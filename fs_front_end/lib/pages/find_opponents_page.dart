@@ -516,7 +516,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   }
 
   Widget _buildSentChallengesTab(bool isDarkMode) {
-    if (_sentChallenges.isEmpty) {
+    // Filtrer pour ne montrer que les défis actifs (pending et accepted)
+    final activeSentChallenges = _sentChallenges
+        .where(
+          (challenge) =>
+              challenge.status == ChallengeStatus.pending ||
+              challenge.status == ChallengeStatus.accepted,
+        )
+        .toList();
+
+    if (activeSentChallenges.isEmpty) {
       return _buildEmptyState(
         icon: Icons.send,
         message: 'Aucun défi envoyé',
@@ -529,10 +538,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       onRefresh: _loadData,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _sentChallenges.length,
+        itemCount: activeSentChallenges.length,
         itemBuilder: (context, index) {
           return _buildChallengeCard(
-            _sentChallenges[index],
+            activeSentChallenges[index],
             isDarkMode,
             isSent: true,
           );
@@ -542,7 +551,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   }
 
   Widget _buildReceivedChallengesTab(bool isDarkMode) {
-    if (_receivedChallenges.isEmpty) {
+    // Filtrer pour ne montrer que les défis actifs (pending et accepted)
+    final activeReceivedChallenges = _receivedChallenges
+        .where(
+          (challenge) =>
+              challenge.status == ChallengeStatus.pending ||
+              challenge.status == ChallengeStatus.accepted,
+        )
+        .toList();
+
+    if (activeReceivedChallenges.isEmpty) {
       return _buildEmptyState(
         icon: Icons.inbox,
         message: 'Aucun défi reçu',
@@ -555,10 +573,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       onRefresh: _loadData,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _receivedChallenges.length,
+        itemCount: activeReceivedChallenges.length,
         itemBuilder: (context, index) {
           return _buildChallengeCard(
-            _receivedChallenges[index],
+            activeReceivedChallenges[index],
             isDarkMode,
             isSent: false,
           );
@@ -1933,29 +1951,34 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       }
     }
 
-    final result = await TeamsService.instance.createChallenge(
-      challengedTeamId: teamId,
-      proposedDate: proposedDate,
-      proposedLocation: proposedLocation,
-      message: message,
-    );
+    try {
+      final result = await TeamsService.instance.createChallenge(
+        challengedTeamId: teamId,
+        proposedDate: proposedDate,
+        proposedLocation: proposedLocation,
+        message: message,
+      );
 
-    if (result != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Défi envoyé ! ⚽'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _loadData();
-      _tabController.animateTo(1); // Aller à l'onglet "Envoyés"
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur lors de l\'envoi du défi'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Défi envoyé ! ⚽'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadData();
+        _tabController.animateTo(1); // Aller à l'onglet "Envoyés"
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 

@@ -797,11 +797,31 @@ class TeamsService {
 
       if (response.statusCode == 201) {
         return MatchChallenge.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 400) {
+        // Essayer de décoder le message d'erreur du serveur
+        try {
+          final errorBody = jsonDecode(response.body);
+          final errorMessage =
+              errorBody['detail'] ?? 'Erreur lors de la création du défi';
+          debugPrint('Erreur createChallenge: $errorMessage');
+          throw Exception(errorMessage);
+        } catch (_) {
+          debugPrint(
+            'Erreur createChallenge: ${response.statusCode} - ${response.body}',
+          );
+          throw Exception(
+            'Erreur lors de la création du défi (${response.statusCode})',
+          );
+        }
+      } else {
+        debugPrint(
+          'Erreur createChallenge: ${response.statusCode} - ${response.body}',
+        );
+        throw Exception('Erreur serveur lors de la création du défi');
       }
-      return null;
     } catch (e) {
       debugPrint('Erreur createChallenge: $e');
-      return null;
+      rethrow; // Relancer l'exception pour que l'UI puisse l'afficher
     }
   }
 
