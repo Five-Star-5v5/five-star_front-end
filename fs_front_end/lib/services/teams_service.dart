@@ -557,10 +557,10 @@ class TeamsService {
     try {
       final headers = await _headers;
       debugPrint(
-        'Token utilisé pour my-team-chats: \\u001b[33m${headers['Authorization']}\\u001b[0m',
+        'Token utilisé pour chat/my-teams: \\u001b[33m${headers['Authorization']}\\u001b[0m',
       );
       final response = await http.get(
-        Uri.parse('$baseUrl/my-team-chats'),
+        Uri.parse('$baseUrl/chat/my-teams'),
         headers: headers,
       );
 
