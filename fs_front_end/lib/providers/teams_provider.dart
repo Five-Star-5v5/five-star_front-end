@@ -29,6 +29,8 @@ class TeamsProvider with ChangeNotifier {
 
   // Candidatures reçues pour mon équipe
   List<SlotApplication> _receivedApplications = [];
+  int _pendingApplicationsCount = 0;
+  int _lastUpdateTimestamp = 0; // Pour forcer les rebuilds
 
   // Tous les postes ouverts disponibles (pour chercher une équipe)
   List<OpenSlot> _allOpenSlots = [];
@@ -83,9 +85,35 @@ class TeamsProvider with ChangeNotifier {
       _myTeamChats.fold(0, (sum, chat) => sum + chat.unreadCount);
 
   /// Retourne le nombre total de candidatures en attente
-  int get pendingApplicationsCount => _receivedApplications
-      .where((a) => a.status == ApplicationStatus.pending)
-      .length;
+  int get pendingApplicationsCount {
+    // Toujours recalculer pour éviter les problèmes de cache
+    _updatePendingApplicationsCount();
+    return _pendingApplicationsCount;
+  }
+
+  /// Timestamp de la dernière mise à jour (pour forcer les rebuilds)
+  int get lastUpdateTimestamp => _lastUpdateTimestamp;
+
+  /// Met à jour le compteur de candidatures en attente
+  void _updatePendingApplicationsCount() {
+    if (_receivedApplications.isEmpty) {
+      _pendingApplicationsCount = 0;
+      debugPrint('_updatePendingApplicationsCount: 0 (liste vide)');
+      return;
+    }
+    
+    final pendingApps = _receivedApplications
+        .where((a) => a.status == ApplicationStatus.pending)
+        .toList();
+    
+    _pendingApplicationsCount = pendingApps.length;
+    
+    debugPrint('_updatePendingApplicationsCount: ${pendingApps.length} candidatures PENDING sur ${_receivedApplications.length} total');
+    
+    for (var app in pendingApps) {
+      debugPrint('  - Candidature PENDING: ${app.id}');
+    }
+  }
 
   /// Retourne toutes les équipes (mon équipe + celles où je suis membre)
   List<TeamDetail> get allTeams {
@@ -191,6 +219,7 @@ class TeamsProvider with ChangeNotifier {
         ]);
         _myOpenSlots = additionalResults[0] as List<OpenSlot>;
         _receivedApplications = additionalResults[1] as List<SlotApplication>;
+        _updatePendingApplicationsCount();
       }
 
       // Charger les infos de chat (pour les notifications de messages non lus)
@@ -402,6 +431,7 @@ class TeamsProvider with ChangeNotifier {
     _currentTeamIndex = 0;
     _myOpenSlots = [];
     _receivedApplications = [];
+    _updatePendingApplicationsCount();
     _allOpenSlots = [];
     _myApplications = [];
     notifyListeners();
@@ -506,6 +536,11 @@ class TeamsProvider with ChangeNotifier {
       _receivedApplications = await _teamsService.getTeamApplications(
         _myTeam!.id,
       );
+      debugPrint('loadReceivedApplications: ${_receivedApplications.length} candidatures chargées');
+      for (var app in _receivedApplications) {
+        debugPrint('  - Candidature ${app.id}: statut ${app.status}');
+      }
+      _updatePendingApplicationsCount();
       notifyListeners();
     } catch (e) {
       debugPrint('Erreur loadReceivedApplications: $e');
@@ -567,14 +602,38 @@ class TeamsProvider with ChangeNotifier {
   /// Refuser une candidature
   Future<bool> rejectApplication(int applicationId) async {
     try {
+      debugPrint('Refus candidature $applicationId...');
+      
       final result = await _teamsService.respondToApplication(
         applicationId,
         accept: false,
       );
 
       if (result != null) {
+        debugPrint('Candidature $applicationId refusée avec succès');
+        
+        // Supprimer immédiatement de la liste locale
         _receivedApplications.removeWhere((a) => a.id == applicationId);
+        debugPrint('Liste locale mise à jour. Nouvelles candidatures: ${_receivedApplications.length}');
+        
+        // Recalculer le compteur
+        _updatePendingApplicationsCount();
+        
+        // Forcer un timestamp pour garantir le rebuild
+        _lastUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
+        
+        // Notifier immédiatement les listeners
+        debugPrint('Notification des listeners après suppression locale...');
         notifyListeners();
+        
+        // Attendre un peu pour laisser l'UI se mettre à jour
+        await Future.delayed(const Duration(milliseconds: 100));
+        
+        // Recharger depuis le serveur pour s'assurer de la cohérence
+        await loadReceivedApplications();
+        
+        debugPrint('Refus terminé. Compteur final: $pendingApplicationsCount');
+        
         return true;
       }
       return false;

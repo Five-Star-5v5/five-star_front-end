@@ -1085,8 +1085,11 @@ class TeamsService {
         (data) {
           try {
             final json = jsonDecode(data as String);
-            final message = MatchChatMessage.fromJson(json);
-            onNewMatchMessage?.call(message);
+            // Le backend envoie {type: "new_message", message: {...}}
+            if (json['type'] == 'new_message' && json['message'] != null) {
+              final message = MatchChatMessage.fromJson(json['message']);
+              onNewMatchMessage?.call(message);
+            }
           } catch (e) {
             debugPrint('Erreur parsing match message: $e');
           }
@@ -1158,7 +1161,9 @@ class TeamsService {
   /// Envoie un message via WebSocket
   void sendMatchMessageWs(String content) {
     if (_isMatchChatConnected && _matchChatChannel != null) {
-      _matchChatChannel!.sink.add(jsonEncode({'content': content}));
+      _matchChatChannel!.sink.add(
+        jsonEncode({'action': 'send_message', 'content': content}),
+      );
     }
   }
 

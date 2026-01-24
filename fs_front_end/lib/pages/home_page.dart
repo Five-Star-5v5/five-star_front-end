@@ -1544,10 +1544,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     const SizedBox(height: 20),
                     // Indicateur de candidatures en attente
-                    if (teamsProvider.isCurrentTeamMine &&
-                        teamsProvider.pendingApplicationsCount > 0)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 16),
+                    if (teamsProvider.isCurrentTeamMine)
+                      Visibility(
+                        visible: teamsProvider.pendingApplicationsCount > 0,
+                        child: Container(
+                          key: ValueKey('pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}'),
+                          margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.orange.withOpacity(0.1),
@@ -1580,6 +1582,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
+                    ),
                     // Section des matchs à venir (visible pour tous les membres)
                     if (teamsProvider.isPartOfCurrentTeam &&
                         _upcomingMatches.isNotEmpty)
