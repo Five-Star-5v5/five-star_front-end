@@ -500,7 +500,7 @@ Widget _buildMyApplicationsTab(bool isDarkMode) {
                 itemCount: applications.length,
                 itemBuilder: (context, index) {
                   final app = applications[index];
-                  return _buildApplicationCard(app, isDarkMode);
+                  return _buildApplicationCard(context, app, isDarkMode);
                 },
               ),
       );
@@ -508,7 +508,11 @@ Widget _buildMyApplicationsTab(bool isDarkMode) {
   );
 }
 
-Widget _buildApplicationCard(SlotApplicationDetail app, bool isDarkMode) {
+Widget _buildApplicationCard(
+  BuildContext context,
+  SlotApplicationDetail app,
+  bool isDarkMode,
+) {
   final slot = app.openSlot;
 
   Color statusColor;
@@ -619,6 +623,28 @@ Widget _buildApplicationCard(SlotApplicationDetail app, bool isDarkMode) {
             'Envoyée ${_formatDate(app.appliedAt)}',
             style: TextStyle(color: Colors.grey[500], fontSize: 11),
           ),
+          // Bouton d'annulation pour les candidatures en attente
+          if (app.status == ApplicationStatus.pending) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: () =>
+                      _showCancelConfirmation(context, app, isDarkMode),
+                  icon: const Icon(Icons.cancel_outlined, size: 16),
+                  label: const Text('Annuler'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     ),
@@ -650,6 +676,66 @@ Widget _buildEmptyState({
           onPressed: onRefresh,
           icon: const Icon(Icons.refresh),
           label: const Text('Rafraîchir'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showCancelConfirmation(
+  BuildContext context,
+  SlotApplicationDetail app,
+  bool isDarkMode,
+) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      title: Text(
+        'Annuler la candidature',
+        style: TextStyle(color: isDarkMode ? myLightBackground : MyprimaryDark),
+      ),
+      content: Text(
+        'Êtes-vous sûr de vouloir annuler votre candidature pour l\'équipe "${app.openSlot.teamName}" ?',
+        style: TextStyle(
+          color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Non',
+            style: TextStyle(
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.of(context).pop();
+
+            final teamsProvider = Provider.of<TeamsProvider>(
+              context,
+              listen: false,
+            );
+            final success = await teamsProvider.cancelApplication(app.id);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  success
+                      ? 'Candidature annulée avec succès'
+                      : 'Erreur lors de l\'annulation',
+                ),
+                backgroundColor: success ? Colors.green : Colors.red,
+              ),
+            );
+          },
+          child: const Text(
+            'Oui, annuler',
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ],
     ),

@@ -584,6 +584,27 @@ class TeamsProvider with ChangeNotifier {
     }
   }
 
+  /// Annuler ma propre candidature
+  Future<bool> cancelApplication(int applicationId) async {
+    try {
+      final success = await _teamsService.cancelApplication(applicationId);
+
+      if (success) {
+        // Retirer la candidature de la liste
+        _myApplications.removeWhere((a) => a.id == applicationId);
+        notifyListeners();
+
+        // Recharger les postes ouverts car celui-ci pourrait redevenir disponible
+        await loadAllOpenSlots();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Erreur cancelApplication: $e');
+      return false;
+    }
+  }
+
   // =====================
   // CHAT D'ÉQUIPE
   // =====================

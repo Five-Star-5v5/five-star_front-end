@@ -489,6 +489,21 @@ class TeamsService {
     }
   }
 
+  /// Annuler sa propre candidature
+  Future<bool> cancelApplication(int applicationId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/applications/$applicationId/cancel'),
+        headers: await _headers,
+      );
+
+      return response.statusCode == 204;
+    } catch (e) {
+      debugPrint('Erreur cancelApplication: $e');
+      return false;
+    }
+  }
+
   // ============================================================
   // Chat d'équipe
   // ============================================================
