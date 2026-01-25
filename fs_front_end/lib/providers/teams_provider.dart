@@ -101,15 +101,17 @@ class TeamsProvider with ChangeNotifier {
       debugPrint('_updatePendingApplicationsCount: 0 (liste vide)');
       return;
     }
-    
+
     final pendingApps = _receivedApplications
         .where((a) => a.status == ApplicationStatus.pending)
         .toList();
-    
+
     _pendingApplicationsCount = pendingApps.length;
-    
-    debugPrint('_updatePendingApplicationsCount: ${pendingApps.length} candidatures PENDING sur ${_receivedApplications.length} total');
-    
+
+    debugPrint(
+      '_updatePendingApplicationsCount: ${pendingApps.length} candidatures PENDING sur ${_receivedApplications.length} total',
+    );
+
     for (var app in pendingApps) {
       debugPrint('  - Candidature PENDING: ${app.id}');
     }
@@ -536,7 +538,9 @@ class TeamsProvider with ChangeNotifier {
       _receivedApplications = await _teamsService.getTeamApplications(
         _myTeam!.id,
       );
-      debugPrint('loadReceivedApplications: ${_receivedApplications.length} candidatures chargées');
+      debugPrint(
+        'loadReceivedApplications: ${_receivedApplications.length} candidatures chargées',
+      );
       for (var app in _receivedApplications) {
         debugPrint('  - Candidature ${app.id}: statut ${app.status}');
       }
@@ -603,7 +607,7 @@ class TeamsProvider with ChangeNotifier {
   Future<bool> rejectApplication(int applicationId) async {
     try {
       debugPrint('Refus candidature $applicationId...');
-      
+
       final result = await _teamsService.respondToApplication(
         applicationId,
         accept: false,
@@ -611,29 +615,31 @@ class TeamsProvider with ChangeNotifier {
 
       if (result != null) {
         debugPrint('Candidature $applicationId refusée avec succès');
-        
+
         // Supprimer immédiatement de la liste locale
         _receivedApplications.removeWhere((a) => a.id == applicationId);
-        debugPrint('Liste locale mise à jour. Nouvelles candidatures: ${_receivedApplications.length}');
-        
+        debugPrint(
+          'Liste locale mise à jour. Nouvelles candidatures: ${_receivedApplications.length}',
+        );
+
         // Recalculer le compteur
         _updatePendingApplicationsCount();
-        
+
         // Forcer un timestamp pour garantir le rebuild
         _lastUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
-        
+
         // Notifier immédiatement les listeners
         debugPrint('Notification des listeners après suppression locale...');
         notifyListeners();
-        
+
         // Attendre un peu pour laisser l'UI se mettre à jour
         await Future.delayed(const Duration(milliseconds: 100));
-        
+
         // Recharger depuis le serveur pour s'assurer de la cohérence
         await loadReceivedApplications();
-        
+
         debugPrint('Refus terminé. Compteur final: $pendingApplicationsCount');
-        
+
         return true;
       }
       return false;

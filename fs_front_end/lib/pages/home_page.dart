@@ -1548,41 +1548,43 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Visibility(
                         visible: teamsProvider.pendingApplicationsCount > 0,
                         child: Container(
-                          key: ValueKey('pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}'),
-                          margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.orange.withOpacity(0.3),
+                          key: ValueKey(
+                            'pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}',
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.notifications_active,
-                              color: Colors.orange,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.orange.withOpacity(0.3),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
-                                style: const TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.w600,
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.notifications_active,
+                                color: Colors.orange,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                            TextButton(
-                              onPressed: () =>
-                                  _showAllApplicationsDialog(context),
-                              child: const Text('Voir'),
-                            ),
-                          ],
+                              TextButton(
+                                onPressed: () =>
+                                    _showAllApplicationsDialog(context),
+                                child: const Text('Voir'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
                     // Section des matchs à venir (visible pour tous les membres)
                     if (teamsProvider.isPartOfCurrentTeam &&
                         _upcomingMatches.isNotEmpty)
