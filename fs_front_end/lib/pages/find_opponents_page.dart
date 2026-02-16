@@ -443,7 +443,8 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               ),
 
               // Lieu préféré
-              if (team.preferredLocations != null) ...[
+              if (team.preferredLocations != null &&
+                  team.preferredLocations!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -451,7 +452,26 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        team.preferredLocations!,
+                        team.preferredLocations!.join(', '),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+
+              // Horaires
+              if (team.preferredTimeSlots != null &&
+                  team.preferredTimeSlots!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.access_time, size: 16, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        _formatTimeSlot(team.preferredTimeSlots!.first),
                         style: TextStyle(color: Colors.grey[500], fontSize: 12),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2113,5 +2133,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);
+  }
+
+  String _formatTimeSlot(String timeSlot) {
+    // Format: "08:00-20:00" -> "08h00 - 20h00"
+    final parts = timeSlot.split('-');
+    if (parts.length != 2) return timeSlot;
+
+    final start = parts[0].replaceAll(':', 'h');
+    final end = parts[1].replaceAll(':', 'h');
+
+    return '$start - $end';
   }
 }

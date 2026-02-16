@@ -720,7 +720,7 @@ class TeamsService {
     required bool isLookingForOpponent,
     List<String>? preferredDays,
     List<String>? preferredTimeSlots,
-    String? preferredLocations,
+    List<String>? preferredLocations, // Maintenant une liste de villes
     String? skillLevel,
     String? description,
   }) async {
@@ -1708,7 +1708,7 @@ class TeamSearchPreference {
   final bool isLookingForOpponent;
   final List<String>? preferredDays;
   final List<String>? preferredTimeSlots;
-  final String? preferredLocations;
+  final List<String>? preferredLocations; // Liste des villes
   final String? skillLevel;
   final String? description;
   final DateTime? updatedAt;
@@ -1734,7 +1734,9 @@ class TeamSearchPreference {
       preferredTimeSlots: (json['preferred_time_slots'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
-      preferredLocations: json['preferred_locations'] as String?,
+      preferredLocations: (json['preferred_locations'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       skillLevel: json['skill_level'] as String?,
       description: json['description'] as String?,
       updatedAt: json['updated_at'] != null
@@ -1754,7 +1756,7 @@ class TeamSearchResult {
   final String? skillLevel;
   final List<String>? preferredDays;
   final List<String>? preferredTimeSlots;
-  final String? preferredLocations;
+  final List<String>? preferredLocations; // Liste des villes
   final String? description;
 
   TeamSearchResult({
@@ -1784,7 +1786,9 @@ class TeamSearchResult {
       preferredTimeSlots: (json['preferred_time_slots'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
-      preferredLocations: json['preferred_locations'] as String?,
+      preferredLocations: (json['preferred_locations'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       description: json['description'] as String?,
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 
 import 'package:provider/provider.dart';
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
           icon: Icons.person_search,
-          label: 'Trouver une équipe',
+          label: 'Trouve ton équipe',
           gradient: LinearGradient(
             colors: <Color>[
               Colors.orange.withOpacity(0.8),
@@ -225,11 +226,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final provider = context.read<TeamsProvider>();
     final team = provider.currentDisplayedTeam;
     if (team == null) return;
-    setState(() => _isLookingForOpponent = value);
+    
+    // Si on active le mode recherche, afficher le dialogue de configuration
+    if (value) {
+      _showSearchPreferencesDialog(context);
+      return;  // Le dialogue gérera l'activation
+    }
+    
+    // Si on désactive, faire la requête directement
+    setState(() => _isLookingForOpponent = false);
     try {
       final result = await TeamsService.instance.updateSearchPreferences(
         team.id,
-        isLookingForOpponent: value,
+        isLookingForOpponent: false,
         preferredDays: _searchPreference?.preferredDays,
         preferredTimeSlots: _searchPreference?.preferredTimeSlots,
         preferredLocations: _searchPreference?.preferredLocations,
@@ -238,15 +247,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
       if (result != null && mounted) {
         setState(() => _searchPreference = result);
-        _showSnackBar(
-          value ? '🔍 Mode recherche activé' : 'Mode recherche désactivé',
-          isSuccess: value,
-        );
+        _showSnackBar('Mode recherche désactivé', isSuccess: false);
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLookingForOpponent = !value);
-        _showSnackBar('Erreur', isSuccess: false);
+        setState(() => _isLookingForOpponent = true);
+        _showSnackBar('Erreur lors de la désactivation', isSuccess: false);
       }
     }
   }
@@ -3567,6 +3573,517 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  /// Affiche un sélecteur d'heure avec des roulettes verticales
+  Future<TimeOfDay?> _showTimePickerWithWheels(
+    BuildContext context,
+    TimeOfDay? initialTime,
+    bool isDarkMode,
+  ) async {
+    int selectedHour = initialTime?.hour ?? 8;
+    int selectedMinute = initialTime?.minute ?? 0;
+
+    return showDialog<TimeOfDay>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+        title: Text(
+          'Sélectionner l\'heure',
+          style: TextStyle(
+            color: isDarkMode ? myLightBackground : MyprimaryDark,
+          ),
+        ),
+        content: SizedBox(
+          height: 200,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Roulette des heures
+              Expanded(
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(
+                    initialItem: selectedHour,
+                  ),
+                  itemExtent: 40,
+                  onSelectedItemChanged: (index) {
+                    selectedHour = index;
+                  },
+                  children: List.generate(
+                    24,
+                    (index) => Center(
+                      child: Text(
+                        index.toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: isDarkMode ? myLightBackground : MyprimaryDark,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Text(
+                ':',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? myLightBackground : MyprimaryDark,
+                ),
+              ),
+              // Roulette des minutes
+              Expanded(
+                child: CupertinoPicker(
+                  scrollController: FixedExtentScrollController(
+                    initialItem: selectedMinute ~/ 5,
+                  ),
+                  itemExtent: 40,
+                  onSelectedItemChanged: (index) {
+                    selectedMinute = index * 5;
+                  },
+                  children: List.generate(
+                    12, // 0, 5, 10, 15... 55
+                    (index) => Center(
+                      child: Text(
+                        (index * 5).toString().padLeft(2, '0'),
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: isDarkMode ? myLightBackground : MyprimaryDark,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(
+                context,
+                TimeOfDay(hour: selectedHour, minute: selectedMinute),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: myAccentVibrantBlue,
+            ),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Affiche le dialogue pour configurer les préférences de recherche d'adversaire
+  void _showSearchPreferencesDialog(BuildContext context) async {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // États locaux pour les sélections
+    final selectedDays = <String>{};
+    TimeOfDay? startTime;
+    TimeOfDay? endTime;
+    final selectedCities = <String>[];
+    final cityController = TextEditingController();
+    
+    // Pré-remplir avec les valeurs existantes si disponibles
+    if (_searchPreference != null) {
+      if (_searchPreference!.preferredDays != null) {
+        selectedDays.addAll(_searchPreference!.preferredDays!);
+      }
+      if (_searchPreference!.preferredTimeSlots != null && 
+          _searchPreference!.preferredTimeSlots!.isNotEmpty) {
+        // Parser le format "HH:mm-HH:mm"
+        final timeSlot = _searchPreference!.preferredTimeSlots!.first;
+        final parts = timeSlot.split('-');
+        if (parts.length == 2) {
+          final start = parts[0].split(':');
+          final end = parts[1].split(':');
+          if (start.length == 2 && end.length == 2) {
+            startTime = TimeOfDay(
+              hour: int.tryParse(start[0]) ?? 8,
+              minute: int.tryParse(start[1]) ?? 0,
+            );
+            endTime = TimeOfDay(
+              hour: int.tryParse(end[0]) ?? 20,
+              minute: int.tryParse(end[1]) ?? 0,
+            );
+          }
+        }
+      }
+      if (_searchPreference!.preferredLocations != null) {
+        selectedCities.addAll(_searchPreference!.preferredLocations!);
+      }
+    }
+    
+    final jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+          title: Row(
+            children: [
+              const Icon(Icons.search, color: myAccentVibrantBlue),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Préférences de recherche',
+                  style: TextStyle(
+                    color: isDarkMode ? myLightBackground : MyprimaryDark,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Jours disponibles
+                  Text(
+                    'Jours disponibles *',
+                    style: TextStyle(
+                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: jours.map((jour) {
+                      final isSelected = selectedDays.contains(jour);
+                      return FilterChip(
+                        label: Text(jour),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              selectedDays.add(jour);
+                            } else {
+                              selectedDays.remove(jour);
+                            }
+                          });
+                        },
+                        selectedColor: myAccentVibrantBlue.withOpacity(0.3),
+                        checkmarkColor: myAccentVibrantBlue,
+                      );
+                    }).toList(),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Plage horaire
+                  Text(
+                    'Plage horaire *',
+                    style: TextStyle(
+                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      // Heure de début
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await _showTimePickerWithWheels(
+                              context,
+                              startTime ?? const TimeOfDay(hour: 8, minute: 0),
+                              isDarkMode,
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                startTime = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  startTime != null
+                                      ? '${startTime!.hour.toString().padLeft(2, '0')}h${startTime!.minute.toString().padLeft(2, '0')}'
+                                      : 'Début',
+                                  style: TextStyle(
+                                    color: startTime != null
+                                        ? (isDarkMode ? myLightBackground : MyprimaryDark)
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                                const Icon(Icons.access_time, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.arrow_forward, color: myAccentVibrantBlue),
+                      const SizedBox(width: 16),
+                      // Heure de fin
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await _showTimePickerWithWheels(
+                              context,
+                              endTime ?? const TimeOfDay(hour: 20, minute: 0),
+                              isDarkMode,
+                            );
+                            if (picked != null) {
+                              setState(() {
+                                endTime = picked;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  endTime != null
+                                      ? '${endTime!.hour.toString().padLeft(2, '0')}h${endTime!.minute.toString().padLeft(2, '0')}'
+                                      : 'Fin',
+                                  style: TextStyle(
+                                    color: endTime != null
+                                        ? (isDarkMode ? myLightBackground : MyprimaryDark)
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                                const Icon(Icons.access_time, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Villes
+                  Text(
+                    'Villes de déplacement *',
+                    style: TextStyle(
+                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  // Liste des villes ajoutées
+                  if (selectedCities.isNotEmpty) ...[
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: selectedCities.map((city) {
+                        return Chip(
+                          label: Text(city),
+                          deleteIcon: const Icon(Icons.close, size: 18),
+                          onDeleted: () {
+                            setState(() {
+                              selectedCities.remove(city);
+                            });
+                          },
+                          backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  
+                  // Champ pour ajouter une ville
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: cityController,
+                          decoration: InputDecoration(
+                            hintText: 'Ajouter une ville',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          onSubmitted: (value) {
+                            if (value.trim().isNotEmpty) {
+                              setState(() {
+                                selectedCities.add(value.trim());
+                                cityController.clear();
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.add, color: myAccentVibrantBlue),
+                        onPressed: () {
+                          final value = cityController.text.trim();
+                          if (value.isNotEmpty) {
+                            setState(() {
+                              selectedCities.add(value);
+                              cityController.clear();
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  Text(
+                    '* Champs obligatoires',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Validation
+                if (selectedDays.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Veuillez sélectionner au moins un jour'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                if (startTime == null || endTime == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Veuillez sélectionner une plage horaire'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                // Vérifier que l'heure de fin est après l'heure de début
+                final startMinutes = startTime!.hour * 60 + startTime!.minute;
+                final endMinutes = endTime!.hour * 60 + endTime!.minute;
+                if (endMinutes <= startMinutes) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('L\'heure de fin doit être après l\'heure de début'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                if (selectedCities.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Veuillez ajouter au moins une ville'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                
+                // Formater la plage horaire
+                final timeSlot = '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}-${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
+                
+                // Retourner les données
+                Navigator.pop(context, {
+                  'days': selectedDays.toList(),
+                  'timeSlots': [timeSlot],
+                  'cities': selectedCities,
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: myAccentVibrantBlue,
+              ),
+              child: const Text('Valider'),
+            ),
+          ],
+        ),
+      ),
+    );
+    
+    // Si l'utilisateur a validé, activer le mode recherche
+    if (result != null && mounted) {
+      final provider = context.read<TeamsProvider>();
+      final team = provider.currentDisplayedTeam;
+      if (team == null) return;
+      
+      setState(() => _isLookingForOpponent = true);
+      
+      try {
+        final searchPref = await TeamsService.instance.updateSearchPreferences(
+          team.id,
+          isLookingForOpponent: true,
+          preferredDays: result['days'] as List<String>,
+          preferredTimeSlots: result['timeSlots'] as List<String>,
+          preferredLocations: result['cities'] as List<String>,
+          skillLevel: _searchPreference?.skillLevel,
+          description: _searchPreference?.description,
+        );
+        
+        if (searchPref != null && mounted) {
+          setState(() => _searchPreference = searchPref);
+          _showSnackBar('🔍 Mode recherche activé', isSuccess: true);
+        } else if (mounted) {
+          setState(() => _isLookingForOpponent = false);
+          _showSnackBar('Erreur lors de l\'activation', isSuccess: false);
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLookingForOpponent = false);
+          _showSnackBar('Erreur: $e', isSuccess: false);
+        }
+      }
+    }
   }
 }
 

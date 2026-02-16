@@ -98,7 +98,6 @@ class TeamsProvider with ChangeNotifier {
   void _updatePendingApplicationsCount() {
     if (_receivedApplications.isEmpty) {
       _pendingApplicationsCount = 0;
-      debugPrint('_updatePendingApplicationsCount: 0 (liste vide)');
       return;
     }
 
@@ -107,14 +106,6 @@ class TeamsProvider with ChangeNotifier {
         .toList();
 
     _pendingApplicationsCount = pendingApps.length;
-
-    debugPrint(
-      '_updatePendingApplicationsCount: ${pendingApps.length} candidatures PENDING sur ${_receivedApplications.length} total',
-    );
-
-    for (var app in pendingApps) {
-      debugPrint('  - Candidature PENDING: ${app.id}');
-    }
   }
 
   /// Retourne toutes les équipes (mon équipe + celles où je suis membre)
@@ -247,7 +238,7 @@ class TeamsProvider with ChangeNotifier {
       _teamsMemberOf = await _teamsService.getTeamsMemberOf();
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadTeamsMemberOf: $e');
+      // Error silently handled
     }
   }
 
@@ -290,7 +281,6 @@ class TeamsProvider with ChangeNotifier {
 
       return team;
     } catch (e) {
-      debugPrint('Erreur createTeam: $e');
       return null;
     }
   }
@@ -401,7 +391,6 @@ class TeamsProvider with ChangeNotifier {
 
       return false;
     } catch (e) {
-      debugPrint('Erreur saveMyTeamComposition: $e');
       return false;
     }
   }
@@ -469,7 +458,7 @@ class TeamsProvider with ChangeNotifier {
       _myOpenSlots = await _teamsService.getTeamOpenSlots(_myTeam!.id);
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadMyOpenSlots: $e');
+      // Error silently handled
     }
   }
 
@@ -496,7 +485,6 @@ class TeamsProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur openSlotForSearch: $e');
       return false;
     }
   }
@@ -511,7 +499,6 @@ class TeamsProvider with ChangeNotifier {
       }
       return success;
     } catch (e) {
-      debugPrint('Erreur closeOpenSlot: $e');
       return false;
     }
   }
@@ -522,7 +509,7 @@ class TeamsProvider with ChangeNotifier {
       _allOpenSlots = await _teamsService.getAllOpenSlots(position: position);
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadAllOpenSlots: $e');
+      // Error silently handled
     }
   }
 
@@ -557,7 +544,7 @@ class TeamsProvider with ChangeNotifier {
       _myApplications = await _teamsService.getMyApplications();
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadMyApplications: $e');
+      // Error silently handled
     }
   }
 
@@ -576,7 +563,6 @@ class TeamsProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur applyToSlot: $e');
       return false;
     }
   }
@@ -598,7 +584,6 @@ class TeamsProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur acceptApplication: $e');
       return false;
     }
   }
@@ -606,21 +591,14 @@ class TeamsProvider with ChangeNotifier {
   /// Refuser une candidature
   Future<bool> rejectApplication(int applicationId) async {
     try {
-      debugPrint('Refus candidature $applicationId...');
-
       final result = await _teamsService.respondToApplication(
         applicationId,
         accept: false,
       );
 
       if (result != null) {
-        debugPrint('Candidature $applicationId refusée avec succès');
-
         // Supprimer immédiatement de la liste locale
         _receivedApplications.removeWhere((a) => a.id == applicationId);
-        debugPrint(
-          'Liste locale mise à jour. Nouvelles candidatures: ${_receivedApplications.length}',
-        );
 
         // Recalculer le compteur
         _updatePendingApplicationsCount();
@@ -629,7 +607,6 @@ class TeamsProvider with ChangeNotifier {
         _lastUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
 
         // Notifier immédiatement les listeners
-        debugPrint('Notification des listeners après suppression locale...');
         notifyListeners();
 
         // Attendre un peu pour laisser l'UI se mettre à jour
@@ -638,13 +615,10 @@ class TeamsProvider with ChangeNotifier {
         // Recharger depuis le serveur pour s'assurer de la cohérence
         await loadReceivedApplications();
 
-        debugPrint('Refus terminé. Compteur final: $pendingApplicationsCount');
-
         return true;
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur rejectApplication: $e');
       return false;
     }
   }

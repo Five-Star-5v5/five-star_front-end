@@ -78,7 +78,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trouver une équipe'),
+        title: const Text('Trouve ton équipe'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
