@@ -39,7 +39,7 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplicationDetail> _myApplications = [];
 
   // Chat d'équipe
-  Map<int, List<TeamChatMessage>> _teamMessages = {}; // teamId -> messages
+  final Map<int, List<TeamChatMessage>> _teamMessages = {}; // teamId -> messages
   List<TeamChatInfo> _myTeamChats = [];
   bool _isLoadingMessages = false;
   bool _isSendingMessage = false;

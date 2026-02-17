@@ -5,6 +5,27 @@ import 'auth_service.dart';
 
 /// Service pour gérer les amis
 class FriendsService {
+  /// Recherche un utilisateur par code_id
+  Future<List<SearchUserResult>> searchUserByCodeId(String codeId) async {
+    final authHeader = await AuthService.instance.getAuthHeader();
+    if (authHeader == null) return [];
+
+    final url = Uri.parse('$baseUrl/search?code_id=$codeId');
+    final resp = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader,
+      },
+    );
+
+    if (resp.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(resp.body);
+      return data.map((e) => SearchUserResult.fromJson(e)).toList();
+    }
+    return [];
+  }
+
   FriendsService._privateConstructor();
   static final FriendsService instance = FriendsService._privateConstructor();
 

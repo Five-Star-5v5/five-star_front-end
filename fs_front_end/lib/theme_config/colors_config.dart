@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Définition des couleurs
+// ignore: constant_identifier_names
 const Color MyprimaryDark = Color(
   0xFF1B263B,
 ); // Dark Charcoal/Blue-Grey (Utilisé pour le texte en Light Mode)

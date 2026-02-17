@@ -92,6 +92,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             _fullUser = UserModel(
               id: widget.userBasicInfo!.id,
               username: widget.userBasicInfo!.username,
+              codeId: '',
               avatarUrl: widget.userBasicInfo!.avatarUrl,
               preferredPosition: widget.userBasicInfo!.preferredPosition,
               rating: widget.userBasicInfo!.rating,
@@ -105,6 +106,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             _fullUser = UserModel(
               id: widget.userBasicInfo!.id,
               username: widget.userBasicInfo!.username,
+              codeId: '',
               avatarUrl: widget.userBasicInfo!.avatarUrl,
               preferredPosition: widget.userBasicInfo!.preferredPosition,
               rating: widget.userBasicInfo!.rating,

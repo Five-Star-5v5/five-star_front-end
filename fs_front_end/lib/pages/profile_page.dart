@@ -177,6 +177,22 @@ class ProfilePage extends StatelessWidget {
                       color: titleColor,
                     ),
                   ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.qr_code, size: 18, color: Colors.grey[600]),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Code ID : ${user.codeId}',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                   Text(
                     user.email ?? 'Email non renseigné',
                     style: TextStyle(

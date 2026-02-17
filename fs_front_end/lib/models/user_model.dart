@@ -2,6 +2,7 @@
 class UserModel {
   final int id;
   final String username;
+  final String codeId; // Code unique visible
   final String? email;
   final String? phone;
   final String? bio;
@@ -16,6 +17,7 @@ class UserModel {
   UserModel({
     required this.id,
     required this.username,
+    required this.codeId,
     this.email,
     this.phone,
     this.bio,
@@ -33,6 +35,7 @@ class UserModel {
     return UserModel(
       id: json['id'] as int,
       username: json['username'] as String,
+      codeId: json['code_id'] as String? ?? '',
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       bio: json['bio'] as String?,
@@ -51,6 +54,7 @@ class UserModel {
     return {
       'id': id,
       'username': username,
+      'code_id': codeId,
       'email': email,
       'phone': phone,
       'bio': bio,

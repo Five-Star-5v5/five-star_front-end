@@ -57,7 +57,7 @@ class FriendsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Recherche des utilisateurs
+  /// Recherche des utilisateurs (par nom ou code_id)
   Future<void> searchUsers(String query) async {
     if (query.length < 2) {
       _searchResults = [];
@@ -69,7 +69,13 @@ class FriendsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _searchResults = await _friendsService.searchUsers(query);
+      // Si la recherche ressemble à un code_id (alphanumérique, longueur typique)
+      final codeIdRegExp = RegExp(r'^[A-Za-z0-9]{6,}$');
+      if (codeIdRegExp.hasMatch(query)) {
+        _searchResults = await _friendsService.searchUserByCodeId(query);
+      } else {
+        _searchResults = await _friendsService.searchUsers(query);
+      }
     } catch (e) {
       _searchResults = [];
     }
