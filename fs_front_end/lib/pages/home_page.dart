@@ -226,13 +226,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final provider = context.read<TeamsProvider>();
     final team = provider.currentDisplayedTeam;
     if (team == null) return;
-    
+
     // Si on active le mode recherche, afficher le dialogue de configuration
     if (value) {
       _showSearchPreferencesDialog(context);
-      return;  // Le dialogue gérera l'activation
+      return; // Le dialogue gérera l'activation
     }
-    
+
     // Si on désactive, faire la requête directement
     setState(() => _isLookingForOpponent = false);
     try {
@@ -3683,20 +3683,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   /// Affiche le dialogue pour configurer les préférences de recherche d'adversaire
   void _showSearchPreferencesDialog(BuildContext context) async {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     // États locaux pour les sélections
     final selectedDays = <String>{};
     TimeOfDay? startTime;
     TimeOfDay? endTime;
     final selectedCities = <String>[];
     final cityController = TextEditingController();
-    
+    String? selectedSkillLevel;
+
     // Pré-remplir avec les valeurs existantes si disponibles
     if (_searchPreference != null) {
       if (_searchPreference!.preferredDays != null) {
         selectedDays.addAll(_searchPreference!.preferredDays!);
       }
-      if (_searchPreference!.preferredTimeSlots != null && 
+      if (_searchPreference!.preferredTimeSlots != null &&
           _searchPreference!.preferredTimeSlots!.isNotEmpty) {
         // Parser le format "HH:mm-HH:mm"
         final timeSlot = _searchPreference!.preferredTimeSlots!.first;
@@ -3719,10 +3720,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       if (_searchPreference!.preferredLocations != null) {
         selectedCities.addAll(_searchPreference!.preferredLocations!);
       }
+      // Capitaliser la première lettre du niveau pour correspondre aux options
+      if (_searchPreference!.skillLevel != null &&
+          _searchPreference!.skillLevel!.isNotEmpty) {
+        selectedSkillLevel =
+            _searchPreference!.skillLevel![0].toUpperCase() +
+            _searchPreference!.skillLevel!.substring(1);
+      }
     }
-    
-    final jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    
+
+    final jours = [
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+      'Dimanche',
+    ];
+    final niveaux = ['Débutant', 'Intermédiaire', 'Confirmé', 'Expert'];
+
     final result = await showDialog<Map<String, dynamic>?>(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -3783,9 +3800,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       );
                     }).toList(),
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Plage horaire
                   Text(
                     'Plage horaire *',
@@ -3820,7 +3837,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             ),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                                color: isDarkMode
+                                    ? Colors.grey[700]!
+                                    : Colors.grey[300]!,
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -3833,7 +3852,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       : 'Début',
                                   style: TextStyle(
                                     color: startTime != null
-                                        ? (isDarkMode ? myLightBackground : MyprimaryDark)
+                                        ? (isDarkMode
+                                              ? myLightBackground
+                                              : MyprimaryDark)
                                         : Colors.grey[600],
                                   ),
                                 ),
@@ -3844,7 +3865,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Icon(Icons.arrow_forward, color: myAccentVibrantBlue),
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: myAccentVibrantBlue,
+                      ),
                       const SizedBox(width: 16),
                       // Heure de fin
                       Expanded(
@@ -3868,7 +3892,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             ),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
+                                color: isDarkMode
+                                    ? Colors.grey[700]!
+                                    : Colors.grey[300]!,
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -3881,7 +3907,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       : 'Fin',
                                   style: TextStyle(
                                     color: endTime != null
-                                        ? (isDarkMode ? myLightBackground : MyprimaryDark)
+                                        ? (isDarkMode
+                                              ? myLightBackground
+                                              : MyprimaryDark)
                                         : Colors.grey[600],
                                   ),
                                 ),
@@ -3893,9 +3921,40 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
+                  // Niveau de l'équipe
+                  Text(
+                    'Niveau de l\'équipe *',
+                    style: TextStyle(
+                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: niveaux.map((niveau) {
+                      final isSelected = selectedSkillLevel == niveau;
+                      return ChoiceChip(
+                        label: Text(niveau),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedSkillLevel = selected ? niveau : null;
+                          });
+                        },
+                        selectedColor: myAccentVibrantBlue.withOpacity(0.3),
+                        checkmarkColor: myAccentVibrantBlue,
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 20),
+
                   // Villes
                   Text(
                     'Villes de déplacement *',
@@ -3906,7 +3965,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Liste des villes ajoutées
                   if (selectedCities.isNotEmpty) ...[
                     Wrap(
@@ -3927,7 +3986,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  
+
                   // Champ pour ajouter une ville
                   Row(
                     children: [
@@ -3969,7 +4028,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
                   Text(
                     '* Champs obligatoires',
@@ -4015,7 +4074,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 if (endMinutes <= startMinutes) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('L\'heure de fin doit être après l\'heure de début'),
+                      content: Text(
+                        'L\'heure de fin doit être après l\'heure de début',
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                if (selectedSkillLevel == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Veuillez sélectionner le niveau de votre équipe',
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -4030,15 +4102,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   );
                   return;
                 }
-                
+
                 // Formater la plage horaire
-                final timeSlot = '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}-${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
-                
+                final timeSlot =
+                    '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}-${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
+
                 // Retourner les données
                 Navigator.pop(context, {
                   'days': selectedDays.toList(),
                   'timeSlots': [timeSlot],
                   'cities': selectedCities,
+                  'skillLevel': selectedSkillLevel!.toLowerCase(),
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -4050,15 +4124,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ),
     );
-    
+
     // Si l'utilisateur a validé, activer le mode recherche
     if (result != null && mounted) {
       final provider = context.read<TeamsProvider>();
       final team = provider.currentDisplayedTeam;
       if (team == null) return;
-      
+
       setState(() => _isLookingForOpponent = true);
-      
+
       try {
         final searchPref = await TeamsService.instance.updateSearchPreferences(
           team.id,
@@ -4066,10 +4140,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           preferredDays: result['days'] as List<String>,
           preferredTimeSlots: result['timeSlots'] as List<String>,
           preferredLocations: result['cities'] as List<String>,
-          skillLevel: _searchPreference?.skillLevel,
+          skillLevel: result['skillLevel'] as String,
           description: _searchPreference?.description,
         );
-        
+
         if (searchPref != null && mounted) {
           setState(() => _searchPreference = searchPref);
           _showSnackBar('🔍 Mode recherche activé', isSuccess: true);
