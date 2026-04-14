@@ -27,7 +27,9 @@ const _kAmberSoft = Color(0xFFFF9A55);
 const _kAmberD    = Color(0xFFD96820);
 const _kAmberDim  = Color(0x1CFF7F2A);
 const _kSage    = Color(0xFF4CAF82);
+const _kSageDim = Color(0x1C4CAF82);
 const _kRose    = Color(0xFFD4607A);
+const _kRoseDim = Color(0x1CD4607A);
 const _kWhite   = Color(0xFFF0F2F5);
 const _kMuted2  = Color(0x9EF0F2F5);
 
@@ -1197,142 +1199,224 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Enregistrer le résultat'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Entrez le score du match contre $opponentName',
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Votre équipe',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: myScoreController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '0',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+        return Dialog(
+          backgroundColor: _kCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _kBorder2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Enregistrer le résultat',
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: _kWhite,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Entrez le score du match contre $opponentName',
+                  style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Votre équipe',
+                            style: GoogleFonts.dmSans(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _kMuted2,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '-',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: myScoreController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: _kWhite,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              hintStyle: const TextStyle(color: _kMuted2),
+                              filled: true,
+                              fillColor: _kCard2,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kBorder2),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kBorder2),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kAmber),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                          opponentName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        '-',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: _kWhite,
                         ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: opponentScoreController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            opponentName,
+                            style: GoogleFonts.dmSans(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _kMuted2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          decoration: InputDecoration(
-                            hintText: '0',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: opponentScoreController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: _kWhite,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              hintStyle: const TextStyle(color: _kMuted2),
+                              filled: true,
+                              fillColor: _kCard2,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kBorder2),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kBorder2),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: _kAmber),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: Colors.blue,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'L\'adversaire devra confirmer ce score pour qu\'il soit validé.',
-                        style: TextStyle(color: Colors.blue[700], fontSize: 12),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _kAmberDim,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: _kAmber,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'L\'adversaire devra confirmer ce score pour qu\'il soit validé.',
+                          style: GoogleFonts.dmSans(
+                            color: _kAmberSoft,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context, false),
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _kCard2,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _kBorder2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              color: _kMuted2,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          final myScore = int.tryParse(myScoreController.text);
+                          final opponentScore = int.tryParse(
+                            opponentScoreController.text,
+                          );
+                          if (myScore != null && opponentScore != null) {
+                            Navigator.pop(context, true);
+                          }
+                        },
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [_kAmber, _kAmberD],
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Valider',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final myScore = int.tryParse(myScoreController.text);
-                final opponentScore = int.tryParse(
-                  opponentScoreController.text,
-                );
-                if (myScore != null && opponentScore != null) {
-                  Navigator.pop(context, true);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: myAccentVibrantBlue,
-              ),
-              child: const Text(
-                'Valider',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -1378,20 +1462,85 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _validateMatchScore(MatchChallenge match) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Valider le score'),
-        content: const Text('Confirmez-vous que ce score est correct ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+      builder: (context) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Valider le score',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: _kWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Confirmez-vous que ce score est correct ?',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_kAmber, _kAmberD],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Valider',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Valider', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -1417,26 +1566,84 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _contestMatchScore(MatchChallenge match) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Contester le score'),
-        content: const Text(
-          'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
-          'Êtes-vous sûr de vouloir contester ?',
+      builder: (context) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Contester le score',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: _kWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
+                'Êtes-vous sûr de vouloir contester ?',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kRose,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Contester',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(
-              'Contester',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -1462,23 +1669,84 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _cancelMatch(MatchChallenge match) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Annuler le match'),
-        content: Text(
-          'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
-          'Cette action ne peut pas être annulée.',
+      builder: (context) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Non'),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Annuler le match',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: _kWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
+                'Cette action ne peut pas être annulée.',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Non',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kRose,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Oui, annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Oui, annuler le match'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -1527,67 +1795,128 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Quitter l\'équipe'),
-          content: Text(
-            'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
-            'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
+        return Dialog(
+          backgroundColor: _kCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _kBorder2),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(
-                  dialogContext,
-                ).pop(); // Fermer la boîte de dialogue
-
-                // Afficher un indicateur de chargement
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext loadingContext) {
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                );
-
-                // Quitter l'équipe
-                final success = await teamsProvider.leaveTeam(team.id);
-
-                // Fermer l'indicateur de chargement
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-
-                  if (success) {
-                    // Recharger les équipes
-                    await teamsProvider.loadMyTeam();
-
-                    // Afficher un message de succès
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Vous avez quitté l\'équipe "${team.name}"',
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Quitter l\'équipe',
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: _kWhite,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
+                  'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
+                  style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(),
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _kCard2,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _kBorder2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              color: _kMuted2,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
-                        backgroundColor: Colors.green,
                       ),
-                    );
-                  } else {
-                    // Afficher un message d'erreur
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Erreur lors de la sortie de l\'équipe'),
-                        backgroundColor: Colors.red,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.of(
+                            dialogContext,
+                          ).pop(); // Fermer la boîte de dialogue
+
+                          // Afficher un indicateur de chargement
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext loadingContext) {
+                              return const Center(child: CircularProgressIndicator());
+                            },
+                          );
+
+                          // Quitter l'équipe
+                          final success = await teamsProvider.leaveTeam(team.id);
+
+                          // Fermer l'indicateur de chargement
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+
+                            if (success) {
+                              // Recharger les équipes
+                              await teamsProvider.loadMyTeam();
+
+                              // Afficher un message de succès
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Vous avez quitté l\'équipe "${team.name}"',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              // Afficher un message d'erreur
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Erreur lors de la sortie de l\'équipe'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _kRose,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Quitter',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
                       ),
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Quitter'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -2790,24 +3119,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showPlayerOptions(BuildContext context, TeamMember member) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final currentUserId = context.read<AuthProvider>().currentUser?.id;
     final isOwner = member.user.id == currentUserId;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _kBorder2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
             CircleAvatar(
               radius: 30,
-              backgroundColor: myAccentVibrantBlue,
+              backgroundColor: _kAmberDim,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -2815,7 +3156,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ? Text(
                       member.user.username[0].toUpperCase(),
                       style: const TextStyle(
-                        color: MyprimaryDark,
+                        color: _kAmber,
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
@@ -2828,10 +3169,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 Text(
                   member.user.username,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? myLightBackground : MyprimaryDark,
+                  style: GoogleFonts.syne(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: _kWhite,
                   ),
                 ),
                 if (isOwner) ...[
@@ -2842,15 +3183,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: myAccentVibrantBlue.withOpacity(0.2),
+                      color: _kAmberDim,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Vous',
-                      style: TextStyle(
+                      style: GoogleFonts.syne(
                         fontSize: 12,
-                        color: myAccentVibrantBlue,
-                        fontWeight: FontWeight.bold,
+                        color: _kAmber,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -2859,46 +3200,126 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             Text(
               member.position.displayName,
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
+              style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
             ),
             const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(Icons.swap_horiz, color: myAccentVibrantBlue),
-              title: const Text('Changer de position'),
+            Divider(color: _kBorder2),
+            GestureDetector(
               onTap: () {
                 Navigator.pop(ctx);
                 _showChangePositionDialog(context, member);
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: _kCard2,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _kBorder2),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.swap_horiz, color: _kAmber, size: 20),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Changer de position',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w600,
+                        color: _kWhite,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+            const SizedBox(height: 8),
             // Le propriétaire ne peut pas se retirer de l'équipe
             if (!isOwner)
-              ListTile(
-                leading: const Icon(Icons.remove_circle, color: Colors.red),
-                title: const Text('Retirer de l\'équipe'),
+              GestureDetector(
                 onTap: () async {
                   Navigator.pop(ctx);
                   final confirm = await showDialog<bool>(
                     context: context,
-                    builder: (dialogCtx) => AlertDialog(
-                      title: const Text('Retirer ce joueur ?'),
-                      content: Text(
-                        'Voulez-vous retirer ${member.user.username} de l\'équipe ?',
+                    builder: (dialogCtx) => Dialog(
+                      backgroundColor: _kCard,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(color: _kBorder2),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(dialogCtx, false),
-                          child: const Text('Annuler'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Retirer ce joueur ?',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: _kWhite,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Voulez-vous retirer ${member.user.username} de l\'équipe ?',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: _kMuted2,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.pop(dialogCtx, false),
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: _kCard2,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: _kBorder2),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'Annuler',
+                                        style: GoogleFonts.syne(
+                                          fontWeight: FontWeight.w600,
+                                          color: _kMuted2,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.pop(dialogCtx, true),
+                                    child: Container(
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: _kRose,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'Retirer',
+                                        style: GoogleFonts.syne(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(dialogCtx, true),
-                          child: const Text(
-                            'Retirer',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                   if (confirm == true && context.mounted) {
@@ -2907,15 +3328,37 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     );
                   }
                 },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: _kRoseDim,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kRose.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.remove_circle, color: _kRose, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Retirer de l\'équipe',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w600,
+                          color: _kRose,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               )
             else
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'En tant que propriétaire, vous ne pouvez pas quitter l\'équipe.',
-                  style: TextStyle(
+                  style: GoogleFonts.dmSans(
                     fontSize: 12,
-                    color: Colors.grey[500],
+                    color: _kMuted2,
                     fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
@@ -2945,11 +3388,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final canAddSelf =
         currentUser != null && !teamsProvider.isUserInTeam(currentUser.id);
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -2959,164 +3400,197 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         maxChildSize: 0.9,
         minChildSize: 0.3,
         expand: false,
-        builder: (sheetCtx, scrollController) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Ajouter un ${position.displayName}',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? myLightBackground : MyprimaryDark,
+        builder: (sheetCtx, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _kBorder2,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Ajouter un ${position.displayName}',
+                      style: GoogleFonts.syne(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _kWhite,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            // Option pour s'ajouter soi-même
-            if (canAddSelf)
+              // Option pour s'ajouter soi-même
+              if (canAddSelf)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _kAmberDim,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _kAmber.withOpacity(0.3),
+                    ),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: _kAmberDim,
+                      backgroundImage: currentUser.avatarUrl != null
+                          ? NetworkImage(currentUser.avatarUrl!)
+                          : null,
+                      child: currentUser.avatarUrl == null
+                          ? Text(
+                              currentUser.username[0].toUpperCase(),
+                              style: const TextStyle(color: _kAmber),
+                            )
+                          : null,
+                    ),
+                    title: Text(
+                      'Me placer ici',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w600,
+                        color: _kWhite,
+                      ),
+                    ),
+                    subtitle: Text(
+                      '@${currentUser.username}',
+                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                    ),
+                    trailing: const Icon(
+                      Icons.person_add,
+                      color: _kAmber,
+                    ),
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      await teamsProvider.addMemberToMyTeam(
+                        userId: currentUser.id,
+                        position: position,
+                        slotIndex: slotIndex,
+                      );
+                    },
+                  ),
+                ),
+              // Option pour mettre en mode recherche
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: myAccentVibrantBlue.withOpacity(0.1),
+                  color: _kAmberDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: myAccentVibrantBlue.withOpacity(0.3),
-                  ),
+                  border: Border.all(color: _kAmber.withOpacity(0.3)),
                 ),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: myAccentVibrantBlue,
-                    backgroundImage: currentUser.avatarUrl != null
-                        ? NetworkImage(currentUser.avatarUrl!)
-                        : null,
-                    child: currentUser.avatarUrl == null
-                        ? Text(
-                            currentUser.username[0].toUpperCase(),
-                            style: const TextStyle(color: Colors.white),
-                          )
-                        : null,
+                  leading: const CircleAvatar(
+                    backgroundColor: _kAmberDim,
+                    child: Icon(Icons.person_search, color: _kAmber),
                   ),
                   title: Text(
-                    'Me placer ici',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+                    'Mettre en mode recherche',
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w600,
+                      color: _kWhite,
                     ),
                   ),
                   subtitle: Text(
-                    '@${currentUser.username}',
-                    style: const TextStyle(fontSize: 12),
+                    'Les joueurs de l\'app pourront postuler',
+                    style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
                   ),
-                  trailing: const Icon(
-                    Icons.person_add,
-                    color: myAccentVibrantBlue,
-                  ),
-                  onTap: () async {
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: _kMuted2),
+                  onTap: () {
                     Navigator.pop(ctx);
-                    await teamsProvider.addMemberToMyTeam(
-                      userId: currentUser.id,
-                      position: position,
-                      slotIndex: slotIndex,
-                    );
+                    _showOpenSlotDialog(context, slotIndex, position);
                   },
                 ),
               ),
-            // Option pour mettre en mode recherche
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
-              ),
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.orange,
-                  child: Icon(Icons.person_search, color: Colors.white),
-                ),
-                title: const Text(
-                  'Mettre en mode recherche',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: const Text(
-                  'Les joueurs de l\'app pourront postuler',
-                  style: TextStyle(fontSize: 12),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _showOpenSlotDialog(context, slotIndex, position);
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey[400])),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      'ou choisir un ami',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey[400])),
-                ],
-              ),
-            ),
-            if (availableFriends.isEmpty)
               Padding(
-                padding: const EdgeInsets.all(20),
-                child: Text(
-                  'Tous vos amis sont déjà dans l\'équipe !',
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    Expanded(child: Divider(color: _kBorder2)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'ou choisir un ami',
+                        style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: _kBorder2)),
+                  ],
                 ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: availableFriends.length,
-                  itemBuilder: (listCtx, index) {
-                    final friend = availableFriends[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: MyprimaryDark,
-                        backgroundImage: friend.user.avatarUrl != null
-                            ? NetworkImage(friend.user.avatarUrl!)
-                            : null,
-                        child: friend.user.avatarUrl == null
+              ),
+              if (availableFriends.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'Tous vos amis sont déjà dans l\'équipe !',
+                    style: GoogleFonts.dmSans(color: _kMuted2),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: availableFriends.length,
+                    itemBuilder: (listCtx, index) {
+                      final friend = availableFriends[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: _kCard2,
+                          backgroundImage: friend.user.avatarUrl != null
+                              ? NetworkImage(friend.user.avatarUrl!)
+                              : null,
+                          child: friend.user.avatarUrl == null
+                              ? Text(
+                                  friend.user.username[0].toUpperCase(),
+                                  style: const TextStyle(
+                                    color: _kAmber,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        title: Text(
+                          friend.user.username,
+                          style: GoogleFonts.syne(
+                            color: _kWhite,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          friend.user.preferredPosition ?? 'Position non définie',
+                          style: GoogleFonts.dmSans(
+                            color: _kMuted2,
+                            fontSize: 12,
+                          ),
+                        ),
+                        trailing: friend.user.rating != null
                             ? Text(
-                                friend.user.username[0].toUpperCase(),
-                                style: const TextStyle(
-                                  color: myAccentVibrantBlue,
-                                ),
+                                '⭐ ${friend.user.rating!.toStringAsFixed(1)}',
+                                style: GoogleFonts.dmSans(color: _kMuted2),
                               )
                             : null,
-                      ),
-                      title: Text(friend.user.username),
-                      subtitle: Text(
-                        friend.user.preferredPosition ?? 'Position non définie',
-                      ),
-                      trailing: friend.user.rating != null
-                          ? Text('⭐ ${friend.user.rating!.toStringAsFixed(1)}')
-                          : null,
-                      onTap: () async {
-                        Navigator.pop(ctx);
-                        await teamsProvider.addMemberToMyTeam(
-                          userId: friend.user.id,
-                          position: position,
-                          slotIndex: slotIndex,
-                        );
-                      },
-                    );
-                  },
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          await teamsProvider.addMemberToMyTeam(
+                            userId: friend.user.id,
+                            position: position,
+                            slotIndex: slotIndex,
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -3127,93 +3601,153 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     int slotIndex,
     PlayerPosition position,
   ) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final descriptionController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
-        title: Row(
-          children: [
-            const Icon(Icons.person_search, color: Colors.orange),
-            const SizedBox(width: 8),
-            Text(
-              'Rechercher un ${position.displayName}',
-              style: TextStyle(
-                color: isDarkMode ? myLightBackground : MyprimaryDark,
-              ),
-            ),
-          ],
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                fontSize: 14,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.person_search, color: _kAmber),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Rechercher un ${position.displayName}',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: _kWhite,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descriptionController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Description (optionnel)',
-                hintText: 'Ex: Recherche défenseur expérimenté...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 12),
+              Text(
+                'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
+                style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                maxLines: 3,
+                style: const TextStyle(color: _kWhite),
+                decoration: InputDecoration(
+                  labelText: 'Description (optionnel)',
+                  labelStyle: const TextStyle(color: _kMuted2),
+                  hintText: 'Ex: Recherche défenseur expérimenté...',
+                  hintStyle: const TextStyle(color: _kMuted2),
+                  filled: true,
+                  fillColor: _kCard2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kBorder2),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kBorder2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kAmber),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: Text(
-              'Annuler',
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.pop(dialogCtx);
-              final success = await context
-                  .read<TeamsProvider>()
-                  .openSlotForSearch(
-                    position: position,
-                    slotIndex: slotIndex,
-                    description: descriptionController.text.trim().isNotEmpty
-                        ? descriptionController.text.trim()
-                        : null,
-                  );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success
-                          ? 'Poste ouvert à la recherche !'
-                          : 'Erreur lors de l\'ouverture du poste',
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(dialogCtx),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
                     ),
-                    backgroundColor: success ? Colors.green : Colors.red,
                   ),
-                );
-              }
-            },
-            icon: const Icon(Icons.person_search, color: Colors.white),
-            label: const Text('Ouvrir'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(dialogCtx);
+                        final success = await context
+                            .read<TeamsProvider>()
+                            .openSlotForSearch(
+                              position: position,
+                              slotIndex: slotIndex,
+                              description: descriptionController.text.trim().isNotEmpty
+                                  ? descriptionController.text.trim()
+                                  : null,
+                            );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Poste ouvert à la recherche !'
+                                    : 'Erreur lors de l\'ouverture du poste',
+                              ),
+                              backgroundColor: success ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_kAmber, _kAmberD],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.person_search, color: Colors.white, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Ouvrir',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -3223,41 +3757,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     OpenSlot openSlot,
     PlayerPosition position,
   ) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final teamsProvider = context.read<TeamsProvider>();
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _kBorder2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
             const CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.orange,
-              child: Icon(Icons.person_search, color: Colors.white, size: 30),
+              backgroundColor: _kAmberDim,
+              child: Icon(Icons.person_search, color: _kAmber, size: 30),
             ),
             const SizedBox(height: 10),
             Text(
               'Poste ${position.displayName} en recherche',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? myLightBackground : MyprimaryDark,
+              style: GoogleFonts.syne(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _kWhite,
               ),
             ),
             if (openSlot.description != null) ...[
               const SizedBox(height: 8),
               Text(
                 openSlot.description!,
-                style: TextStyle(
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
+                style: GoogleFonts.dmSans(color: _kMuted2),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -3265,74 +3809,191 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: _kAmberDim,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${openSlot.applicationsCount} candidature(s)',
-                style: const TextStyle(
-                  color: Colors.orange,
+                style: GoogleFonts.syne(
+                  color: _kAmber,
                   fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            if (openSlot.applicationsCount > 0)
-              ListTile(
-                leading: const Icon(Icons.people, color: myAccentVibrantBlue),
-                title: const Text('Voir les candidatures'),
-                trailing: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${openSlot.applicationsCount}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+            if (openSlot.applicationsCount > 0) ...[
+              GestureDetector(
                 onTap: () {
                   Navigator.pop(ctx);
                   _showApplicationsDialog(context, openSlot);
                 },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: _kCard2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kBorder2),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.people, color: _kAmber, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Voir les candidatures',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w600,
+                          color: _kWhite,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: _kRose,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${openSlot.applicationsCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ListTile(
-              leading: const Icon(Icons.close, color: Colors.red),
-              title: const Text('Fermer la recherche'),
-              subtitle: const Text('Annuler la recherche pour ce poste'),
+              const SizedBox(height: 8),
+            ],
+            GestureDetector(
               onTap: () async {
                 Navigator.pop(ctx);
                 final confirm = await showDialog<bool>(
                   context: context,
-                  builder: (dialogCtx) => AlertDialog(
-                    title: const Text('Fermer la recherche ?'),
-                    content: const Text(
-                      'Les candidatures en attente seront annulées.',
+                  builder: (dialogCtx) => Dialog(
+                    backgroundColor: _kCard,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: const BorderSide(color: _kBorder2),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(dialogCtx, false),
-                        child: const Text('Annuler'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Fermer la recherche ?',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: _kWhite,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Les candidatures en attente seront annulées.',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 13,
+                              color: _kMuted2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => Navigator.pop(dialogCtx, false),
+                                  child: Container(
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: _kCard2,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: _kBorder2),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'Annuler',
+                                      style: GoogleFonts.syne(
+                                        fontWeight: FontWeight.w600,
+                                        color: _kMuted2,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => Navigator.pop(dialogCtx, true),
+                                  child: Container(
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: _kRose,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'Fermer',
+                                      style: GoogleFonts.syne(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(dialogCtx, true),
-                        child: const Text(
-                          'Fermer',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 );
                 if (confirm == true && context.mounted) {
                   await teamsProvider.closeOpenSlot(openSlot.id);
                 }
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: _kRoseDim,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _kRose.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.close, color: _kRose, size: 20),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Fermer la recherche',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kRose,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Annuler la recherche pour ce poste',
+                          style: GoogleFonts.dmSans(
+                            color: _kMuted2,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -3350,11 +4011,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         .where((a) => a.openSlotId == openSlot.id)
         .toList();
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -3364,60 +4023,80 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         maxChildSize: 0.9,
         minChildSize: 0.3,
         expand: false,
-        builder: (sheetCtx, scrollController) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Candidatures (${applications.length})',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? myLightBackground : MyprimaryDark,
-                ),
-              ),
-            ),
-            if (applications.isEmpty)
+        builder: (sheetCtx, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
               Padding(
-                padding: const EdgeInsets.all(40),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.inbox_outlined,
-                      size: 48,
-                      color: Colors.grey[400],
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _kBorder2,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
-                      'Aucune candidature pour le moment',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      'Candidatures (${applications.length})',
+                      style: GoogleFonts.syne(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _kWhite,
                       ),
                     ),
                   ],
                 ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: applications.length,
-                  itemBuilder: (listCtx, index) {
-                    final app = applications[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+              ),
+              if (applications.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.inbox_outlined,
+                        size: 48,
+                        color: _kMuted2,
                       ),
-                      child: Padding(
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucune candidature pour le moment',
+                        style: GoogleFonts.dmSans(color: _kMuted2),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: applications.length,
+                    itemBuilder: (listCtx, index) {
+                      final app = applications[index];
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: myAccentVibrantBlue,
+                                  backgroundColor: _kAmberDim,
                                   backgroundImage:
                                       app.applicant.avatarUrl != null
                                       ? NetworkImage(app.applicant.avatarUrl!)
@@ -3427,7 +4106,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           app.applicant.username[0]
                                               .toUpperCase(),
                                           style: const TextStyle(
-                                            color: MyprimaryDark,
+                                            color: _kAmber,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         )
@@ -3441,16 +4120,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                        style: GoogleFonts.syne(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                          color: _kWhite,
                                         ),
                                       ),
                                       if (app.applicant.rating != null)
                                         Text(
                                           '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
+                                          style: GoogleFonts.dmSans(
+                                            color: _kMuted2,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -3465,18 +4145,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: isDarkMode
-                                      ? Colors.grey[800]
-                                      : Colors.grey[100],
+                                  color: _kBorder.withOpacity(0.5),
                                   borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: _kBorder2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: TextStyle(
+                                  style: GoogleFonts.dmSans(
                                     fontStyle: FontStyle.italic,
-                                    color: isDarkMode
-                                        ? Colors.grey[300]
-                                        : Colors.grey[700],
+                                    color: _kMuted2,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -3485,8 +4163,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                OutlinedButton.icon(
-                                  onPressed: () async {
+                                GestureDetector(
+                                  onTap: () async {
                                     await teamsProvider.rejectApplication(
                                       app.id,
                                     );
@@ -3501,18 +4179,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       );
                                     }
                                   },
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.red,
-                                  ),
-                                  label: const Text(
-                                    'Refuser',
-                                    style: TextStyle(color: Colors.red),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _kRoseDim,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: _kRose.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.close, color: _kRose, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Refuser',
+                                          style: GoogleFonts.syne(
+                                            color: _kRose,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () async {
+                                GestureDetector(
+                                  onTap: () async {
                                     await teamsProvider.acceptApplication(
                                       app.id,
                                     );
@@ -3530,26 +4228,45 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       );
                                     }
                                   },
-                                  icon: const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                  ),
-                                  label: const Text('Accepter'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _kSageDim,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: _kSage.withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check, color: _kSage, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Accepter',
+                                          style: GoogleFonts.syne(
+                                            color: _kSage,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -3562,11 +4279,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (!context.mounted) return;
 
     final applications = teamsProvider.receivedApplications;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -3576,75 +4292,93 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         maxChildSize: 0.9,
         minChildSize: 0.4,
         expand: false,
-        builder: (sheetCtx, scrollController) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.inbox, color: myAccentVibrantBlue),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Toutes les candidatures (${applications.length})',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
+        builder: (sheetCtx, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _kBorder2,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const Icon(Icons.inbox, color: _kAmber),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Toutes les candidatures (${applications.length})',
+                          style: GoogleFonts.syne(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: _kWhite,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (applications.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.inbox_outlined,
+                          size: 48,
+                          color: _kMuted2,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Aucune candidature en attente',
+                          style: GoogleFonts.dmSans(color: _kMuted2),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            if (applications.isEmpty)
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inbox_outlined,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucune candidature en attente',
-                        style: TextStyle(
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: applications.length,
-                  itemBuilder: (listCtx, index) {
-                    final app = applications[index];
-                    // Trouver le slot correspondant
-                    final openSlot = teamsProvider.myOpenSlots
-                        .where((s) => s.id == app.openSlotId)
-                        .firstOrNull;
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: applications.length,
+                    itemBuilder: (listCtx, index) {
+                      final app = applications[index];
+                      // Trouver le slot correspondant
+                      final openSlot = teamsProvider.myOpenSlots
+                          .where((s) => s.id == app.openSlotId)
+                          .firstOrNull;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Padding(
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: myAccentVibrantBlue,
+                                  backgroundColor: _kAmberDim,
                                   backgroundImage:
                                       app.applicant.avatarUrl != null
                                       ? NetworkImage(app.applicant.avatarUrl!)
@@ -3654,7 +4388,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           app.applicant.username[0]
                                               .toUpperCase(),
                                           style: const TextStyle(
-                                            color: MyprimaryDark,
+                                            color: _kAmber,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         )
@@ -3668,16 +4402,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                        style: GoogleFonts.syne(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                          color: _kWhite,
                                         ),
                                       ),
                                       if (openSlot != null)
                                         Text(
                                           'Pour : ${openSlot.position.displayName}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
+                                          style: GoogleFonts.dmSans(
+                                            color: _kMuted2,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -3691,12 +4426,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.amber.withOpacity(0.1),
+                                      color: _kAmberDim,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                      style: const TextStyle(fontSize: 12),
+                                      style: GoogleFonts.dmSans(
+                                        color: _kAmberSoft,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
                               ],
@@ -3707,18 +4445,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: isDarkMode
-                                      ? Colors.grey[800]
-                                      : Colors.grey[100],
+                                  color: _kBorder.withOpacity(0.5),
                                   borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: _kBorder2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: TextStyle(
+                                  style: GoogleFonts.dmSans(
                                     fontStyle: FontStyle.italic,
-                                    color: isDarkMode
-                                        ? Colors.grey[300]
-                                        : Colors.grey[700],
+                                    color: _kMuted2,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
@@ -3727,8 +4463,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                OutlinedButton.icon(
-                                  onPressed: () async {
+                                GestureDetector(
+                                  onTap: () async {
                                     await teamsProvider.rejectApplication(
                                       app.id,
                                     );
@@ -3742,22 +4478,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       );
                                     }
                                   },
-                                  icon: const Icon(
-                                    Icons.close,
-                                    color: Colors.red,
-                                    size: 16,
-                                  ),
-                                  label: const Text(
-                                    'Refuser',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _kRoseDim,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: _kRose.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.close, color: _kRose, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Refuser',
+                                          style: GoogleFonts.syne(
+                                            color: _kRose,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () async {
+                                GestureDetector(
+                                  onTap: () async {
                                     await teamsProvider.acceptApplication(
                                       app.id,
                                     );
@@ -3775,55 +4527,82 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       );
                                     }
                                   },
-                                  icon: const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                  label: const Text(
-                                    'Accepter',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    foregroundColor: Colors.white,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _kSageDim,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: _kSage.withValues(alpha: 0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check, color: _kSage, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Accepter',
+                                          style: GoogleFonts.syne(
+                                            color: _kSage,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   void _showChangePositionDialog(BuildContext context, TeamMember member) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              width: 36,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: _kBorder2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             Text(
               'Changer la position de ${member.user.username}',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDarkMode ? myLightBackground : MyprimaryDark,
+              style: GoogleFonts.syne(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _kWhite,
               ),
             ),
             const SizedBox(height: 16),
@@ -3831,19 +4610,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               (position) => ListTile(
                 leading: CircleAvatar(
                   backgroundColor: member.position == position
-                      ? myAccentVibrantBlue
-                      : Colors.grey,
+                      ? _kAmberDim
+                      : _kCard2,
                   child: Text(
                     position.shortName,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: member.position == position ? _kAmber : _kMuted2,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                title: Text(position.displayName),
+                title: Text(
+                  position.displayName,
+                  style: GoogleFonts.syne(
+                    color: _kWhite,
+                    fontWeight: member.position == position
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                  ),
+                ),
                 trailing: member.position == position
-                    ? const Icon(Icons.check, color: myAccentVibrantBlue)
+                    ? const Icon(Icons.check, color: _kAmber)
                     : null,
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -3891,43 +4678,120 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     showDialog(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Nom de l\'équipe'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Nom',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogCtx);
-              if (controller.text.trim().isNotEmpty) {
-                final currentMembers = teamsProvider.myTeam?.members ?? [];
-                await teamsProvider.saveMyTeamComposition(
-                  name: controller.text.trim(),
-                  members: currentMembers
-                      .map(
-                        (m) => MyTeamMemberInput(
-                          userId: m.user.id,
-                          position: m.position,
-                          slotIndex: m.slotIndex,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Nom de l\'équipe',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: _kWhite,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                style: const TextStyle(color: _kWhite),
+                decoration: InputDecoration(
+                  labelText: 'Nom',
+                  labelStyle: const TextStyle(color: _kMuted2),
+                  filled: true,
+                  fillColor: _kCard2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kBorder2),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kBorder2),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _kAmber),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(dialogCtx),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
                         ),
-                      )
-                      .toList(),
-                );
-              }
-            },
-            child: const Text('Enregistrer'),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(dialogCtx);
+                        if (controller.text.trim().isNotEmpty) {
+                          final currentMembers = teamsProvider.myTeam?.members ?? [];
+                          await teamsProvider.saveMyTeamComposition(
+                            name: controller.text.trim(),
+                            members: currentMembers
+                                .map(
+                                  (m) => MyTeamMemberInput(
+                                    userId: m.user.id,
+                                    position: m.position,
+                                    slotIndex: m.slotIndex,
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }
+                      },
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_kAmber, _kAmberD],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Enregistrer',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -3936,111 +4800,176 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<TimeOfDay?> _showTimePickerWithWheels(
     BuildContext context,
     TimeOfDay? initialTime,
-    bool isDarkMode,
   ) async {
     int selectedHour = initialTime?.hour ?? 8;
     int selectedMinute = initialTime?.minute ?? 0;
 
     return showDialog<TimeOfDay>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
-        title: Text(
-          'Sélectionner l\'heure',
-          style: TextStyle(
-            color: isDarkMode ? myLightBackground : MyprimaryDark,
-          ),
+      builder: (ctx) => Dialog(
+        backgroundColor: _kCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _kBorder2),
         ),
-        content: SizedBox(
-          height: 200,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Roulette des heures
-              Expanded(
-                child: CupertinoPicker(
-                  scrollController: FixedExtentScrollController(
-                    initialItem: selectedHour,
-                  ),
-                  itemExtent: 40,
-                  onSelectedItemChanged: (index) {
-                    selectedHour = index;
-                  },
-                  children: List.generate(
-                    24,
-                    (index) => Center(
-                      child: Text(
-                        index.toString().padLeft(2, '0'),
-                        style: TextStyle(
-                          fontSize: 24,
-                          color: isDarkMode ? myLightBackground : MyprimaryDark,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Text(
-                ':',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? myLightBackground : MyprimaryDark,
+                'Sélectionner l\'heure',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: _kWhite,
                 ),
               ),
-              // Roulette des minutes
-              Expanded(
-                child: CupertinoPicker(
-                  scrollController: FixedExtentScrollController(
-                    initialItem: selectedMinute ~/ 5,
-                  ),
-                  itemExtent: 40,
-                  onSelectedItemChanged: (index) {
-                    selectedMinute = index * 5;
-                  },
-                  children: List.generate(
-                    12, // 0, 5, 10, 15... 55
-                    (index) => Center(
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Roulette des heures
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                            initialItem: selectedHour,
+                          ),
+                          itemExtent: 40,
+                          onSelectedItemChanged: (index) {
+                            selectedHour = index;
+                          },
+                          children: List.generate(
+                            24,
+                            (index) => Center(
+                              child: Text(
+                                index.toString().padLeft(2, '0'),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: _kWhite,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
-                        (index * 5).toString().padLeft(2, '0'),
+                        ':',
                         style: TextStyle(
                           fontSize: 24,
-                          color: isDarkMode ? myLightBackground : MyprimaryDark,
+                          fontWeight: FontWeight.bold,
+                          color: _kWhite,
+                        ),
+                      ),
+                    ),
+                    // Roulette des minutes
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                            initialItem: selectedMinute ~/ 5,
+                          ),
+                          itemExtent: 40,
+                          onSelectedItemChanged: (index) {
+                            selectedMinute = index * 5;
+                          },
+                          children: List.generate(
+                            12, // 0, 5, 10, 15... 55
+                            (index) => Center(
+                              child: Text(
+                                (index * 5).toString().padLeft(2, '0'),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: _kWhite,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _kCard2,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: _kBorder2),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Annuler',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: _kMuted2,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(
+                          context,
+                          TimeOfDay(hour: selectedHour, minute: selectedMinute),
+                        );
+                      },
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_kAmber, _kAmberD],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'OK',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(
-                context,
-                TimeOfDay(hour: selectedHour, minute: selectedMinute),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: myAccentVibrantBlue,
-            ),
-            child: const Text('OK'),
-          ),
-        ],
       ),
     );
   }
 
   /// Affiche le dialogue pour configurer les préférences de recherche d'adversaire
   void _showSearchPreferencesDialog(BuildContext context) async {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     // États locaux pour les sélections
     final selectedDays = <String>{};
     TimeOfDay? startTime;
@@ -4100,38 +5029,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final result = await showDialog<Map<String, dynamic>?>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
-          title: Row(
-            children: [
-              const Icon(Icons.search, color: myAccentVibrantBlue),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Préférences de recherche',
-                  style: TextStyle(
-                    color: isDarkMode ? myLightBackground : MyprimaryDark,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+        builder: (context, setState) => Dialog(
+          backgroundColor: _kCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _kBorder2),
           ),
-          content: SingleChildScrollView(
-            child: SizedBox(
-              width: double.maxFinite,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.search, color: _kAmber),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Préférences de recherche',
+                          style: GoogleFonts.syne(
+                            color: _kWhite,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
                   // Jours disponibles
                   Text(
                     'Jours disponibles *',
-                    style: TextStyle(
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      color: _kWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -4141,7 +5076,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: jours.map((jour) {
                       final isSelected = selectedDays.contains(jour);
                       return FilterChip(
-                        label: Text(jour),
+                        label: Text(
+                          jour,
+                          style: GoogleFonts.syne(
+                            fontSize: 12,
+                            color: isSelected ? _kAmber : _kMuted2,
+                          ),
+                        ),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
@@ -4152,8 +5093,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             }
                           });
                         },
-                        selectedColor: myAccentVibrantBlue.withOpacity(0.3),
-                        checkmarkColor: myAccentVibrantBlue,
+                        selectedColor: _kAmberDim,
+                        checkmarkColor: _kAmber,
+                        backgroundColor: _kCard2,
+                        side: BorderSide(
+                          color: isSelected ? _kAmber.withOpacity(0.5) : _kBorder2,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -4163,10 +5108,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Plage horaire
                   Text(
                     'Plage horaire *',
-                    style: TextStyle(
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      color: _kWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -4179,7 +5124,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             final picked = await _showTimePickerWithWheels(
                               context,
                               startTime ?? const TimeOfDay(hour: 8, minute: 0),
-                              isDarkMode,
                             );
                             if (picked != null) {
                               setState(() {
@@ -4193,11 +5137,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: isDarkMode
-                                    ? Colors.grey[700]!
-                                    : Colors.grey[300]!,
-                              ),
+                              color: _kCard2,
+                              border: Border.all(color: _kBorder2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -4209,13 +5150,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       : 'Début',
                                   style: TextStyle(
                                     color: startTime != null
-                                        ? (isDarkMode
-                                              ? myLightBackground
-                                              : MyprimaryDark)
-                                        : Colors.grey[600],
+                                        ? _kWhite
+                                        : _kMuted2,
                                   ),
                                 ),
-                                const Icon(Icons.access_time, size: 20),
+                                const Icon(Icons.access_time, size: 20, color: _kMuted2),
                               ],
                             ),
                           ),
@@ -4224,7 +5163,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       const SizedBox(width: 16),
                       const Icon(
                         Icons.arrow_forward,
-                        color: myAccentVibrantBlue,
+                        color: _kAmber,
                       ),
                       const SizedBox(width: 16),
                       // Heure de fin
@@ -4234,7 +5173,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             final picked = await _showTimePickerWithWheels(
                               context,
                               endTime ?? const TimeOfDay(hour: 20, minute: 0),
-                              isDarkMode,
                             );
                             if (picked != null) {
                               setState(() {
@@ -4248,11 +5186,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: isDarkMode
-                                    ? Colors.grey[700]!
-                                    : Colors.grey[300]!,
-                              ),
+                              color: _kCard2,
+                              border: Border.all(color: _kBorder2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -4264,13 +5199,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       : 'Fin',
                                   style: TextStyle(
                                     color: endTime != null
-                                        ? (isDarkMode
-                                              ? myLightBackground
-                                              : MyprimaryDark)
-                                        : Colors.grey[600],
+                                        ? _kWhite
+                                        : _kMuted2,
                                   ),
                                 ),
-                                const Icon(Icons.access_time, size: 20),
+                                const Icon(Icons.access_time, size: 20, color: _kMuted2),
                               ],
                             ),
                           ),
@@ -4284,10 +5217,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Niveau de l'équipe
                   Text(
                     'Niveau de l\'équipe *',
-                    style: TextStyle(
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      color: _kWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -4297,15 +5230,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: niveaux.map((niveau) {
                       final isSelected = selectedSkillLevel == niveau;
                       return ChoiceChip(
-                        label: Text(niveau),
+                        label: Text(
+                          niveau,
+                          style: GoogleFonts.syne(
+                            fontSize: 12,
+                            color: isSelected ? _kAmber : _kMuted2,
+                          ),
+                        ),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
                             selectedSkillLevel = selected ? niveau : null;
                           });
                         },
-                        selectedColor: myAccentVibrantBlue.withOpacity(0.3),
-                        checkmarkColor: myAccentVibrantBlue,
+                        selectedColor: _kAmberDim,
+                        checkmarkColor: _kAmber,
+                        backgroundColor: _kCard2,
+                        side: BorderSide(
+                          color: isSelected ? _kAmber.withOpacity(0.5) : _kBorder2,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -4315,10 +5258,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Villes
                   Text(
                     'Villes de déplacement *',
-                    style: TextStyle(
-                      color: isDarkMode ? myLightBackground : MyprimaryDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      color: _kWhite,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -4330,14 +5273,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       runSpacing: 8,
                       children: selectedCities.map((city) {
                         return Chip(
-                          label: Text(city),
-                          deleteIcon: const Icon(Icons.close, size: 18),
+                          label: Text(
+                            city,
+                            style: GoogleFonts.dmSans(color: _kWhite, fontSize: 12),
+                          ),
+                          deleteIcon: const Icon(Icons.close, size: 18, color: _kMuted2),
                           onDeleted: () {
                             setState(() {
                               selectedCities.remove(city);
                             });
                           },
-                          backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
+                          backgroundColor: _kAmberDim,
+                          side: BorderSide(color: _kAmber.withOpacity(0.3)),
                         );
                       }).toList(),
                     ),
@@ -4350,10 +5297,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       Expanded(
                         child: TextField(
                           controller: cityController,
+                          style: const TextStyle(color: _kWhite),
                           decoration: InputDecoration(
                             hintText: 'Ajouter une ville',
+                            hintStyle: const TextStyle(color: _kMuted2),
+                            filled: true,
+                            fillColor: _kCard2,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: _kBorder2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: _kBorder2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: _kAmber),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -4372,7 +5332,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(Icons.add, color: myAccentVibrantBlue),
+                        icon: const Icon(Icons.add, color: _kAmber),
                         onPressed: () {
                           final value = cityController.text.trim();
                           if (value.isNotEmpty) {
@@ -4389,95 +5349,135 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(height: 16),
                   Text(
                     '* Champs obligatoires',
-                    style: TextStyle(
-                      color: Colors.grey[600],
+                    style: GoogleFonts.dmSans(
+                      color: _kMuted2,
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
                     ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Actions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: _kCard2,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: _kBorder2),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Annuler',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                color: _kMuted2,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            // Validation
+                            if (selectedDays.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Veuillez sélectionner au moins un jour'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            if (startTime == null || endTime == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Veuillez sélectionner une plage horaire'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            // Vérifier que l'heure de fin est après l'heure de début
+                            final startMinutes = startTime!.hour * 60 + startTime!.minute;
+                            final endMinutes = endTime!.hour * 60 + endTime!.minute;
+                            if (endMinutes <= startMinutes) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'L\'heure de fin doit être après l\'heure de début',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            if (selectedSkillLevel == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Veuillez sélectionner le niveau de votre équipe',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            if (selectedCities.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Veuillez ajouter au moins une ville'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Formater la plage horaire
+                            final timeSlot =
+                                '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}-${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
+
+                            // Retourner les données
+                            Navigator.pop(context, {
+                              'days': selectedDays.toList(),
+                              'timeSlots': [timeSlot],
+                              'cities': selectedCities,
+                              'skillLevel': selectedSkillLevel!.toLowerCase(),
+                            });
+                          },
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [_kAmber, _kAmberD],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Valider',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Validation
-                if (selectedDays.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Veuillez sélectionner au moins un jour'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-                if (startTime == null || endTime == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Veuillez sélectionner une plage horaire'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-                // Vérifier que l'heure de fin est après l'heure de début
-                final startMinutes = startTime!.hour * 60 + startTime!.minute;
-                final endMinutes = endTime!.hour * 60 + endTime!.minute;
-                if (endMinutes <= startMinutes) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'L\'heure de fin doit être après l\'heure de début',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-                if (selectedSkillLevel == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Veuillez sélectionner le niveau de votre équipe',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-                if (selectedCities.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Veuillez ajouter au moins une ville'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                // Formater la plage horaire
-                final timeSlot =
-                    '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}-${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}';
-
-                // Retourner les données
-                Navigator.pop(context, {
-                  'days': selectedDays.toList(),
-                  'timeSlots': [timeSlot],
-                  'cities': selectedCities,
-                  'skillLevel': selectedSkillLevel!.toLowerCase(),
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: myAccentVibrantBlue,
-              ),
-              child: const Text('Valider'),
-            ),
-          ],
         ),
       ),
     );

@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../theme_config/colors_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
 import '../providers/teams_provider.dart';
+
+// Design tokens
+const _foBg = Color(0xFF0A0C10);
+const _foCard = Color(0xFF181A21);
+const _foCard2 = Color(0xFF1E2029);
+const _foBorder2 = Color(0x21FFFFFF);
+const _foAmber = Color(0xFFFF7F2A);
+const _foAmberSoft = Color(0xFFFF9A55);
+const _foAmberD = Color(0xFFD96820);
+const _foAmberDim = Color(0x1CFF7F2A);
+const _foSage = Color(0xFF4CAF82);
+const _foSageDim = Color(0x1C4CAF82);
+const _foRose = Color(0xFFD4607A);
+const _foRoseDim = Color(0x1CD4607A);
+const _foWhite = Color(0xFFF0F2F5);
+const _foMuted2 = Color(0x9EF0F2F5);
+const _foNight = Color(0xFF0B0D11);
 
 /// Page pour trouver des adversaires et gérer les défis
 class FindOpponentsPage extends StatefulWidget {
@@ -17,88 +32,10 @@ class FindOpponentsPage extends StatefulWidget {
 
 class _FindOpponentsPageState extends State<FindOpponentsPage>
     with SingleTickerProviderStateMixin {
-  // --- Widgets glass premium ---
-  Widget _buildGlassContainer({
-    required Widget child,
-    required Gradient gradient,
-    double borderRadius = 20,
-    double blur = 10,
-    List<BoxShadow>? boxShadow,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow:
-                boxShadow ??
-                [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGlassActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-    required Gradient gradient,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(icon, color: Colors.white, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   late TabController _tabController;
   String? _selectedSkillLevel;
   bool _isLoading = false;
 
-  // Données
   List<TeamSearchResult> _opponents = [];
   List<MatchChallenge> _sentChallenges = [];
   List<MatchChallenge> _receivedChallenges = [];
@@ -146,119 +83,169 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final sentPending = _sentChallenges
+        .where((c) => c.status == ChallengeStatus.pending)
+        .length;
+    final receivedPending = _receivedChallenges
+        .where((c) => c.status == ChallengeStatus.pending)
+        .length;
 
     return Scaffold(
+      backgroundColor: _foBg,
       appBar: AppBar(
-        title: const Text('Trouver des adversaires'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.search, size: 18),
-                  const SizedBox(width: 4),
-                  const Text('Recherche'),
-                ],
+        backgroundColor: _foCard,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(10),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _foCard2,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _foBorder2),
+              ),
+              child: const Icon(Icons.arrow_back, color: _foMuted2, size: 16),
+            ),
+          ),
+        ),
+        title: Text(
+          'TROUVER DES ADVERSAIRES',
+          style: GoogleFonts.syne(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: _foWhite,
+          ),
+        ),
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 2.4,
+                colors: [Color(0x38FF7F2A), Colors.transparent],
               ),
             ),
-            Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.send, size: 18),
-                  const SizedBox(width: 4),
-                  const Text('Envoyés'),
-                  if (_sentChallenges
-                      .where((c) => c.status == ChallengeStatus.pending)
-                      .isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: myAccentVibrantBlue,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${_sentChallenges.where((c) => c.status == ChallengeStatus.pending).length}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.inbox, size: 18),
-                  const SizedBox(width: 4),
-                  const Text('Reçus'),
-                  if (_receivedChallenges
-                      .where((c) => c.status == ChallengeStatus.pending)
-                      .isNotEmpty)
-                    Container(
-                      margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.orange,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${_receivedChallenges.where((c) => c.status == ChallengeStatus.pending).length}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-          indicatorColor: myAccentVibrantBlue,
-          labelColor: myAccentVibrantBlue,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: _foCard2,
+                  border: Border(bottom: BorderSide(color: _foBorder2)),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    _buildCustomTab(0, 'RECHERCHE', null),
+                    const SizedBox(width: 8),
+                    _buildCustomTab(1, 'ENVOYÉS', sentPending),
+                    const SizedBox(width: 8),
+                    _buildCustomTab(2, 'REÇUS', receivedPending),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: _foAmber))
           : TabBarView(
               controller: _tabController,
               children: [
-                _buildSearchTab(isDarkMode),
-                _buildSentChallengesTab(isDarkMode),
-                _buildReceivedChallengesTab(isDarkMode),
+                _buildSearchTab(),
+                _buildSentChallengesTab(),
+                _buildReceivedChallengesTab(),
               ],
             ),
     );
   }
 
-  Widget _buildSearchTab(bool isDarkMode) {
+  Widget _buildCustomTab(int index, String label, int? badgeCount) {
+    final isSelected = _tabController.index == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          _tabController.animateTo(index);
+          setState(() {});
+        },
+        child: Container(
+          height: 32,
+          decoration: BoxDecoration(
+            color: isSelected ? _foAmber : _foCard2,
+            borderRadius: BorderRadius.circular(6),
+            border: isSelected ? null : Border.all(color: _foBorder2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.syne(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: isSelected ? _foNight : _foMuted2,
+                ),
+              ),
+              if (badgeCount != null && badgeCount > 0) ...[
+                const SizedBox(width: 4),
+                Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: isSelected ? _foNight : _foAmber,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$badgeCount',
+                      style: GoogleFonts.syne(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? _foAmber : _foNight,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchTab() {
     return Column(
       children: [
-        // Filtre par niveau
-        _buildSkillFilter(isDarkMode),
-        // Liste des équipes
+        _buildSkillFilter(),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadData,
+            color: _foAmber,
             child: _opponents.isEmpty
                 ? _buildEmptyState(
                     icon: Icons.groups,
                     message: 'Aucune équipe en recherche d\'adversaire',
                     subtitle: 'Revenez plus tard ou modifiez vos filtres',
-                    isDarkMode: isDarkMode,
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _opponents.length,
                     itemBuilder: (context, index) {
-                      return _buildOpponentCard(_opponents[index], isDarkMode);
+                      return _buildOpponentCard(_opponents[index]);
                     },
                   ),
           ),
@@ -267,7 +254,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     );
   }
 
-  Widget _buildSkillFilter(bool isDarkMode) {
+  Widget _buildSkillFilter() {
     final levels = ['Tous', 'débutant', 'intermédiaire', 'confirmé', 'expert'];
 
     return SingleChildScrollView(
@@ -290,24 +277,20 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 14,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? myAccentVibrantBlue
-                      : (isDarkMode ? MyprimaryDark : Colors.grey[200]),
-                  borderRadius: BorderRadius.circular(20),
+                  color: isSelected ? _foAmber : _foCard2,
+                  borderRadius: BorderRadius.circular(8),
+                  border: isSelected ? null : Border.all(color: _foBorder2),
                 ),
                 child: Text(
                   level == 'Tous' ? level : _capitalizeFirst(level),
-                  style: TextStyle(
-                    color: isSelected
-                        ? Colors.white
-                        : (isDarkMode ? Colors.white70 : Colors.black87),
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                  style: GoogleFonts.syne(
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 11,
+                    color: isSelected ? _foNight : _foMuted2,
                   ),
                 ),
               ),
@@ -318,225 +301,225 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     );
   }
 
-  Widget _buildOpponentCard(TeamSearchResult team, bool isDarkMode) {
+  Widget _buildOpponentCard(TeamSearchResult team) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: _buildGlassContainer(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? [
-                  myAccentVibrantBlue.withOpacity(0.13),
-                  Colors.black.withOpacity(0.10),
-                ]
-              : [
-                  myAccentVibrantBlue.withOpacity(0.10),
-                  Colors.white.withOpacity(0.10),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _foCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _foBorder2),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Logo équipe
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                    backgroundImage: team.teamLogoUrl != null
-                        ? NetworkImage(team.teamLogoUrl!)
-                        : null,
-                    child: team.teamLogoUrl == null
-                        ? Text(
-                            team.teamName[0].toUpperCase(),
-                            style: const TextStyle(
-                              color: myAccentVibrantBlue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          team.teamName,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? myLightBackground
-                                : MyprimaryDark,
-                          ),
-                        ),
-                        Text(
-                          'par @${team.ownerUsername}',
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Niveau
-                  if (team.skillLevel != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getSkillLevelColor(
-                          team.skillLevel!,
-                        ).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _capitalizeFirst(team.skillLevel!),
-                        style: TextStyle(
-                          color: _getSkillLevelColor(team.skillLevel!),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-
-              // Infos
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(Icons.people, size: 16, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${team.membersCount} membres',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                  ),
-                  const SizedBox(width: 16),
-                  if (team.preferredDays != null &&
-                      team.preferredDays!.isNotEmpty) ...[
-                    Icon(
-                      Icons.calendar_today,
-                      size: 16,
-                      color: Colors.grey[500],
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        team.preferredDays!.join(', '),
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-
-              // Lieu préféré
-              if (team.preferredLocations != null &&
-                  team.preferredLocations!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 16, color: Colors.grey[500]),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        team.preferredLocations!.join(', '),
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              // Horaires
-              if (team.preferredTimeSlots != null &&
-                  team.preferredTimeSlots!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey[500]),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        _formatTimeSlot(team.preferredTimeSlots!.first),
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              // Description
-              if (team.description != null && team.description!.isNotEmpty) ...[
-                const SizedBox(height: 12),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Logo équipe
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.grey[800]!.withOpacity(0.5)
-                        : Colors.grey[100],
+                    color: _foAmberDim,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.format_quote,
-                        color: Colors.grey[500],
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          team.description!,
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[300]
-                                : Colors.grey[700],
-                            fontStyle: FontStyle.italic,
+                  clipBehavior: Clip.antiAlias,
+                  child: team.teamLogoUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            team.teamLogoUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                team.teamName[0].toUpperCase(),
+                                style: GoogleFonts.syne(
+                                  color: _foAmber,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
                           ),
+                        )
+                      : Center(
+                          child: Text(
+                            team.teamName[0].toUpperCase(),
+                            style: GoogleFonts.syne(
+                              color: _foAmber,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        team.teamName,
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: _foWhite,
+                        ),
+                      ),
+                      Text(
+                        'par @${team.ownerUsername}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _foMuted2,
                         ),
                       ),
                     ],
                   ),
                 ),
+                if (team.skillLevel != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _foAmberDim,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _capitalizeFirst(team.skillLevel!),
+                      style: GoogleFonts.syne(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _foAmber,
+                      ),
+                    ),
+                  ),
               ],
+            ),
 
-              // Bouton défier
-              const SizedBox(height: 16),
-              _buildGlassActionButton(
-                onPressed: () => _showChallengeDialog(context, team),
-                icon: Icons.sports_soccer,
-                label: 'Défier cette équipe',
-                gradient: LinearGradient(
-                  colors: <Color>[
-                    myAccentVibrantBlue.withOpacity(0.8),
-                    myAccentVibrantBlue.withOpacity(0.6),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.people, size: 13, color: _foMuted2),
+                const SizedBox(width: 4),
+                Text(
+                  '${team.membersCount} membres',
+                  style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                ),
+                if (team.preferredDays != null &&
+                    team.preferredDays!.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  const Icon(Icons.calendar_today, size: 13, color: _foMuted2),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      team.preferredDays!.join(', '),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+
+            if (team.preferredLocations != null &&
+                team.preferredLocations!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.location_on, size: 13, color: _foMuted2),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      team.preferredLocations!.join(', '),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            if (team.preferredTimeSlots != null &&
+                team.preferredTimeSlots!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 13, color: _foMuted2),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      _formatTimeSlot(team.preferredTimeSlots!.first),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            if (team.description != null && team.description!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _foCard2,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.format_quote, color: _foMuted2, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        team.description!,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
+                          color: _foMuted2,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
-          ),
+
+            const SizedBox(height: 14),
+            GestureDetector(
+              onTap: () => _showChallengeDialog(context, team),
+              child: Container(
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [_foAmber, _foAmberD],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Text(
+                    'Défier',
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      letterSpacing: 0.6,
+                      color: _foNight,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSentChallengesTab(bool isDarkMode) {
-    // Filtrer pour ne montrer que les défis actifs (pending et accepted)
+  Widget _buildSentChallengesTab() {
     final activeSentChallenges = _sentChallenges
         .where(
           (challenge) =>
@@ -550,28 +533,23 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         icon: Icons.send,
         message: 'Aucun défi envoyé',
         subtitle: 'Recherchez des adversaires et défiez-les !',
-        isDarkMode: isDarkMode,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _loadData,
+      color: _foAmber,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: activeSentChallenges.length,
         itemBuilder: (context, index) {
-          return _buildChallengeCard(
-            activeSentChallenges[index],
-            isDarkMode,
-            isSent: true,
-          );
+          return _buildChallengeCard(activeSentChallenges[index], isSent: true);
         },
       ),
     );
   }
 
-  Widget _buildReceivedChallengesTab(bool isDarkMode) {
-    // Filtrer pour ne montrer que les défis actifs (pending et accepted)
+  Widget _buildReceivedChallengesTab() {
     final activeReceivedChallenges = _receivedChallenges
         .where(
           (challenge) =>
@@ -585,19 +563,18 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         icon: Icons.inbox,
         message: 'Aucun défi reçu',
         subtitle: 'Les équipes qui vous défient apparaîtront ici',
-        isDarkMode: isDarkMode,
       );
     }
 
     return RefreshIndicator(
       onRefresh: _loadData,
+      color: _foAmber,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: activeReceivedChallenges.length,
         itemBuilder: (context, index) {
           return _buildChallengeCard(
             activeReceivedChallenges[index],
-            isDarkMode,
             isSent: false,
           );
         },
@@ -605,11 +582,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     );
   }
 
-  Widget _buildChallengeCard(
-    MatchChallenge challenge,
-    bool isDarkMode, {
-    required bool isSent,
-  }) {
+  Widget _buildChallengeCard(MatchChallenge challenge, {required bool isSent}) {
     final opponentTeamName = isSent
         ? challenge.challengedTeamName
         : challenge.challengerTeamName;
@@ -622,272 +595,304 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: _buildGlassContainer(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? [
-                  myAccentVibrantBlue.withOpacity(0.13),
-                  Colors.black.withOpacity(0.10),
-                ]
-              : [
-                  myAccentVibrantBlue.withOpacity(0.10),
-                  Colors.white.withOpacity(0.10),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+      child: Container(
+        decoration: BoxDecoration(
+          color: _foCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _foBorder2),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Logo équipe adversaire
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                    backgroundImage: opponentLogoUrl != null
-                        ? NetworkImage(opponentLogoUrl)
-                        : null,
-                    child: opponentLogoUrl == null
-                        ? Text(
-                            opponentTeamName[0].toUpperCase(),
-                            style: const TextStyle(
-                              color: myAccentVibrantBlue,
-                              fontWeight: FontWeight.bold,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _foAmberDim,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: opponentLogoUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            opponentLogoUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(
+                                opponentTeamName[0].toUpperCase(),
+                                style: GoogleFonts.syne(
+                                  color: _foAmber,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isSent ? 'Défi envoyé à' : 'Défi de',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            opponentTeamName[0].toUpperCase(),
+                            style: GoogleFonts.syne(
+                              color: _foAmber,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        Text(
-                          opponentTeamName,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? myLightBackground
-                                : MyprimaryDark,
-                          ),
-                        ),
-                        Text(
-                          '@$opponentUsername',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildStatusBadge(challenge.status),
-                ],
-              ),
-
-              // Date et lieu proposés
-              if (challenge.proposedDate != null ||
-                  challenge.proposedLocation != null) ...[
-                const SizedBox(height: 12),
-                const Divider(),
-                const SizedBox(height: 8),
-                if (challenge.proposedDate != null)
-                  Row(
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 16,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 8),
                       Text(
-                        DateFormat(
-                          'EEEE d MMMM à HH:mm',
-                          'fr_FR',
-                        ).format(challenge.proposedDate!),
-                        style: TextStyle(
-                          color: isDarkMode ? Colors.white70 : Colors.black87,
+                        isSent ? 'Défi envoyé à' : 'Défi de',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 10,
+                          color: _foMuted2,
                         ),
                       ),
-                    ],
-                  ),
-                if (challenge.proposedLocation != null) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 16,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          challenge.proposedLocation!,
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white70 : Colors.black87,
-                          ),
+                      Text(
+                        opponentTeamName,
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          color: _foWhite,
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ],
-
-              // Message
-              if (challenge.message != null &&
-                  challenge.message!.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.grey[800]!.withOpacity(0.5)
-                        : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.message, color: Colors.grey[500], size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          challenge.message!,
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[300]
-                                : Colors.grey[700],
-                          ),
+                      Text(
+                        '@$opponentUsername',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _foMuted2,
                         ),
                       ),
                     ],
                   ),
                 ),
+                _buildStatusBadge(challenge.status),
               ],
+            ),
 
-              // Score (si match terminé)
-              if (challenge.status == ChallengeStatus.completed &&
-                  challenge.challengerScore != null &&
-                  challenge.challengedScore != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: myAccentVibrantBlue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        challenge.challengerTeamName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        '${challenge.challengerScore} - ${challenge.challengedScore}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: myAccentVibrantBlue,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        challenge.challengedTeamName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              // Actions
-              if (challenge.status == ChallengeStatus.pending) ...[
-                const SizedBox(height: 16),
-                if (isSent)
-                  // Bouton annuler pour les défis envoyés
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _cancelChallenge(challenge.id),
-                      icon: const Icon(Icons.cancel, size: 18),
-                      label: const Text('Annuler le défi'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                      ),
-                    ),
-                  )
-                else
-                  // Boutons accepter/refuser pour les défis reçus
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () =>
-                              _respondToChallenge(challenge.id, false),
-                          icon: const Icon(Icons.close, size: 18),
-                          label: const Text('Refuser'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _handleAcceptChallenge(challenge),
-                          icon: const Icon(Icons.check, size: 18),
-                          label: const Text('Accepter'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-
-              // Section score (si match accepté ou terminé)
-              if (challenge.status == ChallengeStatus.accepted ||
-                  challenge.status == ChallengeStatus.completed) ...[
-                const SizedBox(height: 16),
-                _buildScoreSection(challenge, isSent, isDarkMode),
-              ],
-
-              // Date du défi
+            if (challenge.proposedDate != null ||
+                challenge.proposedLocation != null) ...[
+              const SizedBox(height: 12),
+              Container(height: 1, color: _foBorder2),
               const SizedBox(height: 8),
-              Text(
-                'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)}',
-                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              if (challenge.proposedDate != null)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: _foMuted2,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      DateFormat(
+                        'EEEE d MMMM à HH:mm',
+                        'fr_FR',
+                      ).format(challenge.proposedDate!),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                    ),
+                  ],
+                ),
+              if (challenge.proposedLocation != null) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 12, color: _foMuted2),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        challenge.proposedLocation!,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _foMuted2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+
+            if (challenge.message != null && challenge.message!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _foCard2,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.message, color: _foMuted2, size: 13),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        challenge.message!,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _foMuted2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
+
+            if (challenge.status == ChallengeStatus.completed &&
+                challenge.challengerScore != null &&
+                challenge.challengedScore != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: _foAmberDim,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        challenge.challengerTeamName,
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          color: _foWhite,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        '${challenge.challengerScore} - ${challenge.challengedScore}',
+                        style: GoogleFonts.syne(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: _foAmber,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        challenge.challengedTeamName,
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          color: _foWhite,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            if (challenge.status == ChallengeStatus.pending) ...[
+              const SizedBox(height: 14),
+              if (isSent)
+                GestureDetector(
+                  onTap: () => _cancelChallenge(challenge.id),
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: _foCard2,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _foBorder2),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Annuler le défi',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                          color: _foMuted2,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _respondToChallenge(challenge.id, false),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _foRoseDim,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _foRose),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Refuser',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                                color: _foRose,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _handleAcceptChallenge(challenge),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [_foAmber, _foAmberD],
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Accepter',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                color: _foNight,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+
+            if (challenge.status == ChallengeStatus.accepted ||
+                challenge.status == ChallengeStatus.completed) ...[
+              const SizedBox(height: 14),
+              _buildScoreSection(challenge, isSent),
+            ],
+
+            const SizedBox(height: 8),
+            Text(
+              'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)}',
+              style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Section d'affichage et de soumission du score
-  Widget _buildScoreSection(
-    MatchChallenge challenge,
-    bool isChallenger,
-    bool isDarkMode,
-  ) {
+  Widget _buildScoreSection(MatchChallenge challenge, bool isChallenger) {
     final myTeamId = isChallenger
         ? challenge.challengerTeamId
         : challenge.challengedTeamId;
@@ -896,22 +901,20 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       myTeamId,
     );
 
-    // Si le score est validé ou en conflit, afficher le résultat final
     if (challenge.scoreValidated || challenge.scoreConflict) {
-      return _buildFinalScoreDisplay(challenge, isChallenger, isDarkMode);
+      return _buildFinalScoreDisplay(challenge, isChallenger);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // CAS 1: L'adversaire a soumis un score et j'attends de valider/contester
         if (opponentSubmittedScore != null && !hasSubmitted) ...[
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              color: _foAmberDim,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _foAmber),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -920,55 +923,43 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   children: [
                     const Icon(
                       Icons.info_outline,
-                      color: Colors.orange,
-                      size: 20,
+                      color: _foAmberSoft,
+                      size: 18,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'L\'adversaire a soumis le score suivant :',
-                        style: TextStyle(
-                          fontSize: 13,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: isDarkMode
-                              ? Colors.orange[200]
-                              : Colors.orange[800],
+                          color: _foAmberSoft,
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Affichage du score proposé avec noms d'équipes clairs
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 16,
+                    vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey[800] : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                      ),
-                    ],
+                    color: _foCard2,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      // Équipe challenger
                       Expanded(
                         child: Column(
                           children: [
                             Text(
                               challenge.challengerTeamName,
-                              style: TextStyle(
-                                fontSize: 14,
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
+                                color: _foWhite,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -977,53 +968,45 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
+                                horizontal: 14,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                color: _foAmberDim,
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '${opponentSubmittedScore['challengerScore']}',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.blue[300]
-                                      : Colors.blue[700],
+                                style: GoogleFonts.syne(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: _foAmber,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // Séparateur VS
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
                           '-',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
+                          style: GoogleFonts.syne(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: _foMuted2,
                           ),
                         ),
                       ),
-                      // Équipe challengée
                       Expanded(
                         child: Column(
                           children: [
                             Text(
                               challenge.challengedTeamName,
-                              style: TextStyle(
-                                fontSize: 14,
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
+                                color: _foWhite,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -1032,21 +1015,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
+                                horizontal: 14,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                color: _foRoseDim,
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 '${opponentSubmittedScore['challengedScore']}',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDarkMode
-                                      ? Colors.red[300]
-                                      : Colors.red[700],
+                                style: GoogleFonts.syne(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: _foRose,
                                 ),
                               ),
                             ),
@@ -1056,32 +1037,53 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Boutons Valider / Contester
+                const SizedBox(height: 14),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _contestScore(challenge),
-                        icon: const Icon(Icons.close, size: 18),
-                        label: const Text('Contester'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: GestureDetector(
+                        onTap: () => _contestScore(challenge),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _foRoseDim,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _foRose),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Contester',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                                color: _foRose,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _validateScore(challenge),
-                        icon: const Icon(Icons.check, size: 18),
-                        label: const Text('Valider'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: GestureDetector(
+                        onTap: () => _validateScore(challenge),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _foSageDim,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _foSage),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Valider',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                                color: _foSage,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1089,10 +1091,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '⚠️ Si vous contestez, le match sera déclaré nul (0-0)',
-                  style: TextStyle(
+                  'Si vous contestez, le match sera déclaré nul (0-0)',
+                  style: GoogleFonts.dmSans(
                     fontSize: 11,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    color: _foMuted2,
                     fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
@@ -1100,52 +1102,54 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               ],
             ),
           ),
-        ]
-        // CAS 2: J'ai déjà soumis mon score, en attente de validation par l'adversaire
-        else if (hasSubmitted) ...[
+        ] else if (hasSubmitted) ...[
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.withOpacity(0.3)),
+              color: _foSageDim,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _foSage),
             ),
             child: Row(
               children: [
                 const Icon(
                   Icons.hourglass_empty,
-                  color: Colors.orange,
-                  size: 20,
+                  color: _foAmberSoft,
+                  size: 18,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Score soumis ! En attente de validation par l\'adversaire.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDarkMode ? Colors.green[200] : Colors.green[800],
-                    ),
+                    style: GoogleFonts.dmSans(fontSize: 12, color: _foSage),
                   ),
                 ),
               ],
             ),
           ),
-        ]
-        // CAS 3: Personne n'a encore soumis - je peux soumettre mon score
-        else ...[
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => _showScoreDialog(
-                context,
-                challenge,
-                isChallenger: isChallenger,
+        ] else ...[
+          GestureDetector(
+            onTap: () => _showScoreDialog(
+              context,
+              challenge,
+              isChallenger: isChallenger,
+            ),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [_foAmber, _foAmberD]),
+                borderRadius: BorderRadius.circular(10),
               ),
-              icon: const Icon(Icons.scoreboard, size: 18),
-              label: const Text('Enregistrer le score'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: myAccentVibrantBlue,
-                foregroundColor: Colors.white,
+              child: Center(
+                child: Text(
+                  'Enregistrer le score',
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    letterSpacing: 0.6,
+                    color: _foNight,
+                  ),
+                ),
               ),
             ),
           ),
@@ -1154,24 +1158,89 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     );
   }
 
-  /// Valide le score soumis par l'adversaire
   Future<void> _validateScore(MatchChallenge challenge) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Valider le score'),
-        content: const Text('Confirmez-vous que ce score est correct ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+      builder: (context) => Dialog(
+        backgroundColor: _foCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _foBorder2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Valider le score',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: _foWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Confirmez-vous que ce score est correct ?',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foCard2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foBorder2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _foMuted2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foSageDim,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foSage),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Valider',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: _foSage,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Valider'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -1185,7 +1254,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Score validé !'),
-            backgroundColor: Colors.green,
+            backgroundColor: _foSage,
           ),
         );
         _loadData();
@@ -1193,27 +1262,89 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     }
   }
 
-  /// Conteste le score - résulte en match nul
   Future<void> _contestScore(MatchChallenge challenge) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Contester le score'),
-        content: const Text(
-          'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
-          'Êtes-vous sûr de vouloir contester ?',
+      builder: (context) => Dialog(
+        backgroundColor: _foCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _foBorder2),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Contester le score',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: _foWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\nÊtes-vous sûr de vouloir contester ?',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foCard2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foBorder2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _foMuted2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foRoseDim,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foRose),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Contester',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: _foRose,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Contester'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -1227,7 +1358,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Score contesté - Match nul déclaré'),
-            backgroundColor: Colors.orange,
+            backgroundColor: _foAmber,
           ),
         );
         _loadData();
@@ -1235,12 +1366,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     }
   }
 
-  /// Affiche le score final (validé ou match nul en cas de conflit)
-  Widget _buildFinalScoreDisplay(
-    MatchChallenge challenge,
-    bool isChallenger,
-    bool isDarkMode,
-  ) {
+  Widget _buildFinalScoreDisplay(MatchChallenge challenge, bool isChallenger) {
     final isConflict = challenge.scoreConflict;
     final myTeamName = isChallenger
         ? challenge.challengerTeamName
@@ -1255,7 +1381,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ? challenge.challengedScore
         : challenge.challengerScore;
 
-    // Déterminer le résultat
     String resultText;
     Color resultColor;
     IconData resultIcon;
@@ -1263,69 +1388,60 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     if (myScore != null && opponentScore != null) {
       if (myScore > opponentScore) {
         resultText = 'Victoire !';
-        resultColor = Colors.green;
+        resultColor = _foSage;
         resultIcon = Icons.emoji_events;
       } else if (myScore < opponentScore) {
         resultText = 'Défaite';
-        resultColor = Colors.red;
+        resultColor = _foRose;
         resultIcon = Icons.sentiment_dissatisfied;
       } else {
         resultText = 'Match nul';
-        resultColor = Colors.orange;
+        resultColor = _foAmber;
         resultIcon = Icons.handshake;
       }
     } else {
       resultText = 'Score en attente';
-      resultColor = Colors.grey;
+      resultColor = _foMuted2;
       resultIcon = Icons.hourglass_empty;
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [resultColor.withOpacity(0.1), resultColor.withOpacity(0.05)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: resultColor.withOpacity(0.3)),
+        color: _foCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _foBorder2),
       ),
       child: Column(
         children: [
-          // Icône et résultat
-          Icon(resultIcon, size: 32, color: resultColor),
-          const SizedBox(height: 8),
+          Icon(resultIcon, size: 28, color: resultColor),
+          const SizedBox(height: 6),
           Text(
             resultText,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.syne(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
               color: resultColor,
             ),
           ),
-
-          // Score affiché avec noms d'équipes clairs
           const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: isDarkMode ? MyprimaryDark : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
-              ],
+              color: _foCard,
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               children: [
-                // Mon équipe
                 Expanded(
                   child: Column(
                     children: [
                       Text(
                         myTeamName,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.white : Colors.black87,
+                          color: _foWhite,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
@@ -1334,49 +1450,45 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                          horizontal: 14,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          color: _foAmberDim,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '${myScore ?? 0}',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? Colors.blue[300]
-                                : Colors.blue[700],
+                          style: GoogleFonts.syne(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: _foAmber,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Séparateur
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     '-',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    style: GoogleFonts.syne(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: _foMuted2,
                     ),
                   ),
                 ),
-                // Équipe adverse
                 Expanded(
                   child: Column(
                     children: [
                       Text(
                         opponentTeamName,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: isDarkMode ? Colors.white : Colors.black87,
+                          color: _foWhite,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
@@ -1385,21 +1497,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                          horizontal: 14,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          color: _foRoseDim,
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '${opponentScore ?? 0}',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? Colors.red[300]
-                                : Colors.red[700],
+                          style: GoogleFonts.syne(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: _foRose,
                           ),
                         ),
                       ),
@@ -1409,28 +1519,25 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               ],
             ),
           ),
-
-          // Message de conflit si applicable
           if (isConflict) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
+                color: _foAmberDim,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.warning_amber,
-                    size: 16,
-                    color: Colors.orange,
-                  ),
+                  const Icon(Icons.warning_amber, size: 14, color: _foAmber),
                   const SizedBox(width: 6),
                   Text(
                     'Scores contradictoires → Match nul déclaré',
-                    style: TextStyle(fontSize: 12, color: Colors.orange[800]),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 11,
+                      color: _foAmberSoft,
+                    ),
                   ),
                 ],
               ),
@@ -1442,40 +1549,47 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   }
 
   Widget _buildStatusBadge(ChallengeStatus status) {
-    Color color;
+    Color bg;
+    Color fg;
     switch (status) {
       case ChallengeStatus.pending:
-        color = Colors.orange;
+        bg = _foAmberDim;
+        fg = _foAmber;
         break;
       case ChallengeStatus.accepted:
-        color = Colors.green;
+        bg = _foSageDim;
+        fg = _foSage;
         break;
       case ChallengeStatus.rejected:
-        color = Colors.red;
+        bg = _foRoseDim;
+        fg = _foRose;
         break;
       case ChallengeStatus.cancelled:
-        color = Colors.grey;
+        bg = _foCard2;
+        fg = _foMuted2;
         break;
       case ChallengeStatus.expired:
-        color = Colors.grey;
+        bg = _foCard2;
+        fg = _foMuted2;
         break;
       case ChallengeStatus.completed:
-        color = myAccentVibrantBlue;
+        bg = _foAmberDim;
+        fg = _foAmber;
         break;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         status.displayName,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+        style: GoogleFonts.syne(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: fg,
         ),
       ),
     );
@@ -1485,38 +1599,56 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     required IconData icon,
     required String message,
     String? subtitle,
-    required bool isDarkMode,
   }) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 80,
-            color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 64, color: _foMuted2),
+            const SizedBox(height: 16),
             Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
+              message,
+              style: GoogleFonts.syne(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: _foMuted2,
               ),
               textAlign: TextAlign.center,
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                subtitle,
+                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: _loadData,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [_foAmber, _foAmberD]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Actualiser',
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: _foNight,
+                  ),
+                ),
+              ),
+            ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1531,25 +1663,56 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Défier ${team.teamName}'),
-              content: SingleChildScrollView(
+            return Dialog(
+              backgroundColor: _foCard,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: _foBorder2),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Date proposée
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_today),
-                      title: Text(
-                        selectedDate != null
-                            ? DateFormat(
-                                'EEEE d MMMM à HH:mm',
-                                'fr_FR',
-                              ).format(selectedDate!)
-                            : 'Proposer une date (optionnel)',
-                      ),
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _foAmberDim,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              team.teamName[0].toUpperCase(),
+                              style: GoogleFonts.syne(
+                                color: _foAmber,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Défier ${team.teamName}',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: _foWhite,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Date picker
+                    GestureDetector(
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
@@ -1579,58 +1742,189 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           }
                         }
                       },
-                    ),
-
-                    // Lieu proposé
-                    TextField(
-                      controller: locationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Lieu proposé (optionnel)',
-                        prefixIcon: Icon(Icons.location_on),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _foCard2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foBorder2),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                              color: _foMuted2,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              selectedDate != null
+                                  ? DateFormat(
+                                      'EEEE d MMMM à HH:mm',
+                                      'fr_FR',
+                                    ).format(selectedDate!)
+                                  : 'Proposer une date (optionnel)',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: selectedDate != null
+                                    ? _foWhite
+                                    : _foMuted2,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // Lieu
+                    TextField(
+                      controller: locationController,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
+                      decoration: InputDecoration(
+                        hintText: 'Lieu proposé (optionnel)',
+                        hintStyle: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          color: _foMuted2,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.location_on,
+                          color: _foMuted2,
+                          size: 18,
+                        ),
+                        filled: true,
+                        fillColor: _foCard2,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foBorder2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foAmber),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
                     // Message
                     TextField(
                       controller: messageController,
-                      decoration: const InputDecoration(
-                        labelText: 'Message (optionnel)',
-                        prefixIcon: Icon(Icons.message),
-                      ),
+                      style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
                       maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Message (optionnel)',
+                        hintStyle: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          color: _foMuted2,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.message,
+                          color: _foMuted2,
+                          size: 18,
+                        ),
+                        filled: true,
+                        fillColor: _foCard2,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foBorder2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _foAmber),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: _foCard2,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _foBorder2),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Annuler',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: _foMuted2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await _sendChallenge(
+                                team.teamId,
+                                proposedDate: selectedDate,
+                                proposedLocation:
+                                    locationController.text.isEmpty
+                                    ? null
+                                    : locationController.text,
+                                message: messageController.text.isEmpty
+                                    ? null
+                                    : messageController.text,
+                              );
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [_foAmber, _foAmberD],
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Envoyer',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: _foNight,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await _sendChallenge(
-                      team.teamId,
-                      proposedDate: selectedDate,
-                      proposedLocation: locationController.text.isEmpty
-                          ? null
-                          : locationController.text,
-                      message: messageController.text.isEmpty
-                          ? null
-                          : messageController.text,
-                    );
-                    if (mounted) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: myAccentVibrantBlue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Envoyer le défi'),
-                ),
-              ],
             );
           },
         );
@@ -1646,7 +1940,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     int myScore = 0;
     int opponentScore = 0;
 
-    // Déterminer les noms d'équipe
     final myTeamName = isChallenger
         ? challenge.challengerTeamName
         : challenge.challengedTeamName;
@@ -1659,165 +1952,250 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('Enregistrer le score'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Info validation mutuelle
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+            return Dialog(
+              backgroundColor: _foCard,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: _foBorder2),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Enregistrer le score',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: _foWhite,
+                      ),
                     ),
-                    child: Row(
+                    const SizedBox(height: 16),
+
+                    // Info validation mutuelle
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _foAmberDim,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            color: _foAmberSoft,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'L\'adversaire devra confirmer ce score',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 11,
+                                color: _foAmberSoft,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
                       children: [
-                        const Icon(
-                          Icons.info_outline,
-                          color: Colors.blue,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            'L\'adversaire devra confirmer ce score',
-                            style: TextStyle(
-                              color: Colors.blue[700],
-                              fontSize: 12,
+                          child: Column(
+                            children: [
+                              Text(
+                                myTeamName,
+                                style: GoogleFonts.syne(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: _foWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                '(Vous)',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 10,
+                                  color: _foMuted2,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: myScore > 0
+                                        ? () => setDialogState(() => myScore--)
+                                        : null,
+                                    child: Icon(
+                                      Icons.remove_circle,
+                                      color: myScore > 0 ? _foAmber : _foMuted2,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '$myScore',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: _foWhite,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        setDialogState(() => myScore++),
+                                    child: const Icon(
+                                      Icons.add_circle,
+                                      color: _foAmber,
+                                      size: 28,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '-',
+                          style: GoogleFonts.syne(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: _foMuted2,
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                opponentTeamName,
+                                style: GoogleFonts.syne(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: _foWhite,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                '(Adversaire)',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 10,
+                                  color: _foMuted2,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: opponentScore > 0
+                                        ? () => setDialogState(
+                                            () => opponentScore--,
+                                          )
+                                        : null,
+                                    child: Icon(
+                                      Icons.remove_circle,
+                                      color: opponentScore > 0
+                                          ? _foAmber
+                                          : _foMuted2,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '$opponentScore',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w700,
+                                      color: _foWhite,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        setDialogState(() => opponentScore++),
+                                    child: const Icon(
+                                      Icons.add_circle,
+                                      color: _foAmber,
+                                      size: 28,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: _foCard2,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _foBorder2),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Annuler',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: _foMuted2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await _updateScore(
+                                challenge.id,
+                                myScore,
+                                opponentScore,
+                              );
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [_foAmber, _foAmberD],
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Valider',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: _foNight,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              myTeamName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const Text(
-                              '(Vous)',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: myScore > 0
-                                      ? () => setDialogState(() => myScore--)
-                                      : null,
-                                  icon: const Icon(Icons.remove_circle),
-                                ),
-                                Text(
-                                  '$myScore',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () =>
-                                      setDialogState(() => myScore++),
-                                  icon: const Icon(
-                                    Icons.add_circle,
-                                    color: myAccentVibrantBlue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Text(
-                        '-',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              opponentTeamName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const Text(
-                              '(Adversaire)',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  onPressed: opponentScore > 0
-                                      ? () => setDialogState(
-                                          () => opponentScore--,
-                                        )
-                                      : null,
-                                  icon: const Icon(Icons.remove_circle),
-                                ),
-                                Text(
-                                  '$opponentScore',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () =>
-                                      setDialogState(() => opponentScore++),
-                                  icon: const Icon(
-                                    Icons.add_circle,
-                                    color: myAccentVibrantBlue,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Annuler'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await _updateScore(challenge.id, myScore, opponentScore);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: myAccentVibrantBlue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Valider'),
-                ),
-              ],
             );
           },
         );
@@ -1825,7 +2203,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     );
   }
 
-  /// Récupère les joueurs en commun entre la propre équipe et l'équipe adverse
   Future<List<String>> _getCommonPlayers(int opponentTeamId) async {
     try {
       final teamsProvider = context.read<TeamsProvider>();
@@ -1835,7 +2212,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         return [];
       }
 
-      // Appeler l'endpoint du service pour récupérer les joueurs en commun
       final commonPlayers = await TeamsService.instance.getCommonPlayers(
         myTeam.id,
         opponentTeamId,
@@ -1847,7 +2223,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     }
   }
 
-  /// Affiche une alerte avec les joueurs en commun
   Future<bool?> _showCommonPlayersAlert(
     String opponentTeamName,
     List<String> commonPlayers,
@@ -1855,33 +2230,40 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   ) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Icon(Icons.warning, color: Colors.orange, size: 32),
-        content: SingleChildScrollView(
+      builder: (context) => Dialog(
+        backgroundColor: _foCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _foBorder2),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Icon(Icons.warning, color: _foAmber, size: 32),
               const SizedBox(height: 12),
               Text(
                 'Attention !',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: _foAmber,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'L\'équipe "$opponentTeamName" partage ${commonPlayers.length} joueur(s) avec votre équipe :',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: _foAmberDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  border: Border.all(color: _foAmber),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1890,17 +2272,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.person,
-                            size: 16,
-                            color: Colors.orange,
-                          ),
+                          const Icon(Icons.person, size: 14, color: _foAmber),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               player,
-                              style: const TextStyle(
+                              style: GoogleFonts.dmSans(
                                 fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                                color: _foWhite,
                               ),
                             ),
                           ),
@@ -1913,27 +2293,68 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Voulez-vous tout de même continuer ?',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+                style: GoogleFonts.dmSans(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: _foMuted2,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foCard2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foBorder2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _foMuted2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_foAmber, _foAmberD],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            actionText,
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: _foNight,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(actionText),
-          ),
-        ],
       ),
     );
   }
@@ -1944,7 +2365,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     String? proposedLocation,
     String? message,
   }) async {
-    // Vérifier s'il y a des joueurs en commun
     final commonPlayers = await _getCommonPlayers(teamId);
 
     if (commonPlayers.isNotEmpty && mounted) {
@@ -1982,19 +2402,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       if (result != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Défi envoyé ! ⚽'),
-            backgroundColor: Colors.green,
+            content: Text('Défi envoyé !'),
+            backgroundColor: _foSage,
           ),
         );
         _loadData();
-        _tabController.animateTo(1); // Aller à l'onglet "Envoyés"
+        _tabController.animateTo(1);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
-            backgroundColor: Colors.red,
+            backgroundColor: _foRose,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -2005,20 +2425,86 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
   Future<void> _cancelChallenge(int challengeId) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Annuler le défi'),
-        content: const Text('Voulez-vous vraiment annuler ce défi ?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Non'),
+      builder: (context) => Dialog(
+        backgroundColor: _foCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: _foBorder2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Annuler le défi',
+                style: GoogleFonts.syne(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: _foWhite,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Voulez-vous vraiment annuler ce défi ?',
+                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, false),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foCard2,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foBorder2),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Non',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: _foMuted2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context, true),
+                      child: Container(
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _foRoseDim,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _foRose),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Oui, annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: _foRose,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Oui, annuler'),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -2033,7 +2519,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     }
   }
 
-  /// Gère l'acceptation d'un défi avec vérification des joueurs en commun
   Future<void> _handleAcceptChallenge(MatchChallenge challenge) async {
     final opponentTeamId =
         challenge.challengerTeamId ==
@@ -2047,7 +2532,6 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ? challenge.challengedTeamName
         : challenge.challengerTeamName;
 
-    // Vérifier s'il y a des joueurs en commun
     final commonPlayers = await _getCommonPlayers(opponentTeamId);
 
     if (commonPlayers.isNotEmpty && mounted) {
@@ -2072,8 +2556,8 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(accept ? 'Défi accepté ! 🎉' : 'Défi refusé'),
-          backgroundColor: accept ? Colors.green : Colors.grey,
+          content: Text(accept ? 'Défi accepté !' : 'Défi refusé'),
+          backgroundColor: accept ? _foSage : _foMuted2,
         ),
       );
       _loadData();
@@ -2096,16 +2580,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       Color bgColor;
 
       if (result.scoreValidated) {
-        message = '✅ Score validé ! Les deux équipes ont confirmé le résultat.';
-        bgColor = Colors.green;
+        message = 'Score validé ! Les deux équipes ont confirmé le résultat.';
+        bgColor = _foSage;
       } else if (result.scoreConflict) {
         message =
-            '⚠️ Conflit de score ! Le score soumis ne correspond pas à celui de l\'adversaire.';
-        bgColor = Colors.orange;
+            'Conflit de score ! Le score soumis ne correspond pas à celui de l\'adversaire.';
+        bgColor = _foAmber;
       } else {
         message =
-            '⏳ Score enregistré. En attente de confirmation de l\'adversaire.';
-        bgColor = Colors.blue;
+            'Score enregistré. En attente de confirmation de l\'adversaire.';
+        bgColor = _foAmberD;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2115,28 +2599,12 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     }
   }
 
-  Color _getSkillLevelColor(String level) {
-    switch (level.toLowerCase()) {
-      case 'débutant':
-        return Colors.green;
-      case 'intermédiaire':
-        return Colors.orange;
-      case 'confirmé':
-        return Colors.red;
-      case 'expert':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
     return text[0].toUpperCase() + text.substring(1);
   }
 
   String _formatTimeSlot(String timeSlot) {
-    // Format: "08:00-20:00" -> "08h00 - 20h00"
     final parts = timeSlot.split('-');
     if (parts.length != 2) return timeSlot;
 

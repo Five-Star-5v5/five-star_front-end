@@ -697,32 +697,95 @@ class _FriendsListPageState extends State<FriendsListPage>
                 Navigator.pop(ctx);
                 final confirm = await showDialog<bool>(
                   context: context,
-                  builder: (_) => AlertDialog(
+                  builder: (dialogCtx) => Dialog(
                     backgroundColor: _fCard,
-                    title: Text(
-                      'Supprimer ${friend.user.username} ?',
-                      style: GoogleFonts.syne(color: _fWhite),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: _fBorder2),
                     ),
-                    content: Text(
-                      'Cette action retirera ${friend.user.username} de ta liste d\'amis.',
-                      style: GoogleFonts.dmSans(color: _fMuted2),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Supprimer ${friend.user.username} ?',
+                            style: GoogleFonts.syne(
+                              color: _fWhite,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Cette action retirera ${friend.user.username} de ta liste d\'amis.',
+                            style: GoogleFonts.dmSans(
+                              color: _fMuted2,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => Navigator.pop(dialogCtx, false),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 11,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _fCard2,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: _fBorder2),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Annuler',
+                                        style: GoogleFonts.syne(
+                                          color: _fMuted2,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => Navigator.pop(dialogCtx, true),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 11,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _fRoseDim,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: _fRose.withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        'Supprimer',
+                                        style: GoogleFonts.syne(
+                                          color: _fRose,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text(
-                          'Annuler',
-                          style: TextStyle(color: _fMuted2),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: Text(
-                          'Supprimer',
-                          style: TextStyle(color: _fRose),
-                        ),
-                      ),
-                    ],
                   ),
                 );
                 if (confirm == true && mounted) {

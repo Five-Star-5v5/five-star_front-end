@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
-import '../theme_config/colors_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
+
+// ── Design tokens ────────────────────────────────────────────────────────────
+const _mcBg = Color(0xFF0A0C10);
+const _mcCard = Color(0xFF181A21);
+const _mcCard2 = Color(0xFF1E2029);
+const _mcBorder2 = Color(0x21FFFFFF);
+const _mcAmber = Color(0xFFFF7F2A);
+const _mcAmberSoft = Color(0xFFFF9A55);
+const _mcAmberD = Color(0xFFD96820);
+const _mcAmberDim = Color(0x1CFF7F2A);
+const _mcWhite = Color(0xFFF0F2F5);
+const _mcMuted2 = Color(0x9EF0F2F5);
+const _mcNight = Color(0xFF0B0D11);
 
 /// Page de chat entre deux équipes pour un match confirmé
 class MatchChatPage extends StatefulWidget {
@@ -143,29 +156,44 @@ class _MatchChatPageState extends State<MatchChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
-    final Color myTeamBubbleColor = isDarkMode
-        ? myAccentVibrantBlue.withValues(alpha: 0.85)
-        : myAccentVibrantBlue;
-
-    final Color opponentBubbleColor = isDarkMode
-        ? MyprimaryDark
-        : Colors.grey[200]!;
-
     return Scaffold(
+      backgroundColor: _mcBg,
       appBar: AppBar(
+        backgroundColor: _mcCard,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _mcCard2,
+                shape: BoxShape.circle,
+                border: Border.all(color: _mcBorder2),
+              ),
+              child: const Icon(Icons.arrow_back, color: _mcMuted2, size: 16),
+            ),
+          ),
+        ),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: myAccentVibrantBlue,
-              backgroundImage: widget.opponentTeamLogoUrl != null
-                  ? NetworkImage(widget.opponentTeamLogoUrl!)
-                  : null,
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: _mcAmberDim,
+                borderRadius: BorderRadius.circular(10),
+                image: widget.opponentTeamLogoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(widget.opponentTeamLogoUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
               child: widget.opponentTeamLogoUrl == null
-                  ? Icon(Icons.groups, color: MyprimaryDark, size: 20)
+                  ? const Icon(Icons.groups, color: _mcAmber, size: 20)
                   : null,
             ),
             const SizedBox(width: 10),
@@ -175,62 +203,66 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 children: [
                   Text(
                     widget.opponentTeamName,
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: _mcWhite,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     'Chat du match',
-                    style: TextStyle(
-                      color: textColor.withValues(alpha: 0.6),
-                      fontSize: 12,
-                    ),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _mcMuted2),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        iconTheme: Theme.of(context).appBarTheme.iconTheme,
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 2.4,
+                colors: [Color(0x38FF7F2A), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: <Widget>[
           // ===== LISTE DES MESSAGES =====
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(color: _mcAmber),
+                  )
                 : _messages.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.forum_outlined,
                           size: 80,
-                          color: isDarkMode
-                              ? Colors.grey[600]
-                              : Colors.grey[400],
+                          color: _mcMuted2,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
-                          style: TextStyle(
+                          style: GoogleFonts.dmSans(
                             fontSize: 18,
-                            color: isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
+                            color: _mcMuted2,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Commencez à discuter avec votre adversaire !',
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[500]
-                                : Colors.grey[500],
+                          style: GoogleFonts.dmSans(
+                            color: _mcMuted2,
+                            fontSize: 13,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -268,9 +300,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 _formatDate(message.createdAt),
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 12,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 11,
+                                  color: _mcMuted2,
                                 ),
                               ),
                             ),
@@ -278,10 +310,6 @@ class _MatchChatPageState extends State<MatchChatPage> {
                             message,
                             isMyTeam,
                             showSenderName,
-                            myTeamBubbleColor,
-                            opponentBubbleColor,
-                            textColor,
-                            isDarkMode,
                           ),
                         ],
                       );
@@ -291,8 +319,12 @@ class _MatchChatPageState extends State<MatchChatPage> {
 
           // ===== BARRE DE SAISIE =====
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: _mcCard,
+                border: Border(top: BorderSide(color: _mcBorder2)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -300,46 +332,62 @@ class _MatchChatPageState extends State<MatchChatPage> {
                       controller: _messageController,
                       decoration: InputDecoration(
                         hintText: 'Écrire un message...',
-                        hintStyle: TextStyle(
-                          color: isDarkMode
-                              ? Colors.grey[500]
-                              : Colors.grey[700],
-                        ),
+                        hintStyle: GoogleFonts.dmSans(color: _mcMuted2),
                         filled: true,
-                        fillColor: isDarkMode
-                            ? MyprimaryDark.withValues(alpha: 0.7)
-                            : Colors.grey[100],
+                        fillColor: _mcCard2,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: const BorderSide(color: _mcBorder2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: const BorderSide(color: _mcBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: const BorderSide(color: _mcAmber),
                         ),
                       ),
-                      style: TextStyle(color: textColor),
+                      style: GoogleFonts.dmSans(color: _mcWhite),
+                      cursorColor: _mcAmber,
                       onSubmitted: (_) => _sendMessage(),
                       enabled: !_isSending,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  FloatingActionButton(
-                    onPressed: _isSending ? null : _sendMessage,
-                    backgroundColor: _isSending
-                        ? Colors.grey
-                        : myAccentVibrantBlue,
-                    elevation: 0,
-                    child: _isSending
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.send, color: MyprimaryDark),
+                  GestureDetector(
+                    onTap: _isSending ? null : _sendMessage,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _isSending ? _mcCard2 : null,
+                        gradient: _isSending
+                            ? null
+                            : const LinearGradient(
+                                colors: [_mcAmberSoft, _mcAmberD],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                      ),
+                      child: _isSending
+                          ? const Center(
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: _mcAmber,
+                                ),
+                              ),
+                            )
+                          : const Icon(Icons.send, color: _mcNight, size: 18),
+                    ),
                   ),
                 ],
               ),
@@ -354,10 +402,6 @@ class _MatchChatPageState extends State<MatchChatPage> {
     MatchChatMessage message,
     bool isMyTeam,
     bool showSenderName,
-    Color myTeamBubbleColor,
-    Color opponentBubbleColor,
-    Color textColor,
-    bool isDarkMode,
   ) {
     return Align(
       alignment: isMyTeam ? Alignment.centerRight : Alignment.centerLeft,
@@ -369,21 +413,30 @@ class _MatchChatPageState extends State<MatchChatPage> {
           children: [
             // Avatar pour l'adversaire
             if (!isMyTeam) ...[
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: Colors.grey[400],
-                backgroundImage: message.senderAvatarUrl != null
-                    ? NetworkImage(message.senderAvatarUrl!)
-                    : null,
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: _mcMuted2,
+                  shape: BoxShape.circle,
+                  image: message.senderAvatarUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(message.senderAvatarUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
                 child: message.senderAvatarUrl == null
-                    ? Text(
-                        message.senderUsername.isNotEmpty
-                            ? message.senderUsername[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                    ? Center(
+                        child: Text(
+                          message.senderUsername.isNotEmpty
+                              ? message.senderUsername[0].toUpperCase()
+                              : '?',
+                          style: GoogleFonts.syne(
+                            color: _mcNight,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       )
                     : null,
@@ -396,14 +449,22 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 padding: const EdgeInsets.all(12),
                 constraints: const BoxConstraints(maxWidth: 280),
                 decoration: BoxDecoration(
-                  color: isMyTeam ? myTeamBubbleColor : opponentBubbleColor,
+                  color: isMyTeam ? null : _mcCard2,
+                  gradient: isMyTeam
+                      ? const LinearGradient(
+                          colors: [_mcAmberSoft, _mcAmberD],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  border: isMyTeam ? null : Border.all(color: _mcBorder2),
                   borderRadius: BorderRadius.circular(20).copyWith(
-                    bottomLeft: isMyTeam
-                        ? const Radius.circular(20)
-                        : const Radius.circular(6),
                     bottomRight: isMyTeam
                         ? const Radius.circular(6)
                         : const Radius.circular(20),
+                    bottomLeft: isMyTeam
+                        ? const Radius.circular(20)
+                        : const Radius.circular(6),
                   ),
                 ),
                 child: Column(
@@ -417,20 +478,18 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           '${message.senderUsername} (${message.senderTeamName})',
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? myAccentVibrantBlue
-                                : Colors.grey[700],
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.syne(
+                            color: _mcAmber,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     // Contenu du message
                     Text(
                       message.content,
-                      style: TextStyle(
-                        color: isMyTeam ? MyprimaryDark : textColor,
+                      style: GoogleFonts.dmSans(
+                        color: isMyTeam ? _mcNight : _mcWhite,
                         fontSize: 14,
                       ),
                     ),
@@ -438,11 +497,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: TextStyle(
-                        color: (isMyTeam ? MyprimaryDark : textColor)
-                            .withValues(alpha: 0.6),
-                        fontSize: 10,
-                      ),
+                      style: GoogleFonts.dmSans(color: _mcMuted2, fontSize: 10),
                     ),
                   ],
                 ),

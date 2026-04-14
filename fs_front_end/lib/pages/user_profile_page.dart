@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../theme_config/colors_config.dart';
 import '../models/user_model.dart';
 import '../providers/friends_provider.dart';
-import '../services/friends_service.dart';
 import '../services/auth_service.dart';
+import '../services/friends_service.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const _upBg       = Color(0xFF0A0C10);
+const _upNight    = Color(0xFF0B0D11);
+const _upCard     = Color(0xFF181A21);
+const _upBorder2  = Color(0x21FFFFFF);
+const _upAmber    = Color(0xFFFF7F2A);
+const _upAmberSoft = Color(0xFFFF9A55);
+const _upAmberD   = Color(0xFFD96820);
+const _upAmberDim = Color(0x1CFF7F2A);
+const _upSage     = Color(0xFF4CAF82);
+const _upSageDim  = Color(0x1C4CAF82);
+const _upRose     = Color(0xFFD4607A);
+const _upRoseDim  = Color(0x1CD4607A);
+const _upWhite    = Color(0xFFF0F2F5);
+const _upMuted2   = Color(0x9EF0F2F5);
 
 /// Page pour afficher le profil d'un autre utilisateur
 class UserProfilePage extends StatefulWidget {
@@ -25,37 +40,6 @@ class UserProfilePage extends StatefulWidget {
 }
 
 class _UserProfilePageState extends State<UserProfilePage> {
-  Widget _buildGlassContainer({
-    required Widget child,
-    required Gradient gradient,
-    double borderRadius = 20,
-    double blur = 10,
-    List<BoxShadow>? boxShadow,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow:
-                boxShadow ??
-                [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
   UserModel? _fullUser;
   bool _isLoading = true;
 
@@ -66,7 +50,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Future<void> _loadFullUserProfile() async {
-    // Si on a déjà un UserModel complet, l'utiliser directement
     if (widget.user != null) {
       setState(() {
         _fullUser = widget.user;
@@ -75,7 +58,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return;
     }
 
-    // Sinon, charger le profil complet depuis le backend
     if (widget.userBasicInfo != null) {
       try {
         final userData = await AuthService.instance.getUserProfile(
@@ -87,7 +69,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
             _isLoading = false;
           });
         } else if (mounted) {
-          // En cas d'échec, utiliser les données basiques disponibles
           setState(() {
             _fullUser = UserModel(
               id: widget.userBasicInfo!.id,
@@ -118,155 +99,407 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color titleColor = isDarkMode ? myLightBackground : MyprimaryDark;
+  // ── AppBar ─────────────────────────────────────────────────────────────────
 
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
+  AppBar _buildAppBar(String title) {
+    return AppBar(
+      backgroundColor: _upCard,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      iconTheme: const IconThemeData(color: _upMuted2),
+      title: Text(
+        title,
+        style: GoogleFonts.syne(
+          color: _upWhite,
+          fontWeight: FontWeight.w700,
+          fontSize: 16,
+        ),
+      ),
+      flexibleSpace: IgnorePointer(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0.0, -0.4),
+              radius: 2.4,
+              colors: [Color(0x38FF7F2A), Colors.transparent],
             ),
-            onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(height: 1, color: _upBorder2),
+      ),
+    );
+  }
+
+  // ── Build ──────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: _upBg,
+        appBar: _buildAppBar('Profil'),
+        body: const Center(child: CircularProgressIndicator(color: _upAmber)),
       );
     }
 
     final user = _fullUser!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          user.username,
-          style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      backgroundColor: _upBg,
+      appBar: _buildAppBar(user.username),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const SizedBox(height: 20),
-              // Avatar
-              CircleAvatar(
-                radius: 60,
-                backgroundImage:
-                    user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                    ? NetworkImage(user.avatarUrl!)
-                    : const AssetImage('assets/images/paris.jpg')
-                          as ImageProvider,
-                backgroundColor: isDarkMode
-                    ? myAccentVibrantBlue.withOpacity(0.8)
-                    : MyprimaryDark.withOpacity(0.8),
-              ),
-              const SizedBox(height: 15),
-              // Nom d'utilisateur
-              Text(
-                user.username,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: titleColor,
-                ),
-              ),
-              // Email (si disponible)
-              if (user.email != null && user.email!.isNotEmpty)
-                Text(
-                  user.email!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                  ),
-                ),
-              // Bio
-              if (user.bio != null && user.bio!.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Text(
-                  user.bio!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 30),
-              // Statistiques
-              _buildStatsRow(user, isDarkMode),
-              const SizedBox(height: 30),
-              // Détails du profil
-              _buildGlassContainer(
-                gradient: LinearGradient(
-                  colors: isDarkMode
-                      ? [
-                          myAccentVibrantBlue.withOpacity(0.18),
-                          Colors.black.withOpacity(0.10),
-                        ]
-                      : [
-                          myAccentVibrantBlue.withOpacity(0.13),
-                          Colors.white.withOpacity(0.10),
-                        ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _buildProfileDetail(
-                        Icons.sports_soccer,
-                        'Poste Préféré',
-                        user.preferredPosition ?? 'Non renseigné',
-                        myAccentVibrantBlue,
-                        isDarkMode,
-                      ),
-                      const Divider(),
-                      _buildProfileDetail(
-                        Icons.star,
-                        'Note',
-                        user.rating != null
-                            ? '${user.rating!.toStringAsFixed(1)} / 5'
-                            : 'Pas encore noté',
-                        myAccentVibrantBlue,
-                        isDarkMode,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Bouton Ajouter en ami (si applicable)
-              if (widget.showAddFriendButton) ...[
-                const SizedBox(height: 30),
-                _buildFriendActionButton(user),
-              ],
-              const SizedBox(height: 40),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHero(user),
+            const SizedBox(height: 14),
+            _buildStatsBar(user),
+            const SizedBox(height: 20),
+            _buildBadges(user),
+            const SizedBox(height: 20),
+            _buildHistory(),
+            const SizedBox(height: 20),
+            _buildComments(),
+            if (widget.showAddFriendButton) ...[
+              const SizedBox(height: 28),
+              Center(child: _buildFriendActionButton(user)),
             ],
-          ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
   }
 
+  // ── Hero ───────────────────────────────────────────────────────────────────
+
+  Widget _buildHero(UserModel user) {
+    final initial = user.username.isNotEmpty ? user.username[0].toUpperCase() : '?';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: [
+          // Avatar
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_upAmberSoft, _upAmberD],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: _upAmber.withValues(alpha: 0.12),
+                    blurRadius: 80,
+                    spreadRadius: 20,
+                  ),
+                ],
+              ),
+              child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: Image.network(
+                        user.avatarUrl!,
+                        fit: BoxFit.cover,
+                        width: 80,
+                        height: 80,
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        initial,
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 26,
+                          color: _upNight,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Username
+          Center(
+            child: Text(
+              user.username.toUpperCase(),
+              style: GoogleFonts.syne(
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                letterSpacing: 0.6,
+                color: _upWhite,
+              ),
+            ),
+          ),
+          const SizedBox(height: 3),
+          // Handle sub-info
+          Center(
+            child: Text(
+              '@${user.username.toLowerCase()}${user.preferredPosition != null ? ' · ${user.preferredPosition}' : ''}',
+              style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Pills
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (user.preferredPosition != null)
+                  _pill(user.preferredPosition!, amber: true),
+                if (user.preferredPosition != null) const SizedBox(width: 6),
+                if (user.rating != null)
+                  _pill('${user.rating!.toStringAsFixed(1)} ★', sage: true),
+              ],
+            ),
+          ),
+          if (user.bio != null && user.bio!.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                user.bio!,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.dmSans(
+                  fontSize: 12,
+                  color: _upMuted2,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String label, {bool amber = false, bool sage = false}) {
+    final color = amber ? _upAmber : sage ? _upSage : _upMuted2;
+    final bg    = amber ? _upAmberDim : sage ? _upSageDim : const Color(0x0DFFFFFF);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.syne(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  // ── Stats bar ──────────────────────────────────────────────────────────────
+
+  Widget _buildStatsBar(UserModel user) {
+    final stats = [
+      _StatItem('MATCHS',    '${user.matchesPlayed}'),
+      _StatItem('VICTOIRES', '${user.matchesWon}'),
+      _StatItem('WIN RATE',  '${user.winRate.toStringAsFixed(0)}%'),
+      _StatItem('NOTE',      user.rating != null ? '${user.rating!.toStringAsFixed(1)}★' : '—'),
+    ];
+
+    return Row(
+      children: List.generate(stats.length, (i) {
+        final isFirst = i == 0;
+        final isLast  = i == stats.length - 1;
+        return Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 11),
+            decoration: BoxDecoration(
+              color: _upCard,
+              border: Border(
+                top:    const BorderSide(color: _upBorder2),
+                bottom: const BorderSide(color: _upBorder2),
+                left:   const BorderSide(color: _upBorder2),
+                right:  isLast ? const BorderSide(color: _upBorder2) : BorderSide.none,
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft:     isFirst ? const Radius.circular(12) : Radius.zero,
+                bottomLeft:  isFirst ? const Radius.circular(12) : Radius.zero,
+                topRight:    isLast  ? const Radius.circular(12) : Radius.zero,
+                bottomRight: isLast  ? const Radius.circular(12) : Radius.zero,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  stats[i].value,
+                  style: GoogleFonts.syne(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: _upAmber,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  stats[i].label,
+                  style: GoogleFonts.syne(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.8,
+                    color: _upMuted2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  // ── Badges ─────────────────────────────────────────────────────────────────
+
+  Widget _buildBadges(UserModel user) {
+    final badges = _computeBadges(user);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel('BADGES'),
+        if (badges.isEmpty)
+          _emptyState(
+            Icons.military_tech_outlined,
+            'Pas encore de badges',
+            'Ce joueur a besoin de plus de matchs pour en gagner',
+          )
+        else
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: badges.map((b) => _badgeChip(b)).toList(),
+          ),
+      ],
+    );
+  }
+
+  List<_Badge> _computeBadges(UserModel user) {
+    final list = <_Badge>[];
+    if (user.matchesPlayed >= 20) list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
+    if (user.matchesPlayed >= 10) list.add(_Badge('Régulier ⚡', _upAmber, _upAmberDim));
+    if (user.matchesWon >= 5)     list.add(_Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
+    if (user.matchesPlayed >= 5)  list.add(_Badge('Actif', _upAmber, _upAmberDim));
+    return list;
+  }
+
+  Widget _badgeChip(_Badge b) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+      decoration: BoxDecoration(
+        color: b.bg,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: b.color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        b.label,
+        style: GoogleFonts.syne(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: b.color,
+        ),
+      ),
+    );
+  }
+
+  // ── History ────────────────────────────────────────────────────────────────
+
+  Widget _buildHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel('HISTORIQUE'),
+        _emptyState(
+          Icons.sports_soccer_outlined,
+          'Aucun match joué',
+          'L\'historique apparaîtra ici',
+        ),
+      ],
+    );
+  }
+
+  // ── Comments ───────────────────────────────────────────────────────────────
+
+  Widget _buildComments() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionLabel('COMMENTAIRES REÇUS'),
+        _emptyState(
+          Icons.chat_bubble_outline,
+          'Aucun commentaire',
+          'Les avis laissés par d\'autres joueurs apparaîtront ici',
+        ),
+      ],
+    );
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  Widget _sectionLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        label,
+        style: GoogleFonts.syne(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+          color: _upMuted2,
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyState(IconData icon, String title, String subtitle) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
+        color: _upCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _upBorder2),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: _upMuted2, size: 26),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: GoogleFonts.syne(
+              color: _upWhite,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            subtitle,
+            style: GoogleFonts.dmSans(color: _upMuted2, fontSize: 11),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Friend action ──────────────────────────────────────────────────────────
+
   Widget _buildFriendActionButton(UserModel user) {
     return Consumer<FriendsProvider>(
       builder: (context, friendsProvider, _) {
-        // Vérifier si déjà ami ou demande en attente
         final isAlreadyFriend = friendsProvider.friends.any(
           (f) => f.user.id == user.id,
         );
@@ -279,22 +512,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
         if (isAlreadyFriend) {
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.green),
+              color: _upSageDim,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _upSage.withValues(alpha: 0.4)),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check, color: Colors.green),
-                SizedBox(width: 8),
+                const Icon(Icons.check, color: _upSage, size: 16),
+                const SizedBox(width: 8),
                 Text(
                   'Déjà ami',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.syne(
+                    color: _upSage,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -304,22 +537,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
         if (hasPendingSent) {
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.orange),
+              color: _upAmberDim,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _upAmber.withValues(alpha: 0.4)),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.hourglass_empty, color: Colors.orange),
-                SizedBox(width: 8),
+                const Icon(Icons.hourglass_empty, color: _upAmber, size: 16),
+                const SizedBox(width: 8),
                 Text(
                   'Demande envoyée',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.syne(
+                    color: _upAmber,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -331,33 +564,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final request = friendsProvider.pendingReceived.firstWhere(
-                    (r) => r.fromUser.id == user.id,
-                  );
-                  await friendsProvider.acceptFriendRequest(
-                    request.friendshipId,
-                  );
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Demande acceptée !'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.check),
-                label: const Text('Accepter'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () async {
+              GestureDetector(
+                onTap: () async {
                   final request = friendsProvider.pendingReceived.firstWhere(
                     (r) => r.fromUser.id == user.id,
                   );
@@ -365,115 +573,115 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     request.friendshipId,
                   );
                 },
-                icon: const Icon(Icons.close),
-                label: const Text('Refuser'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _upRoseDim,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _upRose),
+                  ),
+                  child: Text(
+                    'Refuser',
+                    style: GoogleFonts.syne(
+                      color: _upRose,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () async {
+                  final request = friendsProvider.pendingReceived.firstWhere(
+                    (r) => r.fromUser.id == user.id,
+                  );
+                  final messenger = ScaffoldMessenger.of(context);
+                  await friendsProvider.acceptFriendRequest(
+                    request.friendshipId,
+                  );
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Demande acceptée !'),
+                      backgroundColor: _upSage,
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: const LinearGradient(
+                      colors: [_upAmberSoft, _upAmberD],
+                    ),
+                  ),
+                  child: Text(
+                    'Accepter',
+                    style: GoogleFonts.syne(
+                      color: _upNight,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
           );
         }
 
-        return ElevatedButton.icon(
-          onPressed: () async {
+        return GestureDetector(
+          onTap: () async {
+            final messenger = ScaffoldMessenger.of(context);
             await friendsProvider.sendFriendRequest(user.id);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Demande envoyée à ${user.username}'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Demande envoyée à ${user.username}'),
+                backgroundColor: _upSage,
+              ),
+            );
           },
-          icon: const Icon(Icons.person_add),
-          label: const Text('Ajouter en ami'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: myAccentVibrantBlue,
-            foregroundColor: Colors.white,
+          child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: const LinearGradient(colors: [_upAmberSoft, _upAmberD]),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.person_add, color: _upNight, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  'Ajouter en ami',
+                  style: GoogleFonts.syne(
+                    color: _upNight,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
+}
 
-  Widget _buildStatsRow(UserModel user, bool isDarkMode) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildStatItem('Matchs', user.matchesPlayed.toString(), isDarkMode),
-        _buildStatItem('Victoires', user.matchesWon.toString(), isDarkMode),
-        _buildStatItem('Défaites', user.matchesLost.toString(), isDarkMode),
-        _buildStatItem(
-          'Win Rate',
-          '${user.winRate.toStringAsFixed(0)}%',
-          isDarkMode,
-        ),
-      ],
-    );
-  }
+// ── Data helpers ───────────────────────────────────────────────────────────────
 
-  Widget _buildStatItem(String label, String value, bool isDarkMode) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: myAccentVibrantBlue,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
+class _StatItem {
+  final String label;
+  final String value;
+  const _StatItem(this.label, this.value);
+}
 
-  Widget _buildProfileDetail(
-    IconData icon,
-    String label,
-    String value,
-    Color color,
-    bool isDarkMode,
-  ) {
-    final Color valueColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(value, style: TextStyle(fontSize: 16, color: valueColor)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class _Badge {
+  final String label;
+  final Color  color;
+  final Color  bg;
+  const _Badge(this.label, this.color, this.bg);
 }

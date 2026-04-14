@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../theme_config/colors_config.dart';
 import '../providers/teams_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const _tcBg = Color(0xFF0A0C10);
+const _tcCard = Color(0xFF181A21);
+const _tcCard2 = Color(0xFF1E2029);
+const _tcBorder2 = Color(0x21FFFFFF);
+const _tcAmber = Color(0xFFFF7F2A);
+const _tcAmberSoft = Color(0xFFFF9A55);
+const _tcAmberD = Color(0xFFD96820);
+const _tcAmberDim = Color(0x1CFF7F2A);
+const _tcRose = Color(0xFFD4607A);
+const _tcRoseDim = Color(0x1CD4607A);
+const _tcWhite = Color(0xFFF0F2F5);
+const _tcMuted2 = Color(0x9EF0F2F5);
+const _tcNight = Color(0xFF0B0D11);
 
 class TeamChatPage extends StatefulWidget {
   final int teamId;
@@ -99,33 +114,49 @@ class _TeamChatPageState extends State<TeamChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
-    final Color senderBubbleColor = isDarkMode
-        ? myAccentVibrantBlue.withValues(alpha: 0.85)
-        : myAccentVibrantBlue;
-
-    final Color otherBubbleColor = isDarkMode
-        ? MyprimaryDark
-        : Colors.grey[200]!;
-
     final currentUserId = context.read<AuthProvider>().currentUser?.id;
     final isOwner = widget.ownerId != null && currentUserId == widget.ownerId;
 
     return Scaffold(
+      backgroundColor: _tcBg,
       appBar: AppBar(
+        backgroundColor: _tcCard,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _tcCard2,
+                shape: BoxShape.circle,
+                border: Border.all(color: _tcBorder2),
+              ),
+              child: const Icon(Icons.arrow_back, color: _tcMuted2, size: 16),
+            ),
+          ),
+        ),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: myAccentVibrantBlue,
-              backgroundImage: widget.teamLogoUrl != null
-                  ? NetworkImage(widget.teamLogoUrl!)
-                  : null,
-              child: widget.teamLogoUrl == null
-                  ? Icon(Icons.groups, color: MyprimaryDark, size: 20)
-                  : null,
+            // Logo de l'équipe
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: _tcAmberDim,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: widget.teamLogoUrl != null
+                  ? Image.network(
+                      widget.teamLogoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.groups, color: _tcAmber, size: 20),
+                    )
+                  : const Icon(Icons.groups, color: _tcAmber, size: 20),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -134,26 +165,33 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 children: [
                   Text(
                     widget.teamName,
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: _tcWhite,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Chat d\'équipe',
-                    style: TextStyle(
-                      color: textColor.withValues(alpha: 0.6),
-                      fontSize: 12,
-                    ),
+                    "Chat d'équipe",
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _tcMuted2),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        iconTheme: Theme.of(context).appBarTheme.iconTheme,
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 2.4,
+                colors: [Color(0x38FF7F2A), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: <Widget>[
@@ -161,89 +199,80 @@ class _TeamChatPageState extends State<TeamChatPage> {
           if (!isOwner)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isDarkMode
-                    ? Colors.grey[850]?.withOpacity(0.5)
-                    : Colors.grey[100],
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDarkMode
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
+              decoration: const BoxDecoration(
+                color: _tcCard,
+                border: Border(bottom: BorderSide(color: _tcBorder2, width: 1)),
               ),
               child: Row(
                 children: [
-                  // Badge "Membre"
+                  // Badge "MEMBRE"
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.orange.withOpacity(0.3),
-                          Colors.orange.withOpacity(0.2),
-                        ],
-                      ),
+                      color: _tcAmberDim,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          '👤 Membre',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'MEMBRE',
+                      style: GoogleFonts.syne(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: _tcAmber,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
                   const Spacer(),
                   // Bouton "Quitter l'équipe"
-                  TextButton.icon(
-                    onPressed: () => _showLeaveTeamDialog(context),
-                    icon: Icon(
-                      Icons.exit_to_app,
-                      size: 18,
-                      color: Colors.red[700],
-                    ),
-                    label: Text(
-                      'Quitter l\'équipe',
-                      style: TextStyle(
-                        color: Colors.red[700],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
+                  GestureDetector(
+                    onTap: () => _showLeaveTeamDialog(context),
+                    child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
                       ),
-                      backgroundColor: Colors.red.withOpacity(0.1),
-                      shape: RoundedRectangleBorder(
+                      decoration: BoxDecoration(
+                        color: _tcRoseDim,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: _tcRose),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.exit_to_app,
+                            size: 16,
+                            color: _tcRose,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Quitter l'équipe",
+                            style: GoogleFonts.syne(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: _tcRose,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+
           // ===== LISTE DES MESSAGES =====
           Expanded(
             child: Consumer<TeamsProvider>(
               builder: (context, provider, _) {
                 if (provider.isLoadingMessages &&
                     provider.getMessagesForTeam(widget.teamId).isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: _tcAmber),
+                  );
                 }
 
                 final messages = provider.getMessagesForTeam(widget.teamId);
@@ -253,31 +282,23 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.forum_outlined,
                           size: 80,
-                          color: isDarkMode
-                              ? Colors.grey[600]
-                              : Colors.grey[400],
+                          color: _tcMuted2,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
-                          style: TextStyle(
+                          style: GoogleFonts.dmSans(
                             fontSize: 18,
-                            color: isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
+                            color: _tcMuted2,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Démarrez la conversation avec votre équipe !',
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[500]
-                                : Colors.grey[500],
-                          ),
+                          style: GoogleFonts.dmSans(color: _tcMuted2),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -320,24 +341,20 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Text(
                               _formatDate(message.createdAt),
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 12,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 11,
+                                color: _tcMuted2,
                               ),
                             ),
                           ),
                         // Message système (ex: "X a quitté l'équipe")
                         if (message.isSystemMessage)
-                          _buildSystemMessage(message, isDarkMode)
+                          _buildSystemMessage(message)
                         else
                           _buildMessageBubble(
                             message,
                             isSender,
                             showSenderName,
-                            senderBubbleColor,
-                            otherBubbleColor,
-                            textColor,
-                            isDarkMode,
                           ),
                       ],
                     );
@@ -349,8 +366,12 @@ class _TeamChatPageState extends State<TeamChatPage> {
 
           // ===== BARRE DE SAISIE =====
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: _tcCard,
+                border: Border(top: BorderSide(color: _tcBorder2, width: 1)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Consumer<TeamsProvider>(
                 builder: (context, provider, _) {
                   return Row(
@@ -360,48 +381,66 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           controller: _messageController,
                           decoration: InputDecoration(
                             hintText: 'Écrire un message...',
-                            hintStyle: TextStyle(
-                              color: isDarkMode
-                                  ? Colors.grey[500]
-                                  : Colors.grey[700],
-                            ),
+                            hintStyle: GoogleFonts.dmSans(color: _tcMuted2),
                             filled: true,
-                            fillColor: isDarkMode
-                                ? MyprimaryDark.withValues(alpha: 0.7)
-                                : Colors.grey[100],
+                            fillColor: _tcCard2,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 12,
                             ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: _tcBorder2),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: _tcBorder2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: _tcAmber),
                             ),
                           ),
-                          style: TextStyle(color: textColor),
+                          style: GoogleFonts.dmSans(color: _tcWhite),
+                          cursorColor: _tcAmber,
                           onSubmitted: (_) => _sendMessage(),
                           enabled: !provider.isSendingMessage,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      FloatingActionButton(
-                        onPressed: provider.isSendingMessage
-                            ? null
-                            : _sendMessage,
-                        backgroundColor: provider.isSendingMessage
-                            ? Colors.grey
-                            : myAccentVibrantBlue,
-                        elevation: 0,
-                        child: provider.isSendingMessage
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.send, color: MyprimaryDark),
+                      GestureDetector(
+                        onTap: provider.isSendingMessage ? null : _sendMessage,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: provider.isSendingMessage
+                                ? null
+                                : const LinearGradient(
+                                    colors: [_tcAmberSoft, _tcAmberD],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                            color: provider.isSendingMessage ? _tcCard2 : null,
+                          ),
+                          child: Center(
+                            child: provider.isSendingMessage
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: _tcMuted2,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.send,
+                                    color: _tcNight,
+                                    size: 18,
+                                  ),
+                          ),
+                        ),
                       ),
                     ],
                   );
@@ -415,37 +454,26 @@ class _TeamChatPageState extends State<TeamChatPage> {
   }
 
   /// Widget pour afficher un message système
-  Widget _buildSystemMessage(TeamChatMessage message, bool isDarkMode) {
+  Widget _buildSystemMessage(TeamChatMessage message) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: isDarkMode
-            ? Colors.grey[800]?.withOpacity(0.5)
-            : Colors.grey[200]?.withOpacity(0.8),
+        color: _tcCard2,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.grey[600]!.withOpacity(0.3)
-              : Colors.grey[400]!.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: _tcBorder2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 16,
-            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-          ),
+          const Icon(Icons.info_outline, size: 16, color: _tcMuted2),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               message.content,
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[700],
+              style: GoogleFonts.dmSans(
+                color: _tcMuted2,
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
               ),
@@ -461,10 +489,6 @@ class _TeamChatPageState extends State<TeamChatPage> {
     TeamChatMessage message,
     bool isSender,
     bool showSenderName,
-    Color senderBubbleColor,
-    Color otherBubbleColor,
-    Color textColor,
-    bool isDarkMode,
   ) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
@@ -476,24 +500,43 @@ class _TeamChatPageState extends State<TeamChatPage> {
           children: [
             // Avatar pour les autres
             if (!isSender) ...[
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: myAccentVibrantBlue,
-                backgroundImage: message.sender.avatarUrl != null
-                    ? NetworkImage(message.sender.avatarUrl!)
-                    : null,
-                child: message.sender.avatarUrl == null
-                    ? Text(
-                        message.sender.username.isNotEmpty
-                            ? message.sender.username[0].toUpperCase()
-                            : '?',
-                        style: const TextStyle(
-                          color: MyprimaryDark,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+              Container(
+                width: 28,
+                height: 28,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _tcAmberDim,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: message.sender.avatarUrl != null
+                    ? Image.network(
+                        message.sender.avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Text(
+                            message.sender.username.isNotEmpty
+                                ? message.sender.username[0].toUpperCase()
+                                : '?',
+                            style: GoogleFonts.syne(
+                              color: _tcAmber,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       )
-                    : null,
+                    : Center(
+                        child: Text(
+                          message.sender.username.isNotEmpty
+                              ? message.sender.username[0].toUpperCase()
+                              : '?',
+                          style: GoogleFonts.syne(
+                            color: _tcAmber,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(width: 8),
             ],
@@ -503,8 +546,18 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 padding: const EdgeInsets.all(12),
                 constraints: const BoxConstraints(maxWidth: 280),
                 decoration: BoxDecoration(
-                  color: isSender ? senderBubbleColor : otherBubbleColor,
-                  borderRadius: BorderRadius.circular(20).copyWith(
+                  gradient: isSender
+                      ? const LinearGradient(
+                          colors: [_tcAmberSoft, _tcAmberD],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: isSender ? null : _tcCard2,
+                  border: isSender ? null : Border.all(color: _tcBorder2),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(20),
+                    topRight: const Radius.circular(20),
                     bottomLeft: isSender
                         ? const Radius.circular(20)
                         : const Radius.circular(6),
@@ -524,18 +577,18 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           message.sender.username,
-                          style: TextStyle(
-                            color: myAccentVibrantBlue,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.syne(
+                            color: _tcAmber,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     // Contenu du message
                     Text(
                       message.content,
-                      style: TextStyle(
-                        color: isSender ? MyprimaryDark : textColor,
+                      style: GoogleFonts.dmSans(
+                        color: isSender ? _tcNight : _tcWhite,
                         fontSize: 14,
                       ),
                     ),
@@ -543,11 +596,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: TextStyle(
-                        color: (isSender ? MyprimaryDark : textColor)
-                            .withValues(alpha: 0.6),
-                        fontSize: 10,
-                      ),
+                      style: GoogleFonts.dmSans(color: _tcMuted2, fontSize: 10),
                     ),
                   ],
                 ),
@@ -563,67 +612,157 @@ class _TeamChatPageState extends State<TeamChatPage> {
   void _showLeaveTeamDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Quitter l\'équipe'),
-          content: Text(
-            'Êtes-vous sûr de vouloir quitter "${widget.teamName}" ?\n\n'
-            'Vous ne recevrez plus les messages de cette équipe.',
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: _tcCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _tcBorder2),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop(); // Fermer la boîte de dialogue
-
-                // Afficher un indicateur de chargement
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                );
-
-                // Quitter l'équipe
-                final provider = context.read<TeamsProvider>();
-                final success = await provider.leaveTeam(widget.teamId);
-
-                // Fermer l'indicateur de chargement
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-
-                  if (success) {
-                    // Retourner à la page précédente
-                    Navigator.of(context).pop();
-
-                    // Afficher un message de succès
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Vous avez quitté l\'équipe "${widget.teamName}"',
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Titre
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _tcRoseDim,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.warning_rounded,
+                        color: _tcRose,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "Quitter l'équipe",
+                      style: GoogleFonts.syne(
+                        color: _tcRose,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Corps
+                Text(
+                  'Êtes-vous sûr de vouloir quitter "${widget.teamName}" ?\n\n'
+                  'Vous ne recevrez plus les messages de cette équipe.',
+                  style: GoogleFonts.dmSans(color: _tcMuted2),
+                ),
+                const SizedBox(height: 24),
+                // Boutons
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _tcCard2,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Annuler',
+                              style: GoogleFonts.syne(
+                                color: _tcWhite,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
-                        backgroundColor: Colors.green,
                       ),
-                    );
-                  } else {
-                    // Afficher un message d'erreur
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Erreur lors de la sortie de l\'équipe'),
-                        backgroundColor: Colors.red,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.of(dialogContext).pop();
+
+                          // Afficher un indicateur de chargement
+                          if (!context.mounted) return;
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext loadingContext) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: _tcRose,
+                                ),
+                              );
+                            },
+                          );
+
+                          // Quitter l'équipe
+                          final provider = context.read<TeamsProvider>();
+                          final success = await provider.leaveTeam(
+                            widget.teamId,
+                          );
+
+                          // Fermer l'indicateur de chargement
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+
+                            if (success) {
+                              // Retourner à la page précédente
+                              Navigator.of(context).pop();
+
+                              // Afficher un message de succès
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Vous avez quitté l\'équipe "${widget.teamName}"',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } else {
+                              // Afficher un message d'erreur
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Erreur lors de la sortie de l\'équipe',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _tcRoseDim,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _tcRose),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Quitter',
+                              style: GoogleFonts.syne(
+                                color: _tcRose,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Quitter'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
