@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import '../auth/login.dart';
 import 'edit_profile_page.dart';
 
@@ -85,6 +87,24 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+
+          // ── Section APPARENCE ────────────────────────────────────────────────
+          const SizedBox(height: 16),
+          _sectionLabel('APPARENCE'),
+          const SizedBox(height: 8),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
+              return _buildToggleRow(
+                icon: themeProvider.isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                iconColor: _sAmber,
+                iconBg: _sAmberDim,
+                label: themeProvider.isDark ? 'Thème sombre' : 'Thème clair',
+                subtitle: 'Changer l\'apparence de l\'application',
+                value: themeProvider.isDark,
+                onToggle: () => themeProvider.toggleTheme(),
+              );
+            },
+          ),
 
           // ── Section DANGER ──────────────────────────────────────────────────
           const SizedBox(height: 16),
@@ -179,6 +199,71 @@ class SettingsPage extends StatelessWidget {
               Icons.chevron_right,
               color: trailingColor ?? _sMuted2,
               size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Toggle row ─────────────────────────────────────────────────────────────
+  Widget _buildToggleRow({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String label,
+    required String subtitle,
+    required bool value,
+    required VoidCallback onToggle,
+  }) {
+    return GestureDetector(
+      onTap: onToggle,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: _sCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _sBorder2),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.syne(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _sWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _sMuted2),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: value,
+              onChanged: (_) => onToggle(),
+              activeThumbColor: _sAmber,
+              activeTrackColor: _sAmberDim,
+              inactiveThumbColor: _sMuted2,
+              inactiveTrackColor: _sCard2,
             ),
           ],
         ),

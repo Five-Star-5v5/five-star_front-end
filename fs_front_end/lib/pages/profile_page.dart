@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -114,7 +115,7 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHero(user),
+                _buildHero(user, context),
                 const SizedBox(height: 14),
                 _buildStatsBar(user),
                 const SizedBox(height: 20),
@@ -226,7 +227,7 @@ class ProfilePage extends StatelessWidget {
 
   // ── Hero ───────────────────────────────────────────────────────────────────
 
-  Widget _buildHero(UserModel user) {
+  Widget _buildHero(UserModel user, BuildContext context) {
     final initial = user.username.isNotEmpty ? user.username[0].toUpperCase() : '?';
 
     return Padding(
@@ -285,6 +286,46 @@ class ProfilePage extends StatelessWidget {
               style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2),
             ),
           ),
+          if (user.codeId.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: user.codeId));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Code copié'),
+                      duration: Duration(seconds: 1),
+                      backgroundColor: Color(0xFF1E2029),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _pCard2,
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: _pBorder2),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '#${user.codeId}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 10,
+                          color: _pMuted2,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.copy_outlined, size: 10, color: _pMuted2),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           // Pills
           Center(
