@@ -422,9 +422,40 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         const SizedBox(height: 10),
-        ..._upcomingMatches.map(
-          (match) => _buildMatchCard(match, myTeamId, isDarkMode, isOwner),
-        ),
+        if (_upcomingMatches.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              color: _kCard,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _kBorder, width: 1),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.sports_soccer_outlined, size: 28, color: _kMuted2),
+                const SizedBox(height: 8),
+                Text(
+                  'Aucun match à venir',
+                  style: GoogleFonts.syne(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _kMuted2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Défiez une équipe pour planifier un match',
+                  style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
+          ..._upcomingMatches.map(
+            (match) => _buildMatchCard(match, myTeamId, isDarkMode, isOwner),
+          ),
       ],
     );
   }
@@ -2212,8 +2243,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                       ),
                     // Section des matchs à venir (visible pour tous les membres)
-                    if (teamsProvider.isPartOfCurrentTeam &&
-                        _upcomingMatches.isNotEmpty)
+                    if (teamsProvider.isPartOfCurrentTeam)
                       _buildUpcomingMatchesSection(
                         teamsProvider.currentDisplayedTeam!.id,
                         isDarkMode,
