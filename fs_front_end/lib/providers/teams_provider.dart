@@ -39,7 +39,8 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplicationDetail> _myApplications = [];
 
   // Chat d'équipe
-  final Map<int, List<TeamChatMessage>> _teamMessages = {}; // teamId -> messages
+  final Map<int, List<TeamChatMessage>> _teamMessages =
+      {}; // teamId -> messages
   List<TeamChatInfo> _myTeamChats = [];
   bool _isLoadingMessages = false;
   bool _isSendingMessage = false;
@@ -441,13 +442,10 @@ class TeamsProvider with ChangeNotifier {
 
   /// Retourne le poste ouvert pour un slot donné
   OpenSlot? getOpenSlotForIndex(int slotIndex) {
-    try {
-      return _myOpenSlots.firstWhere(
-        (slot) => slot.slotIndex == slotIndex && slot.isActive,
-      );
-    } catch (_) {
-      return null;
+    for (final slot in _myOpenSlots) {
+      if (slot.slotIndex == slotIndex && slot.isActive) return slot;
     }
+    return null;
   }
 
   /// Charge les postes ouverts de mon équipe

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'theme_config/colors_config.dart';
 import 'auth/login.dart';
 import 'auth/signup.dart';
+import 'auth/welcome_page.dart';
 import 'main_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
@@ -61,7 +62,7 @@ class _FootAppState extends State<FootApp> {
           theme: _lightTheme,
           darkTheme: _darkTheme,
           themeMode: theme.mode,
-          home: auth.isAuthenticated ? const MainScreen() : const LoginPage(),
+          home: auth.isAuthenticated ? const MainScreen() : const WelcomePage(),
           routes: {
             '/login': (context) => const LoginPage(),
             '/signup': (context) => const SignUpPage(),
