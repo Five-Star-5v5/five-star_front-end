@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
 import '../theme_config/colors_config.dart';
@@ -1592,6 +1593,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  void _showNotificationsSheet(
+      BuildContext context, TeamsProvider teamsProvider) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => ChangeNotifierProvider.value(
+        value: teamsProvider,
+        child: const _NotificationsSheet(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -1652,37 +1666,55 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
         actions: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: _kCard,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: _kBorder2),
-                ),
-                child: const Icon(
-                  Icons.notifications_none_outlined,
-                  color: _kMuted2,
-                  size: 17,
-                ),
-              ),
-              Positioned(
-                top: 5,
-                right: 5,
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: _kAmber,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: _kNight, width: 1.5),
+          Consumer<TeamsProvider>(
+            builder: (context, teamsProvider, _) => GestureDetector(
+              onTap: () => _showNotificationsSheet(context, teamsProvider),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: _kCard,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _kBorder2),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_none_outlined,
+                      color: _kMuted2,
+                      size: 17,
+                    ),
                   ),
-                ),
+                  if (teamsProvider.pendingChallengesCount > 0)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: _kAmber,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: _kNight, width: 1.5),
+                        ),
+                        child: Center(
+                          child: Text(
+                            teamsProvider.pendingChallengesCount > 9
+                                ? '9+'
+                                : '${teamsProvider.pendingChallengesCount}',
+                            style: const TextStyle(
+                              fontSize: 7,
+                              fontWeight: FontWeight.w800,
+                              color: _kNight,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
+            ),
           ),
           const SizedBox(width: 8),
           Consumer<AuthProvider>(
@@ -4563,4 +4595,325 @@ class _ModernPitchPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Notification Sheet — demandes de match en attente
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _NotificationsSheet extends StatefulWidget {
+  const _NotificationsSheet();
+
+  @override
+  State<_NotificationsSheet> createState() => _NotificationsSheetState();
+}
+
+class _NotificationsSheetState extends State<_NotificationsSheet> {
+  final Set<int> _loadingIds = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final teamsProvider = context.watch<TeamsProvider>();
+    final challenges = teamsProvider.pendingChallenges;
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: _kCard,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle bar
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: _kBorder2,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Header
+          Row(
+            children: [
+              Text(
+                'Notifications',
+                style: GoogleFonts.syne(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _kWhite,
+                ),
+              ),
+              const Spacer(),
+              if (challenges.isNotEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _kAmberDim,
+                    borderRadius: BorderRadius.circular(100),
+                    border:
+                        Border.all(color: Color(0x40FF7F2A), width: 1),
+                  ),
+                  child: Text(
+                    '${challenges.length}',
+                    style: const TextStyle(
+                      color: _kAmber,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // List or empty state
+          if (challenges.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 28),
+              child: Text(
+                'Aucune demande de match en attente',
+                style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
+              ),
+            )
+          else
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.5),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: challenges.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (_, i) =>
+                    _buildChallengeItem(context, challenges[i], teamsProvider),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChallengeItem(
+    BuildContext context,
+    MatchChallenge challenge,
+    TeamsProvider teamsProvider,
+  ) {
+    final isLoading = _loadingIds.contains(challenge.id);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Logo + nom équipe + date
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _kAmberDim,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                      color: Color(0x33FF7F2A), width: 1),
+                ),
+                child: challenge.challengerTeamLogoUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.network(
+                          challenge.challengerTeamLogoUrl!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          challenge.challengerTeamName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: _kAmber,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      challenge.challengerTeamName,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Défi reçu',
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                    ),
+                  ],
+                ),
+              ),
+              if (challenge.proposedDate != null)
+                Text(
+                  DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
+                  style:
+                      GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                ),
+            ],
+          ),
+          // Message
+          if (challenge.message != null && challenge.message!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: _kBg.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                challenge.message!,
+                style:
+                    GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+          // Lieu
+          if (challenge.proposedLocation != null) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 12, color: _kMuted2),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    challenge.proposedLocation!,
+                    style:
+                        GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          // Boutons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: isLoading
+                    ? null
+                    : () => _respond(context, challenge, false, teamsProvider),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(9),
+                    border: Border.all(color: _kRose, width: 1.5),
+                  ),
+                  child: Text(
+                    'REFUSER',
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10,
+                      letterSpacing: 0.6,
+                      color: _kRose,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: isLoading
+                    ? null
+                    : () => _respond(context, challenge, true, teamsProvider),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        colors: [_kAmberSoft, _kAmberD]),
+                    borderRadius: BorderRadius.circular(9),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x33FF7F2A),
+                        blurRadius: 8,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 50,
+                          height: 14,
+                          child: Center(
+                            child: SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kNight,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'ACCEPTER',
+                          style: GoogleFonts.syne(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            letterSpacing: 0.6,
+                            color: _kNight,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _respond(
+    BuildContext context,
+    MatchChallenge challenge,
+    bool accept,
+    TeamsProvider teamsProvider,
+  ) async {
+    setState(() => _loadingIds.add(challenge.id));
+    final result = await TeamsService.instance.respondToChallenge(
+      challenge.id,
+      accept: accept,
+    );
+    if (!mounted) return;
+    setState(() => _loadingIds.remove(challenge.id));
+    if (result != null) {
+      teamsProvider.loadPendingChallenges();
+      if (accept) teamsProvider.loadMyTeam();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(accept ? 'Défi accepté !' : 'Défi refusé'),
+          backgroundColor: accept ? Colors.green : Colors.grey[700],
+        ),
+      );
+    }
+  }
 }

@@ -38,6 +38,9 @@ class TeamsProvider with ChangeNotifier {
   // Mes candidatures envoyées
   List<SlotApplicationDetail> _myApplications = [];
 
+  // Défis de match reçus en attente
+  List<MatchChallenge> _pendingChallenges = [];
+
   // Chat d'équipe
   final Map<int, List<TeamChatMessage>> _teamMessages =
       {}; // teamId -> messages
@@ -63,6 +66,8 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplication> get receivedApplications => _receivedApplications;
   List<OpenSlot> get allOpenSlots => _allOpenSlots;
   List<SlotApplicationDetail> get myApplications => _myApplications;
+  List<MatchChallenge> get pendingChallenges => List.unmodifiable(_pendingChallenges);
+  int get pendingChallengesCount => _pendingChallenges.length;
 
   // Getters chat
   List<TeamChatInfo> get myTeamChats => _myTeamChats;
@@ -196,14 +201,19 @@ class TeamsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Charger en parallèle mon équipe et les équipes où je suis membre
+      // Charger en parallèle mon équipe, les équipes où je suis membre, et les défis reçus
       final results = await Future.wait([
         _teamsService.getMyTeam(),
         _teamsService.getTeamsMemberOf(),
+        _teamsService.getReceivedChallenges(),
       ]);
 
       _myTeam = results[0] as TeamDetail?;
       _teamsMemberOf = results[1] as List<TeamDetail>;
+      final allChallenges = results[2] as List<MatchChallenge>;
+      _pendingChallenges = allChallenges
+          .where((c) => c.status == ChallengeStatus.pending)
+          .toList();
 
       // Charger les postes ouverts et candidatures si j'ai une équipe
       if (_myTeam != null) {
@@ -241,6 +251,16 @@ class TeamsProvider with ChangeNotifier {
     } catch (e) {
       // Error silently handled
     }
+  }
+
+  /// Recharge les défis de match reçus en attente
+  Future<void> loadPendingChallenges() async {
+    try {
+      final all = await _teamsService.getReceivedChallenges();
+      _pendingChallenges =
+          all.where((c) => c.status == ChallengeStatus.pending).toList();
+      notifyListeners();
+    } catch (_) {}
   }
 
   /// Charge les détails d'une équipe
