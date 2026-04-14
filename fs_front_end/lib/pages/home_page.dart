@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'dart:ui';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:provider/provider.dart';
 import '../theme_config/colors_config.dart';
@@ -8,10 +9,93 @@ import '../providers/teams_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
-import 'discover_teams_page.dart';
 import 'team_chat_page.dart';
-import 'find_opponents_page.dart';
 import 'match_chat_page.dart';
+import 'discover_teams_page.dart';
+import 'find_opponents_page.dart';
+
+// ── Design tokens (dark amber system) ──────────────────────────────────────
+const _kBg      = Color(0xFF0A0C10);
+const _kNight   = Color(0xFF0B0D11);
+const _kCard    = Color(0xFF181A21);
+const _kCard2   = Color(0xFF1E2029);
+const _kBorder  = Color(0x12FFFFFF);
+const _kBorder2 = Color(0x21FFFFFF);
+const _kAmber     = Color(0xFFFF7F2A);
+const _kAmberSoft = Color(0xFFFF9A55);
+const _kAmberD    = Color(0xFFD96820);
+const _kAmberDim  = Color(0x1CFF7F2A);
+const _kSage    = Color(0xFF4CAF82);
+const _kRose    = Color(0xFFD4607A);
+const _kWhite   = Color(0xFFF0F2F5);
+const _kMuted2  = Color(0x9EF0F2F5);
+
+// ── Kobeta hex logo SVG paths ────────────────────────────────────────────────
+const _kLogoOrange =
+    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
+    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
+    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
+    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
+    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
+    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
+    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
+    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
+    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
+    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
+    'M 291.9098,673.44632 245.5,646.89264 241.7475,644.43048 '
+    '237.995,641.96832 238.2475,445.90639 238.5,249.84446 256,239.58695 '
+    '273.5,229.32943 305.58644,210.66472 337.67289,192 H 338.83644 340 '
+    'v 94.5 94.5 h 0.51121 0.51121 l 22.23879,-12.6427 22.23879,-12.64271 '
+    '18,-10.21699 18,-10.217 72,-40.78463 72,-40.78462 10,-5.71608 '
+    '10,-5.71607 18.5,-10.51984 18.5,-10.51984 49,-27.73683 49,-27.73683 '
+    '13.8412,-7.88293 L 748.18239,150 h 0.77491 0.7749 l 50.38168,29.25 '
+    '50.38167,29.25 0.002,0.86895 0.002,0.86896 -7.5,4.19949 -7.5,4.1995 '
+    '-33,18.55543 -33,18.55543 -44,24.75584 -44,24.75583 -53.5,30.02161 '
+    '-53.5,30.02161 -15,8.41924 -15,8.41924 -21.713,12.16644 '
+    '-21.71299,12.16644 0.71299,0.6838 0.713,0.68381 51.5,29.18185 '
+    '51.5,29.18185 41.5,23.48412 41.5,23.48411 37.24413,21.16322 '
+    '37.24412,21.16323 -0.004,0.5 -0.004,0.5 -23.73968,13.14967 '
+    'L 715.5,582.79933 687.31534,598.40918 659.13069,614.01903 '
+    '648.81534,608.13201 638.5,602.24499 620,591.76417 601.5,581.28334 '
+    '557,556.27313 512.5,531.26292 473,509.0197 433.5,486.77649 '
+    '415.34425,476.38824 397.18849,466 h -0.97973 -0.97974 '
+    'L 374.86451,477.66965 354.5,489.33929 347.25046,493.41965 '
+    '340.00092,497.5 340.00046,598.75 340,700 h -0.8402 -0.84021 z '
+    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
+    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
+    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
+    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
+    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
+    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
+    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
+    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
+
+const _kLogoGray =
+    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
+    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
+    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
+    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
+    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
+    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
+    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
+    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
+    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
+    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
+    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
+    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
+    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
+    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
+    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
+    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
+    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
+    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
+
+String _logoHexSvg(String d, String fill, String id) => '''
+<svg width="28" height="28" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+  <defs><clipPath id="$id"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs>
+  <g clip-path="url(#\$$id)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fill" d="$d"/></g></g>
+</svg>
+''';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,95 +105,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  /// Boutons d'action premium avec effet glass
-  Widget _buildPremiumActionButtons(bool isDarkMode) {
-    return Column(
-      children: <Widget>[
-        _buildGlassActionButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute<DiscoverTeamsPage>(
-              builder: (_) => const DiscoverTeamsPage(),
-            ),
-          ),
-          icon: Icons.person_search,
-          label: 'Trouve ton équipe',
-          gradient: LinearGradient(
-            colors: <Color>[
-              Colors.orange.withOpacity(0.8),
-              Colors.orange.withOpacity(0.6),
-            ],
-          ),
-          isDarkMode: isDarkMode,
-        ),
-        const SizedBox(height: 16),
-        _buildGlassActionButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute<FindOpponentsPage>(
-              builder: (_) => const FindOpponentsPage(),
-            ),
-          ),
-          icon: Icons.sports_soccer,
-          label: 'Trouver des adversaires',
-          gradient: LinearGradient(
-            colors: <Color>[
-              myAccentVibrantBlue.withOpacity(0.8),
-              myAccentVibrantBlue.withOpacity(0.6),
-            ],
-          ),
-          isDarkMode: isDarkMode,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGlassActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-    required Gradient gradient,
-    required bool isDarkMode,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(icon, color: Colors.white, size: 24),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   static const double _playerAvatarRadius = 28;
 
   bool _isLookingForOpponent = false;
@@ -274,108 +269,87 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 8),
       decoration: BoxDecoration(
-        gradient: _isLookingForOpponent
-            ? LinearGradient(
-                colors: [
-                  myAccentVibrantBlue.withOpacity(0.15),
-                  myAccentVibrantBlue.withOpacity(0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
         color: _isLookingForOpponent
-            ? null
-            : (isDarkMode ? Colors.grey[850] : Colors.grey[50]),
-        borderRadius: BorderRadius.circular(20),
+            ? _kAmber.withValues(alpha: 0.08)
+            : _kCard,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isLookingForOpponent
-              ? myAccentVibrantBlue.withOpacity(0.5)
-              : Colors.transparent,
-          width: 2,
+              ? _kAmber.withValues(alpha: 0.35)
+              : _kBorder2,
+          width: 1.5,
         ),
-        boxShadow: [
-          if (_isLookingForOpponent)
-            BoxShadow(
-              color: myAccentVibrantBlue.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-        ],
+        boxShadow: _isLookingForOpponent
+            ? [
+                BoxShadow(
+                  color: _kAmber.withValues(alpha: 0.14),
+                  blurRadius: 20,
+                  offset: const Offset(0, 6),
+                ),
+              ]
+            : null,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _isLookingForOpponent
-                        ? myAccentVibrantBlue.withOpacity(0.2)
-                        : (isDarkMode ? Colors.grey[800] : Colors.grey[200]),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    _isLookingForOpponent
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: _isLookingForOpponent
-                        ? myAccentVibrantBlue
-                        : Colors.grey,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mode recherche d\'adversaire',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          letterSpacing: -0.5,
-                          color: isDarkMode ? Colors.white : Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _isLookingForOpponent
-                            ? 'Visible par les autres équipes'
-                            : 'Soyez découvert',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (_isLoadingSearchPrefs)
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else
-                  Transform.scale(
-                    scale: 0.9,
-                    child: Switch.adaptive(
-                      value: _isLookingForOpponent,
-                      onChanged: _toggleSearchMode,
-                      activeColor: myAccentVibrantBlue,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _isLookingForOpponent
+                    ? _kAmberDim
+                    : _kBorder,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                _isLookingForOpponent
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+                color: _isLookingForOpponent ? _kAmber : _kMuted2,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mode recherche d\'adversaire',
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      letterSpacing: 0.04 * 13,
+                      color: _isLookingForOpponent ? _kAmber : _kWhite,
                     ),
                   ),
-              ],
+                  const SizedBox(height: 3),
+                  Text(
+                    _isLookingForOpponent
+                        ? 'Visible par les autres équipes'
+                        : 'Soyez découvert',
+                    style: GoogleFonts.dmSans(
+                      fontSize: 11,
+                      color: _kMuted2,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            if (_isLoadingSearchPrefs)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: _kAmber),
+              )
+            else
+              Switch.adaptive(
+                value: _isLookingForOpponent,
+                onChanged: _toggleSearchMode,
+                activeThumbColor: _kNight,
+                activeTrackColor: _kAmber,
+              ),
+          ],
         ),
       ),
     );
@@ -393,36 +367,58 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       children: [
         const SizedBox(height: 16),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(Icons.sports_soccer, color: myAccentVibrantBlue, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              'Matchs à venir',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: titleColor,
-              ),
+            Row(
+              children: [
+                Text(
+                  'MATCHS À VENIR',
+                  style: GoogleFonts.syne(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.04 * 13,
+                    color: _kWhite,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _kAmberDim,
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                      color: _kAmber.withValues(alpha: 0.25),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    '${_upcomingMatches.length}',
+                    style: const TextStyle(
+                      color: _kAmber,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: myAccentVibrantBlue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FindOpponentsPage()),
               ),
               child: Text(
-                '${_upcomingMatches.length}',
-                style: const TextStyle(
-                  color: myAccentVibrantBlue,
-                  fontWeight: FontWeight.bold,
+                'Trouver →',
+                style: GoogleFonts.syne(
                   fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _kAmber,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         ..._upcomingMatches.map(
           (match) => _buildMatchCard(match, myTeamId, isDarkMode, isOwner),
         ),
@@ -445,21 +441,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[850] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: myAccentVibrantBlue.withOpacity(0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: _kCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _kBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,42 +453,53 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           // En-tête avec adversaire
           Row(
             children: [
-              // Logo adversaire
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                backgroundImage: opponentLogo != null
-                    ? NetworkImage(opponentLogo)
-                    : null,
-                child: opponentLogo == null
-                    ? Text(
-                        opponentName[0].toUpperCase(),
-                        style: const TextStyle(
-                          color: myAccentVibrantBlue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+              // Icône match
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _kAmberDim,
+                  borderRadius: BorderRadius.circular(11),
+                  border: Border.all(
+                    color: _kAmber.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                child: opponentLogo != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(opponentLogo, fit: BoxFit.cover),
                       )
-                    : null,
+                    : Center(
+                        child: Text(
+                          opponentName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: _kAmber,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'vs $opponentName',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isDarkMode ? Colors.white : MyprimaryDark,
+                      'VS $opponentName',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        letterSpacing: 0.03 * 13,
+                        color: _kWhite,
                       ),
                     ),
                     Text(
                       isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      style: GoogleFonts.dmSans(
+                        fontSize: 10,
+                        color: _kMuted2,
                       ),
                     ),
                   ],
@@ -515,57 +512,53 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               _buildMatchStatusBadge(match, hasSubmitted, isDarkMode),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           // Infos du match
           if (match.proposedDate != null || match.proposedLocation != null)
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
+                color: _kCard2,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
                   if (match.proposedDate != null)
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.calendar_today,
-                          size: 16,
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
+                          size: 14,
+                          color: _kMuted2,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           _formatMatchDate(match.proposedDate!),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: isDarkMode ? Colors.white : MyprimaryDark,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: _kWhite,
                           ),
                         ),
                       ],
                     ),
                   if (match.proposedDate != null &&
                       match.proposedLocation != null)
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                   if (match.proposedLocation != null)
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.location_on,
-                          size: 16,
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
+                          size: 14,
+                          color: _kMuted2,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             match.proposedLocation!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDarkMode ? Colors.white : MyprimaryDark,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: _kWhite,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -734,43 +727,63 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   // Boutons Valider / Contester - seulement pour l'owner
                   if (isOwner) ...[
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () => _contestMatchScore(match),
-                            icon: const Icon(Icons.close, size: 18),
-                            label: const Text('Contester'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                        GestureDetector(
+                          onTap: () => _contestMatchScore(match),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(9),
+                              border: Border.all(
+                                  color: const Color(0xFFD4607A), width: 1.5),
+                            ),
+                            child: Text(
+                              'CONTESTER',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
+                                letterSpacing: 0.06 * 10,
+                                color: const Color(0xFFD4607A),
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => _validateMatchScore(match),
-                            icon: const Icon(Icons.check, size: 18),
-                            label: const Text('Valider'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _validateMatchScore(match),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A7A4B),
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            child: Text(
+                              'VALIDER',
+                              style: GoogleFonts.syne(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10,
+                                letterSpacing: 0.06 * 10,
+                                color: _kWhite,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '⚠️ Si vous contestez → Match nul (0-0)',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontStyle: FontStyle.italic,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'Contester = match nul (0-0)',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 10,
+                          color: _kMuted2,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ] else ...[
                     // Message pour les membres non-owner
@@ -836,24 +849,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ]
-          // Personne n'a soumis - seul l'owner peut soumettre
-          else if (isOwner) ...[
-            ElevatedButton.icon(
-              onPressed: () => _showSubmitScoreDialog(match, myTeamId),
-              icon: const Icon(Icons.scoreboard, size: 18),
-              label: const Text('Enregistrer le résultat'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: myAccentVibrantBlue,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 44),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ]
           // Membre mais pas owner - afficher un message
-          else ...[
+          else if (!isOwner) ...[
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -881,21 +878,73 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ],
-          // Bouton d'annulation du match (visible pour tout le monde)
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: isOwner ? () => _cancelMatch(match) : null,
-            icon: const Icon(Icons.close, size: 18),
-            label: const Text('Annuler le match'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 44),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+          // Boutons d'action compacts (droite)
+          if (isOwner) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (!hasSubmitted && opponentSubmittedScore == null) ...[
+                  GestureDetector(
+                    onTap: () => _showSubmitScoreDialog(match, myTeamId),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [_kAmberSoft, _kAmberD],
+                        ),
+                        borderRadius: BorderRadius.circular(9),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x47FF7F2A),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'RÉSULTAT',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                          letterSpacing: 0.06 * 10,
+                          color: _kNight,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                GestureDetector(
+                  onTap: () => _cancelMatch(match),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(9),
+                      border: Border.all(color: _kBorder2, width: 1.5),
+                    ),
+                    child: Text(
+                      'ANNULER',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        letterSpacing: 0.06 * 10,
+                        color: _kMuted2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -913,39 +962,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     IconData icon;
 
     if (match.scoreConflict) {
-      bgColor = Colors.red.withOpacity(0.1);
-      textColor = Colors.red;
+      bgColor = _kRose.withValues(alpha: 0.12);
+      textColor = _kRose;
       text = 'Conflit';
       icon = Icons.warning;
     } else if (hasSubmitted) {
-      bgColor = Colors.orange.withOpacity(0.1);
-      textColor = Colors.orange;
+      bgColor = _kAmberDim;
+      textColor = _kAmber;
       text = 'En attente';
       icon = Icons.hourglass_empty;
     } else {
-      bgColor = myAccentVibrantBlue.withOpacity(0.1);
-      textColor = myAccentVibrantBlue;
+      bgColor = _kSage.withValues(alpha: 0.12);
+      textColor = _kSage;
       text = 'À jouer';
       icon = Icons.sports_soccer;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(
+          color: textColor.withValues(alpha: 0.25),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: textColor),
+          Icon(icon, size: 11, color: textColor),
           const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
               color: textColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              fontSize: 9,
+              letterSpacing: 0.06 * 9,
             ),
           ),
         ],
@@ -987,15 +1041,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Stack(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: myAccentVibrantBlue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: _kAmberDim,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: _kAmber.withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.chat_bubble_outline,
-              color: myAccentVibrantBlue,
-              size: 20,
+              color: _kAmber,
+              size: 17,
             ),
           ),
           // Badge de messages non lus
@@ -1487,37 +1545,163 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final Color titleColor = isDarkMode ? myLightBackground : MyprimaryDark;
 
     return Scaffold(
-      appBar: AppBar(title: null),
+      backgroundColor: _kBg,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 1.6,
+                colors: [Color(0x28FF7F2A), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: Stack(
+                children: [
+                  SvgPicture.string(
+                    _logoHexSvg(_kLogoOrange, '#FF7F2A', 'hmHexO'),
+                    width: 28,
+                    height: 28,
+                  ),
+                  SvgPicture.string(
+                    _logoHexSvg(_kLogoGray, '#e6e6e6', 'hmHexG'),
+                    width: 28,
+                    height: 28,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 9),
+            RichText(
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                  height: 1,
+                ),
+                children: [
+                  TextSpan(text: 'Ko', style: TextStyle(color: _kWhite)),
+                  TextSpan(text: 'beta', style: TextStyle(color: _kAmber)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: _kCard,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _kBorder2),
+                ),
+                child: const Icon(
+                  Icons.notifications_none_outlined,
+                  color: _kMuted2,
+                  size: 17,
+                ),
+              ),
+              Positioned(
+                top: 5,
+                right: 5,
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: _kAmber,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: _kNight, width: 1.5),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
+          Consumer<AuthProvider>(
+            builder: (_, auth, __) {
+              final user = auth.currentUser;
+              final initial = user?.username.isNotEmpty == true
+                  ? user!.username[0].toUpperCase()
+                  : 'U';
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: CircleAvatar(
+                  radius: 15,
+                  backgroundColor: _kAmber,
+                  backgroundImage: user?.avatarUrl != null
+                      ? NetworkImage(user!.avatarUrl!)
+                      : null,
+                  child: user?.avatarUrl == null
+                      ? Text(
+                          initial,
+                          style: const TextStyle(
+                            color: _kNight,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                        )
+                      : null,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Consumer<TeamsProvider>(
         builder: (context, teamsProvider, _) {
           if (teamsProvider.state == TeamsLoadingState.loading &&
               teamsProvider.allTeams.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: _kAmber),
+            );
           }
 
           final allTeams = teamsProvider.allTeams;
           final currentIndex = teamsProvider.currentTeamIndex;
 
-          return RefreshIndicator(
-            onRefresh: () => teamsProvider.loadMyTeam(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _buildTeamHeader(
-                      context: context,
-                      teamsProvider: teamsProvider,
-                      titleColor: titleColor,
-                      isDarkMode: isDarkMode,
-                    ),
-                    // Widget pour activer le mode recherche d'adversaire
-                    if (teamsProvider.isCurrentTeamMine &&
-                        teamsProvider.currentDisplayedTeam != null)
-                      _buildSearchModeToggle(isDarkMode),
-                    const SizedBox(height: 20),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Scrollable content ──────────────────────────────────
+              Expanded(
+                child: RefreshIndicator(
+                  color: _kAmber,
+                  onRefresh: () => teamsProvider.loadMyTeam(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // ── Team cards (scrollable) ─────────────────────
+                          _buildTeamHeader(
+                            context: context,
+                            teamsProvider: teamsProvider,
+                            titleColor: titleColor,
+                            isDarkMode: isDarkMode,
+                          ),
+                          const SizedBox(height: 12),
+                          // Widget pour activer le mode recherche d'adversaire
+                          if (teamsProvider.isCurrentTeamMine &&
+                              teamsProvider.currentDisplayedTeam != null)
+                            _buildSearchModeToggle(isDarkMode),
+                          const SizedBox(height: 12),
                     if (allTeams.isEmpty)
                       _buildEmptyTeamPlaceholder(isDarkMode)
                     else
@@ -1558,34 +1742,56 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             'pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}',
                           ),
                           margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
+                            color: _kAmberDim,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.orange.withOpacity(0.3),
+                              color: _kAmber.withValues(alpha: 0.30),
                             ),
                           ),
                           child: Row(
                             children: [
                               const Icon(
                                 Icons.notifications_active,
-                                color: Colors.orange,
+                                color: _kAmber,
+                                size: 20,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
                                   style: const TextStyle(
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.w600,
+                                    color: _kAmber,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () =>
-                                    _showAllApplicationsDialog(context),
-                                child: const Text('Voir'),
+                              GestureDetector(
+                                onTap: () => _showAllApplicationsDialog(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _kAmber,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'VOIR',
+                                    style: TextStyle(
+                                      color: _kNight,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10,
+                                      letterSpacing: 0.06 * 10,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -1600,84 +1806,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         titleColor,
                         teamsProvider.isCurrentTeamMine,
                       ),
-                    const SizedBox(height: 10),
-                    // Boutons premium glass
-                    _buildPremiumActionButtons(isDarkMode),
-                    const SizedBox(height: 90),
+                    const SizedBox(height: 20),
                   ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+                ),            // inner Column
+              ),              // Padding
+            ),                // SingleChildScrollView
+          ),                  // RefreshIndicator
+        ),                    // Expanded
+      ],
+    );                        // outer Column (return)
+  },
+),
+);
   }
 
-  /// Widget pour le bouton de chat avec badge de messages non lus
-  Widget _buildChatButton({
-    required BuildContext context,
-    required TeamDetail team,
-    required int unreadCount,
-    required bool isDarkMode,
-    double iconSize = 20,
-  }) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          icon: Icon(
-            Icons.chat_bubble_outline,
-            size: iconSize,
-            color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-          ),
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => TeamChatPage(
-                  teamId: team.id,
-                  teamName: team.name,
-                  teamLogoUrl: team.logoUrl,
-                  ownerId: team.ownerId,
-                ),
-              ),
-            );
-            // Recharger les chats pour mettre à jour le compteur
-            if (context.mounted) {
-              context.read<TeamsProvider>().loadMyTeamChats();
-            }
-          },
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          tooltip: 'Chat d\'équipe',
-        ),
-        // Badge rouge pour les messages non lus
-        if (unreadCount > 0)
-          Positioned(
-            right: -4,
-            top: -4,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              child: Text(
-                unreadCount > 99 ? '99+' : unreadCount.toString(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 
   Widget _buildTeamHeader({
     required BuildContext context,
@@ -1685,244 +1827,386 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     required Color titleColor,
     required bool isDarkMode,
   }) {
-    final currentTeam = teamsProvider.currentDisplayedTeam;
-    final isMyTeam = teamsProvider.isCurrentTeamMine;
     final allTeams = teamsProvider.allTeams;
+    final currentIndex = teamsProvider.currentTeamIndex;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? [
-                  Colors.grey[850]!.withOpacity(0.6),
-                  Colors.grey[900]!.withOpacity(0.4),
-                ]
-              : [Colors.white, Colors.grey[50]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: SizedBox(
+              height: 260,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.topCenter,
+                    radius: 1.0,
+                    colors: [Color(0x55FF7F2A), Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Column(
-            children: [
-              Stack(
+        ),
+        Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Horizontal team cards scroll ───────────────────────────
+        if (allTeams.isEmpty)
+          Container(
+            width: double.infinity,
+            height: 116,
+            decoration: BoxDecoration(
+              color: _kCard,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _kBorder),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (currentTeam != null)
-                    Positioned(
-                      top: 0,
-                      right: 12,
-                      child: _buildChatButton(
-                        context: context,
-                        team: currentTeam,
-                        unreadCount: teamsProvider.getUnreadCountForTeam(
-                          currentTeam.id,
-                        ),
-                        isDarkMode: isDarkMode,
-                        iconSize: 28,
+                  const Icon(Icons.group_add_outlined, color: _kMuted2, size: 28),
+                  const SizedBox(height: 8),
+                  Text(
+                    'PAS D\'ÉQUIPE',
+                    style: GoogleFonts.syne(
+                      color: _kMuted2,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.06 * 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 116,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: allTeams.length +
+                  (teamsProvider.myTeam != null &&
+                          teamsProvider.teamsMemberOf.isEmpty
+                      ? 1
+                      : 0),
+              padding: EdgeInsets.zero,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                // "Rejoindre une équipe" card
+                if (index == allTeams.length) {
+                  return GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DiscoverTeamsPage(),
                       ),
                     ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 74),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.chevron_left,
-                            color: teamsProvider.canGoPrevious
-                                ? (isDarkMode
-                                      ? myAccentVibrantBlue
-                                      : MyprimaryDark)
-                                : Colors.grey.withOpacity(0.3),
-                            size: 32,
-                          ),
-                          onPressed: teamsProvider.canGoPrevious
-                              ? () => teamsProvider.goToPreviousTeam()
-                              : null,
+                    child: Container(
+                      width: 116,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _kCard,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: _kAmber.withValues(alpha: 0.20),
+                          width: 1,
                         ),
                       ),
-                      Expanded(
-                        child: Column(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: _kAmberDim,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              size: 18,
+                              color: _kAmber,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'REJOINDRE',
+                            style: GoogleFonts.syne(
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              color: _kAmber,
+                              letterSpacing: 0.06 * 8,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'une équipe',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 9,
+                              color: _kMuted2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                final team = allTeams[index];
+                final isActive = index == currentIndex;
+                final isOwner = team.id == teamsProvider.myTeam?.id;
+                return GestureDetector(
+                  onTap: () => teamsProvider.setCurrentTeamIndex(index),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 152,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: isActive
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                _kAmber.withValues(alpha: 0.12),
+                                _kAmberD.withValues(alpha: 0.06),
+                              ],
+                            )
+                          : null,
+                      color: isActive ? null : _kCard,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isActive
+                            ? _kAmber.withValues(alpha: 0.35)
+                            : _kBorder,
+                        width: isActive ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        if (isActive)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              width: 7,
+                              height: 7,
+                              decoration: const BoxDecoration(
+                                color: _kAmber,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Badge "Mon équipe" ou "Membre" avec bouton "Quitter" si membre
+                            // Role badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isOwner
+                                    ? _kAmberDim
+                                    : Colors.white.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(
+                                  color: isOwner
+                                      ? _kAmber.withValues(alpha: 0.25)
+                                      : _kBorder2,
+                                ),
+                              ),
+                              child: Text(
+                                isOwner ? 'MON ÉQUIPE' : 'MEMBRE',
+                                style: GoogleFonts.syne(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w700,
+                                  color: isOwner ? _kAmber : _kMuted2,
+                                  letterSpacing: 0.06 * 8,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            // Team name
+                            Text(
+                              team.name.toUpperCase(),
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: _kWhite,
+                                letterSpacing: 0.04 * 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            // Meta
+                            Text(
+                              '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 10,
+                                color: _kMuted2,
+                              ),
+                            ),
+                            const Spacer(),
+                            // Avatars + action buttons row
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: isMyTeam
-                                          ? [
-                                              myAccentVibrantBlue.withOpacity(
-                                                0.3,
-                                              ),
-                                              myAccentVibrantBlue.withOpacity(
-                                                0.2,
-                                              ),
-                                            ]
-                                          : [
-                                              Colors.orange.withOpacity(0.3),
-                                              Colors.orange.withOpacity(0.2),
-                                            ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    isMyTeam ? '👑 Mon équipe' : '👤 Membre',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isMyTeam
-                                          ? myAccentVibrantBlue
-                                          : Colors.orange,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.5,
-                                    ),
+                                _buildStackedAvatars(team),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: () async {
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => TeamChatPage(
+                                          teamId: team.id,
+                                          teamName: team.name,
+                                          teamLogoUrl: team.logoUrl,
+                                          ownerId: team.ownerId,
+                                        ),
+                                      ),
+                                    );
+                                    if (context.mounted) {
+                                      context.read<TeamsProvider>().loadMyTeamChats();
+                                    }
+                                  },
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.all(2),
+                                        child: Icon(
+                                          Icons.chat_bubble_outline,
+                                          size: 14,
+                                          color: _kAmber,
+                                        ),
+                                      ),
+                                      if (teamsProvider.getUnreadCountForTeam(team.id) > 0)
+                                        Positioned(
+                                          right: -1,
+                                          top: -1,
+                                          child: Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                // Bouton "Quitter l'équipe" si l'utilisateur est membre (non propriétaire)
-                                if (!isMyTeam && currentTeam != null) ...[
-                                  const SizedBox(width: 8),
+                                if (isOwner) ...[
+                                  const SizedBox(width: 6),
+                                  GestureDetector(
+                                    onTap: () => _showEditTeamNameDialog(context),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(2),
+                                      child: Icon(
+                                        Icons.edit_outlined,
+                                        size: 13,
+                                        color: _kMuted2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (!isOwner) ...[
+                                  const SizedBox(width: 6),
                                   GestureDetector(
                                     onTap: () => _showLeaveTeamDialog(
                                       context,
-                                      currentTeam,
+                                      team,
                                       teamsProvider,
                                     ),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.red.withOpacity(0.3),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.exit_to_app,
-                                            size: 14,
-                                            color: Colors.red[700],
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Quitter',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.red[700],
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(2),
+                                      child: Icon(
+                                        Icons.exit_to_app,
+                                        size: 13,
+                                        color: _kRose,
                                       ),
                                     ),
                                   ),
                                 ],
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    currentTeam?.name ?? 'Mon Équipe',
-                                    style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -1.5,
-                                      color: titleColor,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (isMyTeam)
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.edit,
-                                      size: 24,
-                                      color: isDarkMode
-                                          ? myAccentVibrantBlue
-                                          : MyprimaryDark,
-                                    ),
-                                    onPressed: () =>
-                                        _showEditTeamNameDialog(context),
-                                    padding: const EdgeInsets.only(left: 4),
-                                    constraints: const BoxConstraints(),
-                                  ),
-                              ],
-                            ),
-                            if (allTeams.length > 1)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  '${teamsProvider.currentTeamIndex + 1} / ${allTeams.length}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isDarkMode
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 74),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.chevron_right,
-                            color: teamsProvider.canGoNext
-                                ? (isDarkMode
-                                      ? myAccentVibrantBlue
-                                      : MyprimaryDark)
-                                : Colors.grey.withOpacity(0.3),
-                            size: 32,
-                          ),
-                          onPressed: teamsProvider.canGoNext
-                              ? () => teamsProvider.goToNextTeam()
-                              : null,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
-      ),
+      ],
+    ),
+      ],
+    );
+  }
+
+  Widget _buildStackedAvatars(TeamDetail team) {
+    final starters = team.starters.take(3).toList();
+    final extra = team.members.length > 3 ? team.members.length - 3 : 0;
+    return Row(
+      children: [
+        ...starters.asMap().entries.map((entry) {
+          final i = entry.key;
+          final m = entry.value;
+          return Transform.translate(
+            offset: Offset(i * -5.0, 0),
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _kAmber,
+                border: Border.all(color: _kCard, width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  m.user.username.isNotEmpty
+                      ? m.user.username[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 7,
+                    fontWeight: FontWeight.w700,
+                    color: _kNight,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        if (extra > 0)
+          Transform.translate(
+            offset: Offset(starters.length * -5.0, 0),
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _kCard2,
+                border: Border.all(color: _kCard, width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  '+$extra',
+                  style: const TextStyle(
+                    fontSize: 6,
+                    fontWeight: FontWeight.w600,
+                    color: _kMuted2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -1933,13 +2217,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         final isActive = index == currentIndex;
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: isActive ? 12 : 8,
-          height: isActive ? 12 : 8,
+          width: isActive ? 14 : 6,
+          height: 6,
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive
-                ? myAccentVibrantBlue
-                : (isDarkMode ? Colors.grey[600] : Colors.grey[400]),
+            borderRadius: BorderRadius.circular(100),
+            color: isActive ? _kAmber : _kBorder2,
           ),
         );
       }),
@@ -1948,37 +2230,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget _buildEmptyTeamPlaceholder(bool isDarkMode) {
     return Container(
-      height: 250,
+      height: 220,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.green[800]! : Colors.green[600]!,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: isDarkMode ? Colors.white70 : Colors.white,
-          width: 2,
-        ),
+        color: _kCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _kBorder2, width: 1.5),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.groups, size: 48, color: Colors.white.withOpacity(0.7)),
+            Icon(
+              Icons.groups_outlined,
+              size: 44,
+              color: _kMuted2,
+            ),
             const SizedBox(height: 12),
-            Text(
-              'Aucune équipe',
+            const Text(
+              'AUCUNE ÉQUIPE',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: _kWhite,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.06 * 13,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
+            const SizedBox(height: 6),
+            const Text(
               'Ajoutez des amis pour créer votre équipe',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 12,
-              ),
+              style: TextStyle(color: _kMuted2, fontSize: 11),
             ),
           ],
         ),
@@ -1997,29 +2278,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       height: 280,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color(0xFF2D5016).withOpacity(isDarkMode ? 0.8 : 1.0),
-            const Color(0xFF1A3D0F).withOpacity(isDarkMode ? 0.6 : 0.9),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: const Color(0xFF1A3A1F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 40,
-            offset: const Offset(0, 15),
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: LayoutBuilder(
+        borderRadius: BorderRadius.circular(16),
+        child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final double width = constraints.maxWidth;
               final double height = constraints.maxHeight;
@@ -2034,11 +2309,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ];
 
               TeamMember? getMember(int slotIndex) {
-                try {
-                  return starters.firstWhere((m) => m.slotIndex == slotIndex);
-                } catch (_) {
-                  return null;
-                }
+                final matches = starters.where((m) => m.slotIndex == slotIndex);
+                return matches.isEmpty ? null : matches.first;
               }
 
               final double horizontalSpacing =
@@ -2091,8 +2363,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSubstitutesSection(
@@ -2110,20 +2381,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Remplaçants',
+            const Text(
+              'REMPLAÇANTS',
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: titleColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.04 * 13,
+                color: _kWhite,
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.add_circle, color: myAccentVibrantBlue),
-              onPressed: () => _showAddPlayerDialog(
+            GestureDetector(
+              onTap: () => _showAddPlayerDialog(
                 context,
                 slotIndex: 5 + substitutes.length,
                 position: PlayerPosition.substitute,
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _kAmberDim,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _kAmber.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
+                ),
+                child: const Icon(Icons.add, color: _kAmber, size: 18),
               ),
             ),
           ],
@@ -2131,23 +2414,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         const SizedBox(height: 10),
         if (substitutes.isEmpty)
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? MyprimaryDark.withOpacity(0.5)
-                  : Colors.grey[100],
+              color: _kCard,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-              ),
+              border: Border.all(color: _kBorder2),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
-                'Aucun remplaçant\nAppuyez sur + pour ajouter',
+                'Aucun remplaçant — appuyez sur + pour ajouter',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
+                style: TextStyle(color: _kMuted2, fontSize: 12),
               ),
             ),
           )
@@ -2178,34 +2455,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Remplaçants',
+        const Text(
+          'REMPLAÇANTS',
           style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: titleColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.04 * 13,
+            color: _kWhite,
           ),
         ),
         const SizedBox(height: 10),
         if (substitutes.isEmpty)
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDarkMode
-                  ? MyprimaryDark.withOpacity(0.5)
-                  : Colors.grey[100],
+              color: _kCard,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDarkMode ? Colors.grey[700]! : Colors.grey[300]!,
-              ),
+              border: Border.all(color: _kBorder2),
             ),
-            child: Center(
+            child: const Center(
               child: Text(
                 'Aucun remplaçant',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                ),
+                style: TextStyle(color: _kMuted2, fontSize: 12),
               ),
             ),
           )
@@ -2249,7 +2521,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: <Widget>[
             CircleAvatar(
               radius: _playerAvatarRadius,
-              backgroundColor: myAccentVibrantBlue,
+              backgroundColor: _kAmber,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -2259,8 +2531,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ? member.user.username[0].toUpperCase()
                           : position.shortName,
                       style: const TextStyle(
-                        color: MyprimaryDark,
-                        fontWeight: FontWeight.bold,
+                        color: _kNight,
+                        fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
                     )
@@ -2271,10 +2543,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               member.user.username.length > 8
                   ? '${member.user.username.substring(0, 8)}...'
                   : member.user.username,
-              style: TextStyle(
-                color: isDarkMode ? myLightBackground : MyprimaryDark,
+              style: const TextStyle(
+                color: _kWhite,
                 fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
+                shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
               ),
             ),
           ],
@@ -2293,11 +2566,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 CircleAvatar(
                   radius: _playerAvatarRadius,
-                  backgroundColor: Colors.orange.withOpacity(0.8),
+                  backgroundColor: _kAmber.withValues(alpha: 0.85),
                   child: const Icon(
                     Icons.person_search,
-                    color: Colors.white,
-                    size: 24,
+                    color: _kNight,
+                    size: 22,
                   ),
                 ),
                 if (openSlot.applicationsCount > 0)
@@ -2323,12 +2596,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ],
             ),
             const SizedBox(height: 4),
-            Text(
+            const Text(
               'Recherche',
               style: TextStyle(
-                color: Colors.orange,
+                color: _kAmber,
                 fontSize: 10,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+                shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
               ),
             ),
           ],
@@ -2350,20 +2624,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: <Widget>[
           CircleAvatar(
             radius: _playerAvatarRadius,
-            backgroundColor: Colors.white.withOpacity(0.3),
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
             child: Icon(
               isEditable ? Icons.add : Icons.person_outline,
-              color: Colors.white.withOpacity(0.8),
-              size: 24,
+              color: Colors.white.withValues(alpha: 0.5),
+              size: 22,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             position.shortName,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 10,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
+              shadows: const [Shadow(color: Colors.black54, blurRadius: 4)],
             ),
           ),
         ],
@@ -2379,23 +2654,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return GestureDetector(
       onTap: isEditable ? () => _showPlayerOptions(context, member) : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: isDarkMode ? MyprimaryDark.withOpacity(0.7) : Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDarkMode
-                ? myAccentVibrantBlue.withOpacity(0.3)
-                : Colors.grey[300]!,
-            width: 1,
-          ),
+          color: _kCard,
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(color: _kBorder2, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             CircleAvatar(
-              radius: 12,
-              backgroundColor: myAccentVibrantBlue.withOpacity(0.7),
+              radius: 11,
+              backgroundColor: _kAmberDim,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -2405,27 +2675,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ? member.user.username[0].toUpperCase()
                           : 'R',
                       style: const TextStyle(
-                        color: MyprimaryDark,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                        color: _kAmber,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
                       ),
                     )
                   : null,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 7),
             Text(
               member.user.username,
-              style: TextStyle(
-                color: isDarkMode ? myLightBackground : MyprimaryDark,
-                fontSize: 14,
+              style: const TextStyle(
+                color: _kWhite,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 4),
-            if (member.user.rating != null)
+            if (member.user.rating != null) ...[
+              const SizedBox(width: 5),
               Text(
                 '⭐${member.user.rating!.toStringAsFixed(1)}',
-                style: const TextStyle(fontSize: 10),
+                style: const TextStyle(fontSize: 10, color: _kMuted2),
               ),
+            ],
           ],
         ),
       ),
