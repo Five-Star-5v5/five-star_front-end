@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
-import '../theme_config/colors_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../auth/login.dart';
 import 'edit_profile_page.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const _sBg = Color(0xFF0A0C10);
+const _sCard = Color(0xFF181A21);
+const _sCard2 = Color(0xFF1E2029);
+const _sBorder2 = Color(0x21FFFFFF);
+const _sAmber = Color(0xFFFF7F2A);
+const _sAmberDim = Color(0x1CFF7F2A);
+const _sRose = Color(0xFFD4607A);
+const _sRoseDim = Color(0x1CD4607A);
+const _sWhite = Color(0xFFF0F2F5);
+const _sMuted2 = Color(0x9EF0F2F5);
 
 class SettingsPage extends StatelessWidget {
   final AuthProvider authProvider;
@@ -12,295 +23,418 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color titleColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
     return Scaffold(
+      backgroundColor: _sBg,
       appBar: AppBar(
-        title: Text(
-          'Paramètres',
-          style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
+        backgroundColor: _sCard,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: _sCard2,
+              shape: BoxShape.circle,
+              border: Border.all(color: _sBorder2),
+            ),
+            child: const Icon(Icons.arrow_back, color: _sMuted2, size: 16),
+          ),
         ),
-        iconTheme: IconThemeData(
-          color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
+        title: Text(
+          'PARAMÈTRES',
+          style: GoogleFonts.syne(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: _sWhite,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 2.4,
+                colors: [Color(0x38FF7F2A), Colors.transparent],
+              ),
+            ),
+          ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        children: [
+          // ── Section COMPTE ──────────────────────────────────────────────────
+          _sectionLabel('COMPTE'),
+          const SizedBox(height: 8),
+
+          // Modifier le profil
+          _buildRow(
+            icon: Icons.edit_outlined,
+            iconColor: _sAmber,
+            iconBg: _sAmberDim,
+            label: 'Modifier le profil',
+            subtitle: 'Mettre à jour mes informations',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const EditProfilePage()),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // ── Section DANGER ──────────────────────────────────────────────────
+          const SizedBox(height: 16),
+          _sectionLabel('ZONE DANGER'),
+          const SizedBox(height: 8),
+
+          // Supprimer le compte
+          _buildRow(
+            icon: Icons.delete_outline,
+            iconColor: _sRose,
+            iconBg: _sRoseDim,
+            label: 'Supprimer mon compte',
+            subtitle: 'Action irréversible',
+            trailingColor: _sRose,
+            onTap: () => _showDeleteAccountDialog(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Section label ──────────────────────────────────────────────────────────
+  Widget _sectionLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 2),
+      child: Text(
+        text,
+        style: GoogleFonts.syne(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.4,
+          color: _sMuted2,
+        ),
+      ),
+    );
+  }
+
+  // ── Row item ───────────────────────────────────────────────────────────────
+  Widget _buildRow({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String label,
+    required String subtitle,
+    Color? trailingColor,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: _sCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _sBorder2),
+        ),
+        child: Row(
           children: [
-            // Section Compte
-            Text(
-              'Compte',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: titleColor,
+            // Icon
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(10),
               ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            const SizedBox(height: 16),
-
-            // Carte pour l'édition du profil
-            _buildGlassContainer(
-              isDarkMode: isDarkMode,
-              child: ListTile(
-                leading: Icon(
-                  Icons.edit,
-                  color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-                  size: 28,
-                ),
-                title: Text(
-                  'Modifier mon profil',
-                  style: TextStyle(
-                    color: titleColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+            const SizedBox(width: 14),
+            // Texts
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.syne(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: trailingColor ?? _sWhite,
+                    ),
                   ),
-                ),
-                subtitle: const Text(
-                  'Mettre à jour mes informations personnelles',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-                  size: 16,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const EditProfilePage()),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Carte pour la suppression du compte
-            _buildGlassContainer(
-              isDarkMode: isDarkMode,
-              child: ListTile(
-                leading: Icon(
-                  Icons.delete_forever,
-                  color: Colors.red[700],
-                  size: 28,
-                ),
-                title: Text(
-                  'Supprimer mon compte',
-                  style: TextStyle(
-                    color: Colors.red[700],
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _sMuted2),
                   ),
-                ),
-                subtitle: const Text(
-                  'Action irréversible - toutes vos données seront perdues',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                trailing: Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.red[700],
-                  size: 16,
-                ),
-                onTap: () => _showDeleteAccountDialog(context, isDarkMode),
+                ],
               ),
             ),
-
-            const SizedBox(height: 100),
+            Icon(
+              Icons.chevron_right,
+              color: trailingColor ?? _sMuted2,
+              size: 18,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildGlassContainer({
-    required bool isDarkMode,
-    required Widget child,
-  }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDarkMode
-                  ? [
-                      Colors.grey[850]!.withOpacity(0.6),
-                      Colors.grey[900]!.withOpacity(0.4),
-                    ]
-                  : [
-                      Colors.white.withOpacity(0.8),
-                      Colors.grey[50]!.withOpacity(0.6),
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDarkMode
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.2),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.08),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteAccountDialog(BuildContext context, bool isDarkMode) {
-    final TextEditingController confirmationController =
-        TextEditingController();
+  // ── Delete account dialog ──────────────────────────────────────────────────
+  void _showDeleteAccountDialog(BuildContext context) {
+    final TextEditingController confirmController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.warning, color: Colors.red[700], size: 28),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Supprimer mon compte',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ],
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: _sCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _sBorder2),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Cette action est IRRÉVERSIBLE et entraînera :',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text('• Suppression de toutes vos données personnelles'),
-              const Text(
-                '• Suppression de vos équipes (si vous êtes propriétaire)',
-              ),
-              const Text('• Retrait de toutes les équipes où vous êtes membre'),
-              const Text('• Suppression de votre historique de matchs'),
-              const Text('• Suppression de tous vos messages'),
-              const SizedBox(height: 20),
-              Text(
-                'Pour confirmer, tapez "SUPPRIMER" :',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: _sRoseDim,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_outlined,
+                        color: _sRose,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Supprimer le compte',
+                      style: GoogleFonts.syne(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _sRose,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: confirmationController,
-                decoration: InputDecoration(
-                  hintText: 'SUPPRIMER',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 16),
+                // Warning list
+                Text(
+                  'Cette action est IRRÉVERSIBLE et entraînera :',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _sWhite,
                   ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
                 ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
+                const SizedBox(height: 10),
+                ...[
+                  'Suppression de toutes vos données personnelles',
+                  'Suppression de vos équipes (si propriétaire)',
+                  'Retrait de toutes les équipes dont vous êtes membre',
+                  'Suppression de votre historique de matchs',
+                  'Suppression de tous vos messages',
+                ].map(
+                  (t) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Container(
+                            width: 4,
+                            height: 4,
+                            decoration: const BoxDecoration(
+                              color: _sRose,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            t,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12,
+                              color: _sMuted2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Annuler'),
-            ),
-            StatefulBuilder(
-              builder: (context, setState) {
-                return ElevatedButton(
-                  onPressed: () async {
-                    if (confirmationController.text == 'SUPPRIMER') {
-                      // Fermer le dialogue de confirmation
-                      Navigator.of(dialogContext).pop();
-
-                      // Afficher un indicateur de chargement
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext loadingContext) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                const SizedBox(height: 20),
+                // Confirmation field
+                Text(
+                  'Tapez "SUPPRIMER" pour confirmer :',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _sWhite,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: confirmController,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.syne(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                    color: _sWhite,
+                  ),
+                  cursorColor: _sRose,
+                  decoration: InputDecoration(
+                    hintText: 'SUPPRIMER',
+                    hintStyle: GoogleFonts.syne(
+                      fontSize: 13,
+                      letterSpacing: 2,
+                      color: _sMuted2,
+                    ),
+                    filled: true,
+                    fillColor: _sCard2,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: _sBorder2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: _sRose, width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(dialogContext).pop(),
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _sCard2,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: _sBorder2),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Annuler',
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _sMuted2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: StatefulBuilder(
+                        builder: (ctx, setBtn) {
+                          return GestureDetector(
+                            onTap: () async {
+                              if (confirmController.text == 'SUPPRIMER') {
+                                Navigator.of(dialogContext).pop();
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(
+                                    child: CircularProgressIndicator(
+                                      color: _sRose,
+                                    ),
+                                  ),
+                                );
+                                final success = await authProvider
+                                    .deleteAccount();
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                                if (success) {
+                                  if (context.mounted) {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (_) => const LoginPage(
+                                          successMessage:
+                                              'Votre compte a été supprimé avec succès',
+                                        ),
+                                      ),
+                                      (route) => false,
+                                    );
+                                  }
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Erreur lors de la suppression du compte',
+                                        ),
+                                        backgroundColor: _sRose,
+                                      ),
+                                    );
+                                  }
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Veuillez taper "SUPPRIMER" pour confirmer',
+                                    ),
+                                    backgroundColor: _sRose,
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: _sRoseDim,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _sRose, width: 1.5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Supprimer',
+                                  style: GoogleFonts.syne(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: _sRose,
+                                  ),
+                                ),
+                              ),
+                            ),
                           );
                         },
-                      );
-
-                      // Supprimer le compte
-                      final success = await authProvider.deleteAccount();
-
-                      // Fermer l'indicateur de chargement
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
-
-                      if (success) {
-                        // Rediriger vers la page de connexion avec un message de succès
-                        if (context.mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const LoginPage(
-                                successMessage:
-                                    'Votre compte a été supprimé avec succès',
-                              ),
-                            ),
-                            (route) => false,
-                          );
-                        }
-                      } else {
-                        // Afficher un message d'erreur
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Erreur lors de la suppression du compte',
-                              ),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    } else {
-                      // Le texte ne correspond pas
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                            'Veuillez taper "SUPPRIMER" pour confirmer',
-                          ),
-                          backgroundColor: Colors.orange,
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red[700],
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Confirmer la suppression'),
-                );
-              },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
