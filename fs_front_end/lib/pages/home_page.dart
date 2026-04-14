@@ -849,6 +849,59 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ]
+          // Owner — score pas encore soumis (match à jouer)
+          else if (isOwner) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              decoration: BoxDecoration(
+                color: _kCard2,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      isChallenger
+                          ? match.challengerTeamName
+                          : match.challengedTeamName,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Text(
+                      '? – ?',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                        color: _kMuted2,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      opponentName,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        color: _kWhite,
+                      ),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]
           // Membre mais pas owner - afficher un message
           else if (!isOwner) ...[
             Container(
