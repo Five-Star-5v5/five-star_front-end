@@ -2333,11 +2333,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             height: 116,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: allTeams.length +
-                  (teamsProvider.myTeam != null &&
-                          teamsProvider.teamsMemberOf.isEmpty
-                      ? 1
-                      : 0),
+              itemCount: allTeams.length + 1,
               padding: EdgeInsets.zero,
               separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
