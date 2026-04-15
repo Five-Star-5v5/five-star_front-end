@@ -2983,15 +2983,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   : null,
             ),
             const SizedBox(height: 4),
-            Text(
-              member.user.username.length > 8
-                  ? '${member.user.username.substring(0, 8)}...'
-                  : member.user.username,
-              style: const TextStyle(
-                color: _kWhite,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                member.user.username.length > 8
+                    ? '${member.user.username.substring(0, 8)}…'
+                    : member.user.username,
+                style: const TextStyle(
+                  color: _kWhite,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -3040,13 +3046,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Recherche',
-              style: TextStyle(
-                color: _kAmber,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'Recherche',
+                style: TextStyle(
+                  color: _kAmber,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -5554,6 +5566,20 @@ class _ModernPitchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Bandes de gazon alternées
+    final Paint stripePaint = Paint()..style = PaintingStyle.fill;
+    const int stripeCount = 8;
+    final double stripeWidth = size.width / stripeCount;
+    for (int i = 0; i < stripeCount; i++) {
+      stripePaint.color = i.isEven
+          ? const Color(0xFF1E4A23)
+          : const Color(0xFF194020);
+      canvas.drawRect(
+        Rect.fromLTWH(i * stripeWidth, 0, stripeWidth, size.height),
+        stripePaint,
+      );
+    }
+
     final Paint paint = Paint()
       ..color = lineColor
       ..strokeWidth = 1.5
