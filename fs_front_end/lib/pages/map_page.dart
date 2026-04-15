@@ -1,11 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../theme_config/colors_config.dart';
 import '../providers/fields_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/fields_service.dart';
+
+// ── Kobeta hex logo SVG paths ─────────────────────────────────────────────
+const _mpLogoOrange =
+    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
+    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
+    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
+    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
+    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
+    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
+    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
+    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
+    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
+    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
+    'M 291.9098,673.44632 245.5,646.89264 241.7475,644.43048 '
+    '237.995,641.96832 238.2475,445.90639 238.5,249.84446 256,239.58695 '
+    '273.5,229.32943 305.58644,210.66472 337.67289,192 H 338.83644 340 '
+    'v 94.5 94.5 h 0.51121 0.51121 l 22.23879,-12.6427 22.23879,-12.64271 '
+    '18,-10.21699 18,-10.217 72,-40.78463 72,-40.78462 10,-5.71608 '
+    '10,-5.71607 18.5,-10.51984 18.5,-10.51984 49,-27.73683 49,-27.73683 '
+    '13.8412,-7.88293 L 748.18239,150 h 0.77491 0.7749 l 50.38168,29.25 '
+    '50.38167,29.25 0.002,0.86895 0.002,0.86896 -7.5,4.19949 -7.5,4.1995 '
+    '-33,18.55543 -33,18.55543 -44,24.75584 -44,24.75583 -53.5,30.02161 '
+    '-53.5,30.02161 -15,8.41924 -15,8.41924 -21.713,12.16644 '
+    '-21.71299,12.16644 0.71299,0.6838 0.713,0.68381 51.5,29.18185 '
+    '51.5,29.18185 41.5,23.48412 41.5,23.48411 37.24413,21.16322 '
+    '37.24412,21.16323 -0.004,0.5 -0.004,0.5 -23.73968,13.14967 '
+    'L 715.5,582.79933 687.31534,598.40918 659.13069,614.01903 '
+    '648.81534,608.13201 638.5,602.24499 620,591.76417 601.5,581.28334 '
+    '557,556.27313 512.5,531.26292 473,509.0197 433.5,486.77649 '
+    '415.34425,476.38824 397.18849,466 h -0.97973 -0.97974 '
+    'L 374.86451,477.66965 354.5,489.33929 347.25046,493.41965 '
+    '340.00092,497.5 340.00046,598.75 340,700 h -0.8402 -0.84021 z '
+    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
+    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
+    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
+    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
+    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
+    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
+    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
+    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
+
+const _mpLogoGray =
+    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
+    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
+    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
+    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
+    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
+    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
+    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
+    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
+    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
+    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
+    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
+    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
+    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
+    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
+    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
+    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
+    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
+    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
+
+String _mpLogoHexSvg(String d, String fill, String id) => '''
+<svg width="28" height="28" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+  <defs><clipPath id="$id"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs>
+  <g clip-path="url(#\$$id)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fill" d="$d"/></g></g>
+</svg>
+''';
+
+// ── Design tokens ─────────────────────────────────────────────────────────
+const _kAmber = Color(0xFFFF7F2A);
+const _kAmberSoft = Color(0xFFFF9A52);
+const _kAmberDark = Color(0xFFd96820);
+const _kCard = Color(0xFF181A21);
+const _kBg = Color(0xFF0A0C10);
+const _kWhite = Color(0xFFF0F2F5);
+const _kMuted2 = Color(0x9EF0F2F5);
+const _kBorder = Color(0x12FFFFFF);
+const _kBorder2 = Color(0x2DFFFFFF);
+const _kSage = Color(0xFF4CAF82);
+const _kRose = Color(0xFFD4607A);
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -17,7 +99,6 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final MapController _mapController = MapController();
   SoccerField? _selectedField;
-  bool _showList = false;
 
   @override
   void initState() {
@@ -41,9 +122,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   void _selectField(SoccerField field) {
-    setState(() {
-      _selectedField = field;
-    });
+    setState(() => _selectedField = field);
     _mapController.move(LatLng(field.latitude, field.longitude), 16.0);
   }
 
@@ -58,700 +137,844 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _callPhone(String phone) async {
     final url = Uri.parse('tel:$phone');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
+    if (await canLaunchUrl(url)) await launchUrl(url);
   }
 
   Future<void> _openWebsite(String website) async {
-    var url = website;
-    if (!url.startsWith('http')) {
-      url = 'https://$url';
-    }
+    final url = website.startsWith('http') ? website : 'https://$website';
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
+  Color _fieldColor(SoccerField field) {
+    if (field.isFiveSide) return _kAmber;
+    if (field.isIndoor) return _kRose;
+    return _kSage;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color titleColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Terrains à Proximité',
-          style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          // Bouton pour basculer carte/liste
-          IconButton(
-            icon: Icon(
-              _showList ? Icons.map : Icons.list,
-              color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-            ),
-            onPressed: () {
-              setState(() {
-                _showList = !_showList;
-              });
-            },
-            tooltip: _showList ? 'Afficher la carte' : 'Afficher la liste',
-          ),
-          // Bouton filtre
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color: isDarkMode ? myAccentVibrantBlue : MyprimaryDark,
-            ),
-            onPressed: () => _showFilterSheet(context),
-            tooltip: 'Filtres',
-          ),
-        ],
-      ),
+      backgroundColor: _kBg,
       body: Consumer<FieldsProvider>(
         builder: (context, provider, _) {
-          if (provider.isLoading && provider.fields.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Recherche des terrains...'),
-                ],
-              ),
-            );
-          }
-
-          if (provider.error != null && provider.fields.isEmpty) {
-            return _buildErrorView(provider, isDarkMode);
-          }
-
-          if (_showList) {
-            return _buildListView(provider, isDarkMode);
-          }
-
-          return _buildMapView(provider, isDarkMode);
-        },
-      ),
-      floatingActionButton: Consumer<FieldsProvider>(
-        builder: (context, provider, _) {
-          if (_showList || provider.currentPosition == null) {
-            return const SizedBox.shrink();
-          }
-          return FloatingActionButton(
-            onPressed: _centerOnUserLocation,
-            backgroundColor: myAccentVibrantBlue,
-            child: const Icon(Icons.my_location, color: MyprimaryDark),
+          return Column(
+            children: [
+              _buildTopSection(context, provider),
+              Expanded(child: _buildMapArea(context, provider)),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildErrorView(FieldsProvider provider, bool isDarkMode) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.location_off,
-              size: 80,
-              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              provider.error!,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => provider.initialize(),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Réessayer'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: myAccentVibrantBlue,
-                foregroundColor: MyprimaryDark,
-              ),
-            ),
-            if (!provider.hasLocationPermission) ...[
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () async {
-                  // Ouvrir les paramètres de l'app
-                  await launchUrl(
-                    Uri.parse('app-settings:'),
-                    mode: LaunchMode.externalApplication,
-                  );
-                },
-                child: const Text('Ouvrir les paramètres'),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  // ── Top section: app bar + search bar ────────────────────────────────────
 
-  Widget _buildMapView(FieldsProvider provider, bool isDarkMode) {
-    // Position par défaut : Paris
-    final defaultCenter = LatLng(48.8566, 2.3522);
-    final center = provider.currentPosition != null
-        ? LatLng(
-            provider.currentPosition!.latitude,
-            provider.currentPosition!.longitude,
-          )
-        : defaultCenter;
+  Widget _buildTopSection(BuildContext context, FieldsProvider provider) {
+    final top = MediaQuery.of(context).padding.top;
+    final user = context.watch<AuthProvider>().currentUser;
+    final initials =
+        user != null && user.username.isNotEmpty
+            ? user.username.substring(0, 1).toUpperCase()
+            : '?';
 
-    return Stack(
-      children: [
-        // Carte
-        FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: center,
-            initialZoom: 13.0,
-            onTap: (_, __) {
-              setState(() {
-                _selectedField = null;
-              });
-            },
-          ),
-          children: [
-            // Tuiles de la carte (OpenStreetMap)
-            TileLayer(
-              urlTemplate: isDarkMode
-                  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-                  : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: isDarkMode ? ['a', 'b', 'c', 'd'] : [],
-              userAgentPackageName: 'com.fivestar.app',
-            ),
-            // Marqueur de position utilisateur
-            if (provider.currentPosition != null)
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: LatLng(
-                      provider.currentPosition!.latitude,
-                      provider.currentPosition!.longitude,
-                    ),
-                    width: 40,
-                    height: 40,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: myAccentVibrantBlue,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: MyprimaryDark,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            // Marqueurs des terrains
-            MarkerLayer(
-              markers: provider.fields.map((field) {
-                final isSelected = _selectedField?.id == field.id;
-                return Marker(
-                  point: LatLng(field.latitude, field.longitude),
-                  width: isSelected ? 50 : 40,
-                  height: isSelected ? 50 : 40,
-                  child: GestureDetector(
-                    onTap: () => _selectField(field),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? myAccentVibrantBlue
-                            : (field.isFiveSide ? Colors.green : Colors.orange),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: isSelected ? 4 : 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: isSelected ? 10 : 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.sports_soccer,
-                        color: Colors.white,
-                        size: isSelected ? 28 : 22,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-
-        // Indicateur de chargement
-        if (provider.isLoading)
-          const Positioned(
-            top: 16,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Card(
-                child: Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      SizedBox(width: 12),
-                      Text('Recherche...'),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-        // Compteur de terrains
-        Positioned(
-          top: 16,
-          left: 16,
-          child: Card(
-            color: isDarkMode
-                ? MyprimaryDark.withOpacity(0.9)
-                : Colors.white.withOpacity(0.9),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text(
-                '${provider.fields.length} terrain${provider.fields.length > 1 ? 's' : ''}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? myLightBackground : MyprimaryDark,
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        // Carte du terrain sélectionné
-        if (_selectedField != null)
-          Positioned(
-            bottom: 100,
-            left: 16,
-            right: 16,
-            child: _buildFieldCard(_selectedField!, isDarkMode),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildFieldCard(SoccerField field, bool isDarkMode) {
-    return Card(
-      elevation: 8,
-      color: isDarkMode ? MyprimaryDark : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 280),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    return Container(
+      color: _kBg,
+      padding: EdgeInsets.fromLTRB(15, top + 10, 15, 0),
+      child: Column(
+        children: [
+          // App bar row
+          Row(
             children: [
-              // En-tête
+              // Logo
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: field.isFiveSide
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.orange.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.sports_soccer,
-                      color: field.isFiveSide ? Colors.green : Colors.orange,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Stack(
                       children: [
-                        Text(
-                          field.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? myLightBackground
-                                : MyprimaryDark,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        SvgPicture.string(
+                          _mpLogoHexSvg(_mpLogoOrange, '#FF7F2A', 'mpHexO'),
+                          width: 28,
+                          height: 28,
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 14,
-                              color: Colors.grey[500],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              field.formattedDistance,
-                              style: TextStyle(
-                                color: myAccentVibrantBlue,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (field.isIndoor) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'Indoor',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                        SvgPicture.string(
+                          _mpLogoHexSvg(_mpLogoGray, '#e6e6e6', 'mpHexG'),
+                          width: 28,
+                          height: 28,
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      setState(() {
-                        _selectedField = null;
-                      });
-                    },
+                  const SizedBox(width: 9),
+                  RichText(
+                    text: const TextSpan(
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        height: 1,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Ko',
+                          style: TextStyle(color: _kWhite),
+                        ),
+                        TextSpan(
+                          text: 'beta',
+                          style: TextStyle(color: _kAmber),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-
-              // Infos supplémentaires
-              if (field.address != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  field.address!,
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                    fontSize: 13,
+              const Spacer(),
+              // Bell
+              Container(
+                width: 31,
+                height: 31,
+                decoration: BoxDecoration(
+                  color: _kCard,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _kBorder2, width: 1),
+                ),
+                child: const Icon(
+                  Icons.notifications_outlined,
+                  size: 15,
+                  color: _kMuted2,
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Avatar
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [_kAmberSoft, _kAmberDark],
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    initials,
+                    style: GoogleFonts.syne(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: _kBg,
+                    ),
                   ),
                 ),
-              ],
-
-              if (field.formattedSurface != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.grass, size: 16, color: Colors.grey[500]),
-                    const SizedBox(width: 6),
-                    Text(
-                      field.formattedSurface!,
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              if (field.openingHours != null) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey[500]),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        field.openingHours!,
-                        style: TextStyle(
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-
-              // Boutons d'action
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _openInMaps(field),
-                      icon: const Icon(Icons.directions, size: 18),
-                      label: const Text('Itinéraire'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: myAccentVibrantBlue,
-                        foregroundColor: MyprimaryDark,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                  if (field.phone != null) ...[
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () => _callPhone(field.phone!),
-                      icon: const Icon(Icons.phone),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.green.withOpacity(0.2),
-                        foregroundColor: Colors.green,
-                      ),
-                    ),
-                  ],
-                  if (field.website != null) ...[
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () => _openWebsite(field.website!),
-                      icon: const Icon(Icons.language),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.blue.withOpacity(0.2),
-                        foregroundColor: Colors.blue,
-                      ),
-                    ),
-                  ],
-                ],
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 10),
+          // Location / filter bar
+          Container(
+            decoration: BoxDecoration(
+              color: _kCard,
+              border: Border.all(color: _kBorder2, width: 1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.fromLTRB(12, 7, 7, 7),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 14,
+                  color: _kMuted2,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    provider.currentPosition != null
+                        ? 'Position actuelle'
+                        : (provider.isLoading
+                            ? 'Localisation...'
+                            : 'Paris, Île-de-France'),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _showFilterSheet(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _kAmber,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Filtrer',
+                      style: GoogleFonts.syne(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.06,
+                        color: _kBg,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
       ),
     );
   }
 
-  Widget _buildListView(FieldsProvider provider, bool isDarkMode) {
-    if (provider.fields.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.sports_soccer,
-              size: 80,
-              color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Aucun terrain trouvé',
-              style: TextStyle(
-                fontSize: 18,
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Essayez d\'élargir le rayon de recherche',
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
-              ),
-            ),
-          ],
-        ),
-      );
+  // ── Map area ──────────────────────────────────────────────────────────────
+
+  Widget _buildMapArea(BuildContext context, FieldsProvider provider) {
+    if (provider.isLoading && provider.fields.isEmpty) {
+      return _buildLoadingState();
+    }
+    if (provider.error != null && provider.fields.isEmpty) {
+      return _buildErrorView(provider);
     }
 
-    return RefreshIndicator(
-      onRefresh: () => provider.refresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: provider.fields.length + 1,
-        itemBuilder: (context, index) {
-          if (index == provider.fields.length) {
-            return const SizedBox(height: 80); // Espace pour la navbar
-          }
+    final defaultCenter = LatLng(48.8566, 2.3522);
+    final center =
+        provider.currentPosition != null
+            ? LatLng(
+              provider.currentPosition!.latitude,
+              provider.currentPosition!.longitude,
+            )
+            : defaultCenter;
 
-          final field = provider.fields[index];
-          return _buildListItem(field, isDarkMode);
-        },
+    return Container(
+      margin: const EdgeInsets.fromLTRB(15, 0, 15, 10),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
+      child: Stack(
+        children: [
+          // Map
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: 13.0,
+              onTap: (tapPos, _) => setState(() => _selectedField = null),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
+                userAgentPackageName: 'com.fivestar.app',
+              ),
+              // User location dot
+              if (provider.currentPosition != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: LatLng(
+                        provider.currentPosition!.latitude,
+                        provider.currentPosition!.longitude,
+                      ),
+                      width: 16,
+                      height: 16,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF7EB8D4),
+                          shape: BoxShape.circle,
+                          border: Border.fromBorderSide(
+                            BorderSide(color: Colors.white, width: 2.5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x664FD0F0),
+                              blurRadius: 14,
+                              spreadRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              // Field markers
+              MarkerLayer(
+                markers:
+                    provider.fields.map((field) {
+                      final isSelected = _selectedField?.id == field.id;
+                      final color = _fieldColor(field);
+                      return Marker(
+                        point: LatLng(field.latitude, field.longitude),
+                        width: isSelected ? 34 : 28,
+                        height: isSelected ? 43 : 37,
+                        alignment: Alignment.bottomCenter,
+                        child: GestureDetector(
+                          onTap: () => _selectField(field),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: isSelected ? 30 : 26,
+                                height: isSelected ? 30 : 26,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                      blurRadius: isSelected ? 12 : 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    '⚽',
+                                    style: TextStyle(fontSize: 11),
+                                  ),
+                                ),
+                              ),
+                              Container(width: 2, height: 7, color: color),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ],
+          ),
+
+          // Loading chip overlay
+          if (provider.isLoading)
+            const Positioned(
+              top: 12,
+              left: 0,
+              right: 0,
+              child: Center(child: _LoadingChip()),
+            ),
+
+          // Legend (top-right)
+          Positioned(top: 10, right: 10, child: _buildLegend()),
+
+          // Bottom gradient + summary banner
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildBottomBanner(provider),
+          ),
+
+          // Selected field card (above bottom banner)
+          if (_selectedField != null)
+            Positioned(
+              bottom: 82,
+              left: 12,
+              right: 12,
+              child: _buildFieldCard(_selectedField!),
+            ),
+
+          // Location FAB
+          if (provider.currentPosition != null && _selectedField == null)
+            Positioned(
+              right: 12,
+              bottom: 88,
+              child: GestureDetector(
+                onTap: _centerOnUserLocation,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: _kCard,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _kBorder2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x80000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.my_location_outlined,
+                    color: _kAmber,
+                    size: 17,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildListItem(SoccerField field, bool isDarkMode) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _showList = false;
-            _selectedField = field;
-          });
-          _mapController.move(LatLng(field.latitude, field.longitude), 16.0);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+  // ── Legend ────────────────────────────────────────────────────────────────
+
+  Widget _buildLegend() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xE2111318),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _legendItem(_kAmber, 'Disponible'),
+          const SizedBox(height: 4),
+          _legendItem(_kSage, 'Nouveau'),
+          const SizedBox(height: 4),
+          _legendItem(_kRose, 'Complet'),
+        ],
+      ),
+    );
+  }
+
+  Widget _legendItem(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Text(label, style: GoogleFonts.dmSans(fontSize: 9, color: _kMuted2)),
+      ],
+    );
+  }
+
+  // ── Bottom banner ─────────────────────────────────────────────────────────
+
+  Widget _buildBottomBanner(FieldsProvider provider) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [Color(0xF7191C24), Colors.transparent],
+          stops: [0.52, 1.0],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(13, 20, 13, 11),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${provider.fields.length} terrain${provider.fields.length != 1 ? 's' : ''} autour de toi',
+            style: GoogleFonts.syne(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.06,
+              color: _kWhite,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _pill(
+                '⚡ Ce soir',
+                _kAmber,
+                const Color(0x1CFF7F2A),
+                const Color(0x40FF7F2A),
+              ),
+              _pill(
+                'Places dispo',
+                _kSage,
+                const Color(0x1F4CAF82),
+                const Color(0x404CAF82),
+              ),
+              _pill(
+                'Tous niveaux',
+                _kMuted2,
+                const Color(0x0DFFFFFF),
+                _kBorder2,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(
+    String text,
+    Color textColor,
+    Color bgColor,
+    Color borderColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.syne(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.08,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  // ── Selected field card ───────────────────────────────────────────────────
+
+  Widget _buildFieldCard(SoccerField field) {
+    final color = _fieldColor(field);
+    return Container(
+      decoration: BoxDecoration(
+        color: _kCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _kBorder2, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x99000000),
+            blurRadius: 20,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: field.isFiveSide
-                      ? Colors.green.withOpacity(0.2)
-                      : Colors.orange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  Icons.sports_soccer,
-                  color: field.isFiveSide ? Colors.green : Colors.orange,
-                  size: 28,
+                child: const Center(
+                  child: Text('⚽', style: TextStyle(fontSize: 20)),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       field.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? myLightBackground : MyprimaryDark,
+                      style: GoogleFonts.syne(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _kWhite,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Row(
                       children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 12,
+                          color: _kMuted2,
+                        ),
+                        const SizedBox(width: 3),
                         Text(
                           field.formattedDistance,
-                          style: TextStyle(
-                            color: myAccentVibrantBlue,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 11,
                             fontWeight: FontWeight.w600,
+                            color: color,
                           ),
                         ),
                         if (field.isIndoor) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'Indoor',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          const SizedBox(width: 6),
+                          _pill(
+                            'Indoor',
+                            _kRose,
+                            const Color(0x1FD4607A),
+                            const Color(0x40D4607A),
                           ),
                         ],
                         if (field.isFiveSide) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'Foot 5',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          const SizedBox(width: 6),
+                          _pill(
+                            'Foot 5',
+                            _kAmber,
+                            const Color(0x1CFF7F2A),
+                            const Color(0x40FF7F2A),
                           ),
                         ],
                       ],
                     ),
-                    if (field.address != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        field.address!,
-                        style: TextStyle(
-                          color: isDarkMode
-                              ? Colors.grey[400]
-                              : Colors.grey[600],
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: () => _openInMaps(field),
-                icon: const Icon(Icons.directions),
-                style: IconButton.styleFrom(
-                  backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                  foregroundColor: myAccentVibrantBlue,
+              GestureDetector(
+                onTap: () => setState(() => _selectedField = null),
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.close, color: _kMuted2, size: 14),
                 ),
               ),
             ],
           ),
+
+          // Address
+          if (field.address != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              field.address!,
+              style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+
+          // Opening hours
+          if (field.openingHours != null) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time_outlined,
+                  size: 12,
+                  color: _kMuted2,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    field.openingHours!,
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 12),
+
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _openInMaps(field),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [_kAmberSoft, _kAmberDark],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x40FF7F2A),
+                          blurRadius: 16,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.directions_outlined,
+                          size: 14,
+                          color: Color(0xFF0A0C10),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Itinéraire',
+                          style: GoogleFonts.syne(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: _kBg,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (field.phone != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => _callPhone(field.phone!),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0x1F4CAF82),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0x404CAF82)),
+                    ),
+                    child: const Icon(
+                      Icons.phone_outlined,
+                      color: _kSage,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
+              if (field.website != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => _openWebsite(field.website!),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0x1A7EB8D4),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0x407EB8D4)),
+                    ),
+                    child: const Icon(
+                      Icons.language_outlined,
+                      color: Color(0xFF7EB8D4),
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Loading & error states ────────────────────────────────────────────────
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(
+              color: _kAmber,
+              strokeWidth: 2,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Recherche des terrains...',
+            style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorView(FieldsProvider provider) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: const Color(0x1FD4607A),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.location_off_outlined,
+                size: 32,
+                color: _kRose,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              provider.error!,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => provider.initialize(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [_kAmberSoft, _kAmberDark],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Réessayer',
+                  style: GoogleFonts.syne(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _kBg,
+                  ),
+                ),
+              ),
+            ),
+            if (!provider.hasLocationPermission) ...[
+              const SizedBox(height: 14),
+              GestureDetector(
+                onTap:
+                    () => launchUrl(
+                      Uri.parse('app-settings:'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                child: Text(
+                  'Ouvrir les paramètres',
+                  style: GoogleFonts.dmSans(fontSize: 12, color: _kAmber),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 
+  // ── Filter bottom sheet ───────────────────────────────────────────────────
+
   void _showFilterSheet(BuildContext context) {
     final provider = context.read<FieldsProvider>();
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
+      backgroundColor: _kCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -761,103 +984,160 @@ class _MapPageState extends State<MapPage> {
             return SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.only(
-                  left: 20.0,
-                  right: 20.0,
-                  top: 20.0,
-                  bottom: 20.0 + MediaQuery.of(context).viewInsets.bottom,
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 20 + MediaQuery.of(context).viewInsets.bottom,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Handle
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: _kBorder2,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           'Filtres',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? myLightBackground
-                                : MyprimaryDark,
+                          style: GoogleFonts.syne(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: _kWhite,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
+                        GestureDetector(
+                          onTap: () {
                             provider.clearFilters();
                             setModalState(() {});
                           },
-                          child: const Text('Réinitialiser'),
+                          child: Text(
+                            'Réinitialiser',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 12,
+                              color: _kAmber,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 20),
-
-                    // Rayon de recherche
                     Text(
-                      'Rayon de recherche: ${(provider.searchRadiusMeters / 1000).toStringAsFixed(0)} km',
-                      style: TextStyle(
+                      'Rayon : ${(provider.searchRadiusMeters / 1000).toStringAsFixed(0)} km',
+                      style: GoogleFonts.syne(
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isDarkMode ? myLightBackground : MyprimaryDark,
+                        color: _kWhite,
                       ),
                     ),
-                    Slider(
-                      value: provider.searchRadiusMeters.toDouble(),
-                      min: 5000,
-                      max: 60000,
-                      divisions: 11,
-                      activeColor: myAccentVibrantBlue,
-                      label:
-                          '${(provider.searchRadiusMeters / 1000).toStringAsFixed(0)} km',
-                      onChanged: (value) {
-                        provider.setSearchRadius(value.toInt());
-                        setModalState(() {});
-                      },
+                    SliderTheme(
+                      data: SliderThemeData(
+                        activeTrackColor: _kAmber,
+                        inactiveTrackColor: const Color(0xFF2A2D38),
+                        thumbColor: _kAmber,
+                        overlayColor: const Color(0x30FF7F2A),
+                      ),
+                      child: Slider(
+                        value: provider.searchRadiusMeters.toDouble(),
+                        min: 5000,
+                        max: 60000,
+                        divisions: 11,
+                        label:
+                            '${(provider.searchRadiusMeters / 1000).toStringAsFixed(0)} km',
+                        onChanged: (value) {
+                          provider.setSearchRadius(value.toInt());
+                          setModalState(() {});
+                        },
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Filtres
+                    const SizedBox(height: 8),
                     SwitchListTile(
-                      title: const Text('Foot à 5 uniquement'),
-                      subtitle: const Text('Urban Soccer, Le Five, etc.'),
+                      title: Text(
+                        'Foot à 5 uniquement',
+                        style: GoogleFonts.dmSans(
+                          color: _kWhite,
+                          fontSize: 13,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Urban Soccer, Le Five, etc.',
+                        style: GoogleFonts.dmSans(
+                          color: _kMuted2,
+                          fontSize: 11,
+                        ),
+                      ),
                       value: provider.showOnlyFiveSide,
-                      activeColor: myAccentVibrantBlue,
+                      activeThumbColor: _kAmber,
                       contentPadding: EdgeInsets.zero,
-                      onChanged: (value) {
+                      onChanged: (_) {
                         provider.toggleFiveSideFilter();
                         setModalState(() {});
                       },
                     ),
-
                     SwitchListTile(
-                      title: const Text('Indoor uniquement'),
-                      subtitle: const Text('Terrains couverts'),
+                      title: Text(
+                        'Indoor uniquement',
+                        style: GoogleFonts.dmSans(
+                          color: _kWhite,
+                          fontSize: 13,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Terrains couverts',
+                        style: GoogleFonts.dmSans(
+                          color: _kMuted2,
+                          fontSize: 11,
+                        ),
+                      ),
                       value: provider.showOnlyIndoor,
-                      activeColor: myAccentVibrantBlue,
+                      activeThumbColor: _kAmber,
                       contentPadding: EdgeInsets.zero,
-                      onChanged: (value) {
+                      onChanged: (_) {
                         provider.toggleIndoorFilter();
                         setModalState(() {});
                       },
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Bouton appliquer
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: myAccentVibrantBlue,
-                          foregroundColor: MyprimaryDark,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [_kAmberSoft, _kAmberDark],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x50FF7F2A),
+                              blurRadius: 24,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
                         ),
-                        child: const Text('Appliquer'),
+                        child: Text(
+                          'Appliquer',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.syne(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.06,
+                            color: _kBg,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -867,6 +1147,39 @@ class _MapPageState extends State<MapPage> {
           },
         );
       },
+    );
+  }
+}
+
+// ── Loading chip ──────────────────────────────────────────────────────────────
+
+class _LoadingChip extends StatelessWidget {
+  const _LoadingChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xE2111318),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _kBorder2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(color: _kAmber, strokeWidth: 2),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Recherche...',
+            style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+          ),
+        ],
+      ),
     );
   }
 }

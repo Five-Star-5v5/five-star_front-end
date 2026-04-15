@@ -167,6 +167,7 @@ class _FriendsListPageState extends State<FriendsListPage>
       backgroundColor: _fCard,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
+      automaticallyImplyLeading: false,
       flexibleSpace: IgnorePointer(
         child: Container(
           decoration: const BoxDecoration(
