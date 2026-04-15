@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'theme_config/colors_config.dart';
@@ -153,24 +154,16 @@ class _MainScreenState extends State<MainScreen> {
   void goToTab(int index) => _onItemTapped(index);
 
   Widget _buildCustomBottomNavBar() {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? MyprimaryDark.withOpacity(0.9)
-            : MyprimaryDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30.0),
-        boxShadow: [
-          BoxShadow(
-            color: (isDarkMode ? Colors.black : MyprimaryDark).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: Color(0xFF16181E),
+        border: Border(
+          top: BorderSide(color: Color(0x12FFFFFF), width: 1),
+        ),
       ),
-      height: 60,
+      padding: EdgeInsets.fromLTRB(8, 9, 8, 9 + bottomPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -190,31 +183,34 @@ class _MainScreenState extends State<MainScreen> {
     String label,
   ) {
     final bool isSelected = _selectedIndex == index;
-    final Color unselectedColor =
-        Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey[600]!
-        : Colors.grey[400]!;
+    const Color amber = Color(0xFFFF7F2A);
+    const Color muted = Color(0x62F0F2F5);
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isSelected ? filledIcon : outlineIcon,
-            color: isSelected ? myAccentVibrantBlue : unselectedColor,
-            size: 24,
-          ),
-          if (isSelected)
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 64,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? filledIcon : outlineIcon,
+              color: isSelected ? amber : muted,
+              size: 22,
+            ),
+            const SizedBox(height: 3),
             Text(
               label,
-              style: const TextStyle(
-                color: myAccentVibrantBlue,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.syne(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.06 * 9,
+                color: isSelected ? amber : muted,
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -222,8 +218,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }
