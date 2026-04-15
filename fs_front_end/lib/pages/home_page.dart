@@ -2337,12 +2337,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             height: 116,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: allTeams.length + 1,
+              itemCount: allTeams.length + (teamsProvider.teamsMemberOf.isEmpty ? 1 : 0),
               padding: EdgeInsets.zero,
               separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
-                // "Rejoindre une équipe" card
-                if (index == allTeams.length) {
+                // "Rejoindre une équipe" card (only when not already in other teams)
+                if (index == allTeams.length && teamsProvider.teamsMemberOf.isEmpty) {
                   return GestureDetector(
                     onTap: () => Navigator.push(
                       context,
