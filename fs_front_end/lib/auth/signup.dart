@@ -83,7 +83,8 @@ const _kGrayPaths =
     '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
     'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
 
-String _hexSvg(String pathData, String fillColor, String clipId) => '''
+String _hexSvg(String pathData, String fillColor, String clipId) =>
+    '''
 <svg width="36" height="36" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <clipPath id="$clipId">
@@ -204,10 +205,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: const Color(0xFFD4607A),
-      ),
+      SnackBar(content: Text(msg), backgroundColor: const Color(0xFFD4607A)),
     );
   }
 
@@ -274,8 +272,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           isFocused: _passwordFocused,
                           isValid: _passwordValid && !_passwordFocused,
                           isVisible: _passwordVisible,
-                          onToggle: () =>
-                              setState(() => _passwordVisible = !_passwordVisible),
+                          onToggle: () => setState(
+                            () => _passwordVisible = !_passwordVisible,
+                          ),
                         ),
                         _buildPasswordField(
                           label: 'CONFIRMER LE MOT DE PASSE',
@@ -284,12 +283,14 @@ class _SignUpPageState extends State<SignUpPage> {
                           focusNode: _confirmFocus,
                           isFocused: _confirmFocused,
                           isValid: _confirmValid && !_confirmFocused,
-                          isError: _confirmController.text.isNotEmpty &&
+                          isError:
+                              _confirmController.text.isNotEmpty &&
                               !_confirmValid &&
                               !_confirmFocused,
                           isVisible: _confirmVisible,
-                          onToggle: () =>
-                              setState(() => _confirmVisible = !_confirmVisible),
+                          onToggle: () => setState(
+                            () => _confirmVisible = !_confirmVisible,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         _buildTermsRow(),
@@ -391,8 +392,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 height: 1,
               ),
               children: [
-                TextSpan(text: 'Ko', style: TextStyle(color: _kWhite)),
-                TextSpan(text: 'beta', style: TextStyle(color: _kAmber)),
+                TextSpan(
+                  text: 'Ko',
+                  style: TextStyle(color: _kWhite),
+                ),
+                TextSpan(
+                  text: 'beta',
+                  style: TextStyle(color: _kAmber),
+                ),
               ],
             ),
           ),
@@ -434,8 +441,8 @@ class _SignUpPageState extends State<SignUpPage> {
               color: isValid
                   ? _kValidBorder
                   : isFocused
-                      ? _kFocusedBorder
-                      : _kBorder2,
+                  ? _kFocusedBorder
+                  : _kBorder2,
               width: 1.5,
             ),
           ),
@@ -510,10 +517,10 @@ class _SignUpPageState extends State<SignUpPage> {
               color: isError
                   ? _kErrorBorder
                   : isValid
-                      ? _kValidBorder
-                      : isFocused
-                          ? _kFocusedBorder
-                          : _kBorder2,
+                  ? _kValidBorder
+                  : isFocused
+                  ? _kFocusedBorder
+                  : _kBorder2,
               width: 1.5,
             ),
           ),
@@ -521,7 +528,11 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.lock_outline_rounded, size: 16, color: _kMuted),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: _kMuted,
+                ),
               ),
               Expanded(
                 child: TextField(
