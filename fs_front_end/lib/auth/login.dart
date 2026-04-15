@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'signup.dart';
+import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
 import '../main_screen.dart';
 
@@ -249,7 +250,10 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           // Back button
           GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+            onTap: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const WelcomePage()),
+            ),
             child: Container(
               width: 34,
               height: 34,

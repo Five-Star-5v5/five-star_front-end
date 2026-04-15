@@ -2521,7 +2521,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         padding: EdgeInsets.all(2),
                                         child: Icon(
                                           Icons.chat_bubble_outline,
-                                          size: 14,
+                                          size: 18,
                                           color: _kAmber,
                                         ),
                                       ),
@@ -2549,7 +2549,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       padding: EdgeInsets.all(2),
                                       child: Icon(
                                         Icons.edit_outlined,
-                                        size: 13,
+                                        size: 17,
                                         color: _kMuted2,
                                       ),
                                     ),

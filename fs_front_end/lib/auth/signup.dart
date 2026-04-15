@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'login.dart';
+import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -319,7 +320,10 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+            onTap: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const WelcomePage()),
+            ),
             child: Container(
               width: 34,
               height: 34,
