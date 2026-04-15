@@ -14,6 +14,7 @@ import 'team_chat_page.dart';
 import 'match_chat_page.dart';
 import 'discover_teams_page.dart';
 import 'find_opponents_page.dart';
+import '../main_screen.dart';
 
 // ── Design tokens (dark amber system) ──────────────────────────────────────
 const _kBg      = Color(0xFF0A0C10);
@@ -2083,24 +2084,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               final initial = user?.username.isNotEmpty == true
                   ? user!.username[0].toUpperCase()
                   : 'U';
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: CircleAvatar(
-                  radius: 15,
-                  backgroundColor: _kAmber,
-                  backgroundImage: user?.avatarUrl != null
-                      ? NetworkImage(user!.avatarUrl!)
-                      : null,
-                  child: user?.avatarUrl == null
-                      ? Text(
-                          initial,
-                          style: const TextStyle(
-                            color: _kNight,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                          ),
-                        )
-                      : null,
+              return GestureDetector(
+                onTap: () => MainScreen.of(context).goToTab(3),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundColor: _kAmber,
+                    backgroundImage: user?.avatarUrl != null
+                        ? NetworkImage(user!.avatarUrl!)
+                        : null,
+                    child: user?.avatarUrl == null
+                        ? Text(
+                            initial,
+                            style: const TextStyle(
+                              color: _kNight,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                            ),
+                          )
+                        : null,
+                  ),
                 ),
               );
             },
@@ -2567,7 +2571,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       padding: EdgeInsets.all(2),
                                       child: Icon(
                                         Icons.exit_to_app,
-                                        size: 13,
+                                        size: 18,
                                         color: _kRose,
                                       ),
                                     ),

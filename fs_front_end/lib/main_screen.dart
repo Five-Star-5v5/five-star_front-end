@@ -118,6 +118,9 @@ class MainScreen extends StatefulWidget {
 
   @override
   State<MainScreen> createState() => _MainScreenState();
+
+  static _MainScreenState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MainScreenState>()!;
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -146,6 +149,8 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
+
+  void goToTab(int index) => _onItemTapped(index);
 
   Widget _buildCustomBottomNavBar() {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
