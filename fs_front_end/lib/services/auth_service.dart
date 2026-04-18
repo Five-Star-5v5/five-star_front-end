@@ -228,6 +228,32 @@ class AuthService {
     }
   }
 
+  /// Met à jour le statut de disponibilité du joueur
+  Future<bool> setAvailability(
+    bool isAvailable, {
+    List<String>? days,
+    String? endDate,
+    List<String>? cities,
+    int? radiusKm,
+  }) async {
+    final authHeader = await getAuthHeader();
+    if (authHeader == null) return false;
+    final body = <String, dynamic>{'is_available': isAvailable};
+    if (days != null) body['availability_days'] = jsonEncode(days);
+    if (endDate != null) body['availability_end_date'] = endDate;
+    if (cities != null) body['availability_cities'] = jsonEncode(cities);
+    if (radiusKm != null) body['availability_radius_km'] = radiusKm;
+    final resp = await http.patch(
+      Uri.parse('$baseUrl/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader,
+      },
+      body: jsonEncode(body),
+    );
+    return resp.statusCode == 200;
+  }
+
   /// Retourne l'en-tête Authorization si possible (essaie de rafraîchir si nécessaire)
   Future<String?> getAuthHeader() async {
     var access = await getAccessToken();

@@ -17,22 +17,22 @@ import 'find_opponents_page.dart';
 import '../main_screen.dart';
 
 // ── Design tokens (dark amber system) ──────────────────────────────────────
-const _kBg      = Color(0xFF0A0C10);
-const _kNight   = Color(0xFF0B0D11);
-const _kCard    = Color(0xFF181A21);
-const _kCard2   = Color(0xFF1E2029);
-const _kBorder  = Color(0x12FFFFFF);
+const _kBg = Color(0xFF0A0C10);
+const _kNight = Color(0xFF0B0D11);
+const _kCard = Color(0xFF181A21);
+const _kCard2 = Color(0xFF1E2029);
+const _kBorder = Color(0x12FFFFFF);
 const _kBorder2 = Color(0x21FFFFFF);
-const _kAmber     = Color(0xFFFF7F2A);
+const _kAmber = Color(0xFFFF7F2A);
 const _kAmberSoft = Color(0xFFFF9A55);
-const _kAmberD    = Color(0xFFD96820);
-const _kAmberDim  = Color(0x1CFF7F2A);
-const _kSage    = Color(0xFF4CAF82);
+const _kAmberD = Color(0xFFD96820);
+const _kAmberDim = Color(0x1CFF7F2A);
+const _kSage = Color(0xFF4CAF82);
 const _kSageDim = Color(0x1C4CAF82);
-const _kRose    = Color(0xFFD4607A);
+const _kRose = Color(0xFFD4607A);
 const _kRoseDim = Color(0x1CD4607A);
-const _kWhite   = Color(0xFFF0F2F5);
-const _kMuted2  = Color(0x9EF0F2F5);
+const _kWhite = Color(0xFFF0F2F5);
+const _kMuted2 = Color(0x9EF0F2F5);
 
 // ── Kobeta hex logo SVG paths ────────────────────────────────────────────────
 const _kLogoOrange =
@@ -94,12 +94,34 @@ const _kLogoGray =
     '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
     'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
 
-String _logoHexSvg(String d, String fill, String id) => '''
+String _logoHexSvg(String d, String fill, String id) =>
+    '''
 <svg width="28" height="28" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
   <defs><clipPath id="$id"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs>
   <g clip-path="url(#\$$id)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fill" d="$d"/></g></g>
 </svg>
 ''';
+
+Widget _buildAvailChip(IconData icon, String label) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+    decoration: BoxDecoration(
+      color: _kAmberDim,
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 9, color: _kAmber),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: TextStyle(fontSize: 9, color: _kAmber, fontWeight: FontWeight.w600),
+        ),
+      ],
+    ),
+  );
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -246,7 +268,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
       if (result != null && mounted) {
         setState(() => _searchPreference = result);
-        _showSnackBar('Mode recherche désactivé', isSuccess: false);
+        _showSnackBar('Équipe indisponible pour les matchs', isSuccess: false);
       }
     } catch (e) {
       if (mounted) {
@@ -273,9 +295,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 8),
       decoration: BoxDecoration(
-        color: _isLookingForOpponent
-            ? _kAmber.withValues(alpha: 0.08)
-            : _kCard,
+        color: _isLookingForOpponent ? _kAmber.withValues(alpha: 0.08) : _kCard,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isLookingForOpponent
@@ -300,15 +320,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: _isLookingForOpponent
-                    ? _kAmberDim
-                    : _kBorder,
+                color: _isLookingForOpponent ? _kAmberDim : _kBorder,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                _isLookingForOpponent
-                    ? Icons.visibility
-                    : Icons.visibility_off,
+                _isLookingForOpponent ? Icons.visibility : Icons.visibility_off,
                 color: _isLookingForOpponent ? _kAmber : _kMuted2,
                 size: 20,
               ),
@@ -319,7 +335,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mode recherche d\'adversaire',
+                    'Disponible pour un match',
                     style: GoogleFonts.syne(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
@@ -330,12 +346,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(height: 3),
                   Text(
                     _isLookingForOpponent
-                        ? 'Visible par les autres équipes'
-                        : 'Soyez découvert',
-                    style: GoogleFonts.dmSans(
-                      fontSize: 11,
-                      color: _kMuted2,
-                    ),
+                        ? 'Votre équipe est visible par les équipes qui cherchent un adversaire'
+                        : 'Activez pour apparaître dans les recherches',
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
                   ),
                 ],
               ),
@@ -344,7 +357,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: _kAmber),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _kAmber,
+                ),
               )
             else
               Switch.adaptive(
@@ -386,7 +402,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: _kAmberDim,
                     borderRadius: BorderRadius.circular(100),
@@ -532,10 +551,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     Text(
                       isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 10,
-                        color: _kMuted2,
-                      ),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
                     ),
                   ],
                 ),
@@ -569,10 +585,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         const SizedBox(width: 8),
                         Text(
                           _formatMatchDate(match.proposedDate!),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: _kWhite,
-                          ),
+                          style: const TextStyle(fontSize: 12, color: _kWhite),
                         ),
                       ],
                     ),
@@ -768,11 +781,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           onTap: () => _contestMatchScore(match),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 7),
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(9),
                               border: Border.all(
-                                  color: const Color(0xFFD4607A), width: 1.5),
+                                color: const Color(0xFFD4607A),
+                                width: 1.5,
+                              ),
                             ),
                             child: Text(
                               'CONTESTER',
@@ -790,7 +807,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           onTap: () => _validateMatchScore(match),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 7),
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF2A7A4B),
                               borderRadius: BorderRadius.circular(9),
@@ -1071,10 +1090,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: textColor.withValues(alpha: 0.25),
-          width: 1,
-        ),
+        border: Border.all(color: textColor.withValues(alpha: 0.25), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1369,11 +1385,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: _kAmber,
-                        size: 18,
-                      ),
+                      const Icon(Icons.info_outline, color: _kAmber, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -1891,12 +1903,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             context: context,
                             barrierDismissible: false,
                             builder: (BuildContext loadingContext) {
-                              return const Center(child: CircularProgressIndicator());
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
                             },
                           );
 
                           // Quitter l'équipe
-                          final success = await teamsProvider.leaveTeam(team.id);
+                          final success = await teamsProvider.leaveTeam(
+                            team.id,
+                          );
 
                           // Fermer l'indicateur de chargement
                           if (context.mounted) {
@@ -1919,7 +1935,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               // Afficher un message d'erreur
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Erreur lors de la sortie de l\'équipe'),
+                                  content: Text(
+                                    'Erreur lors de la sortie de l\'équipe',
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -1955,7 +1973,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showNotificationsSheet(
-      BuildContext context, TeamsProvider teamsProvider) {
+    BuildContext context,
+    TeamsProvider teamsProvider,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -2019,8 +2039,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   height: 1,
                 ),
                 children: [
-                  TextSpan(text: 'Ko', style: TextStyle(color: _kWhite)),
-                  TextSpan(text: 'beta', style: TextStyle(color: _kAmber)),
+                  TextSpan(
+                    text: 'Ko',
+                    style: TextStyle(color: _kWhite),
+                  ),
+                  TextSpan(
+                    text: 'beta',
+                    style: TextStyle(color: _kAmber),
+                  ),
                 ],
               ),
             ),
@@ -2047,7 +2073,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       size: 17,
                     ),
                   ),
-                  if (teamsProvider.pendingChallengesCount > 0)
+                  if (teamsProvider.totalNotificationsCount > 0)
                     Positioned(
                       top: 0,
                       right: 0,
@@ -2061,9 +2087,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                         child: Center(
                           child: Text(
-                            teamsProvider.pendingChallengesCount > 9
+                            teamsProvider.totalNotificationsCount > 9
                                 ? '9+'
-                                : '${teamsProvider.pendingChallengesCount}',
+                                : '${teamsProvider.totalNotificationsCount}',
                             style: const TextStyle(
                               fontSize: 7,
                               fontWeight: FontWeight.w800,
@@ -2151,123 +2177,126 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               teamsProvider.currentDisplayedTeam != null)
                             _buildSearchModeToggle(isDarkMode),
                           const SizedBox(height: 12),
-                    if (allTeams.isEmpty)
-                      _buildEmptyTeamPlaceholder(isDarkMode)
-                    else
-                      _buildTeamPitch(
-                        context,
-                        team: teamsProvider.currentDisplayedTeam!,
-                        isMyTeam: teamsProvider.isCurrentTeamMine,
-                        isDarkMode: isDarkMode,
-                      ),
-                    const SizedBox(height: 10),
-                    if (allTeams.length > 1)
-                      _buildPageIndicators(
-                        allTeams.length,
-                        currentIndex,
-                        isDarkMode,
-                      ),
-                    const SizedBox(height: 20),
-                    if (teamsProvider.isCurrentTeamMine)
-                      _buildSubstitutesSection(
-                        context,
-                        teamsProvider: teamsProvider,
-                        titleColor: titleColor,
-                        isDarkMode: isDarkMode,
-                      )
-                    else if (teamsProvider.currentDisplayedTeam != null)
-                      _buildOtherTeamSubstitutes(
-                        teamsProvider.currentDisplayedTeam!,
-                        titleColor: titleColor,
-                        isDarkMode: isDarkMode,
-                      ),
-                    const SizedBox(height: 20),
-                    // Indicateur de candidatures en attente
-                    if (teamsProvider.isCurrentTeamMine)
-                      Visibility(
-                        visible: teamsProvider.pendingApplicationsCount > 0,
-                        child: Container(
-                          key: ValueKey(
-                            'pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}',
-                          ),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _kAmberDim,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _kAmber.withValues(alpha: 0.30),
+                          if (allTeams.isEmpty)
+                            _buildEmptyTeamPlaceholder(isDarkMode)
+                          else
+                            _buildTeamPitch(
+                              context,
+                              team: teamsProvider.currentDisplayedTeam!,
+                              isMyTeam: teamsProvider.isCurrentTeamMine,
+                              isDarkMode: isDarkMode,
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.notifications_active,
-                                color: _kAmber,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
-                                  style: const TextStyle(
-                                    color: _kAmber,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
+                          const SizedBox(height: 10),
+                          if (allTeams.length > 1)
+                            _buildPageIndicators(
+                              allTeams.length,
+                              currentIndex,
+                              isDarkMode,
+                            ),
+                          const SizedBox(height: 20),
+                          if (teamsProvider.isCurrentTeamMine)
+                            _buildSubstitutesSection(
+                              context,
+                              teamsProvider: teamsProvider,
+                              titleColor: titleColor,
+                              isDarkMode: isDarkMode,
+                            )
+                          else if (teamsProvider.currentDisplayedTeam != null)
+                            _buildOtherTeamSubstitutes(
+                              teamsProvider.currentDisplayedTeam!,
+                              titleColor: titleColor,
+                              isDarkMode: isDarkMode,
+                            ),
+                          const SizedBox(height: 20),
+                          // Indicateur de candidatures en attente
+                          if (teamsProvider.isCurrentTeamMine)
+                            Visibility(
+                              visible:
+                                  teamsProvider.pendingApplicationsCount > 0,
+                              child: Container(
+                                key: ValueKey(
+                                  'pending_apps_${teamsProvider.pendingApplicationsCount}_${teamsProvider.lastUpdateTimestamp}',
+                                ),
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _kAmberDim,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _kAmber.withValues(alpha: 0.30),
                                   ),
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () => _showAllApplicationsDialog(context),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _kAmber,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Text(
-                                    'VOIR',
-                                    style: TextStyle(
-                                      color: _kNight,
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 10,
-                                      letterSpacing: 0.06 * 10,
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.notifications_active,
+                                      color: _kAmber,
+                                      size: 20,
                                     ),
-                                  ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
+                                        style: const TextStyle(
+                                          color: _kAmber,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _showAllApplicationsDialog(context),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _kAmber,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'VOIR',
+                                          style: TextStyle(
+                                            color: _kNight,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 10,
+                                            letterSpacing: 0.06 * 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    // Section des matchs à venir (visible pour tous les membres)
-                    if (teamsProvider.isPartOfCurrentTeam)
-                      _buildUpcomingMatchesSection(
-                        teamsProvider.currentDisplayedTeam!.id,
-                        isDarkMode,
-                        titleColor,
-                        teamsProvider.isCurrentTeamMine,
-                      ),
-                    const SizedBox(height: 20),
-                  ],
-                ),            // inner Column
-              ),              // Padding
-            ),                // SingleChildScrollView
-          ),                  // RefreshIndicator
-        ),                    // Expanded
-      ],
-    );                        // outer Column (return)
-  },
-),
-);
+                            ),
+                          // Section des matchs à venir (visible pour tous les membres)
+                          if (teamsProvider.isPartOfCurrentTeam)
+                            _buildUpcomingMatchesSection(
+                              teamsProvider.currentDisplayedTeam!.id,
+                              isDarkMode,
+                              titleColor,
+                              teamsProvider.isCurrentTeamMine,
+                            ),
+                          const SizedBox(height: 20),
+                        ],
+                      ), // inner Column
+                    ), // Padding
+                  ), // SingleChildScrollView
+                ), // RefreshIndicator
+              ), // Expanded
+            ],
+          ); // outer Column (return)
+        },
+      ),
+    );
   }
-
 
   Widget _buildTeamHeader({
     required BuildContext context,
@@ -2301,295 +2330,306 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ),
         Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ── Horizontal team cards scroll ───────────────────────────
-        if (allTeams.isEmpty)
-          Container(
-            width: double.infinity,
-            height: 116,
-            decoration: BoxDecoration(
-              color: _kCard,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _kBorder),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.group_add_outlined, color: _kMuted2, size: 28),
-                  const SizedBox(height: 8),
-                  Text(
-                    'PAS D\'ÉQUIPE',
-                    style: GoogleFonts.syne(
-                      color: _kMuted2,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.06 * 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          SizedBox(
-            height: 116,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: allTeams.length + (teamsProvider.teamsMemberOf.isEmpty ? 1 : 0),
-              padding: EdgeInsets.zero,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                // "Rejoindre une équipe" card (only when not already in other teams)
-                if (index == allTeams.length && teamsProvider.teamsMemberOf.isEmpty) {
-                  return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const DiscoverTeamsPage(),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Horizontal team cards scroll ───────────────────────────
+            if (allTeams.isEmpty)
+              Container(
+                width: double.infinity,
+                height: 116,
+                decoration: BoxDecoration(
+                  color: _kCard,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: _kBorder),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.group_add_outlined,
+                        color: _kMuted2,
+                        size: 28,
                       ),
-                    ),
-                    child: Container(
-                      width: 116,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: _kCard,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: _kAmber.withValues(alpha: 0.20),
-                          width: 1,
+                      const SizedBox(height: 8),
+                      Text(
+                        'PAS D\'ÉQUIPE',
+                        style: GoogleFonts.syne(
+                          color: _kMuted2,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.06 * 11,
                         ),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: _kAmberDim,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              size: 18,
-                              color: _kAmber,
+                    ],
+                  ),
+                ),
+              )
+            else
+              SizedBox(
+                height: 116,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: allTeams.length + 1,
+                  padding: EdgeInsets.zero,
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    // "Rejoindre une équipe" card
+                    if (index == allTeams.length) {
+                      return GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DiscoverTeamsPage(),
+                          ),
+                        ),
+                        child: Container(
+                          width: 116,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _kCard,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: _kAmber.withValues(alpha: 0.20),
+                              width: 1,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'REJOINDRE',
-                            style: GoogleFonts.syne(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w700,
-                              color: _kAmber,
-                              letterSpacing: 0.06 * 8,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'une équipe',
-                            style: GoogleFonts.dmSans(
-                              fontSize: 9,
-                              color: _kMuted2,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                final team = allTeams[index];
-                final isActive = index == currentIndex;
-                final isOwner = team.id == teamsProvider.myTeam?.id;
-                return GestureDetector(
-                  onTap: () => teamsProvider.setCurrentTeamIndex(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 152,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: isActive
-                          ? LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                _kAmber.withValues(alpha: 0.12),
-                                _kAmberD.withValues(alpha: 0.06),
-                              ],
-                            )
-                          : null,
-                      color: isActive ? null : _kCard,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isActive
-                            ? _kAmber.withValues(alpha: 0.35)
-                            : _kBorder,
-                        width: isActive ? 1.5 : 1,
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        if (isActive)
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              width: 7,
-                              height: 7,
-                              decoration: const BoxDecoration(
-                                color: _kAmber,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Role badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isOwner
-                                    ? _kAmberDim
-                                    : Colors.white.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(100),
-                                border: Border.all(
-                                  color: isOwner
-                                      ? _kAmber.withValues(alpha: 0.25)
-                                      : _kBorder2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: _kAmberDim,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 18,
+                                  color: _kAmber,
                                 ),
                               ),
-                              child: Text(
-                                isOwner ? 'MON ÉQUIPE' : 'MEMBRE',
+                              const SizedBox(height: 6),
+                              Text(
+                                'REJOINDRE',
                                 style: GoogleFonts.syne(
                                   fontSize: 8,
                                   fontWeight: FontWeight.w700,
-                                  color: isOwner ? _kAmber : _kMuted2,
+                                  color: _kAmber,
                                   letterSpacing: 0.06 * 8,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            // Team name
-                            Text(
-                              team.name.toUpperCase(),
-                              style: GoogleFonts.syne(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: _kWhite,
-                                letterSpacing: 0.04 * 12,
+                              const SizedBox(height: 2),
+                              Text(
+                                'une équipe',
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 9,
+                                  color: _kMuted2,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            // Meta
-                            Text(
-                              '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 10,
-                                color: _kMuted2,
-                              ),
-                            ),
-                            const Spacer(),
-                            // Avatars + action buttons row
-                            Row(
-                              children: [
-                                _buildStackedAvatars(team),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => TeamChatPage(
-                                          teamId: team.id,
-                                          teamName: team.name,
-                                          teamLogoUrl: team.logoUrl,
-                                          ownerId: team.ownerId,
-                                        ),
-                                      ),
-                                    );
-                                    if (context.mounted) {
-                                      context.read<TeamsProvider>().loadMyTeamChats();
-                                    }
-                                  },
-                                  child: Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      const Padding(
-                                        padding: EdgeInsets.all(2),
-                                        child: Icon(
-                                          Icons.chat_bubble_outline,
-                                          size: 18,
-                                          color: _kAmber,
-                                        ),
-                                      ),
-                                      if (teamsProvider.getUnreadCountForTeam(team.id) > 0)
-                                        Positioned(
-                                          right: -1,
-                                          top: -1,
-                                          child: Container(
-                                            width: 6,
-                                            height: 6,
-                                            decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    final team = allTeams[index];
+                    final isActive = index == currentIndex;
+                    final isOwner = team.id == teamsProvider.myTeam?.id;
+                    return GestureDetector(
+                      onTap: () => teamsProvider.setCurrentTeamIndex(index),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 152,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: isActive
+                              ? LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    _kAmber.withValues(alpha: 0.12),
+                                    _kAmberD.withValues(alpha: 0.06),
+                                  ],
+                                )
+                              : null,
+                          color: isActive ? null : _kCard,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isActive
+                                ? _kAmber.withValues(alpha: 0.35)
+                                : _kBorder,
+                            width: isActive ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            if (isActive)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: const BoxDecoration(
+                                    color: _kAmber,
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                                if (isOwner) ...[
-                                  const SizedBox(width: 6),
-                                  GestureDetector(
-                                    onTap: () => _showEditTeamNameDialog(context),
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(2),
-                                      child: Icon(
-                                        Icons.edit_outlined,
-                                        size: 17,
-                                        color: _kMuted2,
-                                      ),
+                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Role badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isOwner
+                                        ? _kAmberDim
+                                        : Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(100),
+                                    border: Border.all(
+                                      color: isOwner
+                                          ? _kAmber.withValues(alpha: 0.25)
+                                          : _kBorder2,
                                     ),
                                   ),
-                                ],
-                                if (!isOwner) ...[
-                                  const SizedBox(width: 6),
-                                  GestureDetector(
-                                    onTap: () => _showLeaveTeamDialog(
-                                      context,
-                                      team,
-                                      teamsProvider,
-                                    ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(2),
-                                      child: Icon(
-                                        Icons.exit_to_app,
-                                        size: 18,
-                                        color: _kRose,
-                                      ),
+                                  child: Text(
+                                    isOwner ? 'MON ÉQUIPE' : 'MEMBRE',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w700,
+                                      color: isOwner ? _kAmber : _kMuted2,
+                                      letterSpacing: 0.06 * 8,
                                     ),
                                   ),
-                                ],
+                                ),
+                                const SizedBox(height: 6),
+                                // Team name
+                                Text(
+                                  team.name.toUpperCase(),
+                                  style: GoogleFonts.syne(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: _kWhite,
+                                    letterSpacing: 0.04 * 12,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                // Meta
+                                Text(
+                                  '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 10,
+                                    color: _kMuted2,
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Avatars + action buttons row
+                                Row(
+                                  children: [
+                                    _buildStackedAvatars(team),
+                                    const Spacer(),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => TeamChatPage(
+                                              teamId: team.id,
+                                              teamName: team.name,
+                                              teamLogoUrl: team.logoUrl,
+                                              ownerId: team.ownerId,
+                                            ),
+                                          ),
+                                        );
+                                        if (context.mounted) {
+                                          context
+                                              .read<TeamsProvider>()
+                                              .loadMyTeamChats();
+                                        }
+                                      },
+                                      child: Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.all(2),
+                                            child: Icon(
+                                              Icons.chat_bubble_outline,
+                                              size: 18,
+                                              color: _kAmber,
+                                            ),
+                                          ),
+                                          if (teamsProvider
+                                                  .getUnreadCountForTeam(
+                                                    team.id,
+                                                  ) >
+                                              0)
+                                            Positioned(
+                                              right: -1,
+                                              top: -1,
+                                              child: Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.red,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (isOwner) ...[
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: () =>
+                                            _showEditTeamNameDialog(context),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(2),
+                                          child: Icon(
+                                            Icons.edit_outlined,
+                                            size: 17,
+                                            color: _kMuted2,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    if (!isOwner) ...[
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: () => _showLeaveTeamDialog(
+                                          context,
+                                          team,
+                                          teamsProvider,
+                                        ),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(2),
+                                          child: Icon(
+                                            Icons.exit_to_app,
+                                            size: 18,
+                                            color: _kRose,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-      ],
-    ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -2685,11 +2725,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.groups_outlined,
-              size: 44,
-              color: _kMuted2,
-            ),
+            Icon(Icons.groups_outlined, size: 44, color: _kMuted2),
             const SizedBox(height: 12),
             const Text(
               'AUCUNE ÉQUIPE',
@@ -2739,75 +2775,75 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final double width = constraints.maxWidth;
-              final double height = constraints.maxHeight;
-              final double avatarRadius = (width / 13).clamp(18.0, 32.0);
-              final double avatarDiameter = avatarRadius * 2;
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double width = constraints.maxWidth;
+            final double height = constraints.maxHeight;
+            final double avatarRadius = (width / 13).clamp(18.0, 32.0);
+            final double avatarDiameter = avatarRadius * 2;
 
-              // Placement horizontal : gardien à gauche, défenseurs au centre, attaquants à droite
-              final List<List<int>> columns = [
-                [0], // Gardien (à gauche)
-                [1, 2], // Défenseurs (au centre)
-                [3, 4], // Attaquants (à droite)
-              ];
+            // Placement horizontal : gardien à gauche, défenseurs au centre, attaquants à droite
+            final List<List<int>> columns = [
+              [0], // Gardien (à gauche)
+              [1, 2], // Défenseurs (au centre)
+              [3, 4], // Attaquants (à droite)
+            ];
 
-              TeamMember? getMember(int slotIndex) {
-                final matches = starters.where((m) => m.slotIndex == slotIndex);
-                return matches.isEmpty ? null : matches.first;
-              }
+            TeamMember? getMember(int slotIndex) {
+              final matches = starters.where((m) => m.slotIndex == slotIndex);
+              return matches.isEmpty ? null : matches.first;
+            }
 
-              final double horizontalSpacing =
-                  (width - avatarDiameter * columns.length) /
-                  (columns.length + 1);
-              List<Widget> playerWidgets = [];
-              for (int i = 0; i < columns.length; i++) {
-                final column = columns[i];
-                final x =
-                    horizontalSpacing * (i + 1) +
+            final double horizontalSpacing =
+                (width - avatarDiameter * columns.length) /
+                (columns.length + 1);
+            List<Widget> playerWidgets = [];
+            for (int i = 0; i < columns.length; i++) {
+              final column = columns[i];
+              final x =
+                  horizontalSpacing * (i + 1) +
+                  avatarRadius +
+                  avatarDiameter * i;
+              final count = column.length;
+              final verticalSpacing =
+                  (height - (count * avatarDiameter)) / (count + 1);
+              for (int j = 0; j < count; j++) {
+                final y =
+                    verticalSpacing * (j + 1) +
                     avatarRadius +
-                    avatarDiameter * i;
-                final count = column.length;
-                final verticalSpacing =
-                    (height - (count * avatarDiameter)) / (count + 1);
-                for (int j = 0; j < count; j++) {
-                  final y =
-                      verticalSpacing * (j + 1) +
-                      avatarRadius +
-                      avatarDiameter * j;
-                  final slotIndex = column[j];
-                  final member = getMember(slotIndex);
-                  playerWidgets.add(
-                    Positioned(
-                      left: x - avatarRadius,
-                      top: y - avatarRadius,
-                      child: _buildPlayerSlot(
-                        context,
-                        slotIndex: slotIndex,
-                        position: PlayerPosition.values[slotIndex],
-                        member: member,
-                        isDarkMode: isDarkMode,
-                        isEditable: isMyTeam,
-                      ),
+                    avatarDiameter * j;
+                final slotIndex = column[j];
+                final member = getMember(slotIndex);
+                playerWidgets.add(
+                  Positioned(
+                    left: x - avatarRadius,
+                    top: y - avatarRadius,
+                    child: _buildPlayerSlot(
+                      context,
+                      slotIndex: slotIndex,
+                      position: PlayerPosition.values[slotIndex],
+                      member: member,
+                      isDarkMode: isDarkMode,
+                      isEditable: isMyTeam,
                     ),
-                  );
-                }
-              }
-
-              return Stack(
-                children: [
-                  // Terrain
-                  CustomPaint(
-                    size: Size(width, height),
-                    painter: _ModernPitchPainter(Colors.white.withOpacity(0.5)),
                   ),
-                  ...playerWidgets,
-                ],
-              );
-            },
-          ),
+                );
+              }
+            }
+
+            return Stack(
+              children: [
+                // Terrain
+                CustomPaint(
+                  size: Size(width, height),
+                  painter: _ModernPitchPainter(Colors.white.withOpacity(0.5)),
+                ),
+                ...playerWidgets,
+              ],
+            );
+          },
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildSubstitutesSection(
@@ -3053,7 +3089,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Text(
-                'Recherche',
+                'Candidatures',
                 style: TextStyle(
                   color: _kAmber,
                   fontSize: 10,
@@ -3252,7 +3288,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 _showChangePositionDialog(context, member);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: _kCard2,
                   borderRadius: BorderRadius.circular(12),
@@ -3315,7 +3354,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               children: [
                                 Expanded(
                                   child: GestureDetector(
-                                    onTap: () => Navigator.pop(dialogCtx, false),
+                                    onTap: () =>
+                                        Navigator.pop(dialogCtx, false),
                                     child: Container(
                                       height: 44,
                                       decoration: BoxDecoration(
@@ -3371,7 +3411,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: _kRoseDim,
                     borderRadius: BorderRadius.circular(12),
@@ -3476,13 +3519,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               // Option pour s'ajouter soi-même
               if (canAddSelf)
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: _kAmberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _kAmber.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: _kAmber.withOpacity(0.3)),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -3508,10 +3552,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       '@${currentUser.username}',
                       style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
                     ),
-                    trailing: const Icon(
-                      Icons.person_add,
-                      color: _kAmber,
-                    ),
+                    trailing: const Icon(Icons.person_add, color: _kAmber),
                     onTap: () async {
                       Navigator.pop(ctx);
                       await teamsProvider.addMemberToMyTeam(
@@ -3536,25 +3577,67 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Icon(Icons.person_search, color: _kAmber),
                   ),
                   title: Text(
-                    'Mettre en mode recherche',
+                    'Ouvrir aux candidatures',
                     style: GoogleFonts.syne(
                       fontWeight: FontWeight.w600,
                       color: _kWhite,
                     ),
                   ),
                   subtitle: Text(
-                    'Les joueurs de l\'app pourront postuler',
+                    'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
                     style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: _kMuted2),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: _kMuted2,
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     _showOpenSlotDialog(context, slotIndex, position);
                   },
                 ),
               ),
+              // Recruter sur le store
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _kCard,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _kBorder2),
+                ),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF1A1D26),
+                    child: Icon(Icons.storefront_outlined, color: _kMuted2),
+                  ),
+                  title: Text(
+                    'Recruter sur le store',
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w600,
+                      color: _kWhite,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Parcourir les joueurs disponibles et les inviter',
+                    style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: _kMuted2,
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showAvailablePlayersSheet(context, slotIndex, position);
+                  },
+                ),
+              ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(child: Divider(color: _kBorder2)),
@@ -3562,7 +3645,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'ou choisir un ami',
-                        style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                        style: GoogleFonts.dmSans(
+                          color: _kMuted2,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                     Expanded(child: Divider(color: _kBorder2)),
@@ -3593,9 +3679,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           child: friend.user.avatarUrl == null
                               ? Text(
                                   friend.user.username[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: _kAmber,
-                                  ),
+                                  style: const TextStyle(color: _kAmber),
                                 )
                               : null,
                         ),
@@ -3607,7 +3691,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                         ),
                         subtitle: Text(
-                          friend.user.preferredPosition ?? 'Position non définie',
+                          friend.user.preferredPosition ??
+                              'Position non définie',
                           style: GoogleFonts.dmSans(
                             color: _kMuted2,
                             fontSize: 12,
@@ -3665,7 +3750,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Rechercher un ${position.displayName}',
+                      'Ouvrir le poste de ${position.displayName}',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
@@ -3741,7 +3826,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             .openSlotForSearch(
                               position: position,
                               slotIndex: slotIndex,
-                              description: descriptionController.text.trim().isNotEmpty
+                              description:
+                                  descriptionController.text.trim().isNotEmpty
                                   ? descriptionController.text.trim()
                                   : null,
                             );
@@ -3750,10 +3836,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             SnackBar(
                               content: Text(
                                 success
-                                    ? 'Poste ouvert à la recherche !'
+                                    ? 'Poste ouvert aux candidatures !'
                                     : 'Erreur lors de l\'ouverture du poste',
                               ),
-                              backgroundColor: success ? Colors.green : Colors.red,
+                              backgroundColor: success
+                                  ? Colors.green
+                                  : Colors.red,
                             ),
                           );
                         }
@@ -3770,10 +3858,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.person_search, color: Colors.white, size: 16),
+                            const Icon(
+                              Icons.person_search,
+                              color: Colors.white,
+                              size: 16,
+                            ),
                             const SizedBox(width: 6),
                             Text(
-                              'Ouvrir',
+                              'Ouvrir le poste',
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -3832,7 +3924,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 10),
             Text(
-              'Poste ${position.displayName} en recherche',
+              'Poste ${position.displayName} — candidatures ouvertes',
               style: GoogleFonts.syne(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -3871,7 +3963,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   _showApplicationsDialog(context, openSlot);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: _kCard2,
                     borderRadius: BorderRadius.circular(12),
@@ -3928,7 +4023,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Fermer la recherche ?',
+                            'Clôturer les candidatures ?',
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
@@ -4003,7 +4098,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 }
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: _kRoseDim,
                   borderRadius: BorderRadius.circular(12),
@@ -4017,7 +4115,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Fermer la recherche',
+                          'Clôturer les candidatures',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
                             color: _kRose,
@@ -4025,7 +4123,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                         ),
                         Text(
-                          'Annuler la recherche pour ce poste',
+                          'Mettre fin aux candidatures pour ce poste',
                           style: GoogleFonts.dmSans(
                             color: _kMuted2,
                             fontSize: 12,
@@ -4038,6 +4136,293 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showAvailablePlayersSheet(
+    BuildContext context,
+    int slotIndex,
+    PlayerPosition position,
+  ) {
+    final teamsProvider = context.read<TeamsProvider>();
+    final teamId = teamsProvider.currentDisplayedTeam?.id;
+    if (teamId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (_, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _kCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _kBorder2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.storefront_outlined, color: _kAmber, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Joueurs disponibles',
+                      style: GoogleFonts.syne(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: _kWhite,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: _kAmberDim,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        position.displayName,
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kAmber,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: _kBorder2, height: 1),
+              Expanded(
+                child: FutureBuilder<List<AvailablePlayer>>(
+                  future: TeamsService.instance.getAvailablePlayers(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: _kAmber),
+                      );
+                    }
+                    final players = snapshot.data ?? [];
+                    if (players.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.person_off_outlined, color: _kMuted2, size: 40),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Aucun joueur disponible',
+                              style: GoogleFonts.syne(color: _kMuted2, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
+                              style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    // Tri : position correspondante en premier
+                    final sorted = [...players]..sort((a, b) {
+                      final aMatch = a.preferredPosition == position.value ? 0 : 1;
+                      final bMatch = b.preferredPosition == position.value ? 0 : 1;
+                      return aMatch.compareTo(bMatch);
+                    });
+                    return ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: sorted.length,
+                      itemBuilder: (_, i) {
+                        final player = sorted[i];
+                        final posMatch = player.preferredPosition == position.value;
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: posMatch
+                                ? const Color(0xFF1A1D26)
+                                : const Color(0xFF13151C),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: posMatch ? _kAmber.withValues(alpha: 0.25) : _kBorder2,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 22,
+                                backgroundColor: _kAmberDim,
+                                backgroundImage: player.avatarUrl != null
+                                    ? NetworkImage(player.avatarUrl!)
+                                    : null,
+                                child: player.avatarUrl == null
+                                    ? Text(
+                                        player.username[0].toUpperCase(),
+                                        style: GoogleFonts.syne(
+                                          color: _kAmber,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          player.username,
+                                          style: GoogleFonts.syne(
+                                            fontWeight: FontWeight.w700,
+                                            color: _kWhite,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        if (posMatch) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: _kAmberDim,
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              'Poste correspondant',
+                                              style: GoogleFonts.syne(
+                                                fontSize: 9,
+                                                color: _kAmber,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      player.preferredPosition ?? 'Aucune position',
+                                      style: GoogleFonts.dmSans(
+                                        color: _kMuted2,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    if (player.availabilityCities != null ||
+                                        player.availabilityDays != null ||
+                                        player.availabilityRadiusKm != null) ...[
+                                      const SizedBox(height: 5),
+                                      Wrap(
+                                        spacing: 4,
+                                        runSpacing: 4,
+                                        children: [
+                                          if (player.availabilityCities != null &&
+                                              player.availabilityCities!.isNotEmpty)
+                                            _buildAvailChip(
+                                              Icons.location_on_outlined,
+                                              player.availabilityCities!.take(2).join(', '),
+                                            ),
+                                          if (player.availabilityRadiusKm != null)
+                                            _buildAvailChip(
+                                              Icons.radar,
+                                              '${player.availabilityRadiusKm} km',
+                                            ),
+                                          if (player.availabilityDays != null &&
+                                              player.availabilityDays!.isNotEmpty)
+                                            _buildAvailChip(
+                                              Icons.calendar_today_outlined,
+                                              player.availabilityDays!.length == 1
+                                                  ? player.availabilityDays!.first
+                                                  : '${player.availabilityDays!.first} → ${player.availabilityDays!.last}',
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (player.rating != null)
+                                    Text(
+                                      '★ ${player.rating!.toStringAsFixed(1)}',
+                                      style: GoogleFonts.syne(
+                                        color: _kAmber,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  const SizedBox(height: 6),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      Navigator.pop(ctx);
+                                      final success = await TeamsService.instance.sendInvitation(
+                                        teamId: teamId,
+                                        invitedUserId: player.id,
+                                        position: position.name,
+                                        slotIndex: slotIndex,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              success
+                                                  ? 'Invitation envoyée à ${player.username}'
+                                                  : 'Erreur lors de l\'envoi',
+                                            ),
+                                            backgroundColor:
+                                                success ? _kAmber : _kRose,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: _kAmber,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        'Inviter',
+                                        style: GoogleFonts.syne(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -4236,7 +4621,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.close, color: _kRose, size: 14),
+                                        const Icon(
+                                          Icons.close,
+                                          color: _kRose,
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
@@ -4285,7 +4674,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.check, color: _kSage, size: 14),
+                                        const Icon(
+                                          Icons.check,
+                                          color: _kSage,
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
@@ -4535,7 +4928,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.close, color: _kRose, size: 14),
+                                        const Icon(
+                                          Icons.close,
+                                          color: _kRose,
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
@@ -4584,7 +4981,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.check, color: _kSage, size: 14),
+                                        const Icon(
+                                          Icons.check,
+                                          color: _kSage,
+                                          size: 14,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
@@ -4794,7 +5195,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       onTap: () async {
                         Navigator.pop(dialogCtx);
                         if (controller.text.trim().isNotEmpty) {
-                          final currentMembers = teamsProvider.myTeam?.members ?? [];
+                          final currentMembers =
+                              teamsProvider.myTeam?.members ?? [];
                           await teamsProvider.saveMyTeamComposition(
                             name: controller.text.trim(),
                             members: currentMembers
@@ -5139,7 +5541,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         checkmarkColor: _kAmber,
                         backgroundColor: _kCard2,
                         side: BorderSide(
-                          color: isSelected ? _kAmber.withOpacity(0.5) : _kBorder2,
+                          color: isSelected
+                              ? _kAmber.withOpacity(0.5)
+                              : _kBorder2,
                         ),
                       );
                     }).toList(),
@@ -5196,17 +5600,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         : _kMuted2,
                                   ),
                                 ),
-                                const Icon(Icons.access_time, size: 20, color: _kMuted2),
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 20,
+                                  color: _kMuted2,
+                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Icon(
-                        Icons.arrow_forward,
-                        color: _kAmber,
-                      ),
+                      const Icon(Icons.arrow_forward, color: _kAmber),
                       const SizedBox(width: 16),
                       // Heure de fin
                       Expanded(
@@ -5240,12 +5645,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       ? '${endTime!.hour.toString().padLeft(2, '0')}h${endTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Fin',
                                   style: TextStyle(
-                                    color: endTime != null
-                                        ? _kWhite
-                                        : _kMuted2,
+                                    color: endTime != null ? _kWhite : _kMuted2,
                                   ),
                                 ),
-                                const Icon(Icons.access_time, size: 20, color: _kMuted2),
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 20,
+                                  color: _kMuted2,
+                                ),
                               ],
                             ),
                           ),
@@ -5289,7 +5696,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         checkmarkColor: _kAmber,
                         backgroundColor: _kCard2,
                         side: BorderSide(
-                          color: isSelected ? _kAmber.withOpacity(0.5) : _kBorder2,
+                          color: isSelected
+                              ? _kAmber.withOpacity(0.5)
+                              : _kBorder2,
                         ),
                       );
                     }).toList(),
@@ -5317,9 +5726,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         return Chip(
                           label: Text(
                             city,
-                            style: GoogleFonts.dmSans(color: _kWhite, fontSize: 12),
+                            style: GoogleFonts.dmSans(
+                              color: _kWhite,
+                              fontSize: 12,
+                            ),
                           ),
-                          deleteIcon: const Icon(Icons.close, size: 18, color: _kMuted2),
+                          deleteIcon: const Icon(
+                            Icons.close,
+                            size: 18,
+                            color: _kMuted2,
+                          ),
                           onDeleted: () {
                             setState(() {
                               selectedCities.remove(city);
@@ -5432,7 +5848,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             if (selectedDays.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Veuillez sélectionner au moins un jour'),
+                                  content: Text(
+                                    'Veuillez sélectionner au moins un jour',
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -5441,15 +5859,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             if (startTime == null || endTime == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Veuillez sélectionner une plage horaire'),
+                                  content: Text(
+                                    'Veuillez sélectionner une plage horaire',
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
                               return;
                             }
                             // Vérifier que l'heure de fin est après l'heure de début
-                            final startMinutes = startTime!.hour * 60 + startTime!.minute;
-                            final endMinutes = endTime!.hour * 60 + endTime!.minute;
+                            final startMinutes =
+                                startTime!.hour * 60 + startTime!.minute;
+                            final endMinutes =
+                                endTime!.hour * 60 + endTime!.minute;
                             if (endMinutes <= startMinutes) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -5475,7 +5897,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             if (selectedCities.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Veuillez ajouter au moins une ville'),
+                                  content: Text(
+                                    'Veuillez ajouter au moins une ville',
+                                  ),
                                   backgroundColor: Colors.red,
                                 ),
                               );
@@ -5545,7 +5969,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
         if (searchPref != null && mounted) {
           setState(() => _searchPreference = searchPref);
-          _showSnackBar('🔍 Mode recherche activé', isSuccess: true);
+          _showSnackBar('✅ Équipe disponible pour un match', isSuccess: true);
         } else if (mounted) {
           setState(() => _isLookingForOpponent = false);
           _showSnackBar('Erreur lors de l\'activation', isSuccess: false);
@@ -5671,6 +6095,8 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
   Widget build(BuildContext context) {
     final teamsProvider = context.watch<TeamsProvider>();
     final challenges = teamsProvider.pendingChallenges;
+    final invitations = teamsProvider.pendingInvitations;
+    final totalCount = challenges.length + invitations.length;
 
     return Container(
       decoration: const BoxDecoration(
@@ -5678,7 +6104,11 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.fromLTRB(
-          16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 28),
+        16,
+        16,
+        16,
+        MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -5704,18 +6134,19 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 ),
               ),
               const Spacer(),
-              if (challenges.isNotEmpty)
+              if (totalCount > 0)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: _kAmberDim,
                     borderRadius: BorderRadius.circular(100),
-                    border:
-                        Border.all(color: Color(0x40FF7F2A), width: 1),
+                    border: Border.all(color: Color(0x40FF7F2A), width: 1),
                   ),
                   child: Text(
-                    '${challenges.length}',
+                    '$totalCount',
                     style: const TextStyle(
                       color: _kAmber,
                       fontWeight: FontWeight.w700,
@@ -5726,27 +6157,239 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             ],
           ),
           const SizedBox(height: 12),
-          // List or empty state
-          if (challenges.isEmpty)
+          if (totalCount == 0)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
-                'Aucune demande de match en attente',
+                'Aucune notification en attente',
                 style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
               ),
             )
           else
             ConstrainedBox(
               constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.5),
-              child: ListView.separated(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: ListView(
                 shrinkWrap: true,
-                itemCount: challenges.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (_, i) =>
-                    _buildChallengeItem(context, challenges[i], teamsProvider),
+                children: [
+                  if (invitations.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'INVITATIONS D\'ÉQUIPE',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...invitations.map((inv) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _buildInvitationItem(context, inv, teamsProvider),
+                    )),
+                  ],
+                  if (challenges.isNotEmpty) ...[
+                    if (invitations.isNotEmpty) const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'DÉFIS DE MATCH',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...challenges.asMap().entries.map((e) => Padding(
+                      padding: EdgeInsets.only(bottom: e.key < challenges.length - 1 ? 10 : 0),
+                      child: _buildChallengeItem(context, e.value, teamsProvider),
+                    )),
+                  ],
+                ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvitationItem(
+    BuildContext context,
+    TeamInvitation invitation,
+    TeamsProvider teamsProvider,
+  ) {
+    final isLoading = _loadingIds.contains(-invitation.id);
+    final positionLabels = {
+      'goalkeeper': 'Gardien',
+      'defender': 'Défenseur',
+      'midfielder': 'Milieu',
+      'forward': 'Attaquant',
+      'substitute': 'Remplaçant',
+    };
+    final posLabel = positionLabels[invitation.position] ?? invitation.position;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0x1A3B82F6),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x333B82F6), width: 1),
+                ),
+                child: invitation.teamLogoUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.network(invitation.teamLogoUrl!, fit: BoxFit.cover),
+                      )
+                    : Center(
+                        child: Text(
+                          invitation.teamName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFF3B82F6),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      invitation.teamName,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Invitation · ${invitation.invitingUsername}',
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0x1A3B82F6),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  posLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF3B82F6),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(-invitation.id));
+                          await teamsProvider.respondToInvitation(
+                            invitationId: invitation.id,
+                            accept: false,
+                          );
+                          if (mounted) setState(() => _loadingIds.remove(-invitation.id));
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1AD4607A),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33D4607A)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Refuser',
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kRose,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(-invitation.id));
+                          final success = await teamsProvider.respondToInvitation(
+                            invitationId: invitation.id,
+                            accept: true,
+                          );
+                          if (mounted) {
+                            setState(() => _loadingIds.remove(-invitation.id));
+                            if (success && context.mounted) Navigator.pop(context);
+                          }
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _kAmberDim,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33FF7F2A)),
+                    ),
+                    child: Center(
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kAmber,
+                              ),
+                            )
+                          : Text(
+                              'Accepter',
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _kAmber,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -5778,8 +6421,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 decoration: BoxDecoration(
                   color: _kAmberDim,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                      color: Color(0x33FF7F2A), width: 1),
+                  border: Border.all(color: Color(0x33FF7F2A), width: 1),
                 ),
                 child: challenge.challengerTeamLogoUrl != null
                     ? ClipRRect(
@@ -5825,8 +6467,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style:
-                      GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
                 ),
             ],
           ),
@@ -5834,16 +6475,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
           if (challenge.message != null && challenge.message!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
                 color: _kBg.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 challenge.message!,
-                style:
-                    GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -5859,8 +6498,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style:
-                        GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -5879,7 +6517,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     : () => _respond(context, challenge, false, teamsProvider),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(9),
                     border: Border.all(color: _kRose, width: 1.5),
@@ -5902,10 +6542,13 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     : () => _respond(context, challenge, true, teamsProvider),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [_kAmberSoft, _kAmberD]),
+                      colors: [_kAmberSoft, _kAmberD],
+                    ),
                     borderRadius: BorderRadius.circular(9),
                     boxShadow: const [
                       BoxShadow(

@@ -41,6 +41,9 @@ class TeamsProvider with ChangeNotifier {
   // Défis de match reçus en attente
   List<MatchChallenge> _pendingChallenges = [];
 
+  // Invitations à rejoindre une équipe
+  List<TeamInvitation> _pendingInvitations = [];
+
   // Chat d'équipe
   final Map<int, List<TeamChatMessage>> _teamMessages =
       {}; // teamId -> messages
@@ -68,6 +71,9 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplicationDetail> get myApplications => _myApplications;
   List<MatchChallenge> get pendingChallenges => List.unmodifiable(_pendingChallenges);
   int get pendingChallengesCount => _pendingChallenges.length;
+  List<TeamInvitation> get pendingInvitations => List.unmodifiable(_pendingInvitations);
+  int get pendingInvitationsCount => _pendingInvitations.length;
+  int get totalNotificationsCount => pendingChallengesCount + pendingInvitationsCount;
 
   // Getters chat
   List<TeamChatInfo> get myTeamChats => _myTeamChats;
@@ -201,11 +207,12 @@ class TeamsProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Charger en parallèle mon équipe, les équipes où je suis membre, et les défis reçus
+      // Charger en parallèle mon équipe, les équipes où je suis membre, les défis et invitations
       final results = await Future.wait([
         _teamsService.getMyTeam(),
         _teamsService.getTeamsMemberOf(),
         _teamsService.getReceivedChallenges(),
+        _teamsService.getPendingInvitations(),
       ]);
 
       _myTeam = results[0] as TeamDetail?;
@@ -214,6 +221,7 @@ class TeamsProvider with ChangeNotifier {
       _pendingChallenges = allChallenges
           .where((c) => c.status == ChallengeStatus.pending)
           .toList();
+      _pendingInvitations = results[3] as List<TeamInvitation>;
 
       // Charger les postes ouverts et candidatures si j'ai une équipe
       if (_myTeam != null) {
@@ -261,6 +269,35 @@ class TeamsProvider with ChangeNotifier {
           all.where((c) => c.status == ChallengeStatus.pending).toList();
       notifyListeners();
     } catch (_) {}
+  }
+
+  /// Recharge les invitations d'équipe en attente
+  Future<void> loadPendingInvitations() async {
+    try {
+      _pendingInvitations = await _teamsService.getPendingInvitations();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Répondre à une invitation (accepter ou refuser)
+  Future<bool> respondToInvitation({
+    required int invitationId,
+    required bool accept,
+  }) async {
+    try {
+      final success = await _teamsService.respondToInvitation(
+        invitationId: invitationId,
+        accept: accept,
+      );
+      if (success) {
+        _pendingInvitations.removeWhere((inv) => inv.id == invitationId);
+        if (accept) await loadMyTeam(); // Recharger pour intégrer la nouvelle équipe
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Charge les détails d'une équipe
@@ -338,6 +375,26 @@ class TeamsProvider with ChangeNotifier {
       return true;
     }
 
+    return false;
+  }
+
+  /// Ajoute un membre à une équipe quelconque (par teamId)
+  Future<bool> addMember({
+    required int teamId,
+    required int userId,
+    required PlayerPosition position,
+    required int slotIndex,
+  }) async {
+    final member = await _teamsService.addMember(
+      teamId,
+      userId: userId,
+      position: position,
+      slotIndex: slotIndex,
+    );
+    if (member != null) {
+      await loadMyTeam();
+      return true;
+    }
     return false;
   }
 

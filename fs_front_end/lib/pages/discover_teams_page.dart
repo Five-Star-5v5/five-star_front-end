@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/teams_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -135,6 +136,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
       ),
       body: Column(
         children: [
+          _buildAvailabilityBanner(context),
           _buildCustomTabBar(),
           Expanded(
             child: TabBarView(
@@ -144,6 +146,122 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           ),
         ],
       ),
+    );
+  }
+
+  // ── Availability banner ─────────────────────────────────────────────────────
+
+  Widget _buildAvailabilityBanner(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        final isAvailable = auth.currentUser?.isAvailable ?? false;
+        return GestureDetector(
+          onTap: () {
+            if (!isAvailable) {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => _AvailabilitySheet(auth: auth),
+              );
+            } else {
+              auth.setAvailability(false);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: isAvailable
+                  ? const Color(0x1AFF7F2A)
+                  : _dtCard,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isAvailable
+                    ? _dtAmber.withValues(alpha: 0.40)
+                    : _dtBorder2,
+                width: isAvailable ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                // Icône
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isAvailable ? _dtAmberDim : const Color(0x0FFFFFFF),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    isAvailable
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    size: 18,
+                    color: isAvailable ? _dtAmber : _dtMuted2,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Texte
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isAvailable
+                            ? 'PROFIL VISIBLE'
+                            : 'ÊTRE TROUVÉ PAR LES ÉQUIPES',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                          color: isAvailable ? _dtAmber : _dtMuted2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isAvailable
+                            ? 'Les équipes peuvent t\'inviter'
+                            : 'Active pour recevoir des invitations',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: isAvailable ? _dtWhite : _dtMuted2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Toggle
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  width: 42,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isAvailable ? _dtAmber : const Color(0xFF2A2D38),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 220),
+                    alignment: isAvailable
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.all(3),
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -966,6 +1084,324 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Availability Setup Sheet ────────────────────────────────────────────────
+
+class _AvailabilitySheet extends StatefulWidget {
+  final AuthProvider auth;
+  const _AvailabilitySheet({required this.auth});
+
+  @override
+  State<_AvailabilitySheet> createState() => _AvailabilitySheetState();
+}
+
+class _AvailabilitySheetState extends State<_AvailabilitySheet> {
+  // 7 dates à partir d'aujourd'hui
+  late final List<DateTime> _dates = List.generate(
+    7,
+    (i) => DateTime.now().add(Duration(days: i)),
+  );
+
+  final Set<int> _selectedDays = {};
+  final List<TextEditingController> _cityControllers = [TextEditingController()];
+  int _radiusKm = 10;
+  bool _loading = false;
+
+  bool get _allSelected => _selectedDays.length == 7;
+
+  @override
+  void dispose() {
+    for (final c in _cityControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _toggleAll() {
+    setState(() {
+      if (_allSelected) {
+        _selectedDays.clear();
+      } else {
+        _selectedDays.addAll({0, 1, 2, 3, 4, 5, 6});
+      }
+    });
+  }
+
+  String _fmt(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+  Future<void> _submit() async {
+    setState(() => _loading = true);
+    final sortedIndices = _selectedDays.toList()..sort();
+    final days = sortedIndices.map((i) => _fmt(_dates[i])).toList();
+    final cities = _cityControllers
+        .map((c) => c.text.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    final expiry = DateTime.now().add(const Duration(days: 7));
+    final endDate =
+        '${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
+    await widget.auth.setAvailability(
+      true,
+      days: days.isEmpty ? null : days,
+      endDate: endDate,
+      cities: cities.isEmpty ? null : cities,
+      radiusKm: _radiusKm,
+    );
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _dtCard,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: _dtBorder2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'DISPONIBILITÉ',
+              style: GoogleFonts.syne(fontSize: 15, fontWeight: FontWeight.w700, color: _dtWhite),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Renseigne tes créneaux pour être contacté par les bonnes équipes',
+              style: GoogleFonts.dmSans(fontSize: 12, color: _dtMuted2),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Jours ───────────────────────────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Jours disponibles',
+                    style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _toggleAll,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _allSelected ? _dtAmberDim : const Color(0x0EFFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _allSelected ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                      ),
+                    ),
+                    child: Text(
+                      'Tous',
+                      style: GoogleFonts.syne(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _allSelected ? _dtAmber : _dtMuted2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(7, (i) {
+                final sel = _selectedDays.contains(i);
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    if (sel) {
+                      _selectedDays.remove(i);
+                    } else {
+                      _selectedDays.add(i);
+                    }
+                  }),
+                  child: Container(
+                    width: 40,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: sel ? _dtAmberDim : const Color(0x08FFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: sel ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                      ),
+                    ),
+                    child: Text(
+                      _fmt(_dates[i]),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.syne(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: sel ? _dtAmber : _dtMuted2,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Zone ────────────────────────────────────────────────────────
+            Text(
+              'Zone géographique',
+              style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+            ),
+            const SizedBox(height: 10),
+            ..._cityControllers.asMap().entries.map((e) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: e.value,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: _dtWhite),
+                      cursorColor: _dtAmber,
+                      decoration: InputDecoration(
+                        hintText: 'Ville (ex: Paris)',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _dtMuted2),
+                        filled: true,
+                        fillColor: const Color(0x08FFFFFF),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _dtBorder2),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _dtBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: _dtAmber.withValues(alpha: 0.6)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (e.key > 0) ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => setState(() => _cityControllers.removeAt(e.key)),
+                      child: Container(
+                        width: 38, height: 38,
+                        decoration: BoxDecoration(
+                          color: _dtRoseDim,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.remove, size: 18, color: _dtRose),
+                      ),
+                    ),
+                  ],
+                  if (e.key == _cityControllers.length - 1 && _cityControllers.length < 3) ...[
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => setState(() => _cityControllers.add(TextEditingController())),
+                      child: Container(
+                        width: 38, height: 38,
+                        decoration: BoxDecoration(
+                          color: _dtAmberDim,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _dtAmber.withValues(alpha: 0.4)),
+                        ),
+                        child: const Icon(Icons.add, size: 18, color: _dtAmber),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            )),
+            const SizedBox(height: 10),
+
+            // ── Rayon ───────────────────────────────────────────────────────
+            Text(
+              'Rayon',
+              style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [5, 10, 20, 50].map((km) {
+                final sel = _radiusKm == km;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _radiusKm = km),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      decoration: BoxDecoration(
+                        color: sel ? _dtAmberDim : const Color(0x08FFFFFF),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: sel ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                        ),
+                      ),
+                      child: Text(
+                        '$km km',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.syne(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: sel ? _dtAmber : _dtMuted2,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Bouton ──────────────────────────────────────────────────────
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: _loading ? null : _submit,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: _dtAmber,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: _loading
+                        ? const SizedBox(
+                            width: 18, height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(
+                            'ACTIVER MA DISPO',
+                            style: GoogleFonts.syne(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

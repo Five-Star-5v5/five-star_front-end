@@ -406,6 +406,76 @@ class TeamsService {
     }
   }
 
+  /// Liste les joueurs disponibles (cherchant une équipe)
+  Future<List<AvailablePlayer>> getAvailablePlayers({String? position}) async {
+    try {
+      var url = '$baseUrl/available-players';
+      if (position != null) url += '?position=$position';
+      final response = await http.get(Uri.parse(url), headers: await _headers);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => AvailablePlayer.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getAvailablePlayers: $e');
+      return [];
+    }
+  }
+
+  /// Envoyer une invitation à un joueur disponible
+  Future<bool> sendInvitation({
+    required int teamId,
+    required int invitedUserId,
+    required String position,
+    required int slotIndex,
+  }) async {
+    try {
+      final url = '$baseUrl/$teamId/invitations?invited_user_id=$invitedUserId&position=$position&slot_index=$slotIndex';
+      final response = await http.post(Uri.parse(url), headers: await _headers);
+      return response.statusCode == 201;
+    } catch (e) {
+      debugPrint('Erreur sendInvitation: $e');
+      return false;
+    }
+  }
+
+  /// Récupérer les invitations en attente pour l'utilisateur courant
+  Future<List<TeamInvitation>> getPendingInvitations() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/invitations/pending'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => TeamInvitation.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getPendingInvitations: $e');
+      return [];
+    }
+  }
+
+  /// Accepter ou refuser une invitation
+  Future<bool> respondToInvitation({
+    required int invitationId,
+    required bool accept,
+  }) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/invitations/$invitationId'),
+        headers: await _headers,
+        body: jsonEncode({'accept': accept}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Erreur respondToInvitation: $e');
+      return false;
+    }
+  }
+
   // ============================================================
   // Candidatures
   // ============================================================
@@ -1984,6 +2054,115 @@ class MatchChatMessage {
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       isRead: json['is_read'] as bool? ?? false,
+    );
+  }
+}
+
+/// Joueur disponible (cherche une équipe)
+class AvailablePlayer {
+  final int id;
+  final String username;
+  final String codeId;
+  final String? avatarUrl;
+  final String? preferredPosition;
+  final double? rating;
+  final int matchesPlayed;
+  final int matchesWon;
+  final int matchesLost;
+  final int matchesDrawn;
+  final List<String>? availabilityDays;
+  final String? availabilityEndDate;
+  final List<String>? availabilityCities;
+  final int? availabilityRadiusKm;
+
+  AvailablePlayer({
+    required this.id,
+    required this.username,
+    required this.codeId,
+    this.avatarUrl,
+    this.preferredPosition,
+    this.rating,
+    this.matchesPlayed = 0,
+    this.matchesWon = 0,
+    this.matchesLost = 0,
+    this.matchesDrawn = 0,
+    this.availabilityDays,
+    this.availabilityEndDate,
+    this.availabilityCities,
+    this.availabilityRadiusKm,
+  });
+
+  static List<String>? _parseList(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is List) return raw.map((e) => e.toString()).toList();
+    try {
+      final s = raw as String;
+      final trimmed = s.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        final inner = trimmed.substring(1, trimmed.length - 1);
+        if (inner.isEmpty) return [];
+        return inner.split(',').map((e) => e.trim().replaceAll('"', '').replaceAll("'", '')).toList();
+      }
+      return [s];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  factory AvailablePlayer.fromJson(Map<String, dynamic> json) {
+    return AvailablePlayer(
+      id: json['id'] as int,
+      username: json['username'] as String,
+      codeId: json['code_id'] as String? ?? '',
+      avatarUrl: json['avatar_url'] as String?,
+      preferredPosition: json['preferred_position'] as String?,
+      rating: (json['rating'] as num?)?.toDouble(),
+      matchesPlayed: json['matches_played'] as int? ?? 0,
+      matchesWon: json['matches_won'] as int? ?? 0,
+      matchesLost: json['matches_lost'] as int? ?? 0,
+      matchesDrawn: json['matches_drawn'] as int? ?? 0,
+      availabilityDays: _parseList(json['availability_days']),
+      availabilityEndDate: json['availability_end_date'] as String?,
+      availabilityCities: _parseList(json['availability_cities']),
+      availabilityRadiusKm: json['availability_radius_km'] as int?,
+    );
+  }
+}
+
+class TeamInvitation {
+  final int id;
+  final int teamId;
+  final String teamName;
+  final String? teamLogoUrl;
+  final String invitingUsername;
+  final String position;
+  final int slotIndex;
+  final String status;
+  final DateTime createdAt;
+
+  TeamInvitation({
+    required this.id,
+    required this.teamId,
+    required this.teamName,
+    this.teamLogoUrl,
+    required this.invitingUsername,
+    required this.position,
+    required this.slotIndex,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory TeamInvitation.fromJson(Map<String, dynamic> json) {
+    return TeamInvitation(
+      id: json['id'] as int,
+      teamId: json['team_id'] as int,
+      teamName: json['team_name'] as String,
+      teamLogoUrl: json['team_logo_url'] as String?,
+      invitingUsername: json['inviting_username'] as String,
+      position: json['position'] as String,
+      slotIndex: json['slot_index'] as int,
+      status: json['status'] as String,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 }

@@ -252,7 +252,7 @@ class _MapPageState extends State<MapPage> {
                             color: _kMuted2,
                           ),
                         ),
-                        if (teams.pendingChallengesCount > 0)
+                        if (teams.totalNotificationsCount > 0)
                           Positioned(
                             top: 0,
                             right: 0,
@@ -266,9 +266,9 @@ class _MapPageState extends State<MapPage> {
                               ),
                               child: Center(
                                 child: Text(
-                                  teams.pendingChallengesCount > 9
+                                  teams.totalNotificationsCount > 9
                                       ? '9+'
-                                      : '${teams.pendingChallengesCount}',
+                                      : '${teams.totalNotificationsCount}',
                                   style: const TextStyle(
                                     fontSize: 7,
                                     fontWeight: FontWeight.w800,
@@ -1237,6 +1237,8 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
   Widget build(BuildContext context) {
     final teams = context.watch<TeamsProvider>();
     final challenges = teams.pendingChallenges;
+    final invitations = teams.pendingInvitations;
+    final totalCount = challenges.length + invitations.length;
 
     return Container(
       decoration: const BoxDecoration(
@@ -1274,7 +1276,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                 ),
               ),
               const Spacer(),
-              if (challenges.isNotEmpty)
+              if (totalCount > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -1289,7 +1291,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                     ),
                   ),
                   child: Text(
-                    '${challenges.length}',
+                    '$totalCount',
                     style: const TextStyle(
                       color: _kAmber,
                       fontWeight: FontWeight.w700,
@@ -1300,11 +1302,11 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
             ],
           ),
           const SizedBox(height: 12),
-          if (challenges.isEmpty)
+          if (totalCount == 0)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
-                'Aucune demande de match en attente',
+                'Aucune notification en attente',
                 style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
               ),
             )
@@ -1313,14 +1315,228 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.5,
               ),
-              child: ListView.separated(
+              child: ListView(
                 shrinkWrap: true,
-                itemCount: challenges.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 10),
-                itemBuilder: (_, i) =>
-                    _buildItem(context, challenges[i], teams),
+                children: [
+                  if (invitations.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'INVITATIONS D\'ÉQUIPE',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...invitations.map((inv) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _buildInvitationItem(context, inv, teams),
+                    )),
+                  ],
+                  if (challenges.isNotEmpty) ...[
+                    if (invitations.isNotEmpty)
+                      const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'DÉFIS DE MATCH',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...challenges.asMap().entries.map((e) => Padding(
+                      padding: EdgeInsets.only(bottom: e.key < challenges.length - 1 ? 10 : 0),
+                      child: _buildItem(context, e.value, teams),
+                    )),
+                  ],
+                ],
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvitationItem(
+    BuildContext context,
+    TeamInvitation invitation,
+    TeamsProvider teams,
+  ) {
+    final isLoading = _loadingIds.contains(-invitation.id); // negative ID for invitations
+
+    final positionLabels = {
+      'goalkeeper': 'Gardien',
+      'defender': 'Défenseur',
+      'midfielder': 'Milieu',
+      'forward': 'Attaquant',
+      'substitute': 'Remplaçant',
+    };
+    final posLabel = positionLabels[invitation.position] ?? invitation.position;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0x1A3B82F6),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x333B82F6), width: 1),
+                ),
+                child: invitation.teamLogoUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.network(invitation.teamLogoUrl!, fit: BoxFit.cover),
+                      )
+                    : Center(
+                        child: Text(
+                          invitation.teamName[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFF3B82F6),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      invitation.teamName,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Invitation · ${invitation.invitingUsername}',
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0x1A3B82F6),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  posLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF3B82F6),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(-invitation.id));
+                          await teams.respondToInvitation(
+                            invitationId: invitation.id,
+                            accept: false,
+                          );
+                          if (mounted) setState(() => _loadingIds.remove(-invitation.id));
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1AD4607A),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33D4607A)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Refuser',
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kRose,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(-invitation.id));
+                          await teams.respondToInvitation(
+                            invitationId: invitation.id,
+                            accept: true,
+                          );
+                          if (mounted) {
+                            setState(() => _loadingIds.remove(-invitation.id));
+                            if (context.mounted) Navigator.pop(context);
+                          }
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _kAmberDim,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33FF7F2A)),
+                    ),
+                    child: Center(
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kAmber,
+                              ),
+                            )
+                          : Text(
+                              'Accepter',
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _kAmber,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

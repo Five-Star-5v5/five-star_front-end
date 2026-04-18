@@ -42,6 +42,17 @@ class AuthProvider extends ChangeNotifier {
     final userData = await _service.getCurrentUser();
     if (userData != null) {
       _currentUser = UserModel.fromJson(userData);
+      // Désactiver silencieusement si la dispo a expiré
+      if (_currentUser!.isAvailable) {
+        final endDateStr = _currentUser!.availabilityEndDate;
+        if (endDateStr != null) {
+          final endDate = DateTime.tryParse(endDateStr);
+          if (endDate != null && endDate.isBefore(DateTime.now())) {
+            _currentUser = _currentUser!.copyWith(isAvailable: false);
+            _service.setAvailability(false);
+          }
+        }
+      }
     }
   }
 
@@ -102,5 +113,36 @@ class AuthProvider extends ChangeNotifier {
     _isAuthenticated = false;
     _currentUser = null;
     notifyListeners();
+  }
+
+  /// Bascule le statut de disponibilité du joueur (optimistic update)
+  Future<bool> setAvailability(
+    bool isAvailable, {
+    List<String>? days,
+    String? endDate,
+    List<String>? cities,
+    int? radiusKm,
+  }) async {
+    final prev = _currentUser?.isAvailable ?? false;
+    _currentUser = _currentUser?.copyWith(
+      isAvailable: isAvailable,
+      availabilityDays: days,
+      availabilityEndDate: endDate,
+      availabilityCities: cities,
+      availabilityRadiusKm: radiusKm,
+    );
+    notifyListeners();
+    final success = await _service.setAvailability(
+      isAvailable,
+      days: days,
+      endDate: endDate,
+      cities: cities,
+      radiusKm: radiusKm,
+    );
+    if (!success) {
+      _currentUser = _currentUser?.copyWith(isAvailable: prev);
+      notifyListeners();
+    }
+    return success;
   }
 }
