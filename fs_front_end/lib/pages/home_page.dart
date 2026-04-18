@@ -4149,6 +4149,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final teamsProvider = context.read<TeamsProvider>();
     final teamId = teamsProvider.currentDisplayedTeam?.id;
     if (teamId == null) return;
+    final memberIds = teamsProvider.currentDisplayedTeam?.members
+            .map((m) => m.user.id)
+            .toSet() ??
+        {};
 
     showModalBottomSheet(
       context: context,
@@ -4158,6 +4162,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         initialChildSize: 0.7,
         minChildSize: 0.4,
         maxChildSize: 0.9,
+        expand: false,
         builder: (_, scrollController) => Container(
           decoration: const BoxDecoration(
             color: _kCard,
@@ -4372,45 +4377,63 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       ),
                                     ),
                                   const SizedBox(height: 6),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      Navigator.pop(ctx);
-                                      final success = await TeamsService.instance.sendInvitation(
-                                        teamId: teamId,
-                                        invitedUserId: player.id,
-                                        position: position.name,
-                                        slotIndex: slotIndex,
-                                      );
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              success
-                                                  ? 'Invitation envoyée à ${player.username}'
-                                                  : 'Erreur lors de l\'envoi',
-                                            ),
-                                            backgroundColor:
-                                                success ? _kAmber : _kRose,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: Container(
+                                  if (memberIds.contains(player.id))
+                                    Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: _kAmber,
+                                        color: _kCard,
                                         borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: _kBorder2),
                                       ),
                                       child: Text(
-                                        'Inviter',
+                                        'Déjà membre',
                                         style: GoogleFonts.syne(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w700,
+                                          color: _kMuted2,
+                                          fontWeight: FontWeight.w600,
                                           fontSize: 12,
                                         ),
                                       ),
+                                    )
+                                  else
+                                    GestureDetector(
+                                      onTap: () async {
+                                        Navigator.pop(ctx);
+                                        final success = await TeamsService.instance.sendInvitation(
+                                          teamId: teamId,
+                                          invitedUserId: player.id,
+                                          position: position.name,
+                                          slotIndex: slotIndex,
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                success
+                                                    ? 'Invitation envoyée à ${player.username}'
+                                                    : 'Erreur lors de l\'envoi',
+                                              ),
+                                              backgroundColor:
+                                                  success ? _kAmber : _kRose,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: _kAmber,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          'Inviter',
+                                          style: GoogleFonts.syne(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ],
