@@ -126,7 +126,7 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildHistory(context),
                 const SizedBox(height: 20),
-                _buildComments(),
+                _buildComments(user.id),
                 const SizedBox(height: 40),
               ],
             ),
@@ -500,14 +500,8 @@ class ProfilePage extends StatelessWidget {
 
   // ── Comments ──────────────────────────────────────────────────────────────
 
-  Widget _buildComments() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel('COMMENTAIRES REÇUS'),
-        _emptyState(Icons.chat_bubble_outline, 'Aucun commentaire', 'Les avis laissés par d\'autres joueurs apparaîtront ici'),
-      ],
-    );
+  Widget _buildComments(int userId) {
+    return _CommentsSection(userId: userId);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -749,6 +743,142 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                   child: Text(resultLabel, style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
                 ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Section commentaires reçus ────────────────────────────────────────────────
+
+class _CommentsSection extends StatefulWidget {
+  final int userId;
+  const _CommentsSection({required this.userId});
+
+  @override
+  State<_CommentsSection> createState() => _CommentsSectionState();
+}
+
+class _CommentsSectionState extends State<_CommentsSection> {
+  late Future<List<PlayerCommentData>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = TeamsService.instance.getPlayerComments(widget.userId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            'COMMENTAIRES REÇUS',
+            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: _pMuted2),
+          ),
+        ),
+        FutureBuilder<List<PlayerCommentData>>(
+          future: _future,
+          builder: (ctx, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: _pAmber, strokeWidth: 2)));
+            }
+            final comments = snap.data ?? [];
+            if (comments.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(color: _pCard, borderRadius: BorderRadius.circular(14)),
+                child: Column(
+                  children: [
+                    Icon(Icons.chat_bubble_outline, size: 28, color: _pMuted2.withOpacity(0.4)),
+                    const SizedBox(height: 8),
+                    Text('Aucun commentaire', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: _pMuted2)),
+                    const SizedBox(height: 4),
+                    Text('Les avis laissés après vos matchs apparaîtront ici', style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withOpacity(0.6)), textAlign: TextAlign.center),
+                  ],
+                ),
+              );
+            }
+            // Afficher les 3 premiers, avec compteur si plus
+            final displayed = comments.take(3).toList();
+            return Column(
+              children: [
+                ...displayed.map((c) => _buildCommentCard(c)),
+                if (comments.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      '+${comments.length - 3} commentaire${comments.length - 3 > 1 ? 's' : ''}',
+                      style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _pAmber),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommentCard(PlayerCommentData c) {
+    final dateStr = '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _pCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: c.isAbsent ? const Color(0xFFD4607A).withOpacity(0.3) : const Color(0x21FFFFFF)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Avatar
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0x21FFFFFF),
+              shape: BoxShape.circle,
+              image: c.authorAvatarUrl != null
+                  ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
+                  : null,
+            ),
+            child: c.authorAvatarUrl == null ? const Icon(Icons.person_outline, size: 16, color: _pMuted2) : null,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(c.authorUsername ?? 'Joueur', style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFF0F2F5))),
+                    const Spacer(),
+                    if (c.isAbsent)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4607A).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: const Color(0xFFD4607A))),
+                      ),
+                    const SizedBox(width: 6),
+                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: _pMuted2)),
+                  ],
+                ),
+                if (c.content != null && c.content!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2)),
+                ],
+              ],
+            ),
           ),
         ],
       ),

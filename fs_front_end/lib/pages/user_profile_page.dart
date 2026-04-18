@@ -5,6 +5,7 @@ import '../models/user_model.dart';
 import '../providers/friends_provider.dart';
 import '../services/auth_service.dart';
 import '../services/friends_service.dart';
+import '../services/teams_service.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _upBg       = Color(0xFF0A0C10);
@@ -42,10 +43,13 @@ class UserProfilePage extends StatefulWidget {
 class _UserProfilePageState extends State<UserProfilePage> {
   UserModel? _fullUser;
   bool _isLoading = true;
+  late Future<List<PlayerCommentData>> _commentsFuture;
 
   @override
   void initState() {
     super.initState();
+    final userId = widget.user?.id ?? widget.userBasicInfo!.id;
+    _commentsFuture = TeamsService.instance.getPlayerComments(userId);
     _loadFullUserProfile();
   }
 
@@ -437,12 +441,106 @@ class _UserProfilePageState extends State<UserProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionLabel('COMMENTAIRES REÇUS'),
-        _emptyState(
-          Icons.chat_bubble_outline,
-          'Aucun commentaire',
-          'Les avis laissés par d\'autres joueurs apparaîtront ici',
+        FutureBuilder<List<PlayerCommentData>>(
+          future: _commentsFuture,
+          builder: (ctx, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(color: _upAmber, strokeWidth: 2),
+                ),
+              );
+            }
+            final comments = snap.data ?? [];
+            if (comments.isEmpty) {
+              return _emptyState(
+                Icons.chat_bubble_outline,
+                'Aucun commentaire',
+                'Les avis laissés après les matchs apparaîtront ici',
+              );
+            }
+            final displayed = comments.take(3).toList();
+            return Column(
+              children: [
+                ...displayed.map((c) => _buildCommentCard(c)),
+                if (comments.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      '+${comments.length - 3} commentaire${comments.length - 3 > 1 ? 's' : ''}',
+                      style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _upAmber),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ],
+    );
+  }
+
+  Widget _buildCommentCard(PlayerCommentData c) {
+    final dateStr = '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _upCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: c.isAbsent ? _upRose.withValues(alpha: 0.3) : _upBorder2),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: _upBorder2,
+              shape: BoxShape.circle,
+              image: c.authorAvatarUrl != null
+                  ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
+                  : null,
+            ),
+            child: c.authorAvatarUrl == null
+                ? const Icon(Icons.person_outline, size: 16, color: _upMuted2)
+                : null,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      c.authorUsername ?? 'Joueur',
+                      style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w700, color: _upWhite),
+                    ),
+                    const Spacer(),
+                    if (c.isAbsent)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _upRose.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: _upRose)),
+                      ),
+                    const SizedBox(width: 6),
+                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2)),
+                  ],
+                ),
+                if (c.content != null && c.content!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

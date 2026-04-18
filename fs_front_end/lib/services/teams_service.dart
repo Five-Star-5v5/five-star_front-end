@@ -1094,6 +1094,24 @@ class TeamsService {
     }
   }
 
+  /// Récupère les membres publics d'une équipe adverse
+  Future<List<TeamMember>> fetchPublicTeamMembers(int teamId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/$teamId/public-members'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => TeamMember.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur fetchPublicTeamMembers: $e');
+      return [];
+    }
+  }
+
   /// Annule un défi (même accepté)
   Future<bool> cancelChallenge(int challengeId) async {
     try {
@@ -1331,6 +1349,48 @@ class TeamsService {
     } catch (e) {
       debugPrint('Erreur getAllUnreadCounts: $e');
       return {};
+    }
+  }
+
+  Future<bool> submitMatchComments(
+    int challengeId,
+    List<Map<String, dynamic>> comments,
+  ) async {
+    try {
+      final body = jsonEncode({'comments': comments});
+      debugPrint('[submitMatchComments] POST /challenges/$challengeId/comments');
+      debugPrint('[submitMatchComments] body: $body');
+      final response = await http.post(
+        Uri.parse('$baseUrl/challenges/$challengeId/comments'),
+        headers: await _headers,
+        body: body,
+      );
+      debugPrint('[submitMatchComments] status: ${response.statusCode}');
+      debugPrint('[submitMatchComments] response: ${response.body}');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      debugPrint('Erreur submitMatchComments: $e');
+      return false;
+    }
+  }
+
+  Future<List<PlayerCommentData>> getPlayerComments(int userId) async {
+    try {
+      debugPrint('[getPlayerComments] GET /users/$userId/comments');
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/$userId/comments'),
+        headers: await _headers,
+      );
+      debugPrint('[getPlayerComments] status: ${response.statusCode}');
+      debugPrint('[getPlayerComments] response: ${response.body}');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => PlayerCommentData.fromJson(e as Map<String, dynamic>)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getPlayerComments: $e');
+      return [];
     }
   }
 }
@@ -2163,6 +2223,45 @@ class TeamInvitation {
       slotIndex: json['slot_index'] as int,
       status: json['status'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// Commentaire post-match reçu par un joueur
+class PlayerCommentData {
+  final int id;
+  final int challengeId;
+  final int authorId;
+  final int targetUserId;
+  final String? content;
+  final bool isAbsent;
+  final DateTime createdAt;
+  final String? authorUsername;
+  final String? authorAvatarUrl;
+
+  PlayerCommentData({
+    required this.id,
+    required this.challengeId,
+    required this.authorId,
+    required this.targetUserId,
+    this.content,
+    required this.isAbsent,
+    required this.createdAt,
+    this.authorUsername,
+    this.authorAvatarUrl,
+  });
+
+  factory PlayerCommentData.fromJson(Map<String, dynamic> json) {
+    return PlayerCommentData(
+      id: json['id'] as int,
+      challengeId: json['challenge_id'] as int,
+      authorId: json['author_id'] as int,
+      targetUserId: json['target_user_id'] as int,
+      content: json['content'] as String?,
+      isAbsent: json['is_absent'] as bool? ?? false,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      authorUsername: json['author_username'] as String?,
+      authorAvatarUrl: json['author_avatar_url'] as String?,
     );
   }
 }

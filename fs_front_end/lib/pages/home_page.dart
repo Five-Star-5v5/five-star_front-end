@@ -14,7 +14,9 @@ import 'team_chat_page.dart';
 import 'match_chat_page.dart';
 import 'discover_teams_page.dart';
 import 'find_opponents_page.dart';
+import 'user_profile_page.dart';
 import '../main_screen.dart';
+import '../services/friends_service.dart' show UserBasicInfo;
 
 // ── Design tokens (dark amber system) ──────────────────────────────────────
 const _kBg = Color(0xFF0A0C10);
@@ -1489,6 +1491,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   : Colors.orange,
             ),
           );
+          _showPostMatchCommentSheet(match);
           _loadUpcomingMatches();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1601,6 +1604,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             backgroundColor: Colors.green,
           ),
         );
+        _showPostMatchCommentSheet(match);
         _loadUpcomingMatches();
       }
     }
@@ -3282,6 +3286,46 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 20),
             Divider(color: _kBorder2),
+            if (!isOwner) ...[
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UserProfilePage(
+                        userBasicInfo: UserBasicInfo(
+                          id: member.user.id,
+                          username: member.user.username,
+                          avatarUrl: member.user.avatarUrl,
+                          preferredPosition: member.user.preferredPosition,
+                          rating: member.user.rating,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: _kCard2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kBorder2),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person_outline, color: _kAmber, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Voir le profil',
+                        style: GoogleFonts.syne(fontWeight: FontWeight.w600, color: _kWhite, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             GestureDetector(
               onTap: () {
                 Navigator.pop(ctx);
@@ -6005,6 +6049,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     }
   }
+
+  void _showPostMatchCommentSheet(MatchChallenge match) {
+    if (!mounted) return;
+    final teams = context.read<TeamsProvider>();
+    final myTeam = teams.allTeams.firstWhere(
+      (t) => t.id == match.challengerTeamId || t.id == match.challengedTeamId,
+      orElse: () => teams.allTeams.first,
+    );
+    final currentUserId = context.read<AuthProvider>().currentUser?.id;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _PostMatchCommentSheet(match: match, myTeam: myTeam, currentUserId: currentUserId),
+    );
+  }
 }
 
 class _ModernPitchPainter extends CustomPainter {
@@ -6637,5 +6698,354 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
         ),
       );
     }
+  }
+}
+
+// ── Post-match comment sheet ───────────────────────────────────────────────────
+
+class _PostMatchCommentSheet extends StatefulWidget {
+  final MatchChallenge match;
+  final TeamDetail myTeam;
+  final int? currentUserId;
+
+  const _PostMatchCommentSheet({required this.match, required this.myTeam, this.currentUserId});
+
+  @override
+  State<_PostMatchCommentSheet> createState() => _PostMatchCommentSheetState();
+}
+
+class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
+  int _step = 0; // 0 = ma team, 1 = équipe adverse
+  bool _loading = false;
+  List<TeamMember> _opponentMembers = [];
+  bool _loadingOpponent = true;
+
+  // controllers & absences : indexed by userId
+  final Map<int, TextEditingController> _controllers = {};
+  final Map<int, bool> _absences = {};
+
+  @override
+  void initState() {
+    super.initState();
+    final filtered = widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList();
+    _initControllers(filtered);
+    _loadOpponentMembers();
+  }
+
+  void _initControllers(List<TeamMember> members) {
+    for (final m in members) {
+      if (!_controllers.containsKey(m.user.id)) {
+        _controllers[m.user.id] = TextEditingController(text: '👍 Bon match !');
+      }
+      _absences[m.user.id] ??= false;
+    }
+  }
+
+  Future<void> _loadOpponentMembers() async {
+    final match = widget.match;
+    final myTeamId = widget.myTeam.id;
+    final opponentId = match.challengerTeamId == myTeamId
+        ? match.challengedTeamId
+        : match.challengerTeamId;
+
+    final members = await TeamsService.instance.fetchPublicTeamMembers(opponentId);
+    if (mounted) {
+      final filtered = members.where((m) => m.user.id != widget.currentUserId).toList();
+      setState(() {
+        _opponentMembers = filtered;
+        _loadingOpponent = false;
+        _initControllers(filtered);
+      });
+    }
+  }
+
+  Future<void> _submitStep() async {
+    setState(() => _loading = true);
+    final members = _step == 0
+        ? widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList()
+        : _opponentMembers;
+    final comments = members.map((m) {
+      return {
+        'target_user_id': m.user.id,
+        'content': _controllers[m.user.id]?.text.trim().isEmpty == true
+            ? null
+            : _controllers[m.user.id]?.text.trim(),
+        'is_absent': _absences[m.user.id] ?? false,
+      };
+    }).toList();
+
+    final ok = await TeamsService.instance.submitMatchComments(widget.match.id, comments.cast<Map<String, dynamic>>());
+
+    setState(() => _loading = false);
+
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur lors de l\'envoi des commentaires'), backgroundColor: Colors.red),
+      );
+    }
+
+    if (_step == 0) {
+      setState(() => _step = 1);
+    } else {
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMyTeamStep = _step == 0;
+    final members = isMyTeamStep
+        ? widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList()
+        : _opponentMembers;
+    final title = isMyTeamStep ? 'Mon équipe' : 'Équipe adverse';
+    final subtitle = isMyTeamStep
+        ? 'Laisse un commentaire sur tes coéquipiers'
+        : 'Laisse un commentaire sur les joueurs adverses';
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.6,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (_, scroll) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            // Handle
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 4),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _kBorder2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _kAmber.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${_step + 1}/2',
+                      style: GoogleFonts.syne(fontSize: 11, fontWeight: FontWeight.w700, color: _kAmber),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w700, color: _kWhite)),
+                        Text(subtitle, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: _kBorder2),
+            // Liste joueurs
+            Expanded(
+              child: (!isMyTeamStep && _loadingOpponent)
+                  ? const Center(child: CircularProgressIndicator(color: _kAmber))
+                  : ListView.separated(
+                      controller: scroll,
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                      itemCount: members.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (_, i) => _buildPlayerCard(members[i]),
+                    ),
+            ),
+            // Bouton suivant / terminer
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 12),
+              child: GestureDetector(
+                onTap: _loading ? null : _submitStep,
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: _loading ? _kBorder2 : _kAmber,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: _loading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : Text(
+                          _step == 0 ? 'Équipe adverse →' : 'Terminer',
+                          style: GoogleFonts.syne(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static const _suggestions = [
+    '👍 Bon match !',
+    '🔥 Très bonne perf',
+    '💪 Solidaire',
+    '🎯 Précis',
+    '⬆️ En progrès',
+  ];
+
+  Widget _buildSuggestions(int userId) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: _suggestions.map((s) {
+          return GestureDetector(
+            onTap: () {
+              final ctrl = _controllers[userId];
+              if (ctrl != null) {
+                ctrl.text = s;
+                ctrl.selection = TextSelection.fromPosition(TextPosition(offset: s.length));
+              }
+              setState(() {});
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: _kCard2,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _kBorder2),
+              ),
+              child: Text(s, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildPlayerCard(TeamMember member) {
+    final isAbsent = _absences[member.user.id] ?? false;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isAbsent ? _kRose.withOpacity(0.4) : _kBorder2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserProfilePage(
+                      userBasicInfo: UserBasicInfo(
+                        id: member.user.id,
+                        username: member.user.username,
+                        avatarUrl: member.user.avatarUrl,
+                        preferredPosition: member.user.preferredPosition,
+                        rating: member.user.rating,
+                      ),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: _kBorder2,
+                        shape: BoxShape.circle,
+                        image: member.user.avatarUrl != null
+                            ? DecorationImage(image: NetworkImage(member.user.avatarUrl!), fit: BoxFit.cover)
+                            : null,
+                      ),
+                      child: member.user.avatarUrl == null
+                          ? const Icon(Icons.person_outline, size: 20, color: _kMuted2)
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(member.user.username, style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: _kWhite)),
+                        Text(member.position.displayName, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              // Toggle absent
+              GestureDetector(
+                onTap: () => setState(() => _absences[member.user.id] = !isAbsent),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isAbsent ? _kRose.withOpacity(0.2) : _kBorder2,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isAbsent ? _kRose : Colors.transparent),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(isAbsent ? Icons.warning_rounded : Icons.check_circle_outline, size: 12, color: isAbsent ? _kRose : _kMuted2),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAbsent ? 'Absent' : 'Présent',
+                        style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: isAbsent ? _kRose : _kMuted2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _controllers[member.user.id],
+            style: GoogleFonts.dmSans(fontSize: 12, color: _kWhite),
+            maxLines: 2,
+            maxLength: 300,
+            decoration: InputDecoration(
+              hintText: 'Commentaire (optionnel)…',
+              hintStyle: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+              counterStyle: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+              filled: true,
+              fillColor: _kCard,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kBorder2)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kBorder2)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kAmber)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildSuggestions(member.user.id),
+        ],
+      ),
+    );
   }
 }
