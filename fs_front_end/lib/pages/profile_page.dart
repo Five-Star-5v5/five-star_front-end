@@ -5,9 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/friends_provider.dart';
+import '../providers/teams_provider.dart';
 import '../models/user_model.dart';
+import '../services/teams_service.dart';
 import '../auth/login.dart';
 import 'settings_page.dart';
+import 'match_history_page.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const _pBg      = Color(0xFF0A0C10);
@@ -121,7 +124,7 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildBadges(user),
                 const SizedBox(height: 20),
-                _buildHistory(),
+                _buildHistory(context),
                 const SizedBox(height: 20),
                 _buildComments(),
                 const SizedBox(height: 40),
@@ -493,23 +496,7 @@ class ProfilePage extends StatelessWidget {
 
   // ── History ───────────────────────────────────────────────────────────────
 
-  Widget _buildHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(child: _sectionLabel('HISTORIQUE')),
-            Text(
-              'Voir tout →',
-              style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _pAmber),
-            ),
-          ],
-        ),
-        _emptyState(Icons.sports_soccer_outlined, 'Aucun match joué', 'Ton historique apparaîtra ici'),
-      ],
-    );
-  }
+  Widget _buildHistory(BuildContext context) => const _MatchHistorySection();
 
   // ── Comments ──────────────────────────────────────────────────────────────
 
@@ -575,4 +562,196 @@ class _Badge {
   final Color color;
   final Color bg;
   const _Badge(this.label, this.color, this.bg);
+}
+
+// ── Match history section ─────────────────────────────────────────────────
+
+class _MatchHistorySection extends StatefulWidget {
+  const _MatchHistorySection();
+  @override
+  State<_MatchHistorySection> createState() => _MatchHistorySectionState();
+}
+
+class _MatchHistorySectionState extends State<_MatchHistorySection> {
+  late Future<List<MatchChallenge>> _future;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final teams = context.read<TeamsProvider>().allTeams;
+    _future = Future.wait(
+      teams.map((t) => TeamsService.instance.getTeamMatches(t.id, status: 'completed')),
+    ).then((lists) {
+      final seen = <int>{};
+      final result = <MatchChallenge>[];
+      for (final list in lists) {
+        for (final m in list) {
+          if (seen.add(m.id)) result.add(m);
+        }
+      }
+      result.sort((a, b) => (b.matchPlayedAt ?? b.createdAt).compareTo(a.matchPlayedAt ?? a.createdAt));
+      return result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final teams = context.watch<TeamsProvider>().allTeams;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FutureBuilder<List<MatchChallenge>>(
+          future: _future,
+          builder: (ctx, snap) {
+            final matches = snap.data ?? [];
+            final loading = snap.connectionState == ConnectionState.waiting;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'HISTORIQUE',
+                          style: GoogleFonts.syne(fontSize: 11, fontWeight: FontWeight.w800, color: _pMuted2, letterSpacing: 1.1),
+                        ),
+                      ),
+                      if (!loading && matches.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            final myTeamIds = teams.map((t) => t.id).toSet();
+                            Navigator.push(
+                              ctx,
+                              MaterialPageRoute(
+                                builder: (_) => MatchHistoryPage(matches: matches, myTeamIds: myTeamIds),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Voir tout →',
+                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _pAmber),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // Content
+                if (loading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(color: _pAmber, strokeWidth: 2),
+                    ),
+                  )
+                else if (matches.isEmpty)
+                  Column(
+                    children: [
+                      const SizedBox(height: 8),
+                      Icon(Icons.sports_soccer_outlined, size: 32, color: _pMuted2.withOpacity(0.4)),
+                      const SizedBox(height: 8),
+                      Text('Aucun match joué', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: _pMuted2)),
+                      const SizedBox(height: 4),
+                      Text("Ton historique apparaîtra ici", style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withOpacity(0.5))),
+                      const SizedBox(height: 16),
+                    ],
+                  )
+                else
+                  Column(
+                    children: matches.take(3).map((m) {
+                      final myTeamIds = teams.map((t) => t.id).toSet();
+                      return _buildCard(m, myTeamIds);
+                    }).toList(),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCard(MatchChallenge m, Set<int> myTeamIds) {
+    final iChallenger = myTeamIds.contains(m.challengerTeamId);
+    final myTeamName  = iChallenger ? m.challengerTeamName : m.challengedTeamName;
+    final oppName     = iChallenger ? m.challengedTeamName : m.challengerTeamName;
+    final myScore     = iChallenger ? m.challengerScore : m.challengedScore;
+    final oppScore    = iChallenger ? m.challengedScore : m.challengerScore;
+
+    String resultLabel = '';
+    Color resultColor  = _pMuted2;
+    if (myScore != null && oppScore != null) {
+      if (myScore > oppScore)      { resultLabel = 'Victoire'; resultColor = _pSage; }
+      else if (myScore < oppScore) { resultLabel = 'Défaite';  resultColor = const Color(0xFFD4607A); }
+      else                         { resultLabel = 'Nul';      resultColor = _pAmber; }
+    }
+
+    final date = m.matchPlayedAt ?? m.proposedDate ?? m.createdAt;
+    final dateStr = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _pCard,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _pBorder2),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$myTeamName vs $oppName',
+                  style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: _pWhite),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2)),
+                    if (m.proposedLocation != null) ...[
+                      const SizedBox(width: 6),
+                      const Icon(Icons.location_on_outlined, size: 11, color: Color(0x9EF0F2F5)),
+                      Flexible(
+                        child: Text(m.proposedLocation!, style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (myScore != null && oppScore != null)
+                Text(
+                  '$myScore – $oppScore',
+                  style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w800, color: _pWhite),
+                ),
+              if (resultLabel.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: resultColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(resultLabel, style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
