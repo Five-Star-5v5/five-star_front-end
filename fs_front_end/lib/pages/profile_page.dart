@@ -11,6 +11,7 @@ import '../services/teams_service.dart';
 import '../auth/login.dart';
 import 'settings_page.dart';
 import 'match_history_page.dart';
+import 'all_comments_page.dart';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const _pBg      = Color(0xFF0A0C10);
@@ -114,7 +115,7 @@ class ProfilePage extends StatelessWidget {
           backgroundColor: _pBg,
           appBar: _buildAppBar(context, authProvider),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -126,7 +127,7 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildHistory(context),
                 const SizedBox(height: 20),
-                _buildComments(user.id),
+                _buildComments(user.id, user.username),
                 const SizedBox(height: 40),
               ],
             ),
@@ -500,8 +501,8 @@ class ProfilePage extends StatelessWidget {
 
   // ── Comments ──────────────────────────────────────────────────────────────
 
-  Widget _buildComments(int userId) {
-    return _CommentsSection(userId: userId);
+  Widget _buildComments(int userId, String username) {
+    return _CommentsSection(userId: userId, username: username);
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -754,7 +755,8 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
 
 class _CommentsSection extends StatefulWidget {
   final int userId;
-  const _CommentsSection({required this.userId});
+  final String username;
+  const _CommentsSection({required this.userId, required this.username});
 
   @override
   State<_CommentsSection> createState() => _CommentsSectionState();
@@ -774,48 +776,60 @@ class _CommentsSectionState extends State<_CommentsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            'COMMENTAIRES REÇUS',
-            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: _pMuted2),
-          ),
-        ),
         FutureBuilder<List<PlayerCommentData>>(
           future: _future,
           builder: (ctx, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: _pAmber, strokeWidth: 2)));
-            }
+            final loading = snap.connectionState == ConnectionState.waiting;
             final comments = snap.data ?? [];
-            if (comments.isEmpty) {
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                decoration: BoxDecoration(color: _pCard, borderRadius: BorderRadius.circular(14)),
-                child: Column(
-                  children: [
-                    Icon(Icons.chat_bubble_outline, size: 28, color: _pMuted2.withOpacity(0.4)),
-                    const SizedBox(height: 8),
-                    Text('Aucun commentaire', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: _pMuted2)),
-                    const SizedBox(height: 4),
-                    Text('Les avis laissés après vos matchs apparaîtront ici', style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withOpacity(0.6)), textAlign: TextAlign.center),
-                  ],
-                ),
-              );
-            }
-            // Afficher les 3 premiers, avec compteur si plus
-            final displayed = comments.take(3).toList();
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...displayed.map((c) => _buildCommentCard(c)),
-                if (comments.length > 3)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '+${comments.length - 3} commentaire${comments.length - 3 > 1 ? 's' : ''}',
-                      style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _pAmber),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'COMMENTAIRES REÇUS',
+                          style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: _pMuted2),
+                        ),
+                      ),
+                      if (!loading && comments.isNotEmpty)
+                        GestureDetector(
+                          onTap: () => Navigator.push(
+                            ctx,
+                            MaterialPageRoute(
+                              builder: (_) => AllCommentsPage(username: widget.username, comments: comments),
+                            ),
+                          ),
+                          child: Text(
+                            'Voir tout →',
+                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _pAmber),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (loading)
+                  const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: _pAmber, strokeWidth: 2)))
+                else if (comments.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    decoration: BoxDecoration(color: _pCard, borderRadius: BorderRadius.circular(14)),
+                    child: Column(
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 28, color: _pMuted2.withValues(alpha: 0.4)),
+                        const SizedBox(height: 8),
+                        Text('Aucun commentaire', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: _pMuted2)),
+                        const SizedBox(height: 4),
+                        Text('Les avis laissés après vos matchs apparaîtront ici', style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withValues(alpha: 0.6)), textAlign: TextAlign.center),
+                      ],
                     ),
+                  )
+                else
+                  Column(
+                    children: comments.take(3).map((c) => _buildCommentCard(c)).toList(),
                   ),
               ],
             );

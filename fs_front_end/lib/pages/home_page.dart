@@ -2164,7 +2164,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[

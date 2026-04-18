@@ -6,6 +6,7 @@ import '../providers/friends_provider.dart';
 import '../services/auth_service.dart';
 import '../services/friends_service.dart';
 import '../services/teams_service.dart';
+import 'all_comments_page.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _upBg       = Color(0xFF0A0C10);
@@ -437,46 +438,45 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ── Comments ───────────────────────────────────────────────────────────────
 
   Widget _buildComments() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel('COMMENTAIRES REÇUS'),
-        FutureBuilder<List<PlayerCommentData>>(
-          future: _commentsFuture,
-          builder: (ctx, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(color: _upAmber, strokeWidth: 2),
-                ),
-              );
-            }
-            final comments = snap.data ?? [];
-            if (comments.isEmpty) {
-              return _emptyState(
-                Icons.chat_bubble_outline,
-                'Aucun commentaire',
-                'Les avis laissés après les matchs apparaîtront ici',
-              );
-            }
-            final displayed = comments.take(3).toList();
-            return Column(
-              children: [
-                ...displayed.map((c) => _buildCommentCard(c)),
-                if (comments.length > 3)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '+${comments.length - 3} commentaire${comments.length - 3 > 1 ? 's' : ''}',
-                      style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _upAmber),
+    final username = _fullUser?.username ?? '';
+    return FutureBuilder<List<PlayerCommentData>>(
+      future: _commentsFuture,
+      builder: (ctx, snap) {
+        final loading = snap.connectionState == ConnectionState.waiting;
+        final comments = snap.data ?? [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(child: _sectionLabel('COMMENTAIRES REÇUS')),
+                  if (!loading && comments.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        ctx,
+                        MaterialPageRoute(
+                          builder: (_) => AllCommentsPage(username: username, comments: comments),
+                        ),
+                      ),
+                      child: Text(
+                        'Voir tout →',
+                        style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _upAmber),
+                      ),
                     ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
+                ],
+              ),
+            ),
+            if (loading)
+              const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: _upAmber, strokeWidth: 2)))
+            else if (comments.isEmpty)
+              _emptyState(Icons.chat_bubble_outline, 'Aucun commentaire', 'Les avis laissés après les matchs apparaîtront ici')
+            else
+              Column(children: comments.take(3).map((c) => _buildCommentCard(c)).toList()),
+          ],
+        );
+      },
     );
   }
 
