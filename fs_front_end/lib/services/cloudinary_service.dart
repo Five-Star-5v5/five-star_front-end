@@ -21,10 +21,12 @@ class CloudinaryService {
         'https://api.cloudinary.com/v1_1/$_cloudName/image/upload',
       );
 
+      // Ajouter timestamp pour éviter les conflits de public_id
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = _uploadPreset
         ..fields['public_id'] =
-            'five_star_avatars/user_$userId' // Format: five_star_avatars/user_123
+            'five_star_avatars/user_${userId}_$timestamp' // Format: five_star_avatars/user_123_1776637732106
         ..fields['resource_type'] = 'auto'
         ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
 
@@ -37,6 +39,10 @@ class CloudinaryService {
         // Parser la réponse JSON pour extraire l'URL
         final Map<String, dynamic> data = _parseJson(responseBody);
         final String? secureUrl = data['secure_url'] as String?;
+        // Ajouter cache buster pour forcer le refresh
+        if (secureUrl != null) {
+          return '$secureUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+        }
         return secureUrl;
       }
 

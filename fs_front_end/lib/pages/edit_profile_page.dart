@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
@@ -29,10 +31,8 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _positionController = TextEditingController();
   bool _isLoading = false;
   File? _selectedImage;
-  String? _newAvatarUrl;
 
   final List<String> _positions = [
     'Gardien',
@@ -90,7 +90,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _positionController.dispose();
     super.dispose();
   }
 
@@ -107,6 +106,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final navigator = Navigator.of(context);
 
     // 1️⃣ Si nouvelle image sélectionnée, upload à Cloudinary
+    String? newAvatarUrl;
     if (_selectedImage != null) {
       if (currentUser == null) {
         if (mounted) {
@@ -119,14 +119,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
 
       // Upload la nouvelle image
-      _newAvatarUrl = await CloudinaryService.instance.uploadAvatar(
+      newAvatarUrl = await CloudinaryService.instance.uploadAvatar(
         _selectedImage!,
         currentUser.id,
       );
 
       if (!mounted) return;
 
-      if (_newAvatarUrl == null) {
+      if (newAvatarUrl == null) {
         setState(() => _isLoading = false);
         messenger.showSnackBar(
           const SnackBar(
@@ -137,22 +137,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
         return;
       }
 
-      // 2️⃣ Supprimer l'ancienne image (si elle existe)
-      if (currentUser.avatarUrl != null && currentUser.avatarUrl!.isNotEmpty) {
-        final oldPublicId = CloudinaryService.extractPublicIdFromUrl(
-          currentUser.avatarUrl,
-        );
-        if (oldPublicId != null) {
-          await CloudinaryService.instance.deleteAvatar(oldPublicId);
-        }
-      }
+      // Enlever le cache buster avant de sauvegarder
+      final cleanUrl = newAvatarUrl.split('?').first;
+      newAvatarUrl = cleanUrl;
+
+      // 2️⃣ Pas besoin de supprimer l'ancienne image — Cloudinary la remplace automatiquement
     }
 
     // 3️⃣ Sauvegarder les infos au backend
     final result = await AuthService.instance.updateCurrentUser(
       phone: _phoneController.text.trim(),
       preferredPosition: _selectedPosition,
-      avatarUrl: _newAvatarUrl, // null si pas de nouvelle image
+      avatarUrl: newAvatarUrl, // null si pas de nouvelle image
     );
 
     if (!mounted) return;
@@ -162,6 +158,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (result['ok'] == true) {
       await authProvider.refreshCurrentUser();
       if (mounted) {
+        setState(() {
+          _selectedImage = null;
+        });
         messenger.showSnackBar(
           const SnackBar(
             content: Text('Profil mis à jour avec succès !'),
@@ -184,25 +183,44 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  /// Sélectionne une image depuis la galerie
+  /// Sélectionne et crop une image depuis la galerie
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     try {
       final pickedFile = await picker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 80, // Compresser à 80%
-        maxWidth: 500,
-        maxHeight: 500,
+        imageQuality: 80,
       );
 
       if (pickedFile != null) {
-        setState(() => _selectedImage = File(pickedFile.path));
+        // Crop l'image en carré 1:1
+        final croppedFile = await ImageCropper().cropImage(
+          sourcePath: pickedFile.path,
+          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: 'Crop Avatar',
+              toolbarColor: const Color(0xFF181A21),
+              toolbarWidgetColor: const Color(0xFFFF7F2A),
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true,
+            ),
+            IOSUiSettings(
+              title: 'Crop Avatar',
+              minimumAspectRatio: 1.0,
+            ),
+          ],
+        );
+
+        if (croppedFile != null) {
+          setState(() => _selectedImage = File(croppedFile.path));
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e')),
+        );
       }
     }
   }
@@ -305,9 +323,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         // 1️⃣ Image sélectionnée OU image actuelle OU initiale
                         if (_selectedImage != null)
                           ClipOval(
-                            child: Image.file(
-                              _selectedImage!,
-                              fit: BoxFit.cover,
+                            child: FutureBuilder<Uint8List>(
+                              key: ValueKey(_selectedImage!.path),
+                              future: _selectedImage!.readAsBytes(),
+                              builder: (_, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Image.memory(
+                                    snapshot.data!,
+                                    fit: BoxFit.cover,
+                                    key: ValueKey(_selectedImage!.path),
+                                  );
+                                }
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
                             ),
                           )
                         else
