@@ -153,7 +153,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                   ? Image.network(
                       widget.teamLogoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorBuilder: (_, _, _) =>
                           const Icon(Icons.groups, color: _tcAmber, size: 20),
                     )
                   : const Icon(Icons.groups, color: _tcAmber, size: 20),
@@ -512,7 +512,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     ? Image.network(
                         message.sender.avatarUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Center(
+                        errorBuilder: (_, _, _) => Center(
                           child: Text(
                             message.sender.username.isNotEmpty
                                 ? message.sender.username[0].toUpperCase()

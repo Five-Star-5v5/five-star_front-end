@@ -16,6 +16,7 @@ class FootApp extends StatefulWidget {
   State<FootApp> createState() => _FootAppState();
 
   // Pour récupérer l'état depuis n'importe quel widget (toggle du thème)
+  // ignore: library_private_types_in_public_api
   static _FootAppState of(BuildContext context) =>
       context.findAncestorStateOfType<_FootAppState>()!;
 }
@@ -40,7 +41,7 @@ class _FootAppState extends State<FootApp> {
     ),
     scaffoldBackgroundColor: myLightBackground,
     appBarTheme: const AppBarTheme(
-      color: myLightBackground,
+      backgroundColor: myLightBackground,
       elevation: 0,
       iconTheme: IconThemeData(color: MyprimaryDark),
       titleTextStyle: TextStyle(
@@ -74,7 +75,7 @@ class _FootAppState extends State<FootApp> {
     ),
     scaffoldBackgroundColor: myDarkBackground,
     appBarTheme: const AppBarTheme(
-      color: myDarkBackground,
+      backgroundColor: myDarkBackground,
       elevation: 0,
       iconTheme: IconThemeData(color: myAccentVibrantBlue),
       titleTextStyle: TextStyle(
@@ -120,6 +121,7 @@ class MainScreen extends StatefulWidget {
   @override
   State<MainScreen> createState() => _MainScreenState();
 
+  // ignore: library_private_types_in_public_api
   static _MainScreenState of(BuildContext context) =>
       context.findAncestorStateOfType<_MainScreenState>()!;
 }
@@ -159,9 +161,7 @@ class _MainScreenState extends State<MainScreen> {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF16181E),
-        border: Border(
-          top: BorderSide(color: Color(0x12FFFFFF), width: 1),
-        ),
+        border: Border(top: BorderSide(color: Color(0x12FFFFFF), width: 1)),
       ),
       padding: EdgeInsets.fromLTRB(8, 9, 8, 9 + bottomPadding),
       child: Row(

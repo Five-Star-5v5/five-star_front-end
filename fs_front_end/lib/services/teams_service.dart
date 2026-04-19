@@ -431,7 +431,8 @@ class TeamsService {
     required int slotIndex,
   }) async {
     try {
-      final url = '$baseUrl/$teamId/invitations?invited_user_id=$invitedUserId&position=$position&slot_index=$slotIndex';
+      final url =
+          '$baseUrl/$teamId/invitations?invited_user_id=$invitedUserId&position=$position&slot_index=$slotIndex';
       final response = await http.post(Uri.parse(url), headers: await _headers);
       return response.statusCode == 201;
     } catch (e) {
@@ -1074,7 +1075,7 @@ class TeamsService {
               .toSet();
 
           // Récupérer les joueurs adverses et trouver les doublons
-          final opponentMembers = (data as List<dynamic>)
+          final opponentMembers = data
               .map((m) => (m['user']['username'] as String).toLowerCase())
               .toSet();
 
@@ -1103,7 +1104,9 @@ class TeamsService {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((e) => TeamMember.fromJson(e as Map<String, dynamic>)).toList();
+        return data
+            .map((e) => TeamMember.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } catch (e) {
@@ -1358,7 +1361,9 @@ class TeamsService {
   ) async {
     try {
       final body = jsonEncode({'comments': comments});
-      debugPrint('[submitMatchComments] POST /challenges/$challengeId/comments');
+      debugPrint(
+        '[submitMatchComments] POST /challenges/$challengeId/comments',
+      );
       debugPrint('[submitMatchComments] body: $body');
       final response = await http.post(
         Uri.parse('$baseUrl/challenges/$challengeId/comments'),
@@ -1385,7 +1390,9 @@ class TeamsService {
       debugPrint('[getPlayerComments] response: ${response.body}');
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((e) => PlayerCommentData.fromJson(e as Map<String, dynamic>)).toList();
+        return data
+            .map((e) => PlayerCommentData.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
       return [];
     } catch (e) {
@@ -2161,7 +2168,10 @@ class AvailablePlayer {
       if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
         final inner = trimmed.substring(1, trimmed.length - 1);
         if (inner.isEmpty) return [];
-        return inner.split(',').map((e) => e.trim().replaceAll('"', '').replaceAll("'", '')).toList();
+        return inner
+            .split(',')
+            .map((e) => e.trim().replaceAll('"', '').replaceAll("'", ''))
+            .toList();
       }
       return [s];
     } catch (_) {

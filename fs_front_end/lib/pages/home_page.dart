@@ -118,7 +118,11 @@ Widget _buildAvailChip(IconData icon, String label) {
         const SizedBox(width: 3),
         Text(
           label,
-          style: TextStyle(fontSize: 9, color: _kAmber, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 9,
+            color: _kAmber,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     ),
@@ -156,6 +160,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _onTeamChanged() {
+    if (!mounted) return;
     final provider = context.read<TeamsProvider>();
     final currentTeam = provider.currentDisplayedTeam;
     if (currentTeam != null && currentTeam.id != _lastLoadedTeamId) {
@@ -164,6 +169,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _loadSearchPreferences() async {
+    if (!mounted) return;
     final provider = context.read<TeamsProvider>();
     final team = provider.currentDisplayedTeam;
 
@@ -626,9 +632,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -667,7 +673,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                         ),
                       ],
@@ -698,7 +704,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
+                                  color: Colors.blue.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -753,7 +759,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.1),
+                                  color: Colors.red.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -846,10 +852,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.orange.withOpacity(0.3),
+                          color: Colors.orange.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -884,7 +890,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -963,7 +969,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -2109,7 +2115,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           const SizedBox(width: 8),
           Consumer<AuthProvider>(
-            builder: (_, auth, __) {
+            builder: (_, auth, _) {
               final user = auth.currentUser;
               final initial = user?.username.isNotEmpty == true
                   ? user!.username[0].toUpperCase()
@@ -2839,7 +2845,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 // Terrain
                 CustomPaint(
                   size: Size(width, height),
-                  painter: _ModernPitchPainter(Colors.white.withOpacity(0.5)),
+                  painter: _ModernPitchPainter(
+                    Colors.white.withValues(alpha: 0.5),
+                  ),
                 ),
                 ...playerWidgets,
               ],
@@ -3306,7 +3314,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: _kCard2,
                     borderRadius: BorderRadius.circular(12),
@@ -3314,11 +3325,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_outline, color: _kAmber, size: 20),
+                      const Icon(
+                        Icons.person_outline,
+                        color: _kAmber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Voir le profil',
-                        style: GoogleFonts.syne(fontWeight: FontWeight.w600, color: _kWhite, fontSize: 14),
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w600,
+                          color: _kWhite,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -3462,7 +3481,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     color: _kRoseDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kRose.withOpacity(0.3)),
+                    border: Border.all(color: _kRose.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -3570,7 +3589,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     color: _kAmberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kAmber.withOpacity(0.3)),
+                    border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -3613,7 +3632,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: _kAmberDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kAmber.withOpacity(0.3)),
+                  border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
                 ),
                 child: ListTile(
                   leading: const CircleAvatar(
@@ -4149,7 +4168,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: _kRoseDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kRose.withOpacity(0.3)),
+                  border: Border.all(color: _kRose.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -4193,7 +4212,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final teamsProvider = context.read<TeamsProvider>();
     final teamId = teamsProvider.currentDisplayedTeam?.id;
     if (teamId == null) return;
-    final memberIds = teamsProvider.currentDisplayedTeam?.members
+    final memberIds =
+        teamsProvider.currentDisplayedTeam?.members
             .map((m) => m.user.id)
             .toSet() ??
         {};
@@ -4228,7 +4248,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
                 child: Row(
                   children: [
-                    const Icon(Icons.storefront_outlined, color: _kAmber, size: 20),
+                    const Icon(
+                      Icons.storefront_outlined,
+                      color: _kAmber,
+                      size: 20,
+                    ),
                     const SizedBox(width: 10),
                     Text(
                       'Joueurs disponibles',
@@ -4240,7 +4264,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: _kAmberDim,
                         borderRadius: BorderRadius.circular(20),
@@ -4273,16 +4300,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.person_off_outlined, color: _kMuted2, size: 40),
+                            const Icon(
+                              Icons.person_off_outlined,
+                              color: _kMuted2,
+                              size: 40,
+                            ),
                             const SizedBox(height: 12),
                             Text(
                               'Aucun joueur disponible',
-                              style: GoogleFonts.syne(color: _kMuted2, fontWeight: FontWeight.w600),
+                              style: GoogleFonts.syne(
+                                color: _kMuted2,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
-                              style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                              style: GoogleFonts.dmSans(
+                                color: _kMuted2,
+                                fontSize: 12,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -4290,20 +4327,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       );
                     }
                     // Tri : position correspondante en premier
-                    final sorted = [...players]..sort((a, b) {
-                      final aMatch = a.preferredPosition == position.value ? 0 : 1;
-                      final bMatch = b.preferredPosition == position.value ? 0 : 1;
-                      return aMatch.compareTo(bMatch);
-                    });
+                    final sorted = [...players]
+                      ..sort((a, b) {
+                        final aMatch = a.preferredPosition == position.value
+                            ? 0
+                            : 1;
+                        final bMatch = b.preferredPosition == position.value
+                            ? 0
+                            : 1;
+                        return aMatch.compareTo(bMatch);
+                      });
                     return ListView.builder(
                       controller: scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: sorted.length,
                       itemBuilder: (_, i) {
                         final player = sorted[i];
-                        final posMatch = player.preferredPosition == position.value;
+                        final posMatch =
+                            player.preferredPosition == position.value;
                         return Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 5,
+                          ),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: posMatch
@@ -4311,7 +4357,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 : const Color(0xFF13151C),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: posMatch ? _kAmber.withValues(alpha: 0.25) : _kBorder2,
+                              color: posMatch
+                                  ? _kAmber.withValues(alpha: 0.25)
+                                  : _kBorder2,
                             ),
                           ),
                           child: Row(
@@ -4350,10 +4398,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         if (posMatch) ...[
                                           const SizedBox(width: 6),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 1,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: _kAmberDim,
-                                              borderRadius: BorderRadius.circular(10),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Text(
                                               'Poste correspondant',
@@ -4369,7 +4421,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      player.preferredPosition ?? 'Aucune position',
+                                      player.preferredPosition ??
+                                          'Aucune position',
                                       style: GoogleFonts.dmSans(
                                         color: _kMuted2,
                                         fontSize: 12,
@@ -4377,29 +4430,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     ),
                                     if (player.availabilityCities != null ||
                                         player.availabilityDays != null ||
-                                        player.availabilityRadiusKm != null) ...[
+                                        player.availabilityRadiusKm !=
+                                            null) ...[
                                       const SizedBox(height: 5),
                                       Wrap(
                                         spacing: 4,
                                         runSpacing: 4,
                                         children: [
-                                          if (player.availabilityCities != null &&
-                                              player.availabilityCities!.isNotEmpty)
+                                          if (player.availabilityCities !=
+                                                  null &&
+                                              player
+                                                  .availabilityCities!
+                                                  .isNotEmpty)
                                             _buildAvailChip(
                                               Icons.location_on_outlined,
-                                              player.availabilityCities!.take(2).join(', '),
+                                              player.availabilityCities!
+                                                  .take(2)
+                                                  .join(', '),
                                             ),
-                                          if (player.availabilityRadiusKm != null)
+                                          if (player.availabilityRadiusKm !=
+                                              null)
                                             _buildAvailChip(
                                               Icons.radar,
                                               '${player.availabilityRadiusKm} km',
                                             ),
                                           if (player.availabilityDays != null &&
-                                              player.availabilityDays!.isNotEmpty)
+                                              player
+                                                  .availabilityDays!
+                                                  .isNotEmpty)
                                             _buildAvailChip(
                                               Icons.calendar_today_outlined,
-                                              player.availabilityDays!.length == 1
-                                                  ? player.availabilityDays!.first
+                                              player.availabilityDays!.length ==
+                                                      1
+                                                  ? player
+                                                        .availabilityDays!
+                                                        .first
                                                   : '${player.availabilityDays!.first} → ${player.availabilityDays!.last}',
                                             ),
                                         ],
@@ -4423,7 +4488,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   const SizedBox(height: 6),
                                   if (memberIds.contains(player.id))
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: _kCard,
                                         borderRadius: BorderRadius.circular(20),
@@ -4442,31 +4510,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     GestureDetector(
                                       onTap: () async {
                                         Navigator.pop(ctx);
-                                        final success = await TeamsService.instance.sendInvitation(
-                                          teamId: teamId,
-                                          invitedUserId: player.id,
-                                          position: position.name,
-                                          slotIndex: slotIndex,
-                                        );
+                                        final success = await TeamsService
+                                            .instance
+                                            .sendInvitation(
+                                              teamId: teamId,
+                                              invitedUserId: player.id,
+                                              position: position.name,
+                                              slotIndex: slotIndex,
+                                            );
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                 success
                                                     ? 'Invitation envoyée à ${player.username}'
                                                     : 'Erreur lors de l\'envoi',
                                               ),
-                                              backgroundColor:
-                                                  success ? _kAmber : _kRose,
+                                              backgroundColor: success
+                                                  ? _kAmber
+                                                  : _kRose,
                                             ),
                                           );
                                         }
                                       },
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: _kAmber,
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
                                         child: Text(
                                           'Inviter',
@@ -4639,7 +4717,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _kBorder.withOpacity(0.5),
+                                  color: _kBorder.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: _kBorder2),
                                 ),
@@ -4682,7 +4760,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       color: _kRoseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kRose.withOpacity(0.3),
+                                        color: _kRose.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -4947,7 +5025,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _kBorder.withOpacity(0.5),
+                                  color: _kBorder.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: _kBorder2),
                                 ),
@@ -4989,7 +5067,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       color: _kRoseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kRose.withOpacity(0.3),
+                                        color: _kRose.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -5609,7 +5687,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         backgroundColor: _kCard2,
                         side: BorderSide(
                           color: isSelected
-                              ? _kAmber.withOpacity(0.5)
+                              ? _kAmber.withValues(alpha: 0.5)
                               : _kBorder2,
                         ),
                       );
@@ -5764,7 +5842,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         backgroundColor: _kCard2,
                         side: BorderSide(
                           color: isSelected
-                              ? _kAmber.withOpacity(0.5)
+                              ? _kAmber.withValues(alpha: 0.5)
                               : _kBorder2,
                         ),
                       );
@@ -5809,7 +5887,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             });
                           },
                           backgroundColor: _kAmberDim,
-                          side: BorderSide(color: _kAmber.withOpacity(0.3)),
+                          side: BorderSide(
+                            color: _kAmber.withValues(alpha: 0.3),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -6063,7 +6143,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       isScrollControlled: true,
       isDismissible: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => _PostMatchCommentSheet(match: match, myTeam: myTeam, currentUserId: currentUserId),
+      builder: (_) => _PostMatchCommentSheet(
+        match: match,
+        myTeam: myTeam,
+        currentUserId: currentUserId,
+      ),
     );
   }
 }
@@ -6270,10 +6354,16 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         ),
                       ),
                     ),
-                    ...invitations.map((inv) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _buildInvitationItem(context, inv, teamsProvider),
-                    )),
+                    ...invitations.map(
+                      (inv) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _buildInvitationItem(
+                          context,
+                          inv,
+                          teamsProvider,
+                        ),
+                      ),
+                    ),
                   ],
                   if (challenges.isNotEmpty) ...[
                     if (invitations.isNotEmpty) const SizedBox(height: 4),
@@ -6289,10 +6379,18 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         ),
                       ),
                     ),
-                    ...challenges.asMap().entries.map((e) => Padding(
-                      padding: EdgeInsets.only(bottom: e.key < challenges.length - 1 ? 10 : 0),
-                      child: _buildChallengeItem(context, e.value, teamsProvider),
-                    )),
+                    ...challenges.asMap().entries.map(
+                      (e) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: e.key < challenges.length - 1 ? 10 : 0,
+                        ),
+                        child: _buildChallengeItem(
+                          context,
+                          e.value,
+                          teamsProvider,
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -6340,7 +6438,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 child: invitation.teamLogoUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(9),
-                        child: Image.network(invitation.teamLogoUrl!, fit: BoxFit.cover),
+                        child: Image.network(
+                          invitation.teamLogoUrl!,
+                          fit: BoxFit.cover,
+                        ),
                       )
                     : Center(
                         child: Text(
@@ -6405,7 +6506,8 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             invitationId: invitation.id,
                             accept: false,
                           );
-                          if (mounted) setState(() => _loadingIds.remove(-invitation.id));
+                          if (mounted)
+                            setState(() => _loadingIds.remove(-invitation.id));
                         },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -6434,13 +6536,15 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       ? null
                       : () async {
                           setState(() => _loadingIds.add(-invitation.id));
-                          final success = await teamsProvider.respondToInvitation(
-                            invitationId: invitation.id,
-                            accept: true,
-                          );
+                          final success = await teamsProvider
+                              .respondToInvitation(
+                                invitationId: invitation.id,
+                                accept: true,
+                              );
                           if (mounted) {
                             setState(() => _loadingIds.remove(-invitation.id));
-                            if (success && context.mounted) Navigator.pop(context);
+                            if (success && context.mounted)
+                              Navigator.pop(context);
                           }
                         },
                   child: Container(
@@ -6708,7 +6812,11 @@ class _PostMatchCommentSheet extends StatefulWidget {
   final TeamDetail myTeam;
   final int? currentUserId;
 
-  const _PostMatchCommentSheet({required this.match, required this.myTeam, this.currentUserId});
+  const _PostMatchCommentSheet({
+    required this.match,
+    required this.myTeam,
+    this.currentUserId,
+  });
 
   @override
   State<_PostMatchCommentSheet> createState() => _PostMatchCommentSheetState();
@@ -6727,7 +6835,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
   @override
   void initState() {
     super.initState();
-    final filtered = widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList();
+    final filtered = widget.myTeam.members
+        .where((m) => m.user.id != widget.currentUserId)
+        .toList();
     _initControllers(filtered);
     _loadOpponentMembers();
   }
@@ -6748,9 +6858,13 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
         ? match.challengedTeamId
         : match.challengerTeamId;
 
-    final members = await TeamsService.instance.fetchPublicTeamMembers(opponentId);
+    final members = await TeamsService.instance.fetchPublicTeamMembers(
+      opponentId,
+    );
     if (mounted) {
-      final filtered = members.where((m) => m.user.id != widget.currentUserId).toList();
+      final filtered = members
+          .where((m) => m.user.id != widget.currentUserId)
+          .toList();
       setState(() {
         _opponentMembers = filtered;
         _loadingOpponent = false;
@@ -6762,7 +6876,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
   Future<void> _submitStep() async {
     setState(() => _loading = true);
     final members = _step == 0
-        ? widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList()
+        ? widget.myTeam.members
+              .where((m) => m.user.id != widget.currentUserId)
+              .toList()
         : _opponentMembers;
     final comments = members.map((m) {
       return {
@@ -6774,13 +6890,19 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
       };
     }).toList();
 
-    final ok = await TeamsService.instance.submitMatchComments(widget.match.id, comments.cast<Map<String, dynamic>>());
+    final ok = await TeamsService.instance.submitMatchComments(
+      widget.match.id,
+      comments.cast<Map<String, dynamic>>(),
+    );
 
     setState(() => _loading = false);
 
     if (!ok && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de l\'envoi des commentaires'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Erreur lors de l\'envoi des commentaires'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
 
@@ -6803,7 +6925,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
   Widget build(BuildContext context) {
     final isMyTeamStep = _step == 0;
     final members = isMyTeamStep
-        ? widget.myTeam.members.where((m) => m.user.id != widget.currentUserId).toList()
+        ? widget.myTeam.members
+              .where((m) => m.user.id != widget.currentUserId)
+              .toList()
         : _opponentMembers;
     final title = isMyTeamStep ? 'Mon équipe' : 'Équipe adverse';
     final subtitle = isMyTeamStep
@@ -6838,14 +6962,21 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: _kAmber.withOpacity(0.15),
+                      color: _kAmber.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${_step + 1}/2',
-                      style: GoogleFonts.syne(fontSize: 11, fontWeight: FontWeight.w700, color: _kAmber),
+                      style: GoogleFonts.syne(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _kAmber,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -6853,8 +6984,21 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w700, color: _kWhite)),
-                        Text(subtitle, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+                        Text(
+                          title,
+                          style: GoogleFonts.syne(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: _kWhite,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 11,
+                            color: _kMuted2,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -6865,18 +7009,25 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
             // Liste joueurs
             Expanded(
               child: (!isMyTeamStep && _loadingOpponent)
-                  ? const Center(child: CircularProgressIndicator(color: _kAmber))
+                  ? const Center(
+                      child: CircularProgressIndicator(color: _kAmber),
+                    )
                   : ListView.separated(
                       controller: scroll,
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                       itemCount: members.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (_, i) => _buildPlayerCard(members[i]),
                     ),
             ),
             // Bouton suivant / terminer
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 12),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                0,
+                16,
+                MediaQuery.of(context).padding.bottom + 12,
+              ),
               child: GestureDetector(
                 onTap: _loading ? null : _submitStep,
                 child: Container(
@@ -6887,10 +7038,21 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   ),
                   alignment: Alignment.center,
                   child: _loading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : Text(
                           _step == 0 ? 'Équipe adverse →' : 'Terminer',
-                          style: GoogleFonts.syne(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: GoogleFonts.syne(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                 ),
               ),
@@ -6919,7 +7081,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               final ctrl = _controllers[userId];
               if (ctrl != null) {
                 ctrl.text = s;
-                ctrl.selection = TextSelection.fromPosition(TextPosition(offset: s.length));
+                ctrl.selection = TextSelection.fromPosition(
+                  TextPosition(offset: s.length),
+                );
               }
               setState(() {});
             },
@@ -6931,7 +7095,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _kBorder2),
               ),
-              child: Text(s, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+              child: Text(
+                s,
+                style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+              ),
             ),
           );
         }).toList(),
@@ -6947,7 +7114,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
         color: _kCard2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAbsent ? _kRose.withOpacity(0.4) : _kBorder2,
+          color: isAbsent ? _kRose.withValues(alpha: 0.4) : _kBorder2,
         ),
       ),
       child: Column(
@@ -6979,19 +7146,39 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         color: _kBorder2,
                         shape: BoxShape.circle,
                         image: member.user.avatarUrl != null
-                            ? DecorationImage(image: NetworkImage(member.user.avatarUrl!), fit: BoxFit.cover)
+                            ? DecorationImage(
+                                image: NetworkImage(member.user.avatarUrl!),
+                                fit: BoxFit.cover,
+                              )
                             : null,
                       ),
                       child: member.user.avatarUrl == null
-                          ? const Icon(Icons.person_outline, size: 20, color: _kMuted2)
+                          ? const Icon(
+                              Icons.person_outline,
+                              size: 20,
+                              color: _kMuted2,
+                            )
                           : null,
                     ),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(member.user.username, style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: _kWhite)),
-                        Text(member.position.displayName, style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2)),
+                        Text(
+                          member.user.username,
+                          style: GoogleFonts.syne(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: _kWhite,
+                          ),
+                        ),
+                        Text(
+                          member.position.displayName,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 11,
+                            color: _kMuted2,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -7000,23 +7187,39 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               const Spacer(),
               // Toggle absent
               GestureDetector(
-                onTap: () => setState(() => _absences[member.user.id] = !isAbsent),
+                onTap: () =>
+                    setState(() => _absences[member.user.id] = !isAbsent),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
-                    color: isAbsent ? _kRose.withOpacity(0.2) : _kBorder2,
+                    color: isAbsent ? _kRose.withValues(alpha: 0.2) : _kBorder2,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: isAbsent ? _kRose : Colors.transparent),
+                    border: Border.all(
+                      color: isAbsent ? _kRose : Colors.transparent,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(isAbsent ? Icons.warning_rounded : Icons.check_circle_outline, size: 12, color: isAbsent ? _kRose : _kMuted2),
+                      Icon(
+                        isAbsent
+                            ? Icons.warning_rounded
+                            : Icons.check_circle_outline,
+                        size: 12,
+                        color: isAbsent ? _kRose : _kMuted2,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         isAbsent ? 'Absent' : 'Présent',
-                        style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: isAbsent ? _kRose : _kMuted2),
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: isAbsent ? _kRose : _kMuted2,
+                        ),
                       ),
                     ],
                   ),
@@ -7036,10 +7239,22 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               counterStyle: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
               filled: true,
               fillColor: _kCard,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kBorder2)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kBorder2)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: _kAmber)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: _kBorder2),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: _kBorder2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: _kAmber),
+              ),
             ),
           ),
           const SizedBox(height: 8),

@@ -54,5 +54,9 @@
 	<string>Five Stars a besoin de votre position pour trouver les terrains de foot à proximité.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Five Stars a besoin de votre position pour trouver les terrains de foot à proximité.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Five-Star a besoin d'accéder à vos photos pour changer votre avatar</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Five-Star a besoin de la caméra pour prendre une photo d'avatar</string>
 </dict>
 </plist>

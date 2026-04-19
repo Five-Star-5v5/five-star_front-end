@@ -1428,7 +1428,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: provider.searchResults.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (_, i) =>
           _buildSearchResult(provider.searchResults[i], provider),
     );

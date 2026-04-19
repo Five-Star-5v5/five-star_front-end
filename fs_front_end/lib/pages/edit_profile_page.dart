@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import '../services/cloudinary_service.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _eBg = Color(0xFF0A0C10);
@@ -12,6 +15,7 @@ const _eBorder2 = Color(0x21FFFFFF);
 const _eAmber = Color(0xFFFF7F2A);
 const _eAmberSoft = Color(0xFFFF9A55);
 const _eAmberD = Color(0xFFD96820);
+const _eAmberDim = Color(0x1CFF7F2A);
 const _eWhite = Color(0xFFF0F2F5);
 const _eMuted2 = Color(0x9EF0F2F5);
 
@@ -27,6 +31,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _phoneController = TextEditingController();
   final _positionController = TextEditingController();
   bool _isLoading = false;
+  File? _selectedImage;
+  String? _newAvatarUrl;
 
   final List<String> _positions = [
     'Gardien',
@@ -91,17 +97,65 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     // Store context-dependent references before async gaps
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final currentUser = authProvider.currentUser;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
+    // 1️⃣ Si nouvelle image sélectionnée, upload à Cloudinary
+    if (_selectedImage != null) {
+      if (currentUser == null) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Erreur: utilisateur non trouvé')),
+          );
+        }
+        return;
+      }
+
+      // Upload la nouvelle image
+      _newAvatarUrl = await CloudinaryService.instance.uploadAvatar(
+        _selectedImage!,
+        currentUser.id,
+      );
+
+      if (!mounted) return;
+
+      if (_newAvatarUrl == null) {
+        setState(() => _isLoading = false);
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors du upload de l\'image'),
+            backgroundColor: Color(0xFFD4607A),
+          ),
+        );
+        return;
+      }
+
+      // 2️⃣ Supprimer l'ancienne image (si elle existe)
+      if (currentUser.avatarUrl != null && currentUser.avatarUrl!.isNotEmpty) {
+        final oldPublicId = CloudinaryService.extractPublicIdFromUrl(
+          currentUser.avatarUrl,
+        );
+        if (oldPublicId != null) {
+          await CloudinaryService.instance.deleteAvatar(oldPublicId);
+        }
+      }
+    }
+
+    // 3️⃣ Sauvegarder les infos au backend
     final result = await AuthService.instance.updateCurrentUser(
       phone: _phoneController.text.trim(),
       preferredPosition: _selectedPosition,
+      avatarUrl: _newAvatarUrl, // null si pas de nouvelle image
     );
+
+    if (!mounted) return;
 
     setState(() => _isLoading = false);
 
@@ -126,6 +180,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
             backgroundColor: const Color(0xFFD4607A),
           ),
         );
+      }
+    }
+  }
+
+  /// Sélectionne une image depuis la galerie
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    try {
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80, // Compresser à 80%
+        maxWidth: 500,
+        maxHeight: 500,
+      );
+
+      if (pickedFile != null) {
+        setState(() => _selectedImage = File(pickedFile.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
       }
     }
   }
@@ -194,6 +271,155 @@ class _EditProfilePageState extends State<EditProfilePage> {
               Text(
                 'Mettez à jour vos informations de profil',
                 style: GoogleFonts.dmSans(fontSize: 13, color: _eMuted2),
+              ),
+              const SizedBox(height: 32),
+
+              // ── Avatar ──────────────────────────────────────────────────────
+              _fieldLabel('PHOTO DE PROFIL'),
+              const SizedBox(height: 12),
+              Center(
+                child: GestureDetector(
+                  onTap: _isLoading ? null : _pickImage,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [_eAmberSoft, _eAmberD],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _eAmber, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _eAmber.withValues(alpha: 0.2),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 1️⃣ Image sélectionnée OU image actuelle OU initiale
+                        if (_selectedImage != null)
+                          ClipOval(
+                            child: Image.file(
+                              _selectedImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        else
+                          Consumer<AuthProvider>(
+                            builder: (ctx, auth, _) {
+                              final currentUser = auth.currentUser;
+                              final hasAvatar =
+                                  currentUser?.avatarUrl != null &&
+                                  currentUser!.avatarUrl!.isNotEmpty;
+
+                              if (hasAvatar) {
+                                return ClipOval(
+                                  // The second ! is required by Image.network type signature
+                                  // ignore: unnecessary_non_null_assertion
+                                  child: Image.network(
+                                    currentUser!.avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Center(
+                                      child: Text(
+                                        currentUser.username.isNotEmpty
+                                            ? currentUser.username[0]
+                                                  .toUpperCase()
+                                            : '?',
+                                        style: GoogleFonts.syne(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 32,
+                                          color: _eCard,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Center(
+                                child: Text(
+                                  currentUser?.username.isNotEmpty == true
+                                      ? currentUser!.username[0].toUpperCase()
+                                      : '?',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 32,
+                                    color: _eCard,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        // 2️⃣ Overlay: icône caméra
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 32,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: _selectedImage == null
+                    ? Text(
+                        'Appuyez pour changer',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _eMuted2,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _eAmberDim,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Nouvelle image',
+                              style: GoogleFonts.syne(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: _eAmber,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => setState(() => _selectedImage = null),
+                            child: Text(
+                              'Annuler',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 10,
+                                color: _eMuted2,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
               const SizedBox(height: 32),
 

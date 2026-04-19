@@ -378,7 +378,7 @@ class _WelcomePageState extends State<WelcomePage>
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -387,7 +387,7 @@ class _WelcomePageState extends State<WelcomePage>
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -522,7 +522,7 @@ class _GradientButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: _kAmber.withOpacity(0.32),
+                color: _kAmber.withValues(alpha: 0.32),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -618,7 +618,7 @@ class _BgPainter extends CustomPainter {
       ..shader = RadialGradient(
         center: const Alignment(0, -0.7),
         radius: 0.7,
-        colors: [const Color(0xFFE8923A).withOpacity(0.13), Colors.transparent],
+        colors: [const Color(0xFFE8923A).withValues(alpha: 0.13), Colors.transparent],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, amberGlow);
 
@@ -627,13 +627,13 @@ class _BgPainter extends CustomPainter {
       ..shader = RadialGradient(
         center: const Alignment(-0.7, 0.6),
         radius: 0.5,
-        colors: [const Color(0xFF4CAF82).withOpacity(0.06), Colors.transparent],
+        colors: [const Color(0xFF4CAF82).withValues(alpha: 0.06), Colors.transparent],
       ).createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, greenGlow);
 
     // Grid lines 32px
     final gridPaint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withValues(alpha: 0.03)
       ..strokeWidth = 1;
     const step = 32.0;
     for (double x = 0; x < size.width; x += step) {

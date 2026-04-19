@@ -331,7 +331,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Image.network(
                             team.teamLogoUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
+                            errorBuilder: (_, _, _) => Center(
                               child: Text(
                                 team.teamName[0].toUpperCase(),
                                 style: GoogleFonts.syne(
@@ -621,7 +621,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Image.network(
                             opponentLogoUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
+                            errorBuilder: (_, _, _) => Center(
                               child: Text(
                                 opponentTeamName[0].toUpperCase(),
                                 style: GoogleFonts.syne(

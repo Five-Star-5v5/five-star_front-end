@@ -647,11 +647,11 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                   Column(
                     children: [
                       const SizedBox(height: 8),
-                      Icon(Icons.sports_soccer_outlined, size: 32, color: _pMuted2.withOpacity(0.4)),
+                      Icon(Icons.sports_soccer_outlined, size: 32, color: _pMuted2.withValues(alpha: 0.4)),
                       const SizedBox(height: 8),
                       Text('Aucun match joué', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: _pMuted2)),
                       const SizedBox(height: 4),
-                      Text("Ton historique apparaîtra ici", style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withOpacity(0.5))),
+                      Text("Ton historique apparaîtra ici", style: GoogleFonts.dmSans(fontSize: 11, color: _pMuted2.withValues(alpha: 0.5))),
                       const SizedBox(height: 16),
                     ],
                   )
@@ -738,7 +738,7 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                   margin: const EdgeInsets.only(top: 4),
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: resultColor.withOpacity(0.15),
+                    color: resultColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(resultLabel, style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
@@ -847,7 +847,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
       decoration: BoxDecoration(
         color: _pCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.isAbsent ? const Color(0xFFD4607A).withOpacity(0.3) : const Color(0x21FFFFFF)),
+        border: Border.all(color: c.isAbsent ? const Color(0xFFD4607A).withValues(alpha: 0.3) : const Color(0x21FFFFFF)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -878,7 +878,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4607A).withOpacity(0.15),
+                          color: const Color(0xFFD4607A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: const Color(0xFFD4607A))),

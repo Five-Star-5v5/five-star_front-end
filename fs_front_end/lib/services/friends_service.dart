@@ -37,7 +37,7 @@ class FriendsService {
     final authHeader = await AuthService.instance.getAuthHeader();
     if (authHeader == null) return null;
 
-    final url = Uri.parse('$baseUrl');
+    final url = Uri.parse(baseUrl);
     final resp = await http.get(
       url,
       headers: {

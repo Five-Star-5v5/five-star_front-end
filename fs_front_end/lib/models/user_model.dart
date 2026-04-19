@@ -42,7 +42,7 @@ class UserModel {
 
   /// Crée un UserModel à partir d'un JSON (réponse API)
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    List<String>? _parseJsonList(dynamic raw) {
+    List<String>? parseJsonList(dynamic raw) {
       if (raw == null) return null;
       if (raw is List) return raw.map((e) => e.toString()).toList();
       try {
@@ -79,9 +79,9 @@ class UserModel {
       matchesLost: json['matches_lost'] as int? ?? 0,
       matchesDrawn: json['matches_drawn'] as int? ?? 0,
       isAvailable: json['is_available'] as bool? ?? false,
-      availabilityDays: _parseJsonList(json['availability_days']),
+      availabilityDays: parseJsonList(json['availability_days']),
       availabilityEndDate: json['availability_end_date'] as String?,
-      availabilityCities: _parseJsonList(json['availability_cities']),
+      availabilityCities: parseJsonList(json['availability_cities']),
       availabilityRadiusKm: json['availability_radius_km'] as int?,
     );
   }
