@@ -12,6 +12,7 @@ class TeamsProvider with ChangeNotifier {
   // État
   TeamsLoadingState _state = TeamsLoadingState.idle;
   String? _errorMessage;
+  bool _isLoadingInitial = true; // Chargement initial des équipes
 
   // Données
   List<TeamPreview> _teams = [];
@@ -60,6 +61,7 @@ class TeamsProvider with ChangeNotifier {
   // Getters
   TeamsLoadingState get state => _state;
   String? get errorMessage => _errorMessage;
+  bool get isLoadingInitial => _isLoadingInitial;
   List<TeamPreview> get teams => _teams;
   TeamDetail? get myTeam => _myTeam;
   TeamDetail? get selectedTeam => _selectedTeam;
@@ -69,11 +71,14 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplication> get receivedApplications => _receivedApplications;
   List<OpenSlot> get allOpenSlots => _allOpenSlots;
   List<SlotApplicationDetail> get myApplications => _myApplications;
-  List<MatchChallenge> get pendingChallenges => List.unmodifiable(_pendingChallenges);
+  List<MatchChallenge> get pendingChallenges =>
+      List.unmodifiable(_pendingChallenges);
   int get pendingChallengesCount => _pendingChallenges.length;
-  List<TeamInvitation> get pendingInvitations => List.unmodifiable(_pendingInvitations);
+  List<TeamInvitation> get pendingInvitations =>
+      List.unmodifiable(_pendingInvitations);
   int get pendingInvitationsCount => _pendingInvitations.length;
-  int get totalNotificationsCount => pendingChallengesCount + pendingInvitationsCount;
+  int get totalNotificationsCount =>
+      pendingChallengesCount + pendingInvitationsCount;
 
   // Getters chat
   List<TeamChatInfo> get myTeamChats => _myTeamChats;
@@ -202,6 +207,7 @@ class TeamsProvider with ChangeNotifier {
 
   /// Charge "Mon Équipe" (équipe par défaut) ET les équipes où je suis membre
   Future<void> loadMyTeam() async {
+    _isLoadingInitial = true;
     _state = TeamsLoadingState.loading;
     _errorMessage = null;
     notifyListeners();
@@ -248,6 +254,7 @@ class TeamsProvider with ChangeNotifier {
       _errorMessage = 'Erreur: $e';
     }
 
+    _isLoadingInitial = false;
     notifyListeners();
   }
 
@@ -265,8 +272,9 @@ class TeamsProvider with ChangeNotifier {
   Future<void> loadPendingChallenges() async {
     try {
       final all = await _teamsService.getReceivedChallenges();
-      _pendingChallenges =
-          all.where((c) => c.status == ChallengeStatus.pending).toList();
+      _pendingChallenges = all
+          .where((c) => c.status == ChallengeStatus.pending)
+          .toList();
       notifyListeners();
     } catch (_) {}
   }
@@ -291,7 +299,8 @@ class TeamsProvider with ChangeNotifier {
       );
       if (success) {
         _pendingInvitations.removeWhere((inv) => inv.id == invitationId);
-        if (accept) await loadMyTeam(); // Recharger pour intégrer la nouvelle équipe
+        if (accept)
+          await loadMyTeam(); // Recharger pour intégrer la nouvelle équipe
         notifyListeners();
       }
       return success;

@@ -145,10 +145,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int? _lastLoadedTeamId;
   List<MatchChallenge> _upcomingMatches = [];
   Map<int, int> _unreadMatchMessages = {};
+  late AnimationController _loadingAnimationController;
 
   @override
   void initState() {
     super.initState();
+
+    _loadingAnimationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<TeamsProvider>();
@@ -157,6 +163,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       provider.addListener(_onTeamChanged);
       _loadSearchPreferences();
     });
+  }
+
+  @override
+  void dispose() {
+    _loadingAnimationController.dispose();
+    super.dispose();
   }
 
   void _onTeamChanged() {
@@ -284,6 +296,63 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _showSnackBar('Erreur lors de la désactivation', isSuccess: false);
       }
     }
+  }
+
+  Widget _buildLoadingScreen() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Logo avec rotation
+          RotationTransition(
+            turns: _loadingAnimationController,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [_kAmberSoft, _kAmberD],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kAmber.withValues(alpha: 0.4),
+                    blurRadius: 24,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+              child: SvgPicture.string(
+                _logoHexSvg(_kLogoOrange, '#0B0D11', 'loadingHex'),
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'Kobeta',
+            style: GoogleFonts.syne(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: _kWhite,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Préparation en cours...',
+            style: GoogleFonts.dmSans(
+              fontSize: 13,
+              color: _kMuted2,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSnackBar(String message, {required bool isSuccess}) {
@@ -2149,11 +2218,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ),
       body: Consumer<TeamsProvider>(
         builder: (context, teamsProvider, _) {
+          if (teamsProvider.isLoadingInitial) {
+            return _buildLoadingScreen();
+          }
+
           if (teamsProvider.state == TeamsLoadingState.loading &&
               teamsProvider.allTeams.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: _kAmber),
-            );
+            return _buildLoadingScreen();
           }
 
           final allTeams = teamsProvider.allTeams;
