@@ -168,6 +168,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _loadingAnimationController.dispose();
+    // Retirer le listener
+    try {
+      context.read<TeamsProvider>().removeListener(_onTeamChanged);
+    } catch (_) {}
     super.dispose();
   }
 
@@ -1898,15 +1902,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _getMyTeamIdFromMatch(MatchChallenge match) {
     final provider = context.read<TeamsProvider>();
     return provider.currentDisplayedTeam?.id ?? match.challengerTeamId;
-  }
-
-  @override
-  void dispose() {
-    // Retirer le listener
-    try {
-      context.read<TeamsProvider>().removeListener(_onTeamChanged);
-    } catch (_) {}
-    super.dispose();
   }
 
   /// Affiche une boîte de dialogue pour confirmer la sortie de l'équipe

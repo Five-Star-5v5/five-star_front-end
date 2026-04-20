@@ -9,20 +9,20 @@ import '../services/teams_service.dart';
 import 'all_comments_page.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
-const _upBg       = Color(0xFF0A0C10);
-const _upNight    = Color(0xFF0B0D11);
-const _upCard     = Color(0xFF181A21);
-const _upBorder2  = Color(0x21FFFFFF);
-const _upAmber    = Color(0xFFFF7F2A);
+const _upBg = Color(0xFF0A0C10);
+const _upNight = Color(0xFF0B0D11);
+const _upCard = Color(0xFF181A21);
+const _upBorder2 = Color(0x21FFFFFF);
+const _upAmber = Color(0xFFFF7F2A);
 const _upAmberSoft = Color(0xFFFF9A55);
-const _upAmberD   = Color(0xFFD96820);
+const _upAmberD = Color(0xFFD96820);
 const _upAmberDim = Color(0x1CFF7F2A);
-const _upSage     = Color(0xFF4CAF82);
-const _upSageDim  = Color(0x1C4CAF82);
-const _upRose     = Color(0xFFD4607A);
-const _upRoseDim  = Color(0x1CD4607A);
-const _upWhite    = Color(0xFFF0F2F5);
-const _upMuted2   = Color(0x9EF0F2F5);
+const _upSage = Color(0xFF4CAF82);
+const _upSageDim = Color(0x1C4CAF82);
+const _upRose = Color(0xFFD4607A);
+const _upRoseDim = Color(0x1CD4607A);
+const _upWhite = Color(0xFFF0F2F5);
+const _upMuted2 = Color(0x9EF0F2F5);
 
 /// Page pour afficher le profil d'un autre utilisateur
 class UserProfilePage extends StatefulWidget {
@@ -183,7 +183,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ── Hero ───────────────────────────────────────────────────────────────────
 
   Widget _buildHero(UserModel user) {
-    final initial = user.username.isNotEmpty ? user.username[0].toUpperCase() : '?';
+    final initial = user.username.isNotEmpty
+        ? user.username[0].toUpperCase()
+        : '?';
 
     return Padding(
       padding: const EdgeInsets.only(top: 20),
@@ -285,8 +287,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Widget _pill(String label, {bool amber = false, bool sage = false}) {
-    final color = amber ? _upAmber : sage ? _upSage : _upMuted2;
-    final bg    = amber ? _upAmberDim : sage ? _upSageDim : const Color(0x0DFFFFFF);
+    final color = amber
+        ? _upAmber
+        : sage
+        ? _upSage
+        : _upMuted2;
+    final bg = amber
+        ? _upAmberDim
+        : sage
+        ? _upSageDim
+        : const Color(0x0DFFFFFF);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -310,32 +320,37 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildStatsBar(UserModel user) {
     final stats = [
-      _StatItem('MATCHS',    '${user.matchesPlayed}'),
+      _StatItem('MATCHS', '${user.matchesPlayed}'),
       _StatItem('VICTOIRES', '${user.matchesWon}'),
-      _StatItem('WIN RATE',  '${user.winRate.toStringAsFixed(0)}%'),
-      _StatItem('NOTE',      user.rating != null ? '${user.rating!.toStringAsFixed(1)}★' : '—'),
+      _StatItem('WIN RATE', '${user.winRate.toStringAsFixed(0)}%'),
+      _StatItem(
+        'NOTE',
+        user.rating != null ? '${user.rating!.toStringAsFixed(1)}★' : '—',
+      ),
     ];
 
     return Row(
       children: List.generate(stats.length, (i) {
         final isFirst = i == 0;
-        final isLast  = i == stats.length - 1;
+        final isLast = i == stats.length - 1;
         return Expanded(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
             decoration: BoxDecoration(
               color: _upCard,
               border: Border(
-                top:    const BorderSide(color: _upBorder2),
+                top: const BorderSide(color: _upBorder2),
                 bottom: const BorderSide(color: _upBorder2),
-                left:   const BorderSide(color: _upBorder2),
-                right:  isLast ? const BorderSide(color: _upBorder2) : BorderSide.none,
+                left: const BorderSide(color: _upBorder2),
+                right: isLast
+                    ? const BorderSide(color: _upBorder2)
+                    : BorderSide.none,
               ),
               borderRadius: BorderRadius.only(
-                topLeft:     isFirst ? const Radius.circular(12) : Radius.zero,
-                bottomLeft:  isFirst ? const Radius.circular(12) : Radius.zero,
-                topRight:    isLast  ? const Radius.circular(12) : Radius.zero,
-                bottomRight: isLast  ? const Radius.circular(12) : Radius.zero,
+                topLeft: isFirst ? const Radius.circular(12) : Radius.zero,
+                bottomLeft: isFirst ? const Radius.circular(12) : Radius.zero,
+                topRight: isLast ? const Radius.circular(12) : Radius.zero,
+                bottomRight: isLast ? const Radius.circular(12) : Radius.zero,
               ),
             ),
             child: Column(
@@ -392,10 +407,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   List<_Badge> _computeBadges(UserModel user) {
     final list = <_Badge>[];
-    if (user.matchesPlayed >= 20) list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
-    if (user.matchesPlayed >= 10) list.add(_Badge('Régulier ⚡', _upAmber, _upAmberDim));
-    if (user.matchesWon >= 5)     list.add(_Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
-    if (user.matchesPlayed >= 5)  list.add(_Badge('Actif', _upAmber, _upAmberDim));
+    if (user.matchesPlayed >= 20)
+      list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
+    if (user.matchesPlayed >= 10)
+      list.add(_Badge('Régulier ⚡', _upAmber, _upAmberDim));
+    if (user.matchesWon >= 5)
+      list.add(
+        _Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)),
+      );
+    if (user.matchesPlayed >= 5)
+      list.add(_Badge('Actif', _upAmber, _upAmberDim));
     return list;
   }
 
@@ -422,16 +443,121 @@ class _UserProfilePageState extends State<UserProfilePage> {
   // ── History ────────────────────────────────────────────────────────────────
 
   Widget _buildHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionLabel('HISTORIQUE'),
-        _emptyState(
-          Icons.sports_soccer_outlined,
-          'Aucun match joué',
-          'L\'historique apparaîtra ici',
-        ),
-      ],
+    // Réutiliser les commentaires pour afficher les matchs
+    return FutureBuilder<List<PlayerCommentData>>(
+      future: _commentsFuture,
+      builder: (ctx, snap) {
+        final loading = snap.connectionState == ConnectionState.waiting;
+        final comments = snap.data ?? [];
+
+        // Grouper par challenge_id pour avoir un match unique par match joué
+        final matchesMap = <int, PlayerCommentData>{};
+        for (final comment in comments) {
+          if (!matchesMap.containsKey(comment.challengeId)) {
+            matchesMap[comment.challengeId] = comment;
+          }
+        }
+
+        final uniqueMatches = matchesMap.values.toList();
+        debugPrint(
+          '[History] Total comments: ${comments.length}, Unique matches: ${uniqueMatches.length}',
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionLabel('HISTORIQUE'),
+            if (loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(
+                    color: _upAmber,
+                    strokeWidth: 2,
+                  ),
+                ),
+              )
+            else if (uniqueMatches.isEmpty)
+              _emptyState(
+                Icons.sports_soccer_outlined,
+                'Aucun match joué',
+                'L\'historique apparaîtra ici',
+              )
+            else
+              Column(
+                children: uniqueMatches
+                    .map((c) => _buildHistoryCard(c))
+                    .toList(),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHistoryCard(PlayerCommentData comment) {
+    final dateStr =
+        '${comment.createdAt.day.toString().padLeft(2, '0')}/${comment.createdAt.month.toString().padLeft(2, '0')}/${comment.createdAt.year}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _upCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _upBorder2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Match #${comment.challengeId}',
+                  style: GoogleFonts.syne(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _upWhite,
+                  ),
+                ),
+              ),
+              Text(
+                dateStr,
+                style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Icon(
+                comment.isAbsent ? Icons.close_rounded : Icons.check_rounded,
+                size: 14,
+                color: comment.isAbsent ? _upRose : _upSage,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                comment.isAbsent ? 'Absent' : 'Présent',
+                style: GoogleFonts.syne(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: comment.isAbsent ? _upRose : _upSage,
+                ),
+              ),
+            ],
+          ),
+          if (comment.content != null && comment.content!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              comment.content!,
+              style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -457,23 +583,47 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       onTap: () => Navigator.push(
                         ctx,
                         MaterialPageRoute(
-                          builder: (_) => AllCommentsPage(username: username, comments: comments),
+                          builder: (_) => AllCommentsPage(
+                            username: username,
+                            comments: comments,
+                          ),
                         ),
                       ),
                       child: Text(
                         'Voir tout →',
-                        style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: _upAmber),
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _upAmber,
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
             if (loading)
-              const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: _upAmber, strokeWidth: 2)))
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(
+                    color: _upAmber,
+                    strokeWidth: 2,
+                  ),
+                ),
+              )
             else if (comments.isEmpty)
-              _emptyState(Icons.chat_bubble_outline, 'Aucun commentaire', 'Les avis laissés après les matchs apparaîtront ici')
+              _emptyState(
+                Icons.chat_bubble_outline,
+                'Aucun commentaire',
+                'Les avis laissés après les matchs apparaîtront ici',
+              )
             else
-              Column(children: comments.take(3).map((c) => _buildCommentCard(c)).toList()),
+              Column(
+                children: comments
+                    .take(3)
+                    .map((c) => _buildCommentCard(c))
+                    .toList(),
+              ),
           ],
         );
       },
@@ -481,14 +631,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   Widget _buildCommentCard(PlayerCommentData c) {
-    final dateStr = '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: _upCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.isAbsent ? _upRose.withValues(alpha: 0.3) : _upBorder2),
+        border: Border.all(
+          color: c.isAbsent ? _upRose.withValues(alpha: 0.3) : _upBorder2,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,7 +653,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
               color: _upBorder2,
               shape: BoxShape.circle,
               image: c.authorAvatarUrl != null
-                  ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
+                  ? DecorationImage(
+                      image: NetworkImage(c.authorAvatarUrl!),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
             child: c.authorAvatarUrl == null
@@ -516,25 +672,45 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     Text(
                       c.authorUsername ?? 'Joueur',
-                      style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w700, color: _upWhite),
+                      style: GoogleFonts.syne(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: _upWhite,
+                      ),
                     ),
                     const Spacer(),
                     if (c.isAbsent)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: _upRose.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: _upRose)),
+                        child: Text(
+                          'Absent',
+                          style: GoogleFonts.syne(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: _upRose,
+                          ),
+                        ),
                       ),
                     const SizedBox(width: 6),
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2)),
+                    Text(
+                      dateStr,
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+                    ),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2)),
+                  Text(
+                    c.content!,
+                    style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2),
+                  ),
                 ],
               ],
             ),
@@ -779,7 +955,7 @@ class _StatItem {
 
 class _Badge {
   final String label;
-  final Color  color;
-  final Color  bg;
+  final Color color;
+  final Color bg;
   const _Badge(this.label, this.color, this.bg);
 }
