@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -15,7 +14,7 @@ class CloudinaryService {
 
   /// Upload une image à Cloudinary de manière non-signée
   /// Retourne l'URL publique si succès, null sinon
-  Future<String?> uploadAvatar(File imageFile, int userId) async {
+  Future<String?> uploadAvatar(Uint8List imageBytes, int userId) async {
     try {
       final url = Uri.parse(
         'https://api.cloudinary.com/v1_1/$_cloudName/image/upload',
@@ -26,9 +25,13 @@ class CloudinaryService {
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = _uploadPreset
         ..fields['public_id'] =
-            'five_star_avatars/user_${userId}_$timestamp' // Format: five_star_avatars/user_123_1776637732106
+            'five_star_avatars/user_${userId}_$timestamp'
         ..fields['resource_type'] = 'auto'
-        ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+        ..files.add(http.MultipartFile.fromBytes(
+          'file',
+          imageBytes,
+          filename: 'avatar.jpg',
+        ));
 
       final response = await request.send().timeout(
         const Duration(seconds: 30),

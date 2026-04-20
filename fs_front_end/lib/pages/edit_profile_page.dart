@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'dart:io';
-import 'dart:typed_data';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
@@ -32,7 +31,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   bool _isLoading = false;
-  File? _selectedImage;
+  XFile? _selectedImage;
 
   final List<String> _positions = [
     'Gardien',
@@ -119,8 +118,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
 
       // Upload la nouvelle image
+      final imageBytes = await _selectedImage!.readAsBytes();
       newAvatarUrl = await CloudinaryService.instance.uploadAvatar(
-        _selectedImage!,
+        imageBytes,
         currentUser.id,
       );
 
@@ -193,27 +193,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
 
       if (pickedFile != null) {
-        // Crop l'image en carré 1:1
-        final croppedFile = await ImageCropper().cropImage(
-          sourcePath: pickedFile.path,
-          aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-          uiSettings: [
-            AndroidUiSettings(
-              toolbarTitle: 'Crop Avatar',
-              toolbarColor: const Color(0xFF181A21),
-              toolbarWidgetColor: const Color(0xFFFF7F2A),
-              initAspectRatio: CropAspectRatioPreset.square,
-              lockAspectRatio: true,
-            ),
-            IOSUiSettings(
-              title: 'Crop Avatar',
-              minimumAspectRatio: 1.0,
-            ),
-          ],
-        );
+        if (kIsWeb) {
+          // Sur web: pas de crop, utiliser l'image directement
+          setState(() => _selectedImage = pickedFile);
+        } else {
+          // Sur mobile: crop en carré 1:1
+          final croppedFile = await ImageCropper().cropImage(
+            sourcePath: pickedFile.path,
+            aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarTitle: 'Crop Avatar',
+                toolbarColor: const Color(0xFF181A21),
+                toolbarWidgetColor: const Color(0xFFFF7F2A),
+                initAspectRatio: CropAspectRatioPreset.square,
+                lockAspectRatio: true,
+              ),
+              IOSUiSettings(
+                title: 'Crop Avatar',
+                minimumAspectRatio: 1.0,
+              ),
+            ],
+          );
 
-        if (croppedFile != null) {
-          setState(() => _selectedImage = File(croppedFile.path));
+          if (croppedFile != null) {
+            setState(() => _selectedImage = XFile(croppedFile.path));
+          }
         }
       }
     } catch (e) {
