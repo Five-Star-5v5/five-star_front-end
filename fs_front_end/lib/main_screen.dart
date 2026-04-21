@@ -174,8 +174,13 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           _buildNavItem(0, Icons.map_outlined, Icons.map, 'Terrains'),
           _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe'),
-          _buildNavItem(2, Icons.group_outlined, Icons.group, 'Amis',
-              badge: unreadMessages + pendingRequests),
+          _buildNavItem(
+            2,
+            Icons.group_outlined,
+            Icons.group,
+            'Amis',
+            badge: unreadMessages + pendingRequests,
+          ),
           _buildNavItem(3, Icons.person_outline, Icons.person, 'Profil'),
         ],
       ),
@@ -215,13 +220,19 @@ class _MainScreenState extends State<MainScreen> {
                     right: -6,
                     child: Container(
                       padding: badge > 9
-                          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 1)
+                          ? const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            )
                           : const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         color: const Color(0xFFD4607A),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
                       child: Text(
                         badge > 99 ? '99+' : '$badge',
                         style: const TextStyle(
