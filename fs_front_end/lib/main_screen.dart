@@ -196,7 +196,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     final unreadMessages = context.watch<MessagesProvider>().unreadCount;
     final pendingRequests = context.watch<FriendsProvider>().totalPendingCount;
-    final teamNotifications = context.watch<TeamsProvider>().totalNotificationsCount;
+    final teamNotifications = context
+        .watch<TeamsProvider>()
+        .totalNotificationsCount;
 
     return Container(
       decoration: const BoxDecoration(
@@ -208,8 +210,13 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, Icons.map_outlined, Icons.map, 'Terrains'),
-          _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe',
-              badge: teamNotifications),
+          _buildNavItem(
+            1,
+            Icons.people_outline,
+            Icons.people,
+            'Équipe',
+            badge: teamNotifications,
+          ),
           _buildNavItem(
             2,
             Icons.group_outlined,

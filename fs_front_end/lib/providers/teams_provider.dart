@@ -106,7 +106,9 @@ class TeamsProvider with ChangeNotifier {
       _myTeamChats.fold(0, (sum, chat) => sum + chat.unreadCount);
 
   /// Démarre le polling périodique des notifications d'équipe (défis + invitations)
-  void startPollingNotifications({Duration interval = const Duration(seconds: 12)}) {
+  void startPollingNotifications({
+    Duration interval = const Duration(seconds: 12),
+  }) {
     _notificationsPollingTimer?.cancel();
     _silentRefreshNotifications();
     _notificationsPollingTimer = Timer.periodic(interval, (_) {
@@ -125,10 +127,7 @@ class TeamsProvider with ChangeNotifier {
     if (_isNotificationsRefreshRunning) return;
     _isNotificationsRefreshRunning = true;
     try {
-      await Future.wait([
-        loadPendingChallenges(),
-        loadPendingInvitations(),
-      ]);
+      await Future.wait([loadPendingChallenges(), loadPendingInvitations()]);
     } catch (_) {
     } finally {
       _isNotificationsRefreshRunning = false;
