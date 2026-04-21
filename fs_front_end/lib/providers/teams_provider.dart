@@ -143,11 +143,44 @@ class TeamsProvider with ChangeNotifier {
         loadPendingChallenges(),
         loadPendingInvitations(),
         loadSentInvitations(),
+        _silentRefreshTeamMembers(),
       ]);
     } catch (_) {
     } finally {
       _isNotificationsRefreshRunning = false;
     }
+  }
+
+  /// Rafraîchit silencieusement les membres de l'équipe (terrain) sans changer l'état de chargement
+  Future<void> _silentRefreshTeamMembers() async {
+    try {
+      final results = await Future.wait([
+        _teamsService.getMyTeam(),
+        _teamsService.getTeamsMemberOf(),
+      ]);
+      final newMyTeam = results[0] as TeamDetail?;
+      final newTeamsMemberOf = results[1] as List<TeamDetail>;
+
+      bool changed = false;
+
+      if (newMyTeam?.members.length != _myTeam?.members.length) {
+        changed = true;
+      } else if (newTeamsMemberOf.any((updated) {
+        final current = _teamsMemberOf.firstWhere(
+          (t) => t.id == updated.id,
+          orElse: () => updated,
+        );
+        return updated.members.length != current.members.length;
+      })) {
+        changed = true;
+      }
+
+      if (changed) {
+        _myTeam = newMyTeam;
+        _teamsMemberOf = newTeamsMemberOf;
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   /// Retourne le nombre total de candidatures en attente
