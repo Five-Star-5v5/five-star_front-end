@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../services/friends_service.dart';
 
@@ -7,6 +8,7 @@ enum FriendsLoadingState { idle, loading, loaded, error }
 /// Provider pour gérer l'état des amis
 class FriendsProvider with ChangeNotifier {
   final FriendsService _friendsService = FriendsService.instance;
+  Timer? _pollTimer;
 
   // État
   FriendsLoadingState _state = FriendsLoadingState.idle;
@@ -30,6 +32,33 @@ class FriendsProvider with ChangeNotifier {
 
   int get totalPendingCount => _pendingReceived.length;
   int get friendsCount => _friends.length;
+
+  /// Démarre le polling périodique des demandes d'amis (toutes les 30s)
+  void startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _silentRefresh();
+    });
+  }
+
+  /// Rafraîchit silencieusement sans changer l'état de chargement
+  Future<void> _silentRefresh() async {
+    try {
+      final response = await _friendsService.getFriendsList();
+      if (response != null) {
+        _friends = response.friends;
+        _pendingReceived = response.pendingReceived;
+        _pendingSent = response.pendingSent;
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
 
   /// Charge la liste des amis et demandes
   Future<void> loadFriends() async {

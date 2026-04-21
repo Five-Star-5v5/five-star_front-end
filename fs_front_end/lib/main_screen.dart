@@ -138,6 +138,8 @@ class _MainScreenState extends State<MainScreen> {
       final messagesProvider = context.read<MessagesProvider>();
       messagesProvider.initWebSocket();
       messagesProvider.loadConversations();
+      context.read<FriendsProvider>().loadFriends();
+      context.read<FriendsProvider>().startPolling();
     });
   }
 
