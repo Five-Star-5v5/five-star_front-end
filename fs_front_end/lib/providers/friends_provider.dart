@@ -9,6 +9,7 @@ enum FriendsLoadingState { idle, loading, loaded, error }
 class FriendsProvider with ChangeNotifier {
   final FriendsService _friendsService = FriendsService.instance;
   Timer? _pollTimer;
+  bool _isSilentRefreshRunning = false;
 
   // État
   FriendsLoadingState _state = FriendsLoadingState.idle;
@@ -33,16 +34,25 @@ class FriendsProvider with ChangeNotifier {
   int get totalPendingCount => _pendingReceived.length;
   int get friendsCount => _friends.length;
 
-  /// Démarre le polling périodique des demandes d'amis (toutes les 30s)
-  void startPolling() {
+  /// Démarre le polling périodique des demandes d'amis.
+  void startPolling({Duration interval = const Duration(seconds: 12)}) {
     _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _silentRefresh();
+    _pollTimer = Timer.periodic(interval, (_) {
       _silentRefresh();
     });
   }
 
+  /// Arrête le polling périodique.
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+  }
+
   /// Rafraîchit silencieusement sans changer l'état de chargement
   Future<void> _silentRefresh() async {
+    if (_isSilentRefreshRunning) return;
+    _isSilentRefreshRunning = true;
     try {
       final response = await _friendsService.getFriendsList();
       if (response != null) {
@@ -51,12 +61,15 @@ class FriendsProvider with ChangeNotifier {
         _pendingSent = response.pendingSent;
         notifyListeners();
       }
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _isSilentRefreshRunning = false;
+    }
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    stopPolling();
     super.dispose();
   }
 

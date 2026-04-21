@@ -127,12 +127,13 @@ class MainScreen extends StatefulWidget {
       context.findAncestorStateOfType<_MainScreenState>()!;
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _selectedIndex = 1;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Initialiser le WebSocket et charger les conversations
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final messagesProvider = context.read<MessagesProvider>();
@@ -141,6 +142,29 @@ class _MainScreenState extends State<MainScreen> {
       context.read<FriendsProvider>().loadFriends();
       context.read<FriendsProvider>().startPolling();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+
+    final friendsProvider = context.read<FriendsProvider>();
+    if (state == AppLifecycleState.resumed) {
+      friendsProvider.startPolling();
+      friendsProvider.loadFriends();
+      context.read<MessagesProvider>().loadConversations();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      friendsProvider.stopPolling();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    context.read<FriendsProvider>().stopPolling();
+    super.dispose();
   }
 
   static const List<Widget> _widgetOptions = <Widget>[
