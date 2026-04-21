@@ -423,8 +423,8 @@ class TeamsService {
     }
   }
 
-  /// Envoyer une invitation à un joueur disponible
-  Future<bool> sendInvitation({
+  /// Envoyer une invitation à un joueur disponible — retourne l'invitation créée
+  Future<SentInvitation?> sendInvitation({
     required int teamId,
     required int invitedUserId,
     required String position,
@@ -434,10 +434,45 @@ class TeamsService {
       final url =
           '$baseUrl/$teamId/invitations?invited_user_id=$invitedUserId&position=$position&slot_index=$slotIndex';
       final response = await http.post(Uri.parse(url), headers: await _headers);
-      return response.statusCode == 201;
+      if (response.statusCode == 201) {
+        debugPrint('[sendInvitation] 201 body=${response.body}');
+        try {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          // Extraire l'id réel même si le parsing complet échoue
+          final realId = data['id'] as int? ?? -1;
+          debugPrint('[sendInvitation] realId=$realId data.keys=${data.keys.toList()}');
+          try {
+            return SentInvitation.fromJson(data);
+          } catch (e) {
+            debugPrint('[sendInvitation] fromJson failed: $e → fallback id=$realId');
+            return SentInvitation(
+              id: realId,
+              teamId: teamId,
+              invitedUserId: invitedUserId,
+              invitedUsername: '',
+              position: position,
+              slotIndex: slotIndex,
+              status: 'pending',
+              createdAt: DateTime.now(),
+            );
+          }
+        } catch (_) {
+          return SentInvitation(
+            id: -1,
+            teamId: teamId,
+            invitedUserId: invitedUserId,
+            invitedUsername: '',
+            position: position,
+            slotIndex: slotIndex,
+            status: 'pending',
+            createdAt: DateTime.now(),
+          );
+        }
+      }
+      return null;
     } catch (e) {
       debugPrint('Erreur sendInvitation: $e');
-      return false;
+      return null;
     }
   }
 
@@ -473,6 +508,38 @@ class TeamsService {
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('Erreur respondToInvitation: $e');
+      return false;
+    }
+  }
+
+  /// Récupérer les invitations envoyées par l'équipe (vue propriétaire)
+  Future<List<SentInvitation>> getSentInvitations(int teamId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/$teamId/invitations/sent'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => SentInvitation.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getSentInvitations: $e');
+      return [];
+    }
+  }
+
+  /// Annuler une invitation envoyée (en tant que propriétaire)
+  Future<bool> cancelInvitation(int invitationId) async {
+    try {
+      final uri = Uri.parse('$baseUrl/invitations/$invitationId');
+      debugPrint('[cancelInvitation] DELETE $uri (id=$invitationId)');
+      final response = await http.delete(uri, headers: await _headers);
+      debugPrint('[cancelInvitation] status=${response.statusCode} body=${response.body}');
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      debugPrint('[cancelInvitation] exception: $e');
       return false;
     }
   }
@@ -2233,6 +2300,47 @@ class TeamInvitation {
       slotIndex: json['slot_index'] as int,
       status: json['status'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// Invitation envoyée par l'équipe (vue propriétaire)
+class SentInvitation {
+  final int id;
+  final int teamId;
+  final int invitedUserId;
+  final String invitedUsername;
+  final String? invitedAvatarUrl;
+  final String position;
+  final int slotIndex;
+  final String status; // "pending", "accepted", "rejected", "cancelled"
+  final DateTime createdAt;
+
+  SentInvitation({
+    required this.id,
+    required this.teamId,
+    required this.invitedUserId,
+    required this.invitedUsername,
+    this.invitedAvatarUrl,
+    required this.position,
+    required this.slotIndex,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory SentInvitation.fromJson(Map<String, dynamic> json) {
+    return SentInvitation(
+      id: json['id'] as int,
+      teamId: json['team_id'] as int,
+      invitedUserId: json['invited_user_id'] as int,
+      invitedUsername: (json['invited_username'] as String?) ?? '',
+      invitedAvatarUrl: json['invited_avatar_url'] as String?,
+      position: json['position'] as String,
+      slotIndex: json['slot_index'] as int,
+      status: (json['status'] as String?) ?? 'pending',
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
     );
   }
 }

@@ -3180,7 +3180,79 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
-    // Slot vide
+    // Slot vide — vérifier s'il y a des invitations en attente pour ce slot
+    if (isEditable) {
+      final pendingSent =
+          teamsProvider.sentInvitationsForSlot(slotIndex);
+      if (pendingSent.isNotEmpty) {
+        return GestureDetector(
+          onTap: () => _showSlotInvitationsDialog(
+            context,
+            slotIndex: slotIndex,
+            position: position,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: _playerAvatarRadius,
+                    backgroundColor: _kAmber.withValues(alpha: 0.2),
+                    child: const Icon(
+                      Icons.mail_outline,
+                      color: _kAmber,
+                      size: 20,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: _kAmber,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${pendingSent.length}',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _kAmber.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'En attente',
+                  style: TextStyle(
+                    color: _kAmber,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    shadows: const [
+                      Shadow(color: Colors.black54, blurRadius: 4),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    // Slot vide sans invitation
     return GestureDetector(
       onTap: isEditable
           ? () => _showAddPlayerDialog(
@@ -3582,6 +3654,251 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  /// Dialog de gestion des invitations en attente pour un slot
+  void _showSlotInvitationsDialog(
+    BuildContext context, {
+    required int slotIndex,
+    required PlayerPosition position,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          final teamsProvider = context.read<TeamsProvider>();
+          final pending = teamsProvider.sentInvitationsForSlot(slotIndex);
+
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+            ),
+            decoration: const BoxDecoration(
+              color: _kCard,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle + titre
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: _kBorder2,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Invitations envoyées',
+                                  style: GoogleFonts.syne(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: _kWhite,
+                                  ),
+                                ),
+                                Text(
+                                  'Poste : ${position.displayName}',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 12,
+                                    color: _kMuted2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Badge count
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _kAmber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: _kAmber.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Text(
+                              '${pending.length} en attente',
+                              style: GoogleFonts.syne(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _kAmber,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: _kBorder2, height: 1),
+                // Liste des invitations en attente
+                if (pending.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Aucune invitation en attente',
+                      style: GoogleFonts.dmSans(color: _kMuted2),
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: pending.length,
+                      separatorBuilder: (_, _) =>
+                          Divider(color: _kBorder2, height: 1),
+                      itemBuilder: (listCtx, index) {
+                        final inv = pending[index];
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: _kCard2,
+                            backgroundImage: inv.invitedAvatarUrl != null
+                                ? NetworkImage(inv.invitedAvatarUrl!)
+                                : null,
+                            child: inv.invitedAvatarUrl == null
+                                ? Text(
+                                    inv.invitedUsername.isNotEmpty
+                                        ? inv.invitedUsername[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(color: _kAmber),
+                                  )
+                                : null,
+                          ),
+                          title: Text(
+                            inv.invitedUsername,
+                            style: GoogleFonts.syne(
+                              color: _kWhite,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Envoyée le ${_formatInvitationDate(inv.createdAt)}',
+                            style: GoogleFonts.dmSans(
+                              color: _kMuted2,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: GestureDetector(
+                            onTap: () async {
+                              final success = await context
+                                  .read<TeamsProvider>()
+                                  .cancelInvitation(inv.id);
+                              if (context.mounted) {
+                                if (success) {
+                                  setState(() {}); // Rafraîchir la liste
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Invitation annulée pour ${inv.invitedUsername}',
+                                      ),
+                                      backgroundColor: _kAmber,
+                                    ),
+                                  );
+                                  // Fermer si plus d'invitations
+                                  if (teamsProvider
+                                      .sentInvitationsForSlot(slotIndex)
+                                      .isEmpty) {
+                                    Navigator.pop(ctx);
+                                  }
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Erreur lors de l\'annulation'),
+                                      backgroundColor: _kRose,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _kRose.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: _kRose.withValues(alpha: 0.4),
+                                ),
+                              ),
+                              child: Text(
+                                'Annuler',
+                                style: GoogleFonts.syne(
+                                  color: _kRose,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                // Bouton envoyer une autre invitation
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showAddPlayerDialog(
+                        context,
+                        slotIndex: slotIndex,
+                        position: position,
+                      );
+                    },
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: _kAmber,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Inviter une autre personne',
+                        style: GoogleFonts.syne(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _formatInvitationDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
+    return 'il y a ${diff.inDays}j';
   }
 
   void _showAddPlayerDialog(
@@ -4270,11 +4587,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _showAvailablePlayersSheet(
+  Future<void> _showAvailablePlayersSheet(
     BuildContext context,
     int slotIndex,
     PlayerPosition position,
-  ) {
+  ) async {
     final teamsProvider = context.read<TeamsProvider>();
     final teamId = teamsProvider.currentDisplayedTeam?.id;
     if (teamId == null) return;
@@ -4284,357 +4601,444 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             .toSet() ??
         {};
 
+    // Recharger les invitations envoyées depuis le backend avant d'ouvrir la sheet
+    await teamsProvider.loadSentInvitations();
+
+    // Map local userId→SentInvitation — persiste entre les rebuilds du StatefulBuilder
+    final localInvitations = <int, SentInvitation>{
+      for (final inv in teamsProvider.sentInvitationsForSlot(slotIndex))
+        inv.invitedUserId: inv,
+    };
+
+    if (!context.mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: _kCard,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: _kBorder2,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final invitedIds = localInvitations.keys.toSet();
+
+          return DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.4,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (_, scrollController) => Container(
+              decoration: const BoxDecoration(
+                color: _kCard,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.storefront_outlined,
-                      color: _kAmber,
-                      size: 20,
+              child: Column(
+                children: [
+                  // Handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: _kBorder2,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Joueurs disponibles',
-                      style: GoogleFonts.syne(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: _kWhite,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _kAmberDim,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        position.displayName,
-                        style: GoogleFonts.syne(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.storefront_outlined,
                           color: _kAmber,
+                          size: 20,
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(color: _kBorder2, height: 1),
-              Expanded(
-                child: FutureBuilder<List<AvailablePlayer>>(
-                  future: TeamsService.instance.getAvailablePlayers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: _kAmber),
-                      );
-                    }
-                    final players = snapshot.data ?? [];
-                    if (players.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.person_off_outlined,
-                              color: _kMuted2,
-                              size: 40,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Aucun joueur disponible',
-                              style: GoogleFonts.syne(
-                                color: _kMuted2,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
-                              style: GoogleFonts.dmSans(
-                                color: _kMuted2,
-                                fontSize: 12,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                    // Tri : position correspondante en premier
-                    final sorted = [...players]
-                      ..sort((a, b) {
-                        final aMatch = a.preferredPosition == position.value
-                            ? 0
-                            : 1;
-                        final bMatch = b.preferredPosition == position.value
-                            ? 0
-                            : 1;
-                        return aMatch.compareTo(bMatch);
-                      });
-                    return ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: sorted.length,
-                      itemBuilder: (_, i) {
-                        final player = sorted[i];
-                        final posMatch =
-                            player.preferredPosition == position.value;
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 5,
+                        const SizedBox(width: 10),
+                        Text(
+                          'Joueurs disponibles',
+                          style: GoogleFonts.syne(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: _kWhite,
                           ),
-                          padding: const EdgeInsets.all(14),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: posMatch
-                                ? const Color(0xFF1A1D26)
-                                : const Color(0xFF13151C),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: posMatch
-                                  ? _kAmber.withValues(alpha: 0.25)
-                                  : _kBorder2,
+                            color: _kAmberDim,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            position.displayName,
+                            style: GoogleFonts.syne(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: _kAmber,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 22,
-                                backgroundColor: _kAmberDim,
-                                backgroundImage: player.avatarUrl != null
-                                    ? NetworkImage(player.avatarUrl!)
-                                    : null,
-                                child: player.avatarUrl == null
-                                    ? Text(
-                                        player.username[0].toUpperCase(),
-                                        style: GoogleFonts.syne(
-                                          color: _kAmber,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      )
-                                    : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(color: _kBorder2, height: 1),
+                  Expanded(
+                    child: FutureBuilder<List<AvailablePlayer>>(
+                      future: TeamsService.instance.getAvailablePlayers(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(color: _kAmber),
+                          );
+                        }
+                        final players = snapshot.data ?? [];
+                        if (players.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.person_off_outlined,
+                                  color: _kMuted2,
+                                  size: 40,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Aucun joueur disponible',
+                                  style: GoogleFonts.syne(
+                                    color: _kMuted2,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
+                                  style: GoogleFonts.dmSans(
+                                    color: _kMuted2,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        // Tri : position correspondante en premier
+                        final sorted = [...players]
+                          ..sort((a, b) {
+                            final aMatch =
+                                a.preferredPosition == position.value ? 0 : 1;
+                            final bMatch =
+                                b.preferredPosition == position.value ? 0 : 1;
+                            return aMatch.compareTo(bMatch);
+                          });
+                        return ListView.builder(
+                          controller: scrollController,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: sorted.length,
+                          itemBuilder: (_, i) {
+                            final player = sorted[i];
+                            final posMatch =
+                                player.preferredPosition == position.value;
+                            final isMember = memberIds.contains(player.id);
+                            final isInvited = invitedIds.contains(player.id);
+
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 5,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: posMatch
+                                    ? const Color(0xFF1A1D26)
+                                    : const Color(0xFF13151C),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: posMatch
+                                      ? _kAmber.withValues(alpha: 0.25)
+                                      : _kBorder2,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 22,
+                                    backgroundColor: _kAmberDim,
+                                    backgroundImage: player.avatarUrl != null
+                                        ? NetworkImage(player.avatarUrl!)
+                                        : null,
+                                    child: player.avatarUrl == null
+                                        ? Text(
+                                            player.username[0].toUpperCase(),
+                                            style: GoogleFonts.syne(
+                                              color: _kAmber,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          player.username,
-                                          style: GoogleFonts.syne(
-                                            fontWeight: FontWeight.w700,
-                                            color: _kWhite,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        if (posMatch) ...[
-                                          const SizedBox(width: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 1,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: _kAmberDim,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Text(
-                                              'Poste correspondant',
+                                        Row(
+                                          children: [
+                                            Text(
+                                              player.username,
                                               style: GoogleFonts.syne(
-                                                fontSize: 9,
-                                                color: _kAmber,
                                                 fontWeight: FontWeight.w700,
+                                                color: _kWhite,
+                                                fontSize: 14,
                                               ),
                                             ),
+                                            if (posMatch) ...[
+                                              const SizedBox(width: 6),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 1,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: _kAmberDim,
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                                child: Text(
+                                                  'Poste correspondant',
+                                                  style: GoogleFonts.syne(
+                                                    fontSize: 9,
+                                                    color: _kAmber,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          player.preferredPosition ??
+                                              'Aucune position',
+                                          style: GoogleFonts.dmSans(
+                                            color: _kMuted2,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        if (player.availabilityCities != null ||
+                                            player.availabilityDays != null ||
+                                            player.availabilityRadiusKm !=
+                                                null) ...[
+                                          const SizedBox(height: 5),
+                                          Wrap(
+                                            spacing: 4,
+                                            runSpacing: 4,
+                                            children: [
+                                              if (player.availabilityCities !=
+                                                      null &&
+                                                  player.availabilityCities!
+                                                      .isNotEmpty)
+                                                _buildAvailChip(
+                                                  Icons.location_on_outlined,
+                                                  player.availabilityCities!
+                                                      .take(2)
+                                                      .join(', '),
+                                                ),
+                                              if (player.availabilityRadiusKm !=
+                                                  null)
+                                                _buildAvailChip(
+                                                  Icons.radar,
+                                                  '${player.availabilityRadiusKm} km',
+                                                ),
+                                              if (player.availabilityDays !=
+                                                      null &&
+                                                  player.availabilityDays!
+                                                      .isNotEmpty)
+                                                _buildAvailChip(
+                                                  Icons.calendar_today_outlined,
+                                                  player.availabilityDays!
+                                                              .length ==
+                                                          1
+                                                      ? player
+                                                            .availabilityDays!
+                                                            .first
+                                                      : '${player.availabilityDays!.first} → ${player.availabilityDays!.last}',
+                                                ),
+                                            ],
                                           ),
                                         ],
                                       ],
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      player.preferredPosition ??
-                                          'Aucune position',
-                                      style: GoogleFonts.dmSans(
-                                        color: _kMuted2,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    if (player.availabilityCities != null ||
-                                        player.availabilityDays != null ||
-                                        player.availabilityRadiusKm !=
-                                            null) ...[
-                                      const SizedBox(height: 5),
-                                      Wrap(
-                                        spacing: 4,
-                                        runSpacing: 4,
-                                        children: [
-                                          if (player.availabilityCities !=
-                                                  null &&
-                                              player
-                                                  .availabilityCities!
-                                                  .isNotEmpty)
-                                            _buildAvailChip(
-                                              Icons.location_on_outlined,
-                                              player.availabilityCities!
-                                                  .take(2)
-                                                  .join(', '),
-                                            ),
-                                          if (player.availabilityRadiusKm !=
-                                              null)
-                                            _buildAvailChip(
-                                              Icons.radar,
-                                              '${player.availabilityRadiusKm} km',
-                                            ),
-                                          if (player.availabilityDays != null &&
-                                              player
-                                                  .availabilityDays!
-                                                  .isNotEmpty)
-                                            _buildAvailChip(
-                                              Icons.calendar_today_outlined,
-                                              player.availabilityDays!.length ==
-                                                      1
-                                                  ? player
-                                                        .availabilityDays!
-                                                        .first
-                                                  : '${player.availabilityDays!.first} → ${player.availabilityDays!.last}',
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  if (player.rating != null)
-                                    Text(
-                                      '★ ${player.rating!.toStringAsFixed(1)}',
-                                      style: GoogleFonts.syne(
-                                        color: _kAmber,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  const SizedBox(height: 6),
-                                  if (memberIds.contains(player.id))
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _kCard,
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: _kBorder2),
-                                      ),
-                                      child: Text(
-                                        'Déjà membre',
-                                        style: GoogleFonts.syne(
-                                          color: _kMuted2,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      if (player.rating != null)
+                                        Text(
+                                          '★ ${player.rating!.toStringAsFixed(1)}',
+                                          style: GoogleFonts.syne(
+                                            color: _kAmber,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 13,
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  else
-                                    GestureDetector(
-                                      onTap: () async {
-                                        Navigator.pop(ctx);
-                                        final success = await TeamsService
-                                            .instance
-                                            .sendInvitation(
+                                      const SizedBox(height: 6),
+                                      if (isMember)
+                                        // Déjà dans l'équipe
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _kCard,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border:
+                                                Border.all(color: _kBorder2),
+                                          ),
+                                          child: Text(
+                                            'Déjà membre',
+                                            style: GoogleFonts.syne(
+                                              color: _kMuted2,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        )
+                                      else if (isInvited)
+                                        // Invitation déjà envoyée → bouton Annuler
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final provider =
+                                                context.read<TeamsProvider>();
+                                            final messenger =
+                                                ScaffoldMessenger.of(context);
+                                            final inv =
+                                                localInvitations[player.id]!;
+                                            final success =
+                                                await provider.cancelInvitation(
+                                              inv.id,
+                                            );
+                                            if (success) {
+                                              localInvitations.remove(player.id);
+                                            }
+                                            setSheetState(() {});
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  success
+                                                      ? 'Invitation annulée pour ${player.username}'
+                                                      : 'Erreur lors de l\'annulation',
+                                                ),
+                                                backgroundColor:
+                                                    success ? _kAmber : _kRose,
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _kRose.withValues(
+                                                alpha: 0.15,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: _kRose.withValues(
+                                                  alpha: 0.5,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Annuler',
+                                              style: GoogleFonts.syne(
+                                                color: _kRose,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        // Pas encore invité → bouton Inviter
+                                        GestureDetector(
+                                          onTap: () async {
+                                            final provider =
+                                                context.read<TeamsProvider>();
+                                            final messenger =
+                                                ScaffoldMessenger.of(context);
+                                            final created =
+                                                await TeamsService.instance
+                                                    .sendInvitation(
                                               teamId: teamId,
                                               invitedUserId: player.id,
                                               position: position.name,
                                               slotIndex: slotIndex,
                                             );
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                success
-                                                    ? 'Invitation envoyée à ${player.username}'
-                                                    : 'Erreur lors de l\'envoi',
+                                            if (created != null) {
+                                              localInvitations[player.id] =
+                                                  created;
+                                              provider.addSentInvitation(
+                                                  created);
+                                            }
+                                            setSheetState(() {});
+                                            messenger.showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  created != null
+                                                      ? 'Invitation envoyée à ${player.username}'
+                                                      : 'Erreur lors de l\'envoi',
+                                                ),
+                                                backgroundColor: created != null
+                                                    ? _kAmber
+                                                    : _kRose,
                                               ),
-                                              backgroundColor: success
-                                                  ? _kAmber
-                                                  : _kRose,
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
                                             ),
-                                          );
-                                        }
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: _kAmber,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
+                                            decoration: BoxDecoration(
+                                              color: _kAmber,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              'Inviter',
+                                              style: GoogleFonts.syne(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        child: Text(
-                                          'Inviter',
-                                          style: GoogleFonts.syne(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

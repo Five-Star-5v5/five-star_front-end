@@ -45,6 +45,9 @@ class TeamsProvider with ChangeNotifier {
   // Invitations à rejoindre une équipe
   List<TeamInvitation> _pendingInvitations = [];
 
+  // Invitations envoyées par mon équipe (vue propriétaire)
+  List<SentInvitation> _sentInvitations = [];
+
   // Chat d'équipe
   final Map<int, List<TeamChatMessage>> _teamMessages =
       {}; // teamId -> messages
@@ -83,6 +86,15 @@ class TeamsProvider with ChangeNotifier {
   int get pendingInvitationsCount => _pendingInvitations.length;
   int get totalNotificationsCount =>
       pendingChallengesCount + pendingInvitationsCount;
+
+  List<SentInvitation> get sentInvitations =>
+      List.unmodifiable(_sentInvitations);
+
+  /// Invitations envoyées en attente pour un slot précis
+  List<SentInvitation> sentInvitationsForSlot(int slotIndex) =>
+      _sentInvitations
+          .where((inv) => inv.slotIndex == slotIndex && inv.status == 'pending')
+          .toList();
 
   // Getters chat
   List<TeamChatInfo> get myTeamChats => _myTeamChats;
@@ -127,7 +139,11 @@ class TeamsProvider with ChangeNotifier {
     if (_isNotificationsRefreshRunning) return;
     _isNotificationsRefreshRunning = true;
     try {
-      await Future.wait([loadPendingChallenges(), loadPendingInvitations()]);
+      await Future.wait([
+        loadPendingChallenges(),
+        loadPendingInvitations(),
+        loadSentInvitations(),
+      ]);
     } catch (_) {
     } finally {
       _isNotificationsRefreshRunning = false;
@@ -262,6 +278,12 @@ class TeamsProvider with ChangeNotifier {
           .toList();
       _pendingInvitations = results[3] as List<TeamInvitation>;
 
+      // Charger les invitations envoyées si j'ai une équipe
+      if (_myTeam != null) {
+        _sentInvitations =
+            await _teamsService.getSentInvitations(_myTeam!.id);
+      }
+
       // Charger les postes ouverts et candidatures si j'ai une équipe
       if (_myTeam != null) {
         final additionalResults = await Future.wait([
@@ -334,6 +356,36 @@ class TeamsProvider with ChangeNotifier {
         _pendingInvitations.removeWhere((inv) => inv.id == invitationId);
         if (accept)
           await loadMyTeam(); // Recharger pour intégrer la nouvelle équipe
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Charge les invitations envoyées par mon équipe
+  Future<void> loadSentInvitations() async {
+    if (_myTeam == null) return;
+    try {
+      _sentInvitations = await _teamsService.getSentInvitations(_myTeam!.id);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Ajoute une invitation envoyée à l'état local (après envoi réussi)
+  void addSentInvitation(SentInvitation inv) {
+    _sentInvitations.removeWhere((e) => e.id == inv.id);
+    _sentInvitations.add(inv);
+    notifyListeners();
+  }
+
+  /// Annule une invitation envoyée (propriétaire uniquement)
+  Future<bool> cancelInvitation(int invitationId) async {
+    try {
+      final success = await _teamsService.cancelInvitation(invitationId);
+      if (success) {
+        _sentInvitations.removeWhere((inv) => inv.id == invitationId);
         notifyListeners();
       }
       return success;
