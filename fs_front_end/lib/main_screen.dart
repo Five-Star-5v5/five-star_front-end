@@ -9,6 +9,7 @@ import 'pages/friends_list_page.dart';
 import 'pages/profile_page.dart';
 import 'providers/messages_provider.dart';
 import 'providers/friends_provider.dart';
+import 'providers/teams_provider.dart';
 
 class FootApp extends StatefulWidget {
   const FootApp({super.key});
@@ -141,6 +142,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       messagesProvider.loadConversations();
       context.read<FriendsProvider>().loadFriends();
       context.read<FriendsProvider>().startPolling();
+      context.read<TeamsProvider>().loadPendingChallenges();
+      context.read<TeamsProvider>().loadPendingInvitations();
+      context.read<TeamsProvider>().startPollingNotifications();
     });
   }
 
@@ -149,14 +153,19 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     if (!mounted) return;
 
     final friendsProvider = context.read<FriendsProvider>();
+    final teamsProvider = context.read<TeamsProvider>();
     if (state == AppLifecycleState.resumed) {
       friendsProvider.startPolling();
       friendsProvider.loadFriends();
       context.read<MessagesProvider>().loadConversations();
+      teamsProvider.startPollingNotifications();
+      teamsProvider.loadPendingChallenges();
+      teamsProvider.loadPendingInvitations();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached ||
         state == AppLifecycleState.hidden) {
       friendsProvider.stopPolling();
+      teamsProvider.stopPollingNotifications();
     }
   }
 
@@ -164,6 +173,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     context.read<FriendsProvider>().stopPolling();
+    context.read<TeamsProvider>().stopPollingNotifications();
     super.dispose();
   }
 
@@ -186,6 +196,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     final unreadMessages = context.watch<MessagesProvider>().unreadCount;
     final pendingRequests = context.watch<FriendsProvider>().totalPendingCount;
+    final teamNotifications = context.watch<TeamsProvider>().totalNotificationsCount;
 
     return Container(
       decoration: const BoxDecoration(
@@ -197,7 +208,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, Icons.map_outlined, Icons.map, 'Terrains'),
-          _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe'),
+          _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe',
+              badge: teamNotifications),
           _buildNavItem(
             2,
             Icons.group_outlined,

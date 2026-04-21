@@ -58,6 +58,10 @@ class TeamsProvider with ChangeNotifier {
   Timer? _chatPollingTimer;
   static const Duration _pollingInterval = Duration(seconds: 10);
 
+  // Polling pour les notifications (défis + invitations)
+  Timer? _notificationsPollingTimer;
+  bool _isNotificationsRefreshRunning = false;
+
   // Getters
   TeamsLoadingState get state => _state;
   String? get errorMessage => _errorMessage;
@@ -100,6 +104,36 @@ class TeamsProvider with ChangeNotifier {
   /// Retourne le nombre total de messages non lus (toutes équipes)
   int get totalUnreadCount =>
       _myTeamChats.fold(0, (sum, chat) => sum + chat.unreadCount);
+
+  /// Démarre le polling périodique des notifications d'équipe (défis + invitations)
+  void startPollingNotifications({Duration interval = const Duration(seconds: 12)}) {
+    _notificationsPollingTimer?.cancel();
+    _silentRefreshNotifications();
+    _notificationsPollingTimer = Timer.periodic(interval, (_) {
+      _silentRefreshNotifications();
+    });
+  }
+
+  /// Arrête le polling périodique des notifications
+  void stopPollingNotifications() {
+    _notificationsPollingTimer?.cancel();
+    _notificationsPollingTimer = null;
+  }
+
+  /// Rafraîchit silencieusement les notifications sans changer l'état de chargement
+  Future<void> _silentRefreshNotifications() async {
+    if (_isNotificationsRefreshRunning) return;
+    _isNotificationsRefreshRunning = true;
+    try {
+      await Future.wait([
+        loadPendingChallenges(),
+        loadPendingInvitations(),
+      ]);
+    } catch (_) {
+    } finally {
+      _isNotificationsRefreshRunning = false;
+    }
+  }
 
   /// Retourne le nombre total de candidatures en attente
   int get pendingApplicationsCount {
@@ -1019,6 +1053,7 @@ class TeamsProvider with ChangeNotifier {
 
   @override
   void dispose() {
+    stopPollingNotifications();
     stopChatPolling();
     _teamsService.disconnectFromTeamChat();
     super.dispose();
