@@ -11,6 +11,7 @@ typedef MessageCallback = void Function(MessageModel message);
 typedef MessagesReadCallback =
     void Function(int senderId, List<int> messageIds);
 typedef TypingCallback = void Function(int userId);
+typedef WebSocketErrorCallback = void Function(String message);
 
 /// Service pour gérer les messages avec support WebSocket
 class MessagesService {
@@ -41,6 +42,7 @@ class MessagesService {
   MessageCallback? onMessageSent;
   MessagesReadCallback? onMessagesRead;
   TypingCallback? onTyping;
+  WebSocketErrorCallback? onErrorMessage;
   VoidCallback? onConnected;
   VoidCallback? onDisconnected;
 
@@ -119,7 +121,9 @@ class MessagesService {
           // Réponse au ping, connexion OK
           break;
         case 'error':
-          debugPrint('WebSocket error: ${json['message']}');
+          final errorMessage = (json['message'] as String?) ?? 'Unknown error';
+          debugPrint('WebSocket error: $errorMessage');
+          onErrorMessage?.call(errorMessage);
           break;
       }
     } catch (e) {
@@ -130,6 +134,7 @@ class MessagesService {
   void _onError(dynamic error) {
     debugPrint('❌ WebSocket error: $error');
     _isConnected = false;
+    onErrorMessage?.call('WebSocket connection error');
     onDisconnected?.call();
     _scheduleReconnect();
   }
@@ -158,15 +163,26 @@ class MessagesService {
     });
   }
 
-  void _send(Map<String, dynamic> data) {
-    if (_isConnected && _channel != null) {
+  bool _send(Map<String, dynamic> data) {
+    if (!_isConnected || _channel == null) {
+      return false;
+    }
+
+    try {
       _channel!.sink.add(jsonEncode(data));
+      return true;
+    } catch (e) {
+      debugPrint('❌ WebSocket send failed: $e');
+      _isConnected = false;
+      onDisconnected?.call();
+      _scheduleReconnect();
+      return false;
     }
   }
 
   /// Envoie un message via WebSocket (temps réel)
-  void sendMessageRealtime(int receiverId, String content) {
-    _send({
+  bool sendMessageRealtime(int receiverId, String content) {
+    return _send({
       'action': 'send_message',
       'receiver_id': receiverId,
       'content': content,
@@ -179,8 +195,8 @@ class MessagesService {
   }
 
   /// Marque les messages comme lus via WebSocket
-  void markAsReadRealtime(int senderId) {
-    _send({'action': 'mark_read', 'sender_id': senderId});
+  bool markAsReadRealtime(int senderId) {
+    return _send({'action': 'mark_read', 'sender_id': senderId});
   }
 
   // ============ API REST (fallback et chargement initial) ============

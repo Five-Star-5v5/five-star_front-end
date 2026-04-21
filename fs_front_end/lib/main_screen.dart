@@ -8,6 +8,7 @@ import 'pages/home_page.dart';
 import 'pages/friends_list_page.dart';
 import 'pages/profile_page.dart';
 import 'providers/messages_provider.dart';
+import 'providers/friends_provider.dart';
 
 class FootApp extends StatefulWidget {
   const FootApp({super.key});
@@ -157,6 +158,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildCustomBottomNavBar() {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final unreadMessages = context.watch<MessagesProvider>().unreadCount;
+    final pendingRequests = context.watch<FriendsProvider>().totalPendingCount;
 
     return Container(
       decoration: const BoxDecoration(
@@ -169,7 +172,8 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           _buildNavItem(0, Icons.map_outlined, Icons.map, 'Terrains'),
           _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe'),
-          _buildNavItem(2, Icons.group_outlined, Icons.group, 'Amis'),
+          _buildNavItem(2, Icons.group_outlined, Icons.group, 'Amis',
+              badge: unreadMessages + pendingRequests),
           _buildNavItem(3, Icons.person_outline, Icons.person, 'Profil'),
         ],
       ),
@@ -180,8 +184,9 @@ class _MainScreenState extends State<MainScreen> {
     int index,
     IconData outlineIcon,
     IconData filledIcon,
-    String label,
-  ) {
+    String label, {
+    int badge = 0,
+  }) {
     final bool isSelected = _selectedIndex == index;
     const Color amber = Color(0xFFFF7F2A);
     const Color muted = Color(0x62F0F2F5);
@@ -194,10 +199,40 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? filledIcon : outlineIcon,
-              color: isSelected ? amber : muted,
-              size: 22,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? filledIcon : outlineIcon,
+                  color: isSelected ? amber : muted,
+                  size: 22,
+                ),
+                if (badge > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: badge > 9
+                          ? const EdgeInsets.symmetric(horizontal: 4, vertical: 1)
+                          : const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4607A),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                      child: Text(
+                        badge > 99 ? '99+' : '$badge',
+                        style: const TextStyle(
+                          color: Color(0xFFF0F2F5),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 3),
             Text(
