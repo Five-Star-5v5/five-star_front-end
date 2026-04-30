@@ -5,6 +5,7 @@ import 'theme_config/colors_config.dart';
 import 'auth/login.dart';
 import 'auth/signup.dart';
 import 'auth/welcome_page.dart';
+import 'auth/forgot_password_page.dart';
 import 'main_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
@@ -66,6 +67,7 @@ class _FootAppState extends State<FootApp> {
           routes: {
             '/login': (context) => const LoginPage(),
             '/signup': (context) => const SignUpPage(),
+            '/forgot_password': (context) => const ForgotPasswordPage(),
           },
         );
       },

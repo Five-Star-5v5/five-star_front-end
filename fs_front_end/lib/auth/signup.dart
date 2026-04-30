@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'login.dart';
@@ -99,6 +100,14 @@ String _hexSvg(String pathData, String fillColor, String clipId) =>
 </svg>
 ''';
 
+// ── Validation règles (alignées avec le backend) ──────────────────────────────
+final _reUsername = RegExp(r'^[a-zA-Z0-9_]{3,20}$');
+final _reUsernameChars = RegExp(r'[a-zA-Z0-9_]');
+final _rePwdUpper = RegExp(r'[A-Z]');
+final _rePwdLower = RegExp(r'[a-z]');
+final _rePwdDigit = RegExp(r'\d');
+final _rePwdSpecial = RegExp(r'[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/;`~]');
+
 // ── Widget ────────────────────────────────────────────────────────────────────
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -158,13 +167,40 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   // ── Validation helpers ────────────────────────────────────────────────────
-  bool get _usernameValid => _usernameController.text.trim().isNotEmpty;
+  bool get _usernameValid => _reUsername.hasMatch(_usernameController.text.trim());
   bool get _emailValid =>
-      RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text.trim());
-  bool get _passwordValid => _passwordController.text.length >= 6;
+      RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+').hasMatch(_emailController.text.trim());
+  bool get _passwordValid {
+    final v = _passwordController.text;
+    return v.length >= 8 &&
+        _rePwdUpper.hasMatch(v) &&
+        _rePwdLower.hasMatch(v) &&
+        _rePwdDigit.hasMatch(v) &&
+        _rePwdSpecial.hasMatch(v);
+  }
   bool get _confirmValid =>
       _confirmController.text == _passwordController.text &&
       _confirmController.text.isNotEmpty;
+
+  String? get _usernameError {
+    final v = _usernameController.text.trim();
+    if (v.isEmpty) return null;
+    if (v.length < 3) return 'Au moins 3 caractères';
+    if (v.length > 20) return 'Maximum 20 caractères';
+    if (!_reUsername.hasMatch(v)) return 'Lettres, chiffres et _ uniquement';
+    return null;
+  }
+
+  String? get _passwordError {
+    final v = _passwordController.text;
+    if (v.isEmpty) return null;
+    if (v.length < 8) return 'Au moins 8 caractères';
+    if (!_rePwdUpper.hasMatch(v)) return 'Une majuscule requise (A-Z)';
+    if (!_rePwdLower.hasMatch(v)) return 'Une minuscule requise (a-z)';
+    if (!_rePwdDigit.hasMatch(v)) return 'Un chiffre requis (0-9)';
+    if (!_rePwdSpecial.hasMatch(v)) return 'Un symbole requis (!@#...)';
+    return null;
+  }
 
   void _signUp() {
     final username = _usernameController.text.trim();
@@ -174,6 +210,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (username.isEmpty || email.isEmpty || pass.isEmpty || confirm.isEmpty) {
       _showSnack('Veuillez remplir tous les champs');
+      return;
+    }
+    if (_usernameError != null) {
+      _showSnack(_usernameError!);
+      return;
+    }
+    if (!_emailValid) {
+      _showSnack('Adresse email invalide');
+      return;
+    }
+    if (_passwordError != null) {
+      _showSnack(_passwordError!);
       return;
     }
     if (pass != confirm) {
@@ -247,12 +295,17 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 24),
                         _buildField(
                           label: 'NOM D\'UTILISATEUR',
-                          hint: 'Choisis un pseudo',
+                          hint: '3-20 car. — lettres, chiffres, _',
                           controller: _usernameController,
                           focusNode: _usernameFocus,
                           isFocused: _usernameFocused,
                           isValid: _usernameValid && !_usernameFocused,
                           icon: Icons.person_outline_rounded,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(_reUsernameChars),
+                            LengthLimitingTextInputFormatter(20),
+                          ],
+                          errorText: _usernameError,
                         ),
                         _buildField(
                           label: 'ADRESSE E-MAIL',
@@ -266,7 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         _buildPasswordField(
                           label: 'MOT DE PASSE',
-                          hint: '6 caractères minimum',
+                          hint: '8 car. — maj, min, chiffre, symbole',
                           controller: _passwordController,
                           focusNode: _passwordFocus,
                           isFocused: _passwordFocused,
@@ -275,6 +328,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           onToggle: () => setState(
                             () => _passwordVisible = !_passwordVisible,
                           ),
+                          errorText: _passwordError,
                         ),
                         _buildPasswordField(
                           label: 'CONFIRMER LE MOT DE PASSE',
@@ -418,7 +472,10 @@ class _SignUpPageState extends State<SignUpPage> {
     required bool isValid,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
+    String? errorText,
+    List<TextInputFormatter>? inputFormatters,
   }) {
+    final showError = errorText != null && !isFocused;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -438,7 +495,9 @@ class _SignUpPageState extends State<SignUpPage> {
             color: isFocused ? _kFocusedBg : _kCard,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isValid
+              color: showError
+                  ? _kErrorBorder
+                  : isValid
                   ? _kValidBorder
                   : isFocused
                   ? _kFocusedBorder
@@ -457,6 +516,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: controller,
                   focusNode: focusNode,
                   keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
                   style: const TextStyle(fontSize: 13, color: _kWhite),
                   decoration: InputDecoration(
                     hintText: hint,
@@ -478,6 +538,14 @@ class _SignUpPageState extends State<SignUpPage> {
             ],
           ),
         ),
+        if (showError)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
+            child: Text(
+              errorText,
+              style: const TextStyle(fontSize: 10, color: _kErrorBorder),
+            ),
+          ),
         const SizedBox(height: 12),
       ],
     );
@@ -494,7 +562,9 @@ class _SignUpPageState extends State<SignUpPage> {
     required bool isVisible,
     required VoidCallback onToggle,
     bool isError = false,
+    String? errorText,
   }) {
+    final showError = (errorText != null || isError) && !isFocused;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -514,7 +584,7 @@ class _SignUpPageState extends State<SignUpPage> {
             color: isFocused ? _kFocusedBg : _kCard,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isError
+              color: showError
                   ? _kErrorBorder
                   : isValid
                   ? _kValidBorder
@@ -568,6 +638,14 @@ class _SignUpPageState extends State<SignUpPage> {
             ],
           ),
         ),
+        if (showError && errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
+            child: Text(
+              errorText,
+              style: const TextStyle(fontSize: 10, color: _kErrorBorder),
+            ),
+          ),
         const SizedBox(height: 12),
       ],
     );

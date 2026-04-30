@@ -14,8 +14,15 @@ class AuthProvider extends ChangeNotifier {
   UserModel? get currentUser => _currentUser;
 
   AuthProvider() {
-    // lance l'initialisation
+    AuthService.onUnauthorized = _onUnauthorized;
     _tryAutoLogin();
+  }
+
+  void _onUnauthorized() async {
+    await _service.logout();
+    _isAuthenticated = false;
+    _currentUser = null;
+    notifyListeners();
   }
 
   Future<void> _tryAutoLogin() async {

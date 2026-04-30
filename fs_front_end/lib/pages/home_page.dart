@@ -371,6 +371,73 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  void _showInfoModal(String title, List<String> lines) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border(
+            top: BorderSide(color: _kBorder, width: 1),
+            left: BorderSide(color: _kBorder, width: 1),
+            right: BorderSide(color: _kBorder, width: 1),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _kBorder2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, color: _kAmber, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.syne(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _kWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            ...lines.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  line,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13,
+                    color: _kMuted2,
+                    height: 1.55,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Widget pour activer/désactiver le mode recherche d'adversaire
   Widget _buildSearchModeToggle(bool isDarkMode) {
     return Container(
@@ -394,64 +461,92 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ]
             : null,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _isLookingForOpponent ? _kAmberDim : _kBorder,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                _isLookingForOpponent ? Icons.visibility : Icons.visibility_off,
-                color: _isLookingForOpponent ? _kAmber : _kMuted2,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Disponible pour un match',
-                    style: GoogleFonts.syne(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                      letterSpacing: 0.04 * 13,
-                      color: _isLookingForOpponent ? _kAmber : _kWhite,
-                    ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _isLookingForOpponent ? _kAmberDim : _kBorder,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
+                  child: Icon(
                     _isLookingForOpponent
-                        ? 'Votre équipe est visible par les équipes qui cherchent un adversaire'
-                        : 'Activez pour apparaître dans les recherches',
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: _isLookingForOpponent ? _kAmber : _kMuted2,
+                    size: 20,
                   ),
-                ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Disponible pour un match',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          letterSpacing: 0.04 * 13,
+                          color: _isLookingForOpponent ? _kAmber : _kWhite,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        _isLookingForOpponent
+                            ? 'Votre équipe est visible par les équipes qui cherchent un adversaire'
+                            : 'Activez pour apparaître dans les recherches',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _kMuted2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_isLoadingSearchPrefs)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: _kAmber,
+                    ),
+                  )
+                else
+                  Switch.adaptive(
+                    value: _isLookingForOpponent,
+                    onChanged: _toggleSearchMode,
+                    activeThumbColor: _kNight,
+                    activeTrackColor: _kAmber,
+                  ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => _showInfoModal('Publiez un match', [
+                'Publiez un match et laissez une autre équipe le rejoindre. Vous créez l\'offre, une équipe adverse peut donc vous defier.',
+                'Seul le capitaine de l\'équipe peut créer un match. Nous vous conseillons d\'indiquer une plage horaire large afin d\'augmenter vos chances de trouver un adversaire.',
+                'Une fois que la demande de defie sera envoyer par l\'adversaire, tu seras libre de l\'accepter ou de la decliner. Une fois le defie accepter il s\'affichera ici dans « Matchs à venir » et vous aurez accès à un chat pour vous organiser avec l\'équipe adverse.',
+                '👉 Recommandation : trouvez d\'abord un adversaire et fixez l\'horaire avant de réserver et payer un terrain, afin d\'éviter toute dépense inutile.',
+              ]),
+              child: Icon(
+                Icons.info_outline,
+                size: 14,
+                color: _isLookingForOpponent
+                    ? _kAmber.withValues(alpha: 0.65)
+                    : _kMuted2.withValues(alpha: 0.6),
               ),
             ),
-            if (_isLoadingSearchPrefs)
-              const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: _kAmber,
-                ),
-              )
-            else
-              Switch.adaptive(
-                value: _isLookingForOpponent,
-                onChanged: _toggleSearchMode,
-                activeThumbColor: _kNight,
-                activeTrackColor: _kAmber,
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -506,19 +601,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const FindOpponentsPage()),
-              ),
-              child: Text(
-                'Trouver →',
-                style: GoogleFonts.syne(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _kAmber,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => _showInfoModal(
+                    'Trouvez un match et affrontez une équipe',
+                    [
+                      'Consultez les matchs publiés par d’autres équipes et envoyez une demande pour les affronter.',
+                      '👉 Par exemple, si une équipe a créé un match, vous pouvez répondre à son annonce et proposer de jouer contre elle.',
+                      '👉 Une fois la demande acceptée, une conversation s’ouvre pour organiser les détails de la rencontre (horaire, lieu, etc.).',
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: _kAmber.withValues(alpha: 0.55),
+                    ),
+                  ),
                 ),
-              ),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FindOpponentsPage(),
+                    ),
+                  ),
+                  child: Text(
+                    'Trouver →',
+                    style: GoogleFonts.syne(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _kAmber,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -2470,37 +2590,61 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               width: 1,
                             ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Stack(
+                            fit: StackFit.expand,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: _kAmberDim,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.add,
-                                  size: 18,
-                                  color: _kAmber,
-                                ),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: const BoxDecoration(
+                                      color: _kAmberDim,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.add,
+                                      size: 18,
+                                      color: _kAmber,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'REJOINDRE',
+                                    style: GoogleFonts.syne(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w700,
+                                      color: _kAmber,
+                                      letterSpacing: 0.06 * 8,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'une équipe',
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 9,
+                                      color: _kMuted2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'REJOINDRE',
-                                style: GoogleFonts.syne(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w700,
-                                  color: _kAmber,
-                                  letterSpacing: 0.06 * 8,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'une équipe',
-                                style: GoogleFonts.dmSans(
-                                  fontSize: 9,
-                                  color: _kMuted2,
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () => _showInfoModal(
+                                    'Rejoindre une équipe',
+                                    [
+                                      'Trouvez une équipe ou rejoignez la vôtre.',
+                                      'Recherchez une équipe à l\'aide de son nom ou de son code, ou consultez les équipes incomplètes et envoyez une demande pour les rejoindre lors de leur prochain match.',
+                                      '👉 Vous pouvez postuler à plusieurs équipes pour maximiser vos chances de jouer rapidement.',
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.info_outline,
+                                    size: 13,
+                                    color: _kAmber.withValues(alpha: 0.65),
+                                  ),
                                 ),
                               ),
                             ],
@@ -3182,8 +3326,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     // Slot vide — vérifier s'il y a des invitations en attente pour ce slot
     if (isEditable) {
-      final pendingSent =
-          teamsProvider.sentInvitationsForSlot(slotIndex);
+      final pendingSent = teamsProvider.sentInvitationsForSlot(slotIndex);
       if (pendingSent.isNotEmpty) {
         return GestureDetector(
           onTap: () => _showSlotInvitationsDialog(
@@ -3228,8 +3371,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 4),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(
                   color: _kAmber.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
@@ -3822,7 +3964,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Erreur lors de l\'annulation'),
+                                      content: Text(
+                                        'Erreur lors de l\'annulation',
+                                      ),
                                       backgroundColor: _kRose,
                                     ),
                                   );
@@ -4728,10 +4872,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         // Tri : position correspondante en premier
                         final sorted = [...players]
                           ..sort((a, b) {
-                            final aMatch =
-                                a.preferredPosition == position.value ? 0 : 1;
-                            final bMatch =
-                                b.preferredPosition == position.value ? 0 : 1;
+                            final aMatch = a.preferredPosition == position.value
+                                ? 0
+                                : 1;
+                            final bMatch = b.preferredPosition == position.value
+                                ? 0
+                                : 1;
                             return aMatch.compareTo(bMatch);
                           });
                         return ListView.builder(
@@ -4801,9 +4947,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                               Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 1,
-                                                ),
+                                                      horizontal: 6,
+                                                      vertical: 1,
+                                                    ),
                                                 decoration: BoxDecoration(
                                                   color: _kAmberDim,
                                                   borderRadius:
@@ -4841,7 +4987,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             children: [
                                               if (player.availabilityCities !=
                                                       null &&
-                                                  player.availabilityCities!
+                                                  player
+                                                      .availabilityCities!
                                                       .isNotEmpty)
                                                 _buildAvailChip(
                                                   Icons.location_on_outlined,
@@ -4857,11 +5004,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                 ),
                                               if (player.availabilityDays !=
                                                       null &&
-                                                  player.availabilityDays!
+                                                  player
+                                                      .availabilityDays!
                                                       .isNotEmpty)
                                                 _buildAvailChip(
                                                   Icons.calendar_today_outlined,
-                                                  player.availabilityDays!
+                                                  player
+                                                              .availabilityDays!
                                                               .length ==
                                                           1
                                                       ? player
@@ -4897,10 +5046,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           ),
                                           decoration: BoxDecoration(
                                             color: _kCard,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border:
-                                                Border.all(color: _kBorder2),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                            border: Border.all(
+                                              color: _kBorder2,
+                                            ),
                                           ),
                                           child: Text(
                                             'Déjà membre',
@@ -4915,18 +5066,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         // Invitation déjà envoyée → bouton Annuler
                                         GestureDetector(
                                           onTap: () async {
-                                            final provider =
-                                                context.read<TeamsProvider>();
+                                            final provider = context
+                                                .read<TeamsProvider>();
                                             final messenger =
                                                 ScaffoldMessenger.of(context);
                                             final inv =
                                                 localInvitations[player.id]!;
-                                            final success =
-                                                await provider.cancelInvitation(
-                                              inv.id,
-                                            );
+                                            final success = await provider
+                                                .cancelInvitation(inv.id);
                                             if (success) {
-                                              localInvitations.remove(player.id);
+                                              localInvitations.remove(
+                                                player.id,
+                                              );
                                             }
                                             setSheetState(() {});
                                             messenger.showSnackBar(
@@ -4936,8 +5087,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                                       ? 'Invitation annulée pour ${player.username}'
                                                       : 'Erreur lors de l\'annulation',
                                                 ),
-                                                backgroundColor:
-                                                    success ? _kAmber : _kRose,
+                                                backgroundColor: success
+                                                    ? _kAmber
+                                                    : _kRose,
                                               ),
                                             );
                                           },
@@ -4972,23 +5124,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         // Pas encore invité → bouton Inviter
                                         GestureDetector(
                                           onTap: () async {
-                                            final provider =
-                                                context.read<TeamsProvider>();
+                                            final provider = context
+                                                .read<TeamsProvider>();
                                             final messenger =
                                                 ScaffoldMessenger.of(context);
-                                            final created =
-                                                await TeamsService.instance
-                                                    .sendInvitation(
-                                              teamId: teamId,
-                                              invitedUserId: player.id,
-                                              position: position.name,
-                                              slotIndex: slotIndex,
-                                            );
+                                            final created = await TeamsService
+                                                .instance
+                                                .sendInvitation(
+                                                  teamId: teamId,
+                                                  invitedUserId: player.id,
+                                                  position: position.name,
+                                                  slotIndex: slotIndex,
+                                                );
                                             if (created != null) {
                                               localInvitations[player.id] =
                                                   created;
                                               provider.addSentInvitation(
-                                                  created);
+                                                created,
+                                              );
                                             }
                                             setSheetState(() {});
                                             messenger.showSnackBar(

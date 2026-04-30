@@ -191,7 +191,8 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: isAvailable ? _dtAmberDim : const Color(0x0FFFFFFF),
+                    color:
+                        isAvailable ? _dtAmberDim : const Color(0x0FFFFFFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -203,35 +204,61 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Texte
+                // Texte + icône info en haut à droite du bloc texte
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Text(
-                        isAvailable
-                            ? 'PROFIL VISIBLE'
-                            : 'ÊTRE TROUVÉ PAR LES ÉQUIPES',
-                        style: GoogleFonts.syne(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          color: isAvailable ? _dtAmber : _dtMuted2,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isAvailable
+                                ? 'PROFIL VISIBLE'
+                                : 'ÊTRE TROUVÉ PAR LES ÉQUIPES',
+                            style: GoogleFonts.syne(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              color: isAvailable ? _dtAmber : _dtMuted2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isAvailable
+                                ? 'Les équipes peuvent t\'inviter'
+                                : 'Active pour recevoir des invitations',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 11,
+                              color: isAvailable ? _dtWhite : _dtMuted2,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        isAvailable
-                            ? 'Les équipes peuvent t\'inviter'
-                            : 'Active pour recevoir des invitations',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 11,
-                          color: isAvailable ? _dtWhite : _dtMuted2,
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => _showInfoModal(
+                            'Rendez-vous visible auprès des équipes',
+                            [
+                              'Activez ce mode pour apparaître auprès des équipes incomplètes à la recherche d\'un joueur.',
+                              '👉 Les équipes peuvent consulter votre profil et vous envoyer une demande pour rejoindre leur match.',
+                              '👉 Vous pouvez accepter ou refuser chaque demande librement.',
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: isAvailable
+                                ? _dtAmber.withValues(alpha: 0.65)
+                                : _dtMuted2.withValues(alpha: 0.6),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 12),
                 // Toggle
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
@@ -820,6 +847,75 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ── Info modal ───────────────────────────────────────────────────────────────
+
+  void _showInfoModal(String title, List<String> lines) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: _dtCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border(
+            top: BorderSide(color: _dtBorder2, width: 1),
+            left: BorderSide(color: _dtBorder2, width: 1),
+            right: BorderSide(color: _dtBorder2, width: 1),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _dtBorder2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.info_outline, color: _dtAmber, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: GoogleFonts.syne(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _dtWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            ...lines.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  line,
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13,
+                    color: _dtMuted2,
+                    height: 1.55,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -10,6 +10,9 @@ class AuthService {
   AuthService._privateConstructor();
   static final AuthService instance = AuthService._privateConstructor();
 
+  // Déclenché par app_http.dart quand une réponse 401 est reçue sur une requête authentifiée
+  static void Function()? onUnauthorized;
+
   // Utilise la configuration centralisée de l'API
   final String baseUrl = ApiConfig.authUrl;
 
@@ -285,6 +288,57 @@ class AuthService {
       return jsonDecode(resp.body) as Map<String, dynamic>;
     }
     return null;
+  }
+
+  /// Demande un code de réinitialisation par email
+  Future<Map<String, dynamic>> requestPasswordReset({
+    required String email,
+  }) async {
+    final url = Uri.parse('$baseUrl/password-reset/');
+    try {
+      final resp = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (resp.statusCode == 200 || resp.statusCode == 201 || resp.statusCode == 204) {
+        return {'ok': true};
+      }
+      try {
+        final errorData = jsonDecode(resp.body);
+        return {'ok': false, 'message': errorData['detail'] ?? resp.body};
+      } catch (_) {
+        return {'ok': false, 'message': resp.body};
+      }
+    } catch (e) {
+      return {'ok': false, 'message': 'Erreur réseau : $e'};
+    }
+  }
+
+  /// Confirme la réinitialisation avec le code reçu par email
+  Future<Map<String, dynamic>> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/password-reset/confirm/');
+    try {
+      final resp = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'password': newPassword}),
+      );
+      if (resp.statusCode == 200 || resp.statusCode == 204) {
+        return {'ok': true};
+      }
+      try {
+        final errorData = jsonDecode(resp.body);
+        return {'ok': false, 'message': errorData['detail'] ?? resp.body};
+      } catch (_) {
+        return {'ok': false, 'message': resp.body};
+      }
+    } catch (e) {
+      return {'ok': false, 'message': 'Erreur réseau : $e'};
+    }
   }
 
   /// Supprime le compte de l'utilisateur connecté
