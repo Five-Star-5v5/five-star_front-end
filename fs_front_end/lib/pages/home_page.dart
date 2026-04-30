@@ -4154,73 +4154,143 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
               // Option pour mettre en mode recherche
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              Tooltip(
+                message:
+                    'Recherchez des joueurs pour compléter votre équipe.\nPubliez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et vous envoyer une demande.\n👉 Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.\n👉 Vous pouvez accepter ou refuser les demandes librement.',
+                preferBelow: false,
+                verticalOffset: 8,
                 decoration: BoxDecoration(
-                  color: _kAmberDim,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
+                  color: _kNight,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: _kAmberDim,
-                    child: Icon(Icons.person_search, color: _kAmber),
+                textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                  title: Text(
-                    'Ouvrir aux candidatures',
-                    style: GoogleFonts.syne(
-                      fontWeight: FontWeight.w600,
-                      color: _kWhite,
+                  decoration: BoxDecoration(
+                    color: _kAmberDim,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
+                  ),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: _kAmberDim,
+                      child: Icon(Icons.person_search, color: _kAmber),
                     ),
+                    title: Text(
+                      'Ouvrir aux candidatures',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w600,
+                        color: _kWhite,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
+                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showInfoModal('Ouvrir aux candidatures', [
+                            'Recherchez des joueurs pour compléter votre équipe.',
+                            'Publiez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et vous envoyer une demande.',
+                            '👉 Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.',
+                            '👉 Vous pouvez accepter ou refuser les demandes librement.',
+                          ]),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: _kAmber,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: _kMuted2,
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showOpenSlotDialog(context, slotIndex, position);
+                    },
                   ),
-                  subtitle: Text(
-                    'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
-                    style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: _kMuted2,
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _showOpenSlotDialog(context, slotIndex, position);
-                  },
                 ),
               ),
               // Recruter sur le store
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              Tooltip(
+                message: 'Invitez des joueurs pour compléter votre équipe.',
+                preferBelow: false,
+                verticalOffset: 8,
                 decoration: BoxDecoration(
-                  color: _kCard,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kBorder2),
+                  color: _kNight,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFF1A1D26),
-                    child: Icon(Icons.storefront_outlined, color: _kMuted2),
+                textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                  title: Text(
-                    'Recruter sur le store',
-                    style: GoogleFonts.syne(
-                      fontWeight: FontWeight.w600,
-                      color: _kWhite,
+                  decoration: BoxDecoration(
+                    color: _kCard,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kBorder2),
+                  ),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFF1A1D26),
+                      child: Icon(Icons.storefront_outlined, color: _kMuted2),
                     ),
+                    title: Text(
+                      'Recruter sur le store',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w600,
+                        color: _kWhite,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Parcourir les joueurs disponibles et les inviter',
+                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showInfoModal('Recruter sur le store', [
+                            'Invitez des joueurs pour compléter votre équipe.',
+                            'Consultez les joueurs disponibles et envoyez une invitation à ceux qui correspondent à vos besoins.',
+                            '👉 Le joueur peut accepter ou refuser votre invitation librement.',
+                          ]),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.info_outline,
+                              size: 16,
+                              color: _kMuted2,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: _kMuted2,
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showAvailablePlayersSheet(context, slotIndex, position);
+                    },
                   ),
-                  subtitle: Text(
-                    'Parcourir les joueurs disponibles et les inviter',
-                    style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: _kMuted2,
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _showAvailablePlayersSheet(context, slotIndex, position);
-                  },
                 ),
               ),
               Padding(
