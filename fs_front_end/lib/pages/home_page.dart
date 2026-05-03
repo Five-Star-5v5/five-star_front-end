@@ -14,6 +14,7 @@ import 'team_chat_page.dart';
 import 'match_chat_page.dart';
 import 'discover_teams_page.dart';
 import 'find_opponents_page.dart';
+import 'public_matches_page.dart';
 import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
@@ -145,6 +146,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int? _lastLoadedTeamId;
   List<MatchChallenge> _upcomingMatches = [];
   Map<int, int> _unreadMatchMessages = {};
+  List<PublicMatch> _publicMatches = [];
   late AnimationController _loadingAnimationController;
 
   @override
@@ -162,6 +164,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       provider.startChatPolling();
       provider.addListener(_onTeamChanged);
       _loadSearchPreferences();
+      _loadPublicMatches();
     });
   }
 
@@ -244,6 +247,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     } catch (e) {
       if (mounted) setState(() => _isLoadingSearchPrefs = false);
     }
+  }
+
+  Future<void> _loadPublicMatches() async {
+    try {
+      final matches = await TeamsService.instance.getPublicMatches();
+      if (mounted) setState(() => _publicMatches = matches);
+    } catch (_) {}
   }
 
   Future<void> _loadUpcomingMatches() async {
@@ -678,6 +688,231 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             (match) => _buildMatchCard(match, myTeamId, isDarkMode, isOwner),
           ),
       ],
+    );
+  }
+
+  /// Section matchs publics ouverts (aperçu horizontal + lien vers la page)
+  Widget _buildOpenMatchesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'MATCHS OUVERTS',
+                  style: GoogleFonts.syne(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.04 * 13,
+                    color: _kWhite,
+                  ),
+                ),
+                if (_publicMatches.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1C4CAF82),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: const Color(0xFF4CAF82).withValues(alpha: 0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${_publicMatches.length}',
+                      style: const TextStyle(
+                        color: Color(0xFF4CAF82),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PublicMatchesPage()),
+              ),
+              child: Text(
+                'Voir tout →',
+                style: GoogleFonts.syne(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _kAmber,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (_publicMatches.isEmpty)
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: BoxDecoration(
+              color: _kCard,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _kBorder, width: 1),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.people_outline, size: 24, color: _kMuted2),
+                const SizedBox(height: 6),
+                Text(
+                  'Aucun match ouvert pour le moment',
+                  style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                ),
+              ],
+            ),
+          )
+        else
+          SizedBox(
+            height: 160,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _publicMatches.length,
+              separatorBuilder: (context, i) => const SizedBox(width: 10),
+              itemBuilder: (_, i) =>
+                  _buildPublicMatchPreviewCard(_publicMatches[i]),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPublicMatchPreviewCard(PublicMatch match) {
+    final openSlots = match.totalOpenSlots;
+    final sageColor = const Color(0xFF4CAF82);
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
+      ),
+      child: Container(
+        width: 210,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _kBorder, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Teams row
+            Row(
+              children: [
+                _buildMiniTeamLogo(match.challengerTeam),
+                const Spacer(),
+                Text(
+                  'VS',
+                  style: GoogleFonts.syne(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
+                    color: _kMuted2,
+                  ),
+                ),
+                const Spacer(),
+                _buildMiniTeamLogo(match.challengedTeam),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Team names
+            Text(
+              '${match.challengerTeam.name.split(' ').first} — ${match.challengedTeam.name.split(' ').first}',
+              style: GoogleFonts.syne(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: _kWhite,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 6),
+            // Date
+            if (match.proposedDate != null)
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 10, color: _kMuted2),
+                  const SizedBox(width: 4),
+                  Text(
+                    DateFormat('d MMM • HH:mm', 'fr_FR')
+                        .format(match.proposedDate!),
+                    style: GoogleFonts.dmSans(
+                        fontSize: 10, color: _kMuted2),
+                  ),
+                ],
+              ),
+            const Spacer(),
+            // Open slots badge
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: sageColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: sageColor.withValues(alpha: 0.3), width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.person_add_outlined,
+                      size: 10, color: sageColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
+                    style: GoogleFonts.syne(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: sageColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniTeamLogo(PublicMatchTeamInfo team) {
+    return Container(
+      width: 34,
+      height: 34,
+      decoration: BoxDecoration(
+        color: _kAmberDim,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+            color: _kAmber.withValues(alpha: 0.2), width: 1),
+      ),
+      child: team.logoUrl != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(9),
+              child: Image.network(team.logoUrl!, fit: BoxFit.cover),
+            )
+          : Center(
+              child: Text(
+                team.name[0].toUpperCase(),
+                style: const TextStyle(
+                  color: _kAmber,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
+            ),
     );
   }
 
@@ -2480,6 +2715,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               titleColor,
                               teamsProvider.isCurrentTeamMine,
                             ),
+                          // Section matchs publics ouverts aux candidatures
+                          _buildOpenMatchesSection(),
                           const SizedBox(height: 20),
                         ],
                       ), // inner Column
@@ -6957,7 +7194,8 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     final teamsProvider = context.watch<TeamsProvider>();
     final challenges = teamsProvider.pendingChallenges;
     final invitations = teamsProvider.pendingInvitations;
-    final totalCount = challenges.length + invitations.length;
+    final matchApps = teamsProvider.receivedMatchApplications;
+    final totalCount = challenges.length + invitations.length + matchApps.length;
 
     return Container(
       decoration: const BoxDecoration(
@@ -7034,6 +7272,34 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
+                  if (matchApps.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'CANDIDATURES MATCH PUBLIC',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...matchApps.asMap().entries.map(
+                      (e) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: e.key < matchApps.length - 1 ? 10 : 0,
+                        ),
+                        child: _buildMatchApplicationItem(
+                          context,
+                          e.value,
+                          teamsProvider,
+                        ),
+                      ),
+                    ),
+                    if (invitations.isNotEmpty || challenges.isNotEmpty)
+                      const SizedBox(height: 12),
+                  ],
                   if (invitations.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
@@ -7495,6 +7761,199 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
         ),
       );
     }
+  }
+
+  Widget _buildMatchApplicationItem(
+    BuildContext context,
+    MatchApplication app,
+    TeamsProvider teamsProvider,
+  ) {
+    final isLoading = _loadingIds.contains(app.id);
+    final posLabel = app.position.displayName;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0x1A22C55E),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x3322C55E), width: 1),
+                ),
+                child: app.applicantAvatarUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.network(
+                          app.applicantAvatarUrl!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          app.applicantUsername.isNotEmpty
+                              ? app.applicantUsername[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Color(0xFF22C55E),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      app.applicantUsername,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Veut rejoindre · ${app.teamName}',
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0x1A22C55E),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  posLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF22C55E),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(app.id));
+                          await teamsProvider
+                              .rejectReceivedMatchApplication(app.id);
+                          if (mounted)
+                            setState(() => _loadingIds.remove(app.id));
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1AD4607A),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33D4607A)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Refuser',
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kRose,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(app.id));
+                          final result = await teamsProvider
+                              .acceptReceivedMatchApplication(app.id);
+                          if (mounted) {
+                            setState(() => _loadingIds.remove(app.id));
+                            if (!result.success &&
+                                result.errorMessage != null &&
+                                context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result.errorMessage!,
+                                    style: GoogleFonts.dmSans(
+                                        color: _kWhite, fontSize: 13),
+                                  ),
+                                  backgroundColor: _kRose,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(10)),
+                                  margin: const EdgeInsets.all(12),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _kAmberDim,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33FF7F2A)),
+                    ),
+                    child: Center(
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kAmber,
+                              ),
+                            )
+                          : Text(
+                              'Accepter',
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _kAmber,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -45,6 +45,9 @@ class TeamsProvider with ChangeNotifier {
   // Invitations à rejoindre une équipe
   List<TeamInvitation> _pendingInvitations = [];
 
+  // Candidatures de joueurs pour rejoindre mes équipes sur des matchs publics
+  List<MatchApplication> _receivedMatchApplications = [];
+
   // Invitations envoyées par mon équipe (vue propriétaire)
   List<SentInvitation> _sentInvitations = [];
 
@@ -84,8 +87,11 @@ class TeamsProvider with ChangeNotifier {
   List<TeamInvitation> get pendingInvitations =>
       List.unmodifiable(_pendingInvitations);
   int get pendingInvitationsCount => _pendingInvitations.length;
+  List<MatchApplication> get receivedMatchApplications =>
+      List.unmodifiable(_receivedMatchApplications);
+  int get receivedMatchApplicationsCount => _receivedMatchApplications.length;
   int get totalNotificationsCount =>
-      pendingChallengesCount + pendingInvitationsCount;
+      pendingChallengesCount + pendingInvitationsCount + receivedMatchApplicationsCount;
 
   List<SentInvitation> get sentInvitations =>
       List.unmodifiable(_sentInvitations);
@@ -144,6 +150,7 @@ class TeamsProvider with ChangeNotifier {
         loadPendingInvitations(),
         loadSentInvitations(),
         _silentRefreshTeamMembers(),
+        _loadReceivedMatchApplications(),
       ]);
     } catch (_) {
     } finally {
@@ -365,6 +372,39 @@ class TeamsProvider with ChangeNotifier {
           .toList();
       notifyListeners();
     } catch (_) {}
+  }
+
+  /// Recharge les candidatures de matchs publics reçues (vue capitaine)
+  Future<void> _loadReceivedMatchApplications() async {
+    try {
+      _receivedMatchApplications =
+          await _teamsService.getReceivedMatchApplications();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Accepte une candidature de match public et retire-la de la liste locale
+  Future<({bool success, String? errorMessage})> acceptReceivedMatchApplication(
+      int applicationId) async {
+    final result =
+        await _teamsService.acceptMatchApplication(applicationId);
+    if (result.success) {
+      _receivedMatchApplications
+          .removeWhere((a) => a.id == applicationId);
+      notifyListeners();
+    }
+    return result;
+  }
+
+  /// Refuse une candidature de match public et retire-la de la liste locale
+  Future<bool> rejectReceivedMatchApplication(int applicationId) async {
+    final ok = await _teamsService.rejectMatchApplication(applicationId);
+    if (ok) {
+      _receivedMatchApplications
+          .removeWhere((a) => a.id == applicationId);
+      notifyListeners();
+    }
+    return ok;
   }
 
   /// Recharge les invitations d'équipe en attente

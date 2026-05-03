@@ -1467,6 +1467,184 @@ class TeamsService {
       return [];
     }
   }
+
+  // ============================================================
+  // Matchs publics — Candidatures de joueurs
+  // ============================================================
+
+  /// Récupère tous les matchs acceptés ouverts aux candidatures
+  Future<List<PublicMatch>> getPublicMatches() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/challenges/public'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data
+            .map((e) => PublicMatch.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getPublicMatches: $e');
+      return [];
+    }
+  }
+
+  /// Postule pour un slot dans un match public
+  /// Retourne (application: ..., errorMessage: ...) — errorMessage non null si erreur
+  Future<({MatchApplication? application, String? errorMessage})> applyToPublicMatch({
+    required int matchId,
+    required int teamId,
+    required String teamName,
+    required PlayerPosition position,
+    required int slotIndex,
+    required int applicantUserId,
+    required String applicantUsername,
+    String? applicantAvatarUrl,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/challenges/$matchId/applications'),
+        headers: await _headers,
+        body: jsonEncode({
+          'team_id': teamId,
+          'slot_index': slotIndex,
+          'position': position.value,
+        }),
+      );
+      if (response.statusCode == 201) {
+        return (
+          application: MatchApplication.fromJson(
+              jsonDecode(response.body) as Map<String, dynamic>),
+          errorMessage: null,
+        );
+      }
+      debugPrint('applyToPublicMatch: ${response.statusCode} ${response.body}');
+      String errorMsg = 'Erreur lors de la candidature';
+      try {
+        final body = jsonDecode(response.body) as Map<String, dynamic>?;
+        errorMsg = body?['detail'] as String? ?? errorMsg;
+      } catch (_) {}
+      return (application: null, errorMessage: errorMsg);
+    } catch (e) {
+      debugPrint('Erreur applyToPublicMatch: $e');
+      return (application: null, errorMessage: 'Erreur réseau');
+    }
+  }
+
+  /// Toutes les candidatures PENDING reçues sur mes équipes (vue capitaine globale)
+  Future<List<MatchApplication>> getReceivedMatchApplications() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/match-applications/received'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data
+            .map((e) => MatchApplication.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getReceivedMatchApplications: $e');
+      return [];
+    }
+  }
+
+  /// Candidatures reçues par mon équipe pour un match donné (vue capitaine)
+  Future<List<MatchApplication>> getMatchApplicationsReceived({
+    required int matchId,
+    required int teamId,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/challenges/$matchId/applications?team_id=$teamId'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data
+            .map((e) => MatchApplication.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getMatchApplicationsReceived: $e');
+      return [];
+    }
+  }
+
+  /// Mes candidatures envoyées pour les matchs publics
+  Future<List<MatchApplication>> getMyPublicMatchApplications() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/match-applications/mine'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data
+            .map((e) => MatchApplication.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getMyPublicMatchApplications: $e');
+      return [];
+    }
+  }
+
+  /// Accepte une candidature — annule toutes les autres du même joueur sur ce match
+  Future<({bool success, String? errorMessage})> acceptMatchApplication(
+      int applicationId) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/match-applications/$applicationId/accept'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        return (success: true, errorMessage: null);
+      }
+      // 409 : joueur déjà accepté ailleurs
+      final body = jsonDecode(response.body) as Map<String, dynamic>?;
+      final detail = body?['detail'] as String? ?? 'Erreur inconnue';
+      return (success: false, errorMessage: detail);
+    } catch (e) {
+      debugPrint('Erreur acceptMatchApplication: $e');
+      return (success: false, errorMessage: 'Erreur réseau');
+    }
+  }
+
+  /// Refuse une candidature
+  Future<bool> rejectMatchApplication(int applicationId) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/match-applications/$applicationId/reject'),
+        headers: await _headers,
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Erreur rejectMatchApplication: $e');
+      return false;
+    }
+  }
+
+  /// Annule ma propre candidature
+  Future<bool> cancelMatchApplication(int applicationId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/match-applications/$applicationId'),
+        headers: await _headers,
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Erreur cancelMatchApplication: $e');
+      return false;
+    }
+  }
 }
 
 // ============================================================
@@ -2380,6 +2558,187 @@ class PlayerCommentData {
       createdAt: DateTime.parse(json['created_at'] as String),
       authorUsername: json['author_username'] as String?,
       authorAvatarUrl: json['author_avatar_url'] as String?,
+    );
+  }
+}
+
+// ============================================================
+// Matchs publics — Candidatures de joueurs
+// ============================================================
+
+enum MatchApplicationStatus {
+  pending,
+  accepted,
+  rejected,
+  cancelled;
+
+  static MatchApplicationStatus fromString(String value) {
+    switch (value) {
+      case 'accepted':
+        return MatchApplicationStatus.accepted;
+      case 'rejected':
+        return MatchApplicationStatus.rejected;
+      case 'cancelled':
+        return MatchApplicationStatus.cancelled;
+      default:
+        return MatchApplicationStatus.pending;
+    }
+  }
+
+  String get displayName {
+    switch (this) {
+      case MatchApplicationStatus.pending:
+        return 'En attente';
+      case MatchApplicationStatus.accepted:
+        return 'Accepté';
+      case MatchApplicationStatus.rejected:
+        return 'Refusé';
+      case MatchApplicationStatus.cancelled:
+        return 'Annulé';
+    }
+  }
+}
+
+/// Slot d'une équipe dans un match public (peut être occupé ou libre)
+class PublicMatchTeamSlot {
+  final int? memberId;
+  final String? username;
+  final String? avatarUrl;
+  final PlayerPosition position;
+  final int slotIndex;
+  final bool isOpen;
+
+  PublicMatchTeamSlot({
+    this.memberId,
+    this.username,
+    this.avatarUrl,
+    required this.position,
+    required this.slotIndex,
+    required this.isOpen,
+  });
+
+  factory PublicMatchTeamSlot.fromJson(Map<String, dynamic> json) {
+    return PublicMatchTeamSlot(
+      memberId: json['member_id'] as int?,
+      username: json['username'] as String?,
+      avatarUrl: json['avatar_url'] as String?,
+      position: PlayerPosition.fromString(json['position'] as String),
+      slotIndex: json['slot_index'] as int,
+      isOpen: json['is_open'] as bool,
+    );
+  }
+}
+
+/// Informations d'une équipe dans un match public
+class PublicMatchTeamInfo {
+  final int id;
+  final String name;
+  final String? logoUrl;
+  final int captainId;
+  final List<PublicMatchTeamSlot> slots;
+
+  PublicMatchTeamInfo({
+    required this.id,
+    required this.name,
+    this.logoUrl,
+    required this.captainId,
+    required this.slots,
+  });
+
+  int get openSlotsCount => slots.where((s) => s.isOpen).length;
+  List<PublicMatchTeamSlot> get openSlots => slots.where((s) => s.isOpen).toList();
+
+  factory PublicMatchTeamInfo.fromJson(Map<String, dynamic> json) {
+    return PublicMatchTeamInfo(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      logoUrl: json['logo_url'] as String?,
+      captainId: json['captain_id'] as int,
+      slots: (json['slots'] as List<dynamic>)
+          .map((e) => PublicMatchTeamSlot.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+/// Match public visible par tous les utilisateurs
+class PublicMatch {
+  final int id;
+  final PublicMatchTeamInfo challengerTeam;
+  final PublicMatchTeamInfo challengedTeam;
+  final DateTime? proposedDate;
+  final String? proposedLocation;
+  final DateTime createdAt;
+
+  PublicMatch({
+    required this.id,
+    required this.challengerTeam,
+    required this.challengedTeam,
+    this.proposedDate,
+    this.proposedLocation,
+    required this.createdAt,
+  });
+
+  int get totalOpenSlots =>
+      challengerTeam.openSlotsCount + challengedTeam.openSlotsCount;
+
+  factory PublicMatch.fromJson(Map<String, dynamic> json) {
+    return PublicMatch(
+      id: json['id'] as int,
+      challengerTeam: PublicMatchTeamInfo.fromJson(
+          json['challenger_team'] as Map<String, dynamic>),
+      challengedTeam: PublicMatchTeamInfo.fromJson(
+          json['challenged_team'] as Map<String, dynamic>),
+      proposedDate: json['proposed_date'] != null
+          ? DateTime.parse(json['proposed_date'] as String)
+          : null,
+      proposedLocation: json['proposed_location'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// Candidature d'un joueur pour un slot dans un match public
+class MatchApplication {
+  final int id;
+  final int matchId;
+  final int teamId;
+  final String teamName;
+  final PlayerPosition position;
+  final int slotIndex;
+  final int applicantUserId;
+  final String applicantUsername;
+  final String? applicantAvatarUrl;
+  final MatchApplicationStatus status;
+  final DateTime createdAt;
+
+  MatchApplication({
+    required this.id,
+    required this.matchId,
+    required this.teamId,
+    required this.teamName,
+    required this.position,
+    required this.slotIndex,
+    required this.applicantUserId,
+    required this.applicantUsername,
+    this.applicantAvatarUrl,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory MatchApplication.fromJson(Map<String, dynamic> json) {
+    return MatchApplication(
+      id: json['id'] as int,
+      matchId: json['challenge_id'] as int,
+      teamId: json['team_id'] as int,
+      teamName: json['team_name'] as String,
+      position: PlayerPosition.fromString(json['position'] as String),
+      slotIndex: json['slot_index'] as int,
+      applicantUserId: json['applicant_id'] as int,
+      applicantUsername: json['applicant_username'] as String,
+      applicantAvatarUrl: json['applicant_avatar_url'] as String?,
+      status: MatchApplicationStatus.fromString(json['status'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 }
