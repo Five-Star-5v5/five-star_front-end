@@ -257,6 +257,71 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  // ── Password checklist (temps réel) ──────────────────────────────────────
+  Widget _buildPasswordChecklist() {
+    final v = _passwordController.text;
+    if (v.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 2, bottom: 2),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 4,
+        children: [
+          _pwdRule(v.length >= 8, '8 caractères min.'),
+          _pwdRule(_rePwdUpper.hasMatch(v), 'Majuscule (A-Z)'),
+          _pwdRule(_rePwdLower.hasMatch(v), 'Minuscule (a-z)'),
+          _pwdRule(_rePwdDigit.hasMatch(v), 'Chiffre (0-9)'),
+          _pwdRule(_rePwdSpecial.hasMatch(v), 'Symbole (!@#...)'),
+        ],
+      ),
+    );
+  }
+
+  Widget _pwdRule(bool ok, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          ok ? Icons.check_rounded : Icons.close_rounded,
+          size: 11,
+          color: ok ? _kSage : const Color(0xFFD4607A),
+        ),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: TextStyle(fontSize: 10, color: ok ? _kSage : _kMuted2),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmMatch() {
+    final v = _confirmController.text;
+    if (v.isEmpty) return const SizedBox.shrink();
+    final ok = v == _passwordController.text;
+    return Padding(
+      padding: const EdgeInsets.only(top: 5, left: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            ok ? Icons.check_rounded : Icons.close_rounded,
+            size: 11,
+            color: ok ? _kSage : const Color(0xFFD4607A),
+          ),
+          const SizedBox(width: 3),
+          Text(
+            ok ? 'Mots de passe identiques' : 'Ne correspond pas',
+            style: TextStyle(
+              fontSize: 10,
+              color: ok ? _kSage : const Color(0xFFD4607A),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
@@ -328,7 +393,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           onToggle: () => setState(
                             () => _passwordVisible = !_passwordVisible,
                           ),
-                          errorText: _passwordError,
+                          extraContent: _buildPasswordChecklist(),
                         ),
                         _buildPasswordField(
                           label: 'CONFIRMER LE MOT DE PASSE',
@@ -345,6 +410,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           onToggle: () => setState(
                             () => _confirmVisible = !_confirmVisible,
                           ),
+                          extraContent: _buildConfirmMatch(),
                         ),
                         const SizedBox(height: 4),
                         _buildTermsRow(),
@@ -563,6 +629,7 @@ class _SignUpPageState extends State<SignUpPage> {
     required VoidCallback onToggle,
     bool isError = false,
     String? errorText,
+    Widget? extraContent,
   }) {
     final showError = (errorText != null || isError) && !isFocused;
     return Column(
@@ -646,6 +713,7 @@ class _SignUpPageState extends State<SignUpPage> {
               style: const TextStyle(fontSize: 10, color: _kErrorBorder),
             ),
           ),
+        if (extraContent != null) extraContent,
         const SizedBox(height: 12),
       ],
     );

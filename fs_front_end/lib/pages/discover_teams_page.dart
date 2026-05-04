@@ -200,9 +200,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: isAvailable
-                        ? _dtAmberDim
-                        : const Color(0x0FFFFFFF),
+                    color: isAvailable ? _dtAmberDim : const Color(0x0FFFFFFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -251,8 +249,8 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                             'Rendez-vous visible auprès des équipes',
                             [
                               'Activez ce mode pour apparaître auprès des équipes incomplètes à la recherche d\'un joueur.',
-                              '👉 Les équipes peuvent consulter votre profil et vous envoyer une demande pour rejoindre leur match.',
-                              '👉 Vous pouvez accepter ou refuser chaque demande librement.',
+                              '--> Les équipes peuvent consulter votre profil et vous envoyer une demande pour rejoindre leur match.',
+                              '--> Vous pouvez accepter ou refuser chaque demande librement.',
                             ],
                           ),
                           child: Icon(
@@ -273,9 +271,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   width: 42,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: isAvailable
-                        ? _dtAmber
-                        : const Color(0xFF2A2D38),
+                    color: isAvailable ? _dtAmber : const Color(0xFF2A2D38),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: AnimatedAlign(
@@ -341,9 +337,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
-                color: isSelected
-                    ? const Color(0xFF0B0D11)
-                    : _dtMuted2,
+                color: isSelected ? const Color(0xFF0B0D11) : _dtMuted2,
               ),
             ),
           ),
@@ -387,10 +381,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 child: TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _searchQuery = v),
-                  style: GoogleFonts.dmSans(
-                    color: _dtWhite,
-                    fontSize: 13,
-                  ),
+                  style: GoogleFonts.dmSans(color: _dtWhite, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Rechercher une équipe ou un capitaine...',
                     hintStyle: GoogleFonts.dmSans(
@@ -435,43 +426,44 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     ? _buildEmptyState(
                         icon: Icons.groups_outlined,
                         message: 'Aucune équipe disponible pour le moment',
-                        onRefresh: () => teamsProvider.loadAllTeamsForDiscover(),
+                        onRefresh: () =>
+                            teamsProvider.loadAllTeamsForDiscover(),
                       )
                     : teams.isEmpty
-                        ? Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Text(
-                                'Aucune équipe pour "$_searchQuery"',
-                                style: GoogleFonts.dmSans(
-                                  color: _dtMuted2,
-                                  fontSize: 13,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Text(
+                            'Aucune équipe pour "$_searchQuery"',
+                            style: GoogleFonts.dmSans(
+                              color: _dtMuted2,
+                              fontSize: 13,
                             ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                            itemCount: teams.length,
-                            itemBuilder: (context, index) {
-                              final team = teams[index];
-                              final isMember = myTeamIds.contains(team.id);
-                              final pendingRequest = teamsProvider.myJoinRequests
-                                  .where(
-                                    (r) =>
-                                        r.teamId == team.id &&
-                                        r.status == ApplicationStatus.pending,
-                                  )
-                                  .firstOrNull;
-                              return _buildTeamDiscoverCard(
-                                team,
-                                teamsProvider,
-                                isMember: isMember,
-                                pendingRequest: pendingRequest,
-                              );
-                            },
+                            textAlign: TextAlign.center,
                           ),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        itemCount: teams.length,
+                        itemBuilder: (context, index) {
+                          final team = teams[index];
+                          final isMember = myTeamIds.contains(team.id);
+                          final pendingRequest = teamsProvider.myJoinRequests
+                              .where(
+                                (r) =>
+                                    r.teamId == team.id &&
+                                    r.status == ApplicationStatus.pending,
+                              )
+                              .firstOrNull;
+                          return _buildTeamDiscoverCard(
+                            team,
+                            teamsProvider,
+                            isMember: isMember,
+                            pendingRequest: pendingRequest,
+                          );
+                        },
+                      ),
               ),
             ),
           ],
@@ -607,9 +599,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 decoration: BoxDecoration(
                   color: _dtSageDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _dtSage.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: _dtSage.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -636,9 +626,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 decoration: BoxDecoration(
                   color: _dtAmberDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: _dtAmber.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: _dtAmber.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   'Envoyée',
@@ -702,7 +690,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   ) async {
     setState(() => _pendingJoinTeams.add(team.id));
     final messenger = ScaffoldMessenger.of(context);
-    final success = await teamsProvider.sendJoinRequest(team.id, source: 'discover');
+    final success = await teamsProvider.sendJoinRequest(
+      team.id,
+      source: 'discover',
+    );
     if (!mounted) return;
     setState(() => _pendingJoinTeams.remove(team.id));
     messenger.showSnackBar(
@@ -734,8 +725,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 child: teamsProvider.allOpenSlots.isEmpty
                     ? _buildEmptyState(
                         icon: Icons.sports_soccer,
-                        message:
-                            'Aucun poste ouvert disponible pour le moment',
+                        message: 'Aucun poste ouvert disponible pour le moment',
                         onRefresh: () => teamsProvider.loadAllOpenSlots(
                           position: _selectedPositionFilter,
                         ),
@@ -1100,11 +1090,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.format_quote,
-                      color: _dtMuted2,
-                      size: 18,
-                    ),
+                    const Icon(Icons.format_quote, color: _dtMuted2, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1227,10 +1213,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           GestureDetector(
             onTap: onRefresh,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [_dtAmberSoft, _dtAmberD],
@@ -1240,11 +1223,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.refresh,
-                    size: 16,
-                    color: Color(0xFF0B0D11),
-                  ),
+                  const Icon(Icons.refresh, size: 16, color: Color(0xFF0B0D11)),
                   const SizedBox(width: 8),
                   Text(
                     'Rafraîchir',
@@ -1686,9 +1665,8 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                     if (e.key > 0) ...[
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: () => setState(
-                          () => _cityControllers.removeAt(e.key),
-                        ),
+                        onTap: () =>
+                            setState(() => _cityControllers.removeAt(e.key)),
                         child: Container(
                           width: 38,
                           height: 38,

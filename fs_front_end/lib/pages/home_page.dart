@@ -545,7 +545,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 'Publiez un match et laissez une autre équipe le rejoindre. Vous créez l\'offre, une équipe adverse peut donc vous defier.',
                 'Seul le capitaine de l\'équipe peut créer un match. Nous vous conseillons d\'indiquer une plage horaire large afin d\'augmenter vos chances de trouver un adversaire.',
                 'Une fois que la demande de defie sera envoyer par l\'adversaire, tu seras libre de l\'accepter ou de la decliner. Une fois le defie accepter il s\'affichera ici dans « Matchs à venir » et vous aurez accès à un chat pour vous organiser avec l\'équipe adverse.',
-                '👉 Recommandation : trouvez d\'abord un adversaire et fixez l\'horaire avant de réserver et payer un terrain, afin d\'éviter toute dépense inutile.',
+                '--> Recommandation : trouvez d\'abord un adversaire et fixez l\'horaire avant de réserver et payer un terrain, afin d\'éviter toute dépense inutile.',
               ]),
               child: Icon(
                 Icons.info_outline,
@@ -619,8 +619,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     'Trouvez un match et affrontez une équipe',
                     [
                       'Consultez les matchs publiés par d’autres équipes et envoyez une demande pour les affronter.',
-                      '👉 Par exemple, si une équipe a créé un match, vous pouvez répondre à son annonce et proposer de jouer contre elle.',
-                      '👉 Une fois la demande acceptée, une conversation s’ouvre pour organiser les détails de la rencontre (horaire, lieu, etc.).',
+                      '--> Par exemple, si une équipe a créé un match, vous pouvez répondre à son annonce et proposer de jouer contre elle.',
+                      '--> Une fois la demande acceptée, une conversation s’ouvre pour organiser les détails de la rencontre (horaire, lieu, etc.).',
                     ],
                   ),
                   child: Padding(
@@ -715,7 +715,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0x1C4CAF82),
                       borderRadius: BorderRadius.circular(100),
@@ -739,8 +741,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const PublicMatchesPage()),
+                MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
               ),
               child: Text(
                 'Voir tout →',
@@ -757,8 +758,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (_publicMatches.isEmpty)
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             decoration: BoxDecoration(
               color: _kCard,
               borderRadius: BorderRadius.circular(14),
@@ -847,29 +847,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const Icon(Icons.calendar_today, size: 10, color: _kMuted2),
                   const SizedBox(width: 4),
                   Text(
-                    DateFormat('d MMM • HH:mm', 'fr_FR')
-                        .format(match.proposedDate!),
-                    style: GoogleFonts.dmSans(
-                        fontSize: 10, color: _kMuted2),
+                    DateFormat(
+                      'd MMM • HH:mm',
+                      'fr_FR',
+                    ).format(match.proposedDate!),
+                    style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
                   ),
                 ],
               ),
             const Spacer(),
             // Open slots badge
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: sageColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: sageColor.withValues(alpha: 0.3), width: 1),
+                  color: sageColor.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.person_add_outlined,
-                      size: 10, color: sageColor),
+                  Icon(Icons.person_add_outlined, size: 10, color: sageColor),
                   const SizedBox(width: 4),
                   Text(
                     '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
@@ -895,8 +896,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: _kAmberDim,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-            color: _kAmber.withValues(alpha: 0.2), width: 1),
+        border: Border.all(color: _kAmber.withValues(alpha: 0.2), width: 1),
       ),
       child: team.logoUrl != null
           ? ClipRRect(
@@ -2872,9 +2872,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   onTap: () => _showInfoModal(
                                     'Rejoindre une équipe',
                                     [
-                                      'Trouvez une équipe ou rejoignez la vôtre.',
-                                      'Recherchez une équipe à l\'aide de son nom ou de son code, ou consultez les équipes incomplètes et envoyez une demande pour les rejoindre lors de leur prochain match.',
-                                      '👉 Vous pouvez postuler à plusieurs équipes pour maximiser vos chances de jouer rapidement.',
+                                      'Recherchez une équipe ou rejoignez la vôtre.',
+                                      'Recherchez une équipe à l\'aide de son nom ou du code ID du capitaine et envoyez une demande pour les rejoindre, ou consultez les équipes incomplètes et rejoignez les directement.',
+                                      '--> Vous pouvez postuler à plusieurs équipes pour maximiser vos chances de jouer rapidement.',
                                     ],
                                   ),
                                   child: Icon(
@@ -4393,7 +4393,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               // Option pour mettre en mode recherche
               Tooltip(
                 message:
-                    'Recherchez des joueurs pour compléter votre équipe.\nPubliez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et vous envoyer une demande.\n👉 Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.\n👉 Vous pouvez accepter ou refuser les demandes librement.',
+                    'Recherchez des joueurs pour compléter votre équipe.\nPubliez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et rejoindre votre equipe. \n--> Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.\n',
                 preferBelow: false,
                 verticalOffset: 8,
                 decoration: BoxDecoration(
@@ -4431,11 +4431,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         GestureDetector(
-                          onTap: () => _showInfoModal('Ouvrir aux candidatures', [
+                          onTap: () => _showInfoModal('Ouvrir le poste', [
                             'Recherchez des joueurs pour compléter votre équipe.',
-                            'Publiez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et vous envoyer une demande.',
-                            '👉 Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.',
-                            '👉 Vous pouvez accepter ou refuser les demandes librement.',
+                            'Publiez une annonce pour signaler que votre équipe recrute. Les joueurs disponibles pourront voir votre besoin et rejoindre l\'équipe directement.',
+                            '--> Précisez la localisation, la date et le niveau recherché pour recevoir des profils adaptés.',
                           ]),
                           child: const Padding(
                             padding: EdgeInsets.all(4),
@@ -4504,7 +4503,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           onTap: () => _showInfoModal('Recruter sur le store', [
                             'Invitez des joueurs pour compléter votre équipe.',
                             'Consultez les joueurs disponibles et envoyez une invitation à ceux qui correspondent à vos besoins.',
-                            '👉 Le joueur peut accepter ou refuser votre invitation librement.',
+                            '--> Le joueur peut accepter ou refuser votre invitation librement.',
                           ]),
                           child: const Padding(
                             padding: EdgeInsets.all(4),
@@ -7196,7 +7195,11 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     final invitations = teamsProvider.pendingInvitations;
     final matchApps = teamsProvider.receivedMatchApplications;
     final joinRequests = teamsProvider.receivedJoinRequests;
-    final totalCount = challenges.length + invitations.length + matchApps.length + joinRequests.length;
+    final totalCount =
+        challenges.length +
+        invitations.length +
+        matchApps.length +
+        joinRequests.length;
 
     return Container(
       decoration: const BoxDecoration(
@@ -7298,7 +7301,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         ),
                       ),
                     ),
-                    if (matchApps.isNotEmpty || invitations.isNotEmpty || challenges.isNotEmpty)
+                    if (matchApps.isNotEmpty ||
+                        invitations.isNotEmpty ||
+                        challenges.isNotEmpty)
                       const SizedBox(height: 12),
                   ],
                   if (matchApps.isNotEmpty) ...[
@@ -7866,8 +7871,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: const Color(0x1A22C55E),
                   borderRadius: BorderRadius.circular(6),
@@ -7892,8 +7896,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       ? null
                       : () async {
                           setState(() => _loadingIds.add(app.id));
-                          await teamsProvider
-                              .rejectReceivedMatchApplication(app.id);
+                          await teamsProvider.rejectReceivedMatchApplication(
+                            app.id,
+                          );
                           if (mounted)
                             setState(() => _loadingIds.remove(app.id));
                         },
@@ -7936,13 +7941,15 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                                   content: Text(
                                     result.errorMessage!,
                                     style: GoogleFonts.dmSans(
-                                        color: _kWhite, fontSize: 13),
+                                      color: _kWhite,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                   backgroundColor: _kRose,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(10)),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                   margin: const EdgeInsets.all(12),
                                 ),
                               );
@@ -8099,7 +8106,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             accept: false,
                           );
                           if (mounted)
-                            setState(() => _loadingIds.remove(request.id * 1000));
+                            setState(
+                              () => _loadingIds.remove(request.id * 1000),
+                            );
                         },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -8128,13 +8137,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       ? null
                       : () async {
                           setState(() => _loadingIds.add(request.id * 1000));
-                          final success = await teamsProvider.respondToJoinRequest(
-                            request.id,
-                            accept: true,
-                          );
+                          final success = await teamsProvider
+                              .respondToJoinRequest(request.id, accept: true);
                           if (mounted) {
-                            setState(() => _loadingIds.remove(request.id * 1000));
-                            if (success && context.mounted) Navigator.pop(context);
+                            setState(
+                              () => _loadingIds.remove(request.id * 1000),
+                            );
+                            if (success && context.mounted)
+                              Navigator.pop(context);
                           }
                         },
                   child: Container(
