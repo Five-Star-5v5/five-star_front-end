@@ -39,7 +39,6 @@ String _formatDate(DateTime date) {
 
 // ─── Widget ───────────────────────────────────────────────────────────────────
 
-/// Page pour découvrir les équipes en recherche de joueurs
 class DiscoverTeamsPage extends StatefulWidget {
   const DiscoverTeamsPage({super.key});
 
@@ -52,10 +51,17 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   late TabController _tabController;
   PlayerPosition? _selectedPositionFilter;
 
+  // Recherche dans l'onglet ÉQUIPES
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  // Tracks optimistic join-request state: teamId → true while sending
+  final Set<int> _pendingJoinTeams = {};
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -64,6 +70,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -72,8 +79,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   Future<void> _loadData() async {
     final teamsProvider = context.read<TeamsProvider>();
     await Future.wait([
+      teamsProvider.loadAllTeamsForDiscover(),
       teamsProvider.loadAllOpenSlots(position: _selectedPositionFilter),
-      teamsProvider.loadMyApplications(),
+      teamsProvider.loadMyJoinRequests(),
     ]);
   }
 
@@ -141,7 +149,11 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildOpenSlotsTab(), _buildMyApplicationsTab()],
+              children: [
+                _buildAllTeamsTab(),
+                _buildOpenSlotsTab(),
+                _buildMyJoinRequestsTab(),
+              ],
             ),
           ),
         ],
@@ -173,9 +185,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: isAvailable
-                  ? const Color(0x1AFF7F2A)
-                  : _dtCard,
+              color: isAvailable ? const Color(0x1AFF7F2A) : _dtCard,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: isAvailable
@@ -186,13 +196,13 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             ),
             child: Row(
               children: [
-                // Icône
                 Container(
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color:
-                        isAvailable ? _dtAmberDim : const Color(0x0FFFFFFF),
+                    color: isAvailable
+                        ? _dtAmberDim
+                        : const Color(0x0FFFFFFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -204,7 +214,6 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Texte + icône info en haut à droite du bloc texte
                 Expanded(
                   child: Stack(
                     children: [
@@ -259,13 +268,14 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Toggle
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   width: 42,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: isAvailable ? _dtAmber : const Color(0xFF2A2D38),
+                    color: isAvailable
+                        ? _dtAmber
+                        : const Color(0xFF2A2D38),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: AnimatedAlign(
@@ -295,13 +305,16 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   // ── Custom tab bar ──────────────────────────────────────────────────────────
 
   Widget _buildCustomTabBar() {
-    return Padding(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
           _buildTabPill(0, 'ÉQUIPES'),
           const SizedBox(width: 8),
-          _buildTabPill(1, 'CANDIDATURES'),
+          _buildTabPill(1, 'POSTES OUVERTS'),
+          const SizedBox(width: 8),
+          _buildTabPill(2, 'CANDIDATURES'),
         ],
       ),
     );
@@ -328,7 +341,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
-                color: isSelected ? const Color(0xFF0B0D11) : _dtMuted2,
+                color: isSelected
+                    ? const Color(0xFF0B0D11)
+                    : _dtMuted2,
               ),
             ),
           ),
@@ -337,7 +352,372 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     );
   }
 
-  // ── Tabs ────────────────────────────────────────────────────────────────────
+  // ── Tab: ÉQUIPES (toutes les équipes) ───────────────────────────────────────
+
+  Widget _buildAllTeamsTab() {
+    return Consumer<TeamsProvider>(
+      builder: (context, teamsProvider, _) {
+        final myTeamIds = teamsProvider.allTeams.map((t) => t.id).toSet();
+        final allTeams = teamsProvider.allTeamsForDiscover;
+
+        final q = _searchQuery.toLowerCase().trim();
+        final teams = q.isEmpty
+            ? allTeams
+            : allTeams.where((t) {
+                final nameMatch = t.name.toLowerCase().contains(q);
+                final ownerMatch =
+                    t.ownerUsername?.toLowerCase().contains(q) ?? false;
+                final codeMatch =
+                    t.ownerCodeId?.toLowerCase().contains(q) ?? false;
+                return nameMatch || ownerMatch || codeMatch;
+              }).toList();
+
+        return Column(
+          children: [
+            // Barre de recherche
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Container(
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _dtCard,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0x21FFFFFF)),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _searchQuery = v),
+                  style: GoogleFonts.dmSans(
+                    color: _dtWhite,
+                    fontSize: 13,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher une équipe ou un capitaine...',
+                    hintStyle: GoogleFonts.dmSans(
+                      color: _dtMuted2,
+                      fontSize: 13,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: _dtMuted2,
+                      size: 18,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              color: _dtMuted2,
+                              size: 16,
+                            ),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ),
+            // Liste des équipes
+            Expanded(
+              child: RefreshIndicator(
+                color: _dtAmber,
+                onRefresh: () async {
+                  await Future.wait([
+                    teamsProvider.loadAllTeamsForDiscover(),
+                    teamsProvider.loadMyJoinRequests(),
+                  ]);
+                },
+                child: allTeams.isEmpty
+                    ? _buildEmptyState(
+                        icon: Icons.groups_outlined,
+                        message: 'Aucune équipe disponible pour le moment',
+                        onRefresh: () => teamsProvider.loadAllTeamsForDiscover(),
+                      )
+                    : teams.isEmpty
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Text(
+                                'Aucune équipe pour "$_searchQuery"',
+                                style: GoogleFonts.dmSans(
+                                  color: _dtMuted2,
+                                  fontSize: 13,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                            itemCount: teams.length,
+                            itemBuilder: (context, index) {
+                              final team = teams[index];
+                              final isMember = myTeamIds.contains(team.id);
+                              final pendingRequest = teamsProvider.myJoinRequests
+                                  .where(
+                                    (r) =>
+                                        r.teamId == team.id &&
+                                        r.status == ApplicationStatus.pending,
+                                  )
+                                  .firstOrNull;
+                              return _buildTeamDiscoverCard(
+                                team,
+                                teamsProvider,
+                                isMember: isMember,
+                                pendingRequest: pendingRequest,
+                              );
+                            },
+                          ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTeamDiscoverCard(
+    TeamPreview team,
+    TeamsProvider teamsProvider, {
+    bool isMember = false,
+    TeamJoinRequest? pendingRequest,
+  }) {
+    final isSending = _pendingJoinTeams.contains(team.id);
+    final hasPendingRequest = pendingRequest != null;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _dtCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _dtBorder2),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Logo
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: _dtAmberDim,
+                borderRadius: BorderRadius.circular(10),
+                image: team.logoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(team.logoUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: team.logoUrl == null
+                  ? Center(
+                      child: Text(
+                        team.name[0].toUpperCase(),
+                        style: GoogleFonts.syne(
+                          color: _dtAmber,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            // Infos
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    team.name,
+                    style: GoogleFonts.syne(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: _dtWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.people_outline,
+                        size: 12,
+                        color: _dtMuted2,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${team.membersCount} joueur${team.membersCount > 1 ? 's' : ''}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 11,
+                          color: _dtMuted2,
+                        ),
+                      ),
+                      if (team.ownerUsername != null) ...[
+                        const SizedBox(width: 8),
+                        const Text(
+                          '·',
+                          style: TextStyle(color: _dtMuted2, fontSize: 11),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '@${team.ownerUsername}',
+                            style: GoogleFonts.dmSans(
+                              fontSize: 11,
+                              color: _dtAmber,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (team.description != null &&
+                      team.description!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      team.description!,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 11,
+                        color: _dtMuted2,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Bouton
+            if (isMember)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: _dtSageDim,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _dtSage.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check, size: 12, color: _dtSage),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Membre',
+                      style: GoogleFonts.syne(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _dtSage,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (hasPendingRequest)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: _dtAmberDim,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _dtAmber.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  'Envoyée',
+                  style: GoogleFonts.syne(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _dtAmber,
+                  ),
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: isSending
+                    ? null
+                    : () => _sendJoinRequest(team, teamsProvider),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: isSending
+                        ? null
+                        : const LinearGradient(
+                            colors: [_dtAmberSoft, _dtAmberD],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    color: isSending ? _dtCard2 : null,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: isSending
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: _dtAmber,
+                          ),
+                        )
+                      : Text(
+                          'Rejoindre',
+                          style: GoogleFonts.syne(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0B0D11),
+                          ),
+                        ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendJoinRequest(
+    TeamPreview team,
+    TeamsProvider teamsProvider,
+  ) async {
+    setState(() => _pendingJoinTeams.add(team.id));
+    final messenger = ScaffoldMessenger.of(context);
+    final success = await teamsProvider.sendJoinRequest(team.id, source: 'discover');
+    if (!mounted) return;
+    setState(() => _pendingJoinTeams.remove(team.id));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Demande envoyée à ${team.name} !'
+              : 'Erreur lors de l\'envoi de la demande',
+        ),
+        backgroundColor: success ? _dtSage : _dtRose,
+      ),
+    );
+  }
+
+  // ── Tab: POSTES OUVERTS ─────────────────────────────────────────────────────
 
   Widget _buildOpenSlotsTab() {
     return Consumer<TeamsProvider>(
@@ -354,7 +734,8 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 child: teamsProvider.allOpenSlots.isEmpty
                     ? _buildEmptyState(
                         icon: Icons.sports_soccer,
-                        message: 'Aucune équipe en recherche pour le moment',
+                        message:
+                            'Aucun poste ouvert disponible pour le moment',
                         onRefresh: () => teamsProvider.loadAllOpenSlots(
                           position: _selectedPositionFilter,
                         ),
@@ -364,7 +745,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         itemCount: teamsProvider.allOpenSlots.length,
                         itemBuilder: (context, index) {
                           final slot = teamsProvider.allOpenSlots[index];
-                          return _buildOpenSlotCard(slot);
+                          return _buildOpenSlotCard(slot, teamsProvider);
                         },
                       ),
               ),
@@ -375,29 +756,193 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     );
   }
 
-  Widget _buildMyApplicationsTab() {
+  // ── Tab: CANDIDATURES (demandes de rejoindre) ───────────────────────────────
+
+  Widget _buildMyJoinRequestsTab() {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, _) {
-        final applications = teamsProvider.myApplications;
+        final requests = teamsProvider.myJoinRequests;
         return RefreshIndicator(
           color: _dtAmber,
-          onRefresh: () => teamsProvider.loadMyApplications(),
-          child: applications.isEmpty
+          onRefresh: () => teamsProvider.loadMyJoinRequests(),
+          child: requests.isEmpty
               ? _buildEmptyState(
                   icon: Icons.inbox_outlined,
-                  message: 'Vous n\'avez pas encore postulé',
-                  onRefresh: () => teamsProvider.loadMyApplications(),
+                  message: 'Vous n\'avez pas encore envoyé de demande',
+                  onRefresh: () => teamsProvider.loadMyJoinRequests(),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: applications.length,
+                  itemCount: requests.length,
                   itemBuilder: (context, index) {
-                    final app = applications[index];
-                    return _buildApplicationCard(app);
+                    final request = requests[index];
+                    return _buildJoinRequestCard(request, teamsProvider);
                   },
                 ),
         );
       },
+    );
+  }
+
+  Widget _buildJoinRequestCard(
+    TeamJoinRequest request,
+    TeamsProvider teamsProvider,
+  ) {
+    Color statusColor;
+    Color statusDimColor;
+    String statusText;
+    IconData statusIcon;
+
+    switch (request.status) {
+      case ApplicationStatus.pending:
+        statusColor = _dtAmber;
+        statusDimColor = _dtAmberDim;
+        statusText = 'En attente';
+        statusIcon = Icons.hourglass_empty;
+        break;
+      case ApplicationStatus.accepted:
+        statusColor = _dtSage;
+        statusDimColor = _dtSageDim;
+        statusText = 'Acceptée';
+        statusIcon = Icons.check_circle;
+        break;
+      case ApplicationStatus.rejected:
+        statusColor = _dtRose;
+        statusDimColor = _dtRoseDim;
+        statusText = 'Refusée';
+        statusIcon = Icons.cancel;
+        break;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: _dtCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _dtBorder2),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _dtAmberDim,
+                    borderRadius: BorderRadius.circular(10),
+                    image: request.teamLogoUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(request.teamLogoUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: request.teamLogoUrl == null
+                      ? Center(
+                          child: Text(
+                            request.teamName[0].toUpperCase(),
+                            style: GoogleFonts.syne(
+                              color: _dtAmber,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    request.teamName,
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: _dtWhite,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusDimColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 12, color: statusColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusText,
+                        style: GoogleFonts.syne(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Envoyée ${_formatDate(request.createdAt)}',
+              style: GoogleFonts.dmSans(color: _dtMuted2, fontSize: 11),
+            ),
+            if (request.status == ApplicationStatus.pending) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () => _showCancelJoinRequestConfirmation(
+                      request,
+                      teamsProvider,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: _dtRose),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.cancel_outlined,
+                            size: 14,
+                            color: _dtRose,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              color: _dtRose,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -458,9 +1003,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     );
   }
 
-  // ── Cards ───────────────────────────────────────────────────────────────────
+  // ── Open slot card ──────────────────────────────────────────────────────────
 
-  Widget _buildOpenSlotCard(OpenSlot slot) {
+  Widget _buildOpenSlotCard(OpenSlot slot, TeamsProvider teamsProvider) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Container(
@@ -475,7 +1020,6 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           children: [
             Row(
               children: [
-                // Logo
                 Container(
                   width: 46,
                   height: 46,
@@ -556,7 +1100,11 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.format_quote, color: _dtMuted2, size: 18),
+                    const Icon(
+                      Icons.format_quote,
+                      color: _dtMuted2,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -583,7 +1131,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 const Spacer(),
                 GestureDetector(
-                  onTap: () => _showApplyDialog(slot),
+                  onTap: () => _joinSlot(slot, teamsProvider),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -601,13 +1149,13 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.send,
+                          Icons.login,
                           size: 12,
                           color: Color(0xFF0B0D11),
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Postuler',
+                          'Rejoindre',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w700,
                             fontSize: 11,
@@ -627,177 +1175,34 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     );
   }
 
-  Widget _buildApplicationCard(SlotApplicationDetail app) {
-    final slot = app.openSlot;
+  Future<void> _joinSlot(OpenSlot slot, TeamsProvider teamsProvider) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await teamsProvider.joinSlotDirectly(slot.id);
+    if (!mounted) return;
 
-    Color statusColor;
-    Color statusDimColor;
-    String statusText;
-    IconData statusIcon;
-
-    switch (app.status) {
-      case ApplicationStatus.pending:
-        statusColor = _dtAmber;
-        statusDimColor = _dtAmberDim;
-        statusText = 'En attente';
-        statusIcon = Icons.hourglass_empty;
-        break;
-      case ApplicationStatus.accepted:
-        statusColor = _dtSage;
-        statusDimColor = _dtSageDim;
-        statusText = 'Acceptée';
-        statusIcon = Icons.check_circle;
-        break;
-      case ApplicationStatus.rejected:
-        statusColor = _dtRose;
-        statusDimColor = _dtRoseDim;
-        statusText = 'Refusée';
-        statusIcon = Icons.cancel;
-        break;
+    if (result.success) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Tu as rejoint l\'équipe !'),
+          backgroundColor: _dtSage,
+        ),
+      );
+      Navigator.of(context).pop();
+    } else if (result.alreadyTaken) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Cette place a déjà été prise par un autre joueur.'),
+          backgroundColor: _dtRose,
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Une erreur est survenue, réessaie plus tard.'),
+          backgroundColor: _dtRose,
+        ),
+      );
     }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: _dtCard,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _dtBorder2),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: _dtAmberDim,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Text(
-                      slot.teamName[0].toUpperCase(),
-                      style: GoogleFonts.syne(
-                        color: _dtAmber,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        slot.teamName,
-                        style: GoogleFonts.syne(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: _dtWhite,
-                        ),
-                      ),
-                      Text(
-                        'Poste : ${slot.position.displayName}',
-                        style: GoogleFonts.dmSans(
-                          color: _dtMuted2,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusDimColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 12, color: statusColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        statusText,
-                        style: GoogleFonts.syne(
-                          color: statusColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (app.message != null && app.message!.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                'Votre message : "${app.message}"',
-                style: GoogleFonts.dmSans(
-                  color: _dtMuted2,
-                  fontStyle: FontStyle.italic,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Text(
-              'Envoyée ${_formatDate(app.appliedAt)}',
-              style: GoogleFonts.dmSans(color: _dtMuted2, fontSize: 11),
-            ),
-            if (app.status == ApplicationStatus.pending) ...[
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () => _showCancelConfirmation(app),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: _dtRose),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.cancel_outlined,
-                            size: 14,
-                            color: _dtRose,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Annuler',
-                            style: GoogleFonts.syne(
-                              color: _dtRose,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 
   // ── Empty state ─────────────────────────────────────────────────────────────
@@ -822,7 +1227,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           GestureDetector(
             onTap: onRefresh,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 10,
+              ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [_dtAmberSoft, _dtAmberD],
@@ -832,7 +1240,11 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.refresh, size: 16, color: Color(0xFF0B0D11)),
+                  const Icon(
+                    Icons.refresh,
+                    size: 16,
+                    color: Color(0xFF0B0D11),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Rafraîchir',
@@ -922,8 +1334,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
 
   // ── Dialogs ─────────────────────────────────────────────────────────────────
 
-  void _showApplyDialog(OpenSlot slot) {
-    final messageController = TextEditingController();
+  void _showCancelJoinRequestConfirmation(
+    TeamJoinRequest request,
+    TeamsProvider teamsProvider,
+  ) {
     showDialog(
       context: context,
       builder: (dialogCtx) => Dialog(
@@ -939,163 +1353,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Postuler chez ${slot.teamName}',
-                style: GoogleFonts.syne(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: _dtWhite,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Icon(Icons.sports_soccer, color: _dtAmber, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Poste : ${slot.position.displayName}',
-                    style: GoogleFonts.dmSans(color: _dtMuted2, fontSize: 13),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: messageController,
-                maxLines: 3,
-                style: GoogleFonts.dmSans(color: _dtWhite, fontSize: 13),
-                decoration: InputDecoration(
-                  labelText: 'Message (optionnel)',
-                  labelStyle: GoogleFonts.dmSans(
-                    color: _dtMuted2,
-                    fontSize: 12,
-                  ),
-                  hintText: 'Présentez-vous en quelques mots...',
-                  hintStyle: GoogleFonts.dmSans(color: _dtMuted2, fontSize: 12),
-                  filled: true,
-                  fillColor: _dtCard2,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: _dtBorder2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: _dtBorder2),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: _dtAmber),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(dialogCtx),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: _dtCard2,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Annuler',
-                            style: GoogleFonts.syne(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: _dtMuted2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(dialogCtx);
-                        final teamsProvider = context.read<TeamsProvider>();
-                        final messenger = ScaffoldMessenger.of(context);
-                        final success = await teamsProvider.applyToSlot(
-                          slot.id,
-                          message: messageController.text.trim().isNotEmpty
-                              ? messageController.text.trim()
-                              : null,
-                        );
-                        if (!mounted) return;
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Candidature envoyée !'
-                                  : 'Vous avez déjà postulé ou une erreur est survenue',
-                            ),
-                            backgroundColor: success ? _dtSage : _dtRose,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [_dtAmberSoft, _dtAmberD],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.send,
-                                size: 14,
-                                color: Color(0xFF0B0D11),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Envoyer',
-                                style: GoogleFonts.syne(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                  color: const Color(0xFF0B0D11),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showCancelConfirmation(SlotApplicationDetail app) {
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => Dialog(
-        backgroundColor: _dtCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _dtBorder2),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Annuler la candidature',
+                'Annuler la demande',
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
@@ -1104,7 +1362,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               ),
               const SizedBox(height: 12),
               Text(
-                'Êtes-vous sûr de vouloir annuler votre candidature pour l\'équipe "${app.openSlot.teamName}" ?',
+                'Annuler la demande pour rejoindre "${request.teamName}" ?',
                 style: GoogleFonts.dmSans(color: _dtMuted2, fontSize: 13),
               ),
               const SizedBox(height: 24),
@@ -1137,19 +1395,16 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     child: GestureDetector(
                       onTap: () async {
                         Navigator.of(dialogCtx).pop();
-                        final teamsProvider = Provider.of<TeamsProvider>(
-                          context,
-                          listen: false,
-                        );
                         final messenger = ScaffoldMessenger.of(context);
-                        final success = await teamsProvider.cancelApplication(
-                          app.id,
+                        final success = await teamsProvider.cancelJoinRequest(
+                          request.id,
                         );
+                        if (!mounted) return;
                         messenger.showSnackBar(
                           SnackBar(
                             content: Text(
                               success
-                                  ? 'Candidature annulée avec succès'
+                                  ? 'Demande annulée'
                                   : 'Erreur lors de l\'annulation',
                             ),
                             backgroundColor: success ? _dtSage : _dtRose,
@@ -1197,14 +1452,15 @@ class _AvailabilitySheet extends StatefulWidget {
 }
 
 class _AvailabilitySheetState extends State<_AvailabilitySheet> {
-  // 7 dates à partir d'aujourd'hui
   late final List<DateTime> _dates = List.generate(
     7,
     (i) => DateTime.now().add(Duration(days: i)),
   );
 
   final Set<int> _selectedDays = {};
-  final List<TextEditingController> _cityControllers = [TextEditingController()];
+  final List<TextEditingController> _cityControllers = [
+    TextEditingController(),
+  ];
   int _radiusKm = 10;
   bool _loading = false;
 
@@ -1260,17 +1516,20 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.fromLTRB(
-        20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 28,
+        20,
+        16,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 28,
       ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle
             Center(
               child: Container(
-                width: 36, height: 4,
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
                   color: _dtBorder2,
                   borderRadius: BorderRadius.circular(2),
@@ -1280,7 +1539,11 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
             const SizedBox(height: 16),
             Text(
               'DISPONIBILITÉ',
-              style: GoogleFonts.syne(fontSize: 15, fontWeight: FontWeight.w700, color: _dtWhite),
+              style: GoogleFonts.syne(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _dtWhite,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -1288,25 +1551,34 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
               style: GoogleFonts.dmSans(fontSize: 12, color: _dtMuted2),
             ),
             const SizedBox(height: 20),
-
-            // ── Jours ───────────────────────────────────────────────────────
             Row(
               children: [
                 Expanded(
                   child: Text(
                     'Jours disponibles',
-                    style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+                    style: GoogleFonts.syne(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _dtWhite,
+                    ),
                   ),
                 ),
                 GestureDetector(
                   onTap: _toggleAll,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
-                      color: _allSelected ? _dtAmberDim : const Color(0x0EFFFFFF),
+                      color: _allSelected
+                          ? _dtAmberDim
+                          : const Color(0x0EFFFFFF),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: _allSelected ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                        color: _allSelected
+                            ? _dtAmber.withValues(alpha: 0.4)
+                            : _dtBorder2,
                       ),
                     ),
                     child: Text(
@@ -1341,7 +1613,9 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                       color: sel ? _dtAmberDim : const Color(0x08FFFFFF),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: sel ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                        color: sel
+                            ? _dtAmber.withValues(alpha: 0.4)
+                            : _dtBorder2,
                       ),
                     ),
                     child: Text(
@@ -1358,81 +1632,115 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
               }),
             ),
             const SizedBox(height: 20),
-
-            // ── Zone ────────────────────────────────────────────────────────
             Text(
               'Zone géographique',
-              style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+              style: GoogleFonts.syne(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: _dtWhite,
+              ),
             ),
             const SizedBox(height: 10),
-            ..._cityControllers.asMap().entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: e.value,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _dtWhite),
-                      cursorColor: _dtAmber,
-                      decoration: InputDecoration(
-                        hintText: 'Ville (ex: Paris)',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _dtMuted2),
-                        filled: true,
-                        fillColor: const Color(0x08FFFFFF),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _dtBorder2),
+            ..._cityControllers.asMap().entries.map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: e.value,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          color: _dtWhite,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _dtBorder2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: _dtAmber.withValues(alpha: 0.6)),
+                        cursorColor: _dtAmber,
+                        decoration: InputDecoration(
+                          hintText: 'Ville (ex: Paris)',
+                          hintStyle: GoogleFonts.dmSans(
+                            fontSize: 13,
+                            color: _dtMuted2,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0x08FFFFFF),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 11,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: _dtBorder2),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: _dtBorder2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: _dtAmber.withValues(alpha: 0.6),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (e.key > 0) ...[
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => setState(() => _cityControllers.removeAt(e.key)),
-                      child: Container(
-                        width: 38, height: 38,
-                        decoration: BoxDecoration(
-                          color: _dtRoseDim,
-                          borderRadius: BorderRadius.circular(10),
+                    if (e.key > 0) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => setState(
+                          () => _cityControllers.removeAt(e.key),
                         ),
-                        child: const Icon(Icons.remove, size: 18, color: _dtRose),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: _dtRoseDim,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.remove,
+                            size: 18,
+                            color: _dtRose,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
+                    if (e.key == _cityControllers.length - 1 &&
+                        _cityControllers.length < 3) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => setState(
+                          () => _cityControllers.add(TextEditingController()),
+                        ),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: _dtAmberDim,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: _dtAmber.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            size: 18,
+                            color: _dtAmber,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                  if (e.key == _cityControllers.length - 1 && _cityControllers.length < 3) ...[
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => setState(() => _cityControllers.add(TextEditingController())),
-                      child: Container(
-                        width: 38, height: 38,
-                        decoration: BoxDecoration(
-                          color: _dtAmberDim,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _dtAmber.withValues(alpha: 0.4)),
-                        ),
-                        child: const Icon(Icons.add, size: 18, color: _dtAmber),
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            )),
+            ),
             const SizedBox(height: 10),
-
-            // ── Rayon ───────────────────────────────────────────────────────
             Text(
               'Rayon',
-              style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w600, color: _dtWhite),
+              style: GoogleFonts.syne(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: _dtWhite,
+              ),
             ),
             const SizedBox(height: 8),
             Row(
@@ -1448,7 +1756,9 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                         color: sel ? _dtAmberDim : const Color(0x08FFFFFF),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: sel ? _dtAmber.withValues(alpha: 0.4) : _dtBorder2,
+                          color: sel
+                              ? _dtAmber.withValues(alpha: 0.4)
+                              : _dtBorder2,
                         ),
                       ),
                       child: Text(
@@ -1466,8 +1776,6 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
               }).toList(),
             ),
             const SizedBox(height: 24),
-
-            // ── Bouton ──────────────────────────────────────────────────────
             SizedBox(
               width: double.infinity,
               child: GestureDetector(
@@ -1482,8 +1790,12 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                   child: Center(
                     child: _loading
                         ? const SizedBox(
-                            width: 18, height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : Text(
                             'ACTIVER MA DISPO',

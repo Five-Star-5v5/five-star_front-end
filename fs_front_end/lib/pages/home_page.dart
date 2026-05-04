@@ -7195,7 +7195,8 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     final challenges = teamsProvider.pendingChallenges;
     final invitations = teamsProvider.pendingInvitations;
     final matchApps = teamsProvider.receivedMatchApplications;
-    final totalCount = challenges.length + invitations.length + matchApps.length;
+    final joinRequests = teamsProvider.receivedJoinRequests;
+    final totalCount = challenges.length + invitations.length + matchApps.length + joinRequests.length;
 
     return Container(
       decoration: const BoxDecoration(
@@ -7272,6 +7273,34 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
+                  if (joinRequests.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        'DEMANDES D\'ÉQUIPE',
+                        style: GoogleFonts.syne(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _kMuted2,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    ...joinRequests.asMap().entries.map(
+                      (e) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: e.key < joinRequests.length - 1 ? 10 : 0,
+                        ),
+                        child: _buildJoinRequestItem(
+                          context,
+                          e.value,
+                          teamsProvider,
+                        ),
+                      ),
+                    ),
+                    if (matchApps.isNotEmpty || invitations.isNotEmpty || challenges.isNotEmpty)
+                      const SizedBox(height: 12),
+                  ],
                   if (matchApps.isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
@@ -7926,6 +7955,194 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       color: _kAmberDim,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0x33FF7F2A)),
+                    ),
+                    child: Center(
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _kAmber,
+                              ),
+                            )
+                          : Text(
+                              'Accepter',
+                              style: GoogleFonts.syne(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _kAmber,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildJoinRequestItem(
+    BuildContext context,
+    ReceivedJoinRequest request,
+    TeamsProvider teamsProvider,
+  ) {
+    final isLoading = _loadingIds.contains(request.id * 1000);
+
+    // Badge source
+    final sourceLabel = request.source == 'match'
+        ? 'Match en cours'
+        : 'Recherche d\'équipe';
+    final sourceColor = request.source == 'match'
+        ? const Color(0xFF3B82F6)
+        : _kAmber;
+    final sourceBg = request.source == 'match'
+        ? const Color(0x1A3B82F6)
+        : _kAmberDim;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kCard2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Avatar du demandeur
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _kAmberDim,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x33FF7F2A), width: 1),
+                ),
+                child: request.requesterAvatarUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(9),
+                        child: Image.network(
+                          request.requesterAvatarUrl!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          request.requesterUsername[0].toUpperCase(),
+                          style: const TextStyle(
+                            color: _kAmber,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      request.requesterUsername,
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: _kWhite,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Veut rejoindre · ${request.teamName}',
+                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Badge source
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: sourceBg,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  sourceLabel,
+                  style: TextStyle(
+                    color: sourceColor,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(request.id * 1000));
+                          await teamsProvider.respondToJoinRequest(
+                            request.id,
+                            accept: false,
+                          );
+                          if (mounted)
+                            setState(() => _loadingIds.remove(request.id * 1000));
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _kRoseDim,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x33D4607A)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Refuser',
+                        style: GoogleFonts.syne(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kRose,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: isLoading
+                      ? null
+                      : () async {
+                          setState(() => _loadingIds.add(request.id * 1000));
+                          final success = await teamsProvider.respondToJoinRequest(
+                            request.id,
+                            accept: true,
+                          );
+                          if (mounted) {
+                            setState(() => _loadingIds.remove(request.id * 1000));
+                            if (success && context.mounted) Navigator.pop(context);
+                          }
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _kAmberDim,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0x40FF7F2A)),
                     ),
                     child: Center(
                       child: isLoading

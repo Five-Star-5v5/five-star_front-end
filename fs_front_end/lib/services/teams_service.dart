@@ -643,6 +643,136 @@ class TeamsService {
   }
 
   // ============================================================
+  // Rejoindre directement un poste ouvert
+  // ============================================================
+
+  /// Rejoindre directement un poste ouvert (sans validation du capitaine)
+  Future<({bool success, bool alreadyTaken})> joinOpenSlotDirectly(
+    int slotId,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/open-slots/$slotId/join'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return (success: true, alreadyTaken: false);
+      } else if (response.statusCode == 409) {
+        return (success: false, alreadyTaken: true);
+      }
+      return (success: false, alreadyTaken: false);
+    } catch (e) {
+      debugPrint('Erreur joinOpenSlotDirectly: $e');
+      return (success: false, alreadyTaken: false);
+    }
+  }
+
+  // ============================================================
+  // Demandes de rejoindre une équipe
+  // ============================================================
+
+  /// Liste toutes les équipes pour la découverte (exclut les équipes de l'utilisateur)
+  Future<List<TeamPreview>> getAllTeamsForDiscover() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/discover'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => TeamPreview.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getAllTeamsForDiscover: $e');
+      return [];
+    }
+  }
+
+  /// Envoie une demande pour rejoindre une équipe
+  Future<TeamJoinRequest?> sendJoinRequest(int teamId, {String? source}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/$teamId/join-requests'),
+        headers: await _headers,
+        body: jsonEncode({'source': source}),
+      );
+      if (response.statusCode == 201) {
+        return TeamJoinRequest.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Erreur sendJoinRequest: $e');
+      return null;
+    }
+  }
+
+  /// Récupère les demandes de rejoindre reçues par les équipes dont je suis capitaine
+  Future<List<ReceivedJoinRequest>> getReceivedJoinRequests() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/received-join-requests'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => ReceivedJoinRequest.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getReceivedJoinRequests: $e');
+      return [];
+    }
+  }
+
+  /// Le capitaine accepte ou refuse une demande de rejoindre
+  Future<bool> respondToJoinRequest(int requestId, {required bool accept}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/join-requests/$requestId/respond'),
+        headers: await _headers,
+        body: jsonEncode({'accept': accept}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Erreur respondToJoinRequest: $e');
+      return false;
+    }
+  }
+
+  /// Récupère les demandes de rejoindre envoyées par l'utilisateur
+  Future<List<TeamJoinRequest>> getMyJoinRequests() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/my-join-requests'),
+        headers: await _headers,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => TeamJoinRequest.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Erreur getMyJoinRequests: $e');
+      return [];
+    }
+  }
+
+  /// Annule une demande de rejoindre
+  Future<bool> cancelJoinRequest(int requestId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/join-requests/$requestId'),
+        headers: await _headers,
+      );
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Erreur cancelJoinRequest: $e');
+      return false;
+    }
+  }
+
+  // ============================================================
   // Chat d'équipe
   // ============================================================
 
@@ -1765,6 +1895,8 @@ class TeamPreview {
   final String? logoUrl;
   final bool isDefault;
   final int membersCount;
+  final String? ownerUsername;
+  final String? ownerCodeId;
   final DateTime createdAt;
 
   TeamPreview({
@@ -1774,6 +1906,8 @@ class TeamPreview {
     this.logoUrl,
     required this.isDefault,
     required this.membersCount,
+    this.ownerUsername,
+    this.ownerCodeId,
     required this.createdAt,
   });
 
@@ -1785,6 +1919,8 @@ class TeamPreview {
       logoUrl: json['logo_url'] as String?,
       isDefault: json['is_default'] as bool,
       membersCount: json['members_count'] as int,
+      ownerUsername: json['owner_username'] as String?,
+      ownerCodeId: json['owner_code_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -2738,6 +2874,84 @@ class MatchApplication {
       applicantUsername: json['applicant_username'] as String,
       applicantAvatarUrl: json['applicant_avatar_url'] as String?,
       status: MatchApplicationStatus.fromString(json['status'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// Demande de rejoindre une équipe (envoyée depuis le store d'équipes)
+class TeamJoinRequest {
+  final int id;
+  final int teamId;
+  final String teamName;
+  final String? teamLogoUrl;
+  final ApplicationStatus status;
+  final String? source;
+  final DateTime createdAt;
+
+  TeamJoinRequest({
+    required this.id,
+    required this.teamId,
+    required this.teamName,
+    this.teamLogoUrl,
+    required this.status,
+    this.source,
+    required this.createdAt,
+  });
+
+  factory TeamJoinRequest.fromJson(Map<String, dynamic> json) {
+    return TeamJoinRequest(
+      id: json['id'] as int,
+      teamId: json['team_id'] as int,
+      teamName: json['team_name'] as String,
+      teamLogoUrl: json['team_logo_url'] as String?,
+      status: ApplicationStatus.values.firstWhere(
+        (s) => s.name == (json['status'] as String),
+        orElse: () => ApplicationStatus.pending,
+      ),
+      source: json['source'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+}
+
+/// Demande de rejoindre une équipe reçue par le capitaine
+class ReceivedJoinRequest {
+  final int id;
+  final int teamId;
+  final String teamName;
+  final String? teamLogoUrl;
+  final int requesterId;
+  final String requesterUsername;
+  final String? requesterAvatarUrl;
+  final String? source;
+  final String status;
+  final DateTime createdAt;
+
+  ReceivedJoinRequest({
+    required this.id,
+    required this.teamId,
+    required this.teamName,
+    this.teamLogoUrl,
+    required this.requesterId,
+    required this.requesterUsername,
+    this.requesterAvatarUrl,
+    this.source,
+    required this.status,
+    required this.createdAt,
+  });
+
+  factory ReceivedJoinRequest.fromJson(Map<String, dynamic> json) {
+    return ReceivedJoinRequest(
+      id: json['id'] as int,
+      teamId: json['team_id'] as int,
+      teamName: json['team_name'] as String,
+      teamLogoUrl: json['team_logo_url'] as String?,
+      requesterId: json['requester_id'] as int,
+      requesterUsername: json['requester_username'] as String,
+      requesterAvatarUrl: json['requester_avatar_url'] as String?,
+      source: json['source'] as String?,
+      status: json['status'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

@@ -39,6 +39,12 @@ class TeamsProvider with ChangeNotifier {
   // Mes candidatures envoyées
   List<SlotApplicationDetail> _myApplications = [];
 
+  // Toutes les équipes (pour découverte)
+  List<TeamPreview> _allTeamsForDiscover = [];
+
+  // Mes demandes de rejoindre une équipe
+  List<TeamJoinRequest> _myJoinRequests = [];
+
   // Défis de match reçus en attente
   List<MatchChallenge> _pendingChallenges = [];
 
@@ -47,6 +53,9 @@ class TeamsProvider with ChangeNotifier {
 
   // Candidatures de joueurs pour rejoindre mes équipes sur des matchs publics
   List<MatchApplication> _receivedMatchApplications = [];
+
+  // Demandes de joueurs pour rejoindre mes équipes (approbation requise)
+  List<ReceivedJoinRequest> _receivedJoinRequests = [];
 
   // Invitations envoyées par mon équipe (vue propriétaire)
   List<SentInvitation> _sentInvitations = [];
@@ -81,6 +90,8 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplication> get receivedApplications => _receivedApplications;
   List<OpenSlot> get allOpenSlots => _allOpenSlots;
   List<SlotApplicationDetail> get myApplications => _myApplications;
+  List<TeamPreview> get allTeamsForDiscover => _allTeamsForDiscover;
+  List<TeamJoinRequest> get myJoinRequests => _myJoinRequests;
   List<MatchChallenge> get pendingChallenges =>
       List.unmodifiable(_pendingChallenges);
   int get pendingChallengesCount => _pendingChallenges.length;
@@ -90,8 +101,14 @@ class TeamsProvider with ChangeNotifier {
   List<MatchApplication> get receivedMatchApplications =>
       List.unmodifiable(_receivedMatchApplications);
   int get receivedMatchApplicationsCount => _receivedMatchApplications.length;
+  List<ReceivedJoinRequest> get receivedJoinRequests =>
+      List.unmodifiable(_receivedJoinRequests);
+  int get receivedJoinRequestsCount => _receivedJoinRequests.length;
   int get totalNotificationsCount =>
-      pendingChallengesCount + pendingInvitationsCount + receivedMatchApplicationsCount;
+      pendingChallengesCount +
+      pendingInvitationsCount +
+      receivedMatchApplicationsCount +
+      receivedJoinRequestsCount;
 
   List<SentInvitation> get sentInvitations =>
       List.unmodifiable(_sentInvitations);
@@ -151,6 +168,7 @@ class TeamsProvider with ChangeNotifier {
         loadSentInvitations(),
         _silentRefreshTeamMembers(),
         _loadReceivedMatchApplications(),
+        _loadReceivedJoinRequests(),
       ]);
     } catch (_) {
     } finally {
@@ -383,6 +401,27 @@ class TeamsProvider with ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> _loadReceivedJoinRequests() async {
+    try {
+      _receivedJoinRequests = await _teamsService.getReceivedJoinRequests();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Le capitaine répond à une demande de rejoindre
+  Future<bool> respondToJoinRequest(int requestId, {required bool accept}) async {
+    try {
+      final success = await _teamsService.respondToJoinRequest(requestId, accept: accept);
+      if (success) {
+        _receivedJoinRequests.removeWhere((r) => r.id == requestId);
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Accepte une candidature de match public et retire-la de la liste locale
   Future<({bool success, String? errorMessage})> acceptReceivedMatchApplication(
       int applicationId) async {
@@ -427,8 +466,9 @@ class TeamsProvider with ChangeNotifier {
       );
       if (success) {
         _pendingInvitations.removeWhere((inv) => inv.id == invitationId);
-        if (accept)
-          await loadMyTeam(); // Recharger pour intégrer la nouvelle équipe
+        if (accept) {
+          await loadMyTeam();
+        }
         notifyListeners();
       }
       return success;
@@ -670,6 +710,8 @@ class TeamsProvider with ChangeNotifier {
     _updatePendingApplicationsCount();
     _allOpenSlots = [];
     _myApplications = [];
+    _allTeamsForDiscover = [];
+    _myJoinRequests = [];
     notifyListeners();
   }
 
@@ -882,6 +924,76 @@ class TeamsProvider with ChangeNotifier {
       return false;
     } catch (e) {
       debugPrint('Erreur cancelApplication: $e');
+      return false;
+    }
+  }
+
+  // ============================================================
+  // Rejoindre directement un poste ouvert
+  // ============================================================
+
+  /// Rejoindre directement un poste ouvert (sans validation)
+  Future<({bool success, bool alreadyTaken})> joinSlotDirectly(
+    int slotId,
+  ) async {
+    try {
+      final result = await _teamsService.joinOpenSlotDirectly(slotId);
+      if (result.success) {
+        await Future.wait([loadMyTeam(), loadAllOpenSlots()]);
+      } else if (result.alreadyTaken) {
+        await loadAllOpenSlots();
+      }
+      return result;
+    } catch (e) {
+      return (success: false, alreadyTaken: false);
+    }
+  }
+
+  // ============================================================
+  // Demandes de rejoindre une équipe
+  // ============================================================
+
+  /// Charge toutes les équipes pour la découverte
+  Future<void> loadAllTeamsForDiscover() async {
+    try {
+      _allTeamsForDiscover = await _teamsService.getAllTeamsForDiscover();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Charge les demandes de rejoindre envoyées
+  Future<void> loadMyJoinRequests() async {
+    try {
+      _myJoinRequests = await _teamsService.getMyJoinRequests();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Envoie une demande pour rejoindre une équipe
+  Future<bool> sendJoinRequest(int teamId, {String? source}) async {
+    try {
+      final request = await _teamsService.sendJoinRequest(teamId, source: source);
+      if (request != null) {
+        _myJoinRequests.add(request);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Annule une demande de rejoindre
+  Future<bool> cancelJoinRequest(int requestId) async {
+    try {
+      final success = await _teamsService.cancelJoinRequest(requestId);
+      if (success) {
+        _myJoinRequests.removeWhere((r) => r.id == requestId);
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
       return false;
     }
   }
