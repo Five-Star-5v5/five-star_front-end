@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -137,7 +139,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   static const double _playerAvatarRadius = 28;
 
   bool _isLookingForOpponent = false;
@@ -149,10 +152,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // SECTION MATCHS OUVERTS — désactivée, décommenter pour réactiver
   // List<PublicMatch> _publicMatches = [];
   late AnimationController _loadingAnimationController;
+  Timer? _matchPollingTimer;
 
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
 
     _loadingAnimationController = AnimationController(
       duration: const Duration(seconds: 2),
@@ -167,12 +173,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _loadSearchPreferences();
       // _loadPublicMatches(); // SECTION MATCHS OUVERTS
     });
+
+    _matchPollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _loadUpcomingMatches();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadUpcomingMatches();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _matchPollingTimer?.cancel();
     _loadingAnimationController.dispose();
-    // Retirer le listener
     try {
       context.read<TeamsProvider>().removeListener(_onTeamChanged);
     } catch (_) {}
@@ -261,22 +279,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Future<void> _loadUpcomingMatches() async {
     final provider = context.read<TeamsProvider>();
     final team = provider.currentDisplayedTeam;
-    if (team == null) return;
-    // Suppression du setState inutilisé
+    if (team == null || !provider.isPartOfCurrentTeam) return;
     try {
-      final matches = await TeamsService.instance.getTeamMatches(
-        team.id,
-        status: 'accepted',
-      );
+      final results = await Future.wait([
+        TeamsService.instance.getTeamMatches(team.id, status: 'accepted'),
+        TeamsService.instance.getAllUnreadCounts(),
+      ]);
       if (mounted) {
         setState(() {
-          _upcomingMatches = matches;
-          // Suppression de l'affectation inutile
+          _upcomingMatches = results[0] as List<MatchChallenge>;
+          _unreadMatchMessages = results[1] as Map<int, int>;
         });
       }
-    } catch (e) {
-      // Suppression du setState inutile
-    }
+    } catch (_) {}
   }
 
   Future<void> _toggleSearchMode(bool value) async {
