@@ -601,11 +601,16 @@ class _MatchHistorySection extends StatefulWidget {
 
 class _MatchHistorySectionState extends State<_MatchHistorySection> {
   late Future<List<MatchChallenge>> _future;
+  List<int> _loadedTeamIds = [];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final teams = context.read<TeamsProvider>().allTeams;
+    final teamIds = (teams.map((t) => t.id).toList()..sort());
+    // Ne recharge que si la liste d'équipes a réellement changé
+    if (_listEquals(teamIds, _loadedTeamIds)) return;
+    _loadedTeamIds = teamIds;
     _future = Future.wait(
       teams.map((t) => TeamsService.instance.getTeamMatches(t.id, status: 'completed')),
     ).then((lists) {
@@ -619,6 +624,14 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
       result.sort((a, b) => (b.matchPlayedAt ?? b.createdAt).compareTo(a.matchPlayedAt ?? a.createdAt));
       return result;
     });
+  }
+
+  bool _listEquals(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
