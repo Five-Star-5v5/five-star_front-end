@@ -14,7 +14,7 @@ import 'team_chat_page.dart';
 import 'match_chat_page.dart';
 import 'discover_teams_page.dart';
 import 'find_opponents_page.dart';
-import 'public_matches_page.dart';
+// import 'public_matches_page.dart'; // SECTION MATCHS OUVERTS
 import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
@@ -146,7 +146,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int? _lastLoadedTeamId;
   List<MatchChallenge> _upcomingMatches = [];
   Map<int, int> _unreadMatchMessages = {};
-  List<PublicMatch> _publicMatches = [];
+  // SECTION MATCHS OUVERTS — désactivée, décommenter pour réactiver
+  // List<PublicMatch> _publicMatches = [];
   late AnimationController _loadingAnimationController;
 
   @override
@@ -164,7 +165,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       provider.startChatPolling();
       provider.addListener(_onTeamChanged);
       _loadSearchPreferences();
-      _loadPublicMatches();
+      // _loadPublicMatches(); // SECTION MATCHS OUVERTS
     });
   }
 
@@ -249,12 +250,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _loadPublicMatches() async {
-    try {
-      final matches = await TeamsService.instance.getPublicMatches();
-      if (mounted) setState(() => _publicMatches = matches);
-    } catch (_) {}
-  }
+  // SECTION MATCHS OUVERTS — désactivée, décommenter pour réactiver
+  // Future<void> _loadPublicMatches() async {
+  //   try {
+  //     final matches = await TeamsService.instance.getPublicMatches();
+  //     if (mounted) setState(() => _publicMatches = matches);
+  //   } catch (_) {}
+  // }
 
   Future<void> _loadUpcomingMatches() async {
     final provider = context.read<TeamsProvider>();
@@ -542,9 +544,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             right: 8,
             child: GestureDetector(
               onTap: () => _showInfoModal('Publiez un match', [
-                'Publiez un match et laissez une autre équipe le rejoindre. Vous créez l\'offre, une équipe adverse peut donc vous defier.',
+                'Publiez un match et laissez une autre équipe le rejoindre. Vous créez l\'offre, une équipe adverse peut donc vous défier.',
                 'Seul le capitaine de l\'équipe peut créer un match. Nous vous conseillons d\'indiquer une plage horaire large afin d\'augmenter vos chances de trouver un adversaire.',
-                'Une fois que la demande de defie sera envoyer par l\'adversaire, tu seras libre de l\'accepter ou de la decliner. Une fois le defie accepter il s\'affichera ici dans « Matchs à venir » et vous aurez accès à un chat pour vous organiser avec l\'équipe adverse.',
+                'Une fois que la demande de défi sera envoyée par l\'adversaire, vous serez libre de l\'accepter ou de la décliner. Une fois le défi accepté, il s\'affichera ici dans « Matchs à venir » et vous aurez accès à un chat pour vous organiser avec l\'équipe adverse.',
                 '--> Recommandation : trouvez d\'abord un adversaire et fixez l\'horaire avant de réserver et payer un terrain, afin d\'éviter toute dépense inutile.',
               ]),
               child: Icon(
@@ -691,230 +693,225 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  /// Section matchs publics ouverts (aperçu horizontal + lien vers la page)
-  Widget _buildOpenMatchesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'MATCHS OUVERTS',
-                  style: GoogleFonts.syne(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.04 * 13,
-                    color: _kWhite,
-                  ),
-                ),
-                if (_publicMatches.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0x1C4CAF82),
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(
-                        color: const Color(0xFF4CAF82).withValues(alpha: 0.25),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      '${_publicMatches.length}',
-                      style: const TextStyle(
-                        color: Color(0xFF4CAF82),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
-              ),
-              child: Text(
-                'Voir tout →',
-                style: GoogleFonts.syne(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _kAmber,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        if (_publicMatches.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            decoration: BoxDecoration(
-              color: _kCard,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _kBorder, width: 1),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.people_outline, size: 24, color: _kMuted2),
-                const SizedBox(height: 6),
-                Text(
-                  'Aucun match ouvert pour le moment',
-                  style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
-                ),
-              ],
-            ),
-          )
-        else
-          SizedBox(
-            height: 160,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _publicMatches.length,
-              separatorBuilder: (context, i) => const SizedBox(width: 10),
-              itemBuilder: (_, i) =>
-                  _buildPublicMatchPreviewCard(_publicMatches[i]),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildPublicMatchPreviewCard(PublicMatch match) {
-    final openSlots = match.totalOpenSlots;
-    final sageColor = const Color(0xFF4CAF82);
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
-      ),
-      child: Container(
-        width: 210,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: _kCard,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _kBorder, width: 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Teams row
-            Row(
-              children: [
-                _buildMiniTeamLogo(match.challengerTeam),
-                const Spacer(),
-                Text(
-                  'VS',
-                  style: GoogleFonts.syne(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.5,
-                    color: _kMuted2,
-                  ),
-                ),
-                const Spacer(),
-                _buildMiniTeamLogo(match.challengedTeam),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Team names
-            Text(
-              '${match.challengerTeam.name.split(' ').first} — ${match.challengedTeam.name.split(' ').first}',
-              style: GoogleFonts.syne(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: _kWhite,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 6),
-            // Date
-            if (match.proposedDate != null)
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 10, color: _kMuted2),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat(
-                      'd MMM • HH:mm',
-                      'fr_FR',
-                    ).format(match.proposedDate!),
-                    style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
-                  ),
-                ],
-              ),
-            const Spacer(),
-            // Open slots badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: sageColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: sageColor.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.person_add_outlined, size: 10, color: sageColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
-                    style: GoogleFonts.syne(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: sageColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMiniTeamLogo(PublicMatchTeamInfo team) {
-    return Container(
-      width: 34,
-      height: 34,
-      decoration: BoxDecoration(
-        color: _kAmberDim,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _kAmber.withValues(alpha: 0.2), width: 1),
-      ),
-      child: team.logoUrl != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(9),
-              child: Image.network(team.logoUrl!, fit: BoxFit.cover),
-            )
-          : Center(
-              child: Text(
-                team.name[0].toUpperCase(),
-                style: const TextStyle(
-                  color: _kAmber,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-    );
-  }
+  // ─── SECTION MATCHS OUVERTS — désactivée ────────────────────────────────────
+  // Pour réactiver : décommenter ce bloc + la variable _publicMatches,
+  // _loadPublicMatches() et son appel dans initState, et _buildOpenMatchesSection()
+  // dans le build.
+  //
+  // Widget _buildOpenMatchesSection() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const SizedBox(height: 20),
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               Text(
+  //                 'MATCHS OUVERTS',
+  //                 style: GoogleFonts.syne(
+  //                   fontSize: 13,
+  //                   fontWeight: FontWeight.w700,
+  //                   letterSpacing: 0.04 * 13,
+  //                   color: _kWhite,
+  //                 ),
+  //               ),
+  //               if (_publicMatches.isNotEmpty) ...[
+  //                 const SizedBox(width: 8),
+  //                 Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 8,
+  //                     vertical: 3,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     color: const Color(0x1C4CAF82),
+  //                     borderRadius: BorderRadius.circular(100),
+  //                     border: Border.all(
+  //                       color: const Color(0xFF4CAF82).withValues(alpha: 0.25),
+  //                       width: 1,
+  //                     ),
+  //                   ),
+  //                   child: Text(
+  //                     '${_publicMatches.length}',
+  //                     style: const TextStyle(
+  //                       color: Color(0xFF4CAF82),
+  //                       fontWeight: FontWeight.w700,
+  //                       fontSize: 10,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ],
+  //           ),
+  //           GestureDetector(
+  //             onTap: () => Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
+  //             ),
+  //             child: Text(
+  //               'Voir tout →',
+  //               style: GoogleFonts.syne(
+  //                 fontSize: 12,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: _kAmber,
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 10),
+  //       if (_publicMatches.isEmpty)
+  //         Container(
+  //           width: double.infinity,
+  //           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+  //           decoration: BoxDecoration(
+  //             color: _kCard,
+  //             borderRadius: BorderRadius.circular(14),
+  //             border: Border.all(color: _kBorder, width: 1),
+  //           ),
+  //           child: Column(
+  //             children: [
+  //               Icon(Icons.people_outline, size: 24, color: _kMuted2),
+  //               const SizedBox(height: 6),
+  //               Text(
+  //                 'Aucun match ouvert pour le moment',
+  //                 style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+  //               ),
+  //             ],
+  //           ),
+  //         )
+  //       else
+  //         SizedBox(
+  //           height: 160,
+  //           child: ListView.separated(
+  //             scrollDirection: Axis.horizontal,
+  //             itemCount: _publicMatches.length,
+  //             separatorBuilder: (context, i) => const SizedBox(width: 10),
+  //             itemBuilder: (_, i) =>
+  //                 _buildPublicMatchPreviewCard(_publicMatches[i]),
+  //           ),
+  //         ),
+  //     ],
+  //   );
+  // }
+  //
+  // Widget _buildPublicMatchPreviewCard(PublicMatch match) {
+  //   final openSlots = match.totalOpenSlots;
+  //   final sageColor = const Color(0xFF4CAF82);
+  //   return GestureDetector(
+  //     onTap: () => Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (_) => const PublicMatchesPage()),
+  //     ),
+  //     child: Container(
+  //       width: 210,
+  //       padding: const EdgeInsets.all(12),
+  //       decoration: BoxDecoration(
+  //         color: _kCard,
+  //         borderRadius: BorderRadius.circular(14),
+  //         border: Border.all(color: _kBorder, width: 1),
+  //       ),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             children: [
+  //               _buildMiniTeamLogo(match.challengerTeam),
+  //               const Spacer(),
+  //               Text(
+  //                 'VS',
+  //                 style: GoogleFonts.syne(
+  //                   fontSize: 10,
+  //                   fontWeight: FontWeight.w800,
+  //                   letterSpacing: 1.5,
+  //                   color: _kMuted2,
+  //                 ),
+  //               ),
+  //               const Spacer(),
+  //               _buildMiniTeamLogo(match.challengedTeam),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 8),
+  //           Text(
+  //             '${match.challengerTeam.name.split(' ').first} — ${match.challengedTeam.name.split(' ').first}',
+  //             style: GoogleFonts.syne(
+  //               fontSize: 11,
+  //               fontWeight: FontWeight.w700,
+  //               color: _kWhite,
+  //             ),
+  //             maxLines: 1,
+  //             overflow: TextOverflow.ellipsis,
+  //           ),
+  //           const SizedBox(height: 6),
+  //           if (match.proposedDate != null)
+  //             Row(
+  //               children: [
+  //                 const Icon(Icons.calendar_today, size: 10, color: _kMuted2),
+  //                 const SizedBox(width: 4),
+  //                 Text(
+  //                   DateFormat('d MMM • HH:mm', 'fr_FR').format(match.proposedDate!),
+  //                   style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+  //                 ),
+  //               ],
+  //             ),
+  //           const Spacer(),
+  //           Container(
+  //             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+  //             decoration: BoxDecoration(
+  //               color: sageColor.withValues(alpha: 0.12),
+  //               borderRadius: BorderRadius.circular(8),
+  //               border: Border.all(color: sageColor.withValues(alpha: 0.3), width: 1),
+  //             ),
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Icon(Icons.person_add_outlined, size: 10, color: sageColor),
+  //                 const SizedBox(width: 4),
+  //                 Text(
+  //                   '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
+  //                   style: GoogleFonts.syne(
+  //                     fontSize: 9,
+  //                     fontWeight: FontWeight.w700,
+  //                     color: sageColor,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+  //
+  // Widget _buildMiniTeamLogo(PublicMatchTeamInfo team) {
+  //   return Container(
+  //     width: 34,
+  //     height: 34,
+  //     decoration: BoxDecoration(
+  //       color: _kAmberDim,
+  //       borderRadius: BorderRadius.circular(10),
+  //       border: Border.all(color: _kAmber.withValues(alpha: 0.2), width: 1),
+  //     ),
+  //     child: team.logoUrl != null
+  //         ? ClipRRect(
+  //             borderRadius: BorderRadius.circular(9),
+  //             child: Image.network(team.logoUrl!, fit: BoxFit.cover),
+  //           )
+  //         : Center(
+  //             child: Text(
+  //               team.name[0].toUpperCase(),
+  //               style: const TextStyle(
+  //                 color: _kAmber,
+  //                 fontWeight: FontWeight.w800,
+  //                 fontSize: 14,
+  //               ),
+  //             ),
+  //           ),
+  //   );
+  // }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   /// Carte pour afficher un match
   Widget _buildMatchCard(
@@ -2715,8 +2712,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               titleColor,
                               teamsProvider.isCurrentTeamMine,
                             ),
-                          // Section matchs publics ouverts aux candidatures
-                          _buildOpenMatchesSection(),
+                          // Section matchs publics ouverts aux candidatures — désactivée
+                          // _buildOpenMatchesSection(), // SECTION MATCHS OUVERTS
                           const SizedBox(height: 20),
                         ],
                       ), // inner Column
@@ -4417,7 +4414,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: Icon(Icons.person_search, color: _kAmber),
                     ),
                     title: Text(
-                      'Ouvrir aux candidatures',
+                      'Ouvrir le poste',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w600,
                         color: _kWhite,
@@ -4625,157 +4622,552 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     PlayerPosition position,
   ) {
     final descriptionController = TextEditingController();
+    bool openAll = false;
+    PlayerPosition? preferredPosition;
+    bool hasMatch = false;
+    DateTime? matchDate;
+    TimeOfDay? matchTime;
 
     showDialog(
       context: context,
-      builder: (dialogCtx) => Dialog(
-        backgroundColor: _kCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.person_search, color: _kAmber),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Ouvrir le poste de ${position.displayName}',
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: _kWhite,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (sbCtx, setState) => Dialog(
+          backgroundColor: _kCard,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: _kBorder2),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Titre
+                Row(
+                  children: [
+                    const Icon(Icons.person_search, color: _kAmber),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ouvrir le poste de ${position.displayName}',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: _kWhite,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-                style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                maxLines: 3,
-                style: const TextStyle(color: _kWhite),
-                decoration: InputDecoration(
-                  labelText: 'Description (optionnel)',
-                  labelStyle: const TextStyle(color: _kMuted2),
-                  hintText: 'Ex: Recherche défenseur expérimenté...',
-                  hintStyle: const TextStyle(color: _kMuted2),
-                  filled: true,
-                  fillColor: _kCard2,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kBorder2),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kBorder2),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kAmber),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
+                  style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                ),
+
+                // ── PORTÉE ──
+                const SizedBox(height: 20),
+                Text(
+                  'PORTÉE',
+                  style: GoogleFonts.syne(
+                    color: _kMuted2,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(dialogCtx),
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: _kCard2,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Annuler',
-                          style: GoogleFonts.syne(
-                            fontWeight: FontWeight.w600,
-                            color: _kMuted2,
-                            fontSize: 13,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => openAll = false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: !openAll ? _kAmberDim : _kCard2,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: !openAll ? _kAmber : _kBorder2,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.person_pin,
+                                color: !openAll ? _kAmber : _kMuted2,
+                                size: 18,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Ce poste uniquement',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.syne(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: !openAll ? _kAmber : _kMuted2,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(dialogCtx);
-                        final success = await context
-                            .read<TeamsProvider>()
-                            .openSlotForSearch(
-                              position: position,
-                              slotIndex: slotIndex,
-                              description:
-                                  descriptionController.text.trim().isNotEmpty
-                                  ? descriptionController.text.trim()
-                                  : null,
-                            );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                success
-                                    ? 'Poste ouvert aux candidatures !'
-                                    : 'Erreur lors de l\'ouverture du poste',
-                              ),
-                              backgroundColor: success
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [_kAmber, _kAmberD],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => openAll = true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 8,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        alignment: Alignment.center,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.person_search,
-                              color: Colors.white,
-                              size: 16,
+                          decoration: BoxDecoration(
+                            color: openAll ? _kAmberDim : _kCard2,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: openAll ? _kAmber : _kBorder2,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Ouvrir le poste',
-                              style: GoogleFonts.syne(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 13,
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.groups,
+                                color: openAll ? _kAmber : _kMuted2,
+                                size: 18,
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Tous les postes disponibles',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.syne(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: openAll ? _kAmber : _kMuted2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // ── PROFIL RECHERCHÉ ──
+                const SizedBox(height: 20),
+                Text(
+                  'PROFIL RECHERCHÉ',
+                  style: GoogleFonts.syne(
+                    color: _kMuted2,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _buildPositionChip(
+                      label: 'N\'importe',
+                      selected: preferredPosition == null,
+                      onTap: () => setState(() => preferredPosition = null),
+                    ),
+                    ...PlayerPosition.values
+                        .where((p) => p != PlayerPosition.substitute)
+                        .map(
+                          (p) => _buildPositionChip(
+                            label: p.displayName,
+                            selected: preferredPosition == p,
+                            onTap: () => setState(() => preferredPosition = p),
+                          ),
+                        ),
+                  ],
+                ),
+
+                // ── DESCRIPTION ──
+                const SizedBox(height: 20),
+                Text(
+                  'DESCRIPTION (OPTIONNEL)',
+                  style: GoogleFonts.syne(
+                    color: _kMuted2,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: descriptionController,
+                  maxLines: 2,
+                  style: const TextStyle(color: _kWhite, fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Ex: Bon niveau requis, ambiance sympa...',
+                    hintStyle: const TextStyle(color: _kMuted2, fontSize: 12),
+                    filled: true,
+                    fillColor: _kCard2,
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: _kBorder2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: _kBorder2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: _kAmber),
+                    ),
+                  ),
+                ),
+
+                // ── MATCH PRÉVU ──
+                const SizedBox(height: 20),
+                Text(
+                  'MATCH PRÉVU',
+                  style: GoogleFonts.syne(
+                    color: _kMuted2,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: _kCard2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kBorder2),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 15,
+                              color: hasMatch ? _kAmber : _kMuted2,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Avez-vous un match prévu ?',
+                                style: GoogleFonts.dmSans(
+                                  color: _kWhite,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            Switch(
+                              value: hasMatch,
+                              activeThumbColor: _kAmber,
+                              activeTrackColor: _kAmberDim,
+                              onChanged: (v) => setState(() {
+                                hasMatch = v;
+                                if (!v) {
+                                  matchDate = null;
+                                  matchTime = null;
+                                }
+                              }),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                      if (hasMatch) ...[
+                        Divider(
+                          height: 1,
+                          color: _kBorder2,
+                          indent: 14,
+                          endIndent: 14,
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: dialogCtx,
+                              initialDate:
+                                  matchDate ??
+                                  DateTime.now().add(const Duration(days: 1)),
+                              firstDate: DateTime.now(),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                              builder: (ctx, child) => Theme(
+                                data: ThemeData.dark().copyWith(
+                                  colorScheme: const ColorScheme.dark(
+                                    primary: _kAmber,
+                                    onPrimary: Colors.black,
+                                    surface: _kCard,
+                                    onSurface: _kWhite,
+                                  ),
+                                ),
+                                child: child!,
+                              ),
+                            );
+                            if (picked != null) {
+                              setState(() => matchDate = picked);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.event,
+                                  size: 15,
+                                  color: _kAmber,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  matchDate != null
+                                      ? '${matchDate!.day.toString().padLeft(2, '0')}/${matchDate!.month.toString().padLeft(2, '0')}/${matchDate!.year}'
+                                      : 'Choisir la date du match',
+                                  style: GoogleFonts.dmSans(
+                                    color: matchDate != null
+                                        ? _kAmber
+                                        : _kMuted2,
+                                    fontSize: 13,
+                                    fontWeight: matchDate != null
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  size: 16,
+                                  color: _kMuted2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Divider(
+                          height: 1,
+                          color: _kBorder2,
+                          indent: 14,
+                          endIndent: 14,
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            final picked = await showTimePicker(
+                              context: dialogCtx,
+                              initialTime: matchTime ?? TimeOfDay.now(),
+                              builder: (ctx, child) => Theme(
+                                data: ThemeData.dark().copyWith(
+                                  colorScheme: const ColorScheme.dark(
+                                    primary: _kAmber,
+                                    onPrimary: Colors.black,
+                                    surface: _kCard,
+                                    onSurface: _kWhite,
+                                  ),
+                                ),
+                                child: child!,
+                              ),
+                            );
+                            if (picked != null) {
+                              setState(() => matchTime = picked);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: 15,
+                                  color: matchTime != null ? _kAmber : _kMuted2,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  matchTime != null
+                                      ? '${matchTime!.hour.toString().padLeft(2, '0')}h${matchTime!.minute.toString().padLeft(2, '0')}'
+                                      : 'Choisir l\'heure du match',
+                                  style: GoogleFonts.dmSans(
+                                    color: matchTime != null
+                                        ? _kAmber
+                                        : _kMuted2,
+                                    fontSize: 13,
+                                    fontWeight: matchTime != null
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                                const Spacer(),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  size: 16,
+                                  color: _kMuted2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+
+                // ── BOUTONS ──
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(dialogCtx),
+                        child: Container(
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: _kCard2,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _kBorder2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Annuler',
+                            style: GoogleFonts.syne(
+                              fontWeight: FontWeight.w600,
+                              color: _kMuted2,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Builder(builder: (context) {
+                      final canSubmit =
+                          !hasMatch || (matchDate != null && matchTime != null);
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: canSubmit
+                              ? () async {
+                                  Navigator.pop(dialogCtx);
+                                  final success = await context
+                                      .read<TeamsProvider>()
+                                      .openSlotForSearch(
+                                        position: position,
+                                        slotIndex: slotIndex,
+                                        description: descriptionController.text
+                                                .trim()
+                                                .isNotEmpty
+                                            ? descriptionController.text.trim()
+                                            : null,
+                                        openAllSlots: openAll,
+                                        preferredPosition: preferredPosition,
+                                        matchDate: matchDate != null
+                                            ? DateTime(
+                                                matchDate!.year,
+                                                matchDate!.month,
+                                                matchDate!.day,
+                                                matchTime?.hour ?? 0,
+                                                matchTime?.minute ?? 0,
+                                              )
+                                            : null,
+                                      );
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          success
+                                              ? openAll
+                                                    ? 'Tous les postes ouverts aux candidatures !'
+                                                    : 'Poste ouvert aux candidatures !'
+                                              : 'Erreur lors de l\'ouverture du poste',
+                                        ),
+                                        backgroundColor: success
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              : null,
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: canSubmit
+                                  ? const LinearGradient(
+                                      colors: [_kAmber, _kAmberD],
+                                    )
+                                  : null,
+                              color: canSubmit ? null : _kCard2,
+                              borderRadius: BorderRadius.circular(12),
+                              border: canSubmit
+                                  ? null
+                                  : Border.all(color: _kBorder2),
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.person_search,
+                                  color: canSubmit ? Colors.white : _kMuted2,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Ouvrir',
+                                  style: GoogleFonts.syne(
+                                    fontWeight: FontWeight.w600,
+                                    color: canSubmit ? Colors.white : _kMuted2,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPositionChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? _kAmberDim : _kCard2,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: selected ? _kAmber : _kBorder2),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.syne(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: selected ? _kAmber : _kMuted2,
           ),
         ),
       ),

@@ -329,6 +329,8 @@ class TeamsService {
     required PlayerPosition position,
     required int slotIndex,
     String? description,
+    PlayerPosition? preferredPosition,
+    DateTime? matchDate,
   }) async {
     try {
       final response = await http.post(
@@ -338,6 +340,9 @@ class TeamsService {
           'position': position.value,
           'slot_index': slotIndex,
           if (description != null) 'description': description,
+          if (preferredPosition != null)
+            'preferred_position': preferredPosition.value,
+          if (matchDate != null) 'match_date': matchDate.toIso8601String(),
         }),
       );
 
@@ -2025,6 +2030,8 @@ class OpenSlot {
   final bool isActive;
   final DateTime createdAt;
   final int applicationsCount;
+  final PlayerPosition? preferredPosition;
+  final DateTime? matchDate;
 
   OpenSlot({
     required this.id,
@@ -2038,6 +2045,8 @@ class OpenSlot {
     required this.isActive,
     required this.createdAt,
     required this.applicationsCount,
+    this.preferredPosition,
+    this.matchDate,
   });
 
   factory OpenSlot.fromJson(Map<String, dynamic> json) {
@@ -2053,6 +2062,12 @@ class OpenSlot {
       isActive: json['is_active'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
       applicationsCount: json['applications_count'] as int,
+      preferredPosition: json['preferred_position'] != null
+          ? PlayerPosition.fromString(json['preferred_position'] as String)
+          : null,
+      matchDate: json['match_date'] != null
+          ? DateTime.parse(json['match_date'] as String)
+          : null,
     );
   }
 }

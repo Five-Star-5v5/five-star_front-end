@@ -1106,6 +1106,61 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
               ),
             ],
+            if (slot.matchDate != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: _dtSageDim,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _dtSage.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.event_available,
+                      size: 14,
+                      color: _dtSage,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year}',
+                      style: GoogleFonts.dmSans(
+                        color: _dtSage,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (slot.preferredPosition != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.manage_accounts,
+                    size: 13,
+                    color: _dtMuted2,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Profil recherché : ${slot.preferredPosition!.displayName}',
+                    style: GoogleFonts.dmSans(
+                      color: _dtMuted2,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 14),
             Row(
               children: [

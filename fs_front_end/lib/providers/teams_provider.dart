@@ -751,23 +751,57 @@ class TeamsProvider with ChangeNotifier {
     required PlayerPosition position,
     required int slotIndex,
     String? description,
+    bool openAllSlots = false,
+    PlayerPosition? preferredPosition,
+    DateTime? matchDate,
   }) async {
     if (_myTeam == null) return false;
 
     try {
-      final slot = await _teamsService.createOpenSlot(
-        _myTeam!.id,
-        position: position,
-        slotIndex: slotIndex,
-        description: description,
-      );
+      if (openAllSlots) {
+        final occupiedIndices =
+            _myTeam!.members.map((m) => m.slotIndex).toSet();
+        final alreadyOpenIndices =
+            _myOpenSlots.where((s) => s.isActive).map((s) => s.slotIndex).toSet();
+        final emptySlots = List.generate(5, (i) => i)
+            .where((i) =>
+                !occupiedIndices.contains(i) && !alreadyOpenIndices.contains(i))
+            .toList();
 
-      if (slot != null) {
-        _myOpenSlots.add(slot);
+        bool anySuccess = false;
+        for (final emptyIdx in emptySlots) {
+          final slotPosition = PlayerPosition.values[emptyIdx];
+          final slot = await _teamsService.createOpenSlot(
+            _myTeam!.id,
+            position: slotPosition,
+            slotIndex: emptyIdx,
+            description: description,
+            preferredPosition: preferredPosition,
+            matchDate: matchDate,
+          );
+          if (slot != null) {
+            _myOpenSlots.add(slot);
+            anySuccess = true;
+          }
+        }
         notifyListeners();
-        return true;
+        return anySuccess;
+      } else {
+        final slot = await _teamsService.createOpenSlot(
+          _myTeam!.id,
+          position: position,
+          slotIndex: slotIndex,
+          description: description,
+          preferredPosition: preferredPosition,
+          matchDate: matchDate,
+        );
+        if (slot != null) {
+          _myOpenSlots.add(slot);
+          notifyListeners();
+          return true;
+        }
+        return false;
       }
-      return false;
     } catch (e) {
       return false;
     }
