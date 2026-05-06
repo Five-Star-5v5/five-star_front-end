@@ -331,6 +331,7 @@ class TeamsService {
     String? description,
     PlayerPosition? preferredPosition,
     DateTime? matchDate,
+    String? matchLocation,
   }) async {
     try {
       final response = await http.post(
@@ -343,6 +344,7 @@ class TeamsService {
           if (preferredPosition != null)
             'preferred_position': preferredPosition.value,
           if (matchDate != null) 'match_date': matchDate.toIso8601String(),
+          if (matchLocation != null) 'match_location': matchLocation,
         }),
       );
 
@@ -2032,6 +2034,7 @@ class OpenSlot {
   final int applicationsCount;
   final PlayerPosition? preferredPosition;
   final DateTime? matchDate;
+  final String? matchLocation;
 
   OpenSlot({
     required this.id,
@@ -2047,6 +2050,7 @@ class OpenSlot {
     required this.applicationsCount,
     this.preferredPosition,
     this.matchDate,
+    this.matchLocation,
   });
 
   factory OpenSlot.fromJson(Map<String, dynamic> json) {
@@ -2068,6 +2072,7 @@ class OpenSlot {
       matchDate: json['match_date'] != null
           ? DateTime.parse(json['match_date'] as String)
           : null,
+      matchLocation: json['match_location'] as String?,
     );
   }
 }
@@ -2682,6 +2687,7 @@ class PlayerCommentData {
   final int targetUserId;
   final String? content;
   final bool isAbsent;
+  final int? rating;
   final DateTime createdAt;
   final String? authorUsername;
   final String? authorAvatarUrl;
@@ -2693,6 +2699,7 @@ class PlayerCommentData {
     required this.targetUserId,
     this.content,
     required this.isAbsent,
+    this.rating,
     required this.createdAt,
     this.authorUsername,
     this.authorAvatarUrl,
@@ -2706,6 +2713,7 @@ class PlayerCommentData {
       targetUserId: json['target_user_id'] as int,
       content: json['content'] as String?,
       isAbsent: json['is_absent'] as bool? ?? false,
+      rating: json['rating'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
       authorUsername: json['author_username'] as String?,
       authorAvatarUrl: json['author_avatar_url'] as String?,

@@ -373,6 +373,10 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 if (user.preferredPosition != null) const SizedBox(width: 6),
                 if (user.rating != null)
                   _pill('${user.rating!.toStringAsFixed(1)} ★', sage: true),
+                if (user.rating != null) ...[
+                  const SizedBox(width: 6),
+                  _levelPill(user.rating!),
+                ],
               ],
             ),
           ),
@@ -413,6 +417,41 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _levelPill(double rating) {
+    final String label;
+    final Color color;
+    if (rating >= 8.0) {
+      label = 'EXPERT';
+      color = _pAmber;
+    } else if (rating >= 6.0) {
+      label = 'CONFIRMÉ';
+      color = _pSage;
+    } else if (rating >= 4.0) {
+      label = 'INTERMÉDIAIRE';
+      color = const Color(0xFF7B6CF6);
+    } else {
+      label = 'DÉBUTANT';
+      color = const Color(0xFF4A9EFF);
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.syne(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: color,
+        ),
+      ),
+    );
+  }
+
   // ── Stats bar ─────────────────────────────────────────────────────────────
 
   Widget _buildStatsBar(UserModel user) {
@@ -421,7 +460,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         final stats = [
           _StatItem('MATCHS', '${user.matchesPlayed}'),
           _StatItem('VICTOIRES', '${user.matchesWon}'),
-          _StatItem('NOTE', user.rating != null ? '${user.rating!.toStringAsFixed(1)}★' : '—'),
+          _StatItem('NOTE /10', user.rating != null ? user.rating!.toStringAsFixed(1) : '--'),
           _StatItem('AMIS', '${friends.friendsCount}'),
         ];
 

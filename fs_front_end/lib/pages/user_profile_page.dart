@@ -264,6 +264,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 if (user.preferredPosition != null) const SizedBox(width: 6),
                 if (user.rating != null)
                   _pill('${user.rating!.toStringAsFixed(1)} ★', sage: true),
+                if (user.rating != null) ...[
+                  const SizedBox(width: 6),
+                  _levelPill(user.rating!),
+                ],
               ],
             ),
           ),
@@ -301,6 +305,41 @@ class _UserProfilePageState extends State<UserProfilePage> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.syne(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _levelPill(double rating) {
+    final String label;
+    final Color color;
+    if (rating >= 8.0) {
+      label = 'EXPERT';
+      color = _upAmber;
+    } else if (rating >= 6.0) {
+      label = 'CONFIRMÉ';
+      color = _upSage;
+    } else if (rating >= 4.0) {
+      label = 'INTERMÉDIAIRE';
+      color = const Color(0xFF7B6CF6);
+    } else {
+      label = 'DÉBUTANT';
+      color = const Color(0xFF4A9EFF);
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(100),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),

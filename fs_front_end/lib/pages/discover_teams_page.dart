@@ -1106,39 +1106,66 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
               ),
             ],
-            if (slot.matchDate != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: slot.matchDate != null ? _dtSageDim : _dtCard2,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: slot.matchDate != null
+                      ? _dtSage.withValues(alpha: 0.3)
+                      : _dtBorder2,
                 ),
-                decoration: BoxDecoration(
-                  color: _dtSageDim,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: _dtSage.withValues(alpha: 0.3),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    slot.matchDate != null
+                        ? Icons.event_available
+                        : Icons.event_busy,
+                    size: 14,
+                    color: slot.matchDate != null ? _dtSage : _dtMuted2,
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.event_available,
-                      size: 14,
-                      color: _dtSage,
+                  const SizedBox(width: 6),
+                  Text(
+                    slot.matchDate != null
+                        ? 'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year} à ${slot.matchDate!.hour.toString().padLeft(2, '0')}h${slot.matchDate!.minute.toString().padLeft(2, '0')}'
+                        : 'Pas de match prévu',
+                    style: GoogleFonts.dmSans(
+                      color: slot.matchDate != null ? _dtSage : _dtMuted2,
+                      fontSize: 12,
+                      fontWeight: slot.matchDate != null
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year}',
+                  ),
+                ],
+              ),
+            ),
+            if (slot.matchDate != null && slot.matchLocation != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 13,
+                    color: _dtSage,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      slot.matchLocation!,
                       style: GoogleFonts.dmSans(
                         color: _dtSage,
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
             if (slot.preferredPosition != null) ...[

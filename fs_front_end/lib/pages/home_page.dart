@@ -4642,6 +4642,7 @@ class _HomePageState extends State<HomePage>
     bool hasMatch = false;
     DateTime? matchDate;
     TimeOfDay? matchTime;
+    final locationController = TextEditingController();
 
     showDialog(
       context: context,
@@ -4894,6 +4895,7 @@ class _HomePageState extends State<HomePage>
                                 if (!v) {
                                   matchDate = null;
                                   matchTime = null;
+                                  locationController.clear();
                                 }
                               }),
                             ),
@@ -5035,6 +5037,48 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                         ),
+                        Divider(
+                          height: 1,
+                          color: _kBorder2,
+                          indent: 14,
+                          endIndent: 14,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 15,
+                                color: _kAmber,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextField(
+                                  controller: locationController,
+                                  onChanged: (_) => setState(() {}),
+                                  style: const TextStyle(
+                                    color: _kWhite,
+                                    fontSize: 13,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Lieu du match (ex: Stade Jean-Bouin)',
+                                    hintStyle: const TextStyle(
+                                      color: _kMuted2,
+                                      fontSize: 12,
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -5068,8 +5112,10 @@ class _HomePageState extends State<HomePage>
                     ),
                     const SizedBox(width: 12),
                     Builder(builder: (context) {
-                      final canSubmit =
-                          !hasMatch || (matchDate != null && matchTime != null);
+                      final canSubmit = !hasMatch ||
+                          (matchDate != null &&
+                              matchTime != null &&
+                              locationController.text.trim().isNotEmpty);
                       return Expanded(
                         child: GestureDetector(
                           onTap: canSubmit
@@ -5087,6 +5133,9 @@ class _HomePageState extends State<HomePage>
                                             : null,
                                         openAllSlots: openAll,
                                         preferredPosition: preferredPosition,
+                                        matchLocation: locationController.text.trim().isNotEmpty
+                                            ? locationController.text.trim()
+                                            : null,
                                         matchDate: matchDate != null
                                             ? DateTime(
                                                 matchDate!.year,
@@ -8614,9 +8663,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
   List<TeamMember> _opponentMembers = [];
   bool _loadingOpponent = true;
 
-  // controllers & absences : indexed by userId
+  // controllers, absences & ratings : indexed by userId
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, bool> _absences = {};
+  final Map<int, int?> _ratings = {};
 
   @override
   void initState() {
@@ -8673,6 +8723,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
             ? null
             : _controllers[m.user.id]?.text.trim(),
         'is_absent': _absences[m.user.id] ?? false,
+        'rating': _ratings[m.user.id],
       };
     }).toList();
 
@@ -8892,6 +8943,61 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
     );
   }
 
+  Widget _buildRatingPicker(int userId) {
+    final selected = _ratings[userId];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'NOTE (optionnel)',
+          style: GoogleFonts.syne(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            color: _kMuted2,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: List.generate(10, (i) {
+            final note = i + 1;
+            final isSelected = selected == note;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() {
+                  _ratings[userId] = isSelected ? null : note;
+                }),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? _kAmber
+                        : _kCard,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isSelected ? _kAmber : _kBorder2,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$note',
+                    style: GoogleFonts.syne(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : _kMuted2,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPlayerCard(TeamMember member) {
     final isAbsent = _absences[member.user.id] ?? false;
     return Container(
@@ -9013,6 +9119,8 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          _buildRatingPicker(member.user.id),
           const SizedBox(height: 10),
           TextField(
             controller: _controllers[member.user.id],

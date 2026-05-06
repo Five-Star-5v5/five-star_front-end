@@ -754,6 +754,7 @@ class TeamsProvider with ChangeNotifier {
     bool openAllSlots = false,
     PlayerPosition? preferredPosition,
     DateTime? matchDate,
+    String? matchLocation,
   }) async {
     if (_myTeam == null) return false;
 
@@ -778,6 +779,7 @@ class TeamsProvider with ChangeNotifier {
             description: description,
             preferredPosition: preferredPosition,
             matchDate: matchDate,
+            matchLocation: matchLocation,
           );
           if (slot != null) {
             _myOpenSlots.add(slot);
@@ -794,6 +796,7 @@ class TeamsProvider with ChangeNotifier {
           description: description,
           preferredPosition: preferredPosition,
           matchDate: matchDate,
+          matchLocation: matchLocation,
         );
         if (slot != null) {
           _myOpenSlots.add(slot);
