@@ -3250,11 +3250,12 @@ class _HomePageState extends State<HomePage>
             final double avatarRadius = (width / 13).clamp(18.0, 32.0);
             final double avatarDiameter = avatarRadius * 2;
 
-            // Placement horizontal : gardien à gauche, défenseurs au centre, attaquants à droite
+            // Formation 1-2-1-1 : gardien | 2 défenseurs | milieu | attaquant
             final List<List<int>> columns = [
-              [0], // Gardien (à gauche)
-              [1, 2], // Défenseurs (au centre)
-              [3, 4], // Attaquants (à droite)
+              [0],    // Gardien (à gauche)
+              [1, 4], // Défenseurs (centre-gauche)
+              [2],    // Milieu (centre-droit)
+              [3],    // Attaquant (à droite)
             ];
 
             TeamMember? getMember(int slotIndex) {
@@ -4638,7 +4639,7 @@ class _HomePageState extends State<HomePage>
   ) {
     final descriptionController = TextEditingController();
     bool openAll = false;
-    PlayerPosition? preferredPosition;
+    PlayerPosition? preferredPosition = position;
     bool hasMatch = false;
     DateTime? matchDate;
     TimeOfDay? matchTime;
@@ -4720,7 +4721,7 @@ class _HomePageState extends State<HomePage>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Ce poste uniquement',
+                                'Un poste uniquement',
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.syne(
                                   fontSize: 11,
@@ -4786,26 +4787,46 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    _buildPositionChip(
-                      label: 'N\'importe',
-                      selected: preferredPosition == null,
-                      onTap: () => setState(() => preferredPosition = null),
-                    ),
-                    ...PlayerPosition.values
-                        .where((p) => p != PlayerPosition.substitute)
-                        .map(
-                          (p) => _buildPositionChip(
-                            label: p.displayName,
-                            selected: preferredPosition == p,
-                            onTap: () => setState(() => preferredPosition = p),
+                Builder(builder: (ctx) {
+                  final tp = context.read<TeamsProvider>();
+                  final occupied = (tp.myTeam?.members ?? [])
+                      .map((m) => m.slotIndex)
+                      .toSet();
+                  bool isAvailable(PlayerPosition p) {
+                    if (p == PlayerPosition.substitute) {
+                      final occupiedSubs =
+                          occupied.where((idx) => idx >= 5).length;
+                      final openSubs = tp.myOpenSlots
+                          .where((s) => s.isActive && s.slotIndex >= 5)
+                          .length;
+                      return (occupiedSubs + openSubs) < 3;
+                    }
+                    if (p == PlayerPosition.defender) {
+                      return (!occupied.contains(1) && !tp.isSlotOpen(1)) ||
+                          (!occupied.contains(4) && !tp.isSlotOpen(4));
+                    }
+                    final idx = p.index;
+                    return !occupied.contains(idx) && !tp.isSlotOpen(idx);
+                  }
+                  return Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ...PlayerPosition.values
+                          .map(
+                            (p) => _buildPositionChip(
+                              label: p.displayName,
+                              selected: preferredPosition == p,
+                              disabled: !isAvailable(p),
+                              onTap: () {
+                                if (preferredPosition == p) return;
+                                setState(() => preferredPosition = p);
+                              },
+                            ),
                           ),
-                        ),
-                  ],
-                ),
+                    ],
+                  );
+                }),
 
                 // ── DESCRIPTION ──
                 const SizedBox(height: 20),
@@ -5124,8 +5145,12 @@ class _HomePageState extends State<HomePage>
                                   final success = await context
                                       .read<TeamsProvider>()
                                       .openSlotForSearch(
-                                        position: position,
-                                        slotIndex: slotIndex,
+                                        position: openAll
+                                            ? position
+                                            : (preferredPosition ?? position),
+                                        slotIndex: (!openAll && preferredPosition != null)
+                                            ? preferredPosition!.index
+                                            : slotIndex,
                                         description: descriptionController.text
                                                 .trim()
                                                 .isNotEmpty
@@ -5216,22 +5241,26 @@ class _HomePageState extends State<HomePage>
     required String label,
     required bool selected,
     required VoidCallback onTap,
+    bool disabled = false,
   }) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? _kAmberDim : _kCard2,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: selected ? _kAmber : _kBorder2),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.syne(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: selected ? _kAmber : _kMuted2,
+      onTap: disabled ? null : onTap,
+      child: Opacity(
+        opacity: disabled ? 0.35 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? _kAmberDim : _kCard2,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: selected ? _kAmber : _kBorder2),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.syne(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: selected ? _kAmber : _kMuted2,
+            ),
           ),
         ),
       ),

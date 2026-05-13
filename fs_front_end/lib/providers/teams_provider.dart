@@ -789,10 +789,37 @@ class TeamsProvider with ChangeNotifier {
         notifyListeners();
         return anySuccess;
       } else {
+        final occupiedIndices =
+            _myTeam!.members.map((m) => m.slotIndex).toSet();
+        final alreadyOpenIndices = _myOpenSlots
+            .where((s) => s.isActive)
+            .map((s) => s.slotIndex)
+            .toSet();
+
+        int effectiveSlotIndex = slotIndex;
+        if (position == PlayerPosition.defender) {
+          // Les deux slots défenseurs sont 1 et 4 — choisir le premier disponible
+          const defenderSlots = [1, 4];
+          for (final idx in [slotIndex, ...defenderSlots.where((i) => i != slotIndex)]) {
+            if (!occupiedIndices.contains(idx) && !alreadyOpenIndices.contains(idx)) {
+              effectiveSlotIndex = idx;
+              break;
+            }
+          }
+        } else if (position == PlayerPosition.substitute) {
+          // Les slots remplaçants sont 5, 6, 7 — prendre le premier libre
+          for (final idx in [5, 6, 7]) {
+            if (!occupiedIndices.contains(idx) && !alreadyOpenIndices.contains(idx)) {
+              effectiveSlotIndex = idx;
+              break;
+            }
+          }
+        }
+
         final slot = await _teamsService.createOpenSlot(
           _myTeam!.id,
           position: position,
-          slotIndex: slotIndex,
+          slotIndex: effectiveSlotIndex,
           description: description,
           preferredPosition: preferredPosition,
           matchDate: matchDate,
