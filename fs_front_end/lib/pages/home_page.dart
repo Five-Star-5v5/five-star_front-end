@@ -3343,10 +3343,9 @@ class _HomePageState extends State<HomePage>
               ),
             ),
             GestureDetector(
-              onTap: () => _showAddPlayerDialog(
+              onTap: () => _showSubstituteOptions(
                 context,
-                slotIndex: 5 + substitutes.length,
-                position: PlayerPosition.substitute,
+                currentSubstituteCount: substitutes.length,
               ),
               child: Container(
                 padding: const EdgeInsets.all(6),
@@ -4777,6 +4776,13 @@ class _HomePageState extends State<HomePage>
 
                 // ── PROFIL RECHERCHÉ ──
                 const SizedBox(height: 20),
+                IgnorePointer(
+                  ignoring: openAll,
+                  child: Opacity(
+                    opacity: openAll ? 0.35 : 1.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                 Text(
                   'PROFIL RECHERCHÉ',
                   style: GoogleFonts.syne(
@@ -4827,6 +4833,10 @@ class _HomePageState extends State<HomePage>
                     ],
                   );
                 }),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // ── DESCRIPTION ──
                 const SizedBox(height: 20),
@@ -5262,6 +5272,147 @@ class _HomePageState extends State<HomePage>
               color: selected ? _kAmber : _kMuted2,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showSubstituteOptions(
+    BuildContext context, {
+    required int currentSubstituteCount,
+  }) {
+    final teamsProvider = context.read<TeamsProvider>();
+    final openSubSlots = teamsProvider.myOpenSlots
+        .where((s) => s.isActive && s.slotIndex >= 5)
+        .toList();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Container(
+        decoration: const BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _kBorder2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Slots remplaçants ouverts
+            if (openSubSlots.isNotEmpty) ...[
+              Text(
+                'POSTES EN RECHERCHE',
+                style: GoogleFonts.syne(
+                  color: _kMuted2,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...openSubSlots.map((slot) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showOpenSlotOptions(
+                      context,
+                      slot,
+                      PlayerPosition.substitute,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _kCard2,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _kAmber.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.person_search,
+                          color: _kAmber,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Remplaçant · ${slot.applicationsCount} candidature(s)',
+                            style: GoogleFonts.syne(
+                              color: _kWhite,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: _kMuted2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )),
+              const SizedBox(height: 8),
+              Divider(color: _kBorder2, height: 1),
+              const SizedBox(height: 16),
+            ],
+            // Ajouter un joueur
+            if (currentSubstituteCount + openSubSlots.length < 3)
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showAddPlayerDialog(
+                    context,
+                    slotIndex: 5 + currentSubstituteCount + openSubSlots.length,
+                    position: PlayerPosition.substitute,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _kCard2,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _kBorder2),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person_add, color: _kAmber, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Ajouter un remplaçant',
+                        style: GoogleFonts.syne(
+                          fontWeight: FontWeight.w600,
+                          color: _kWhite,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
