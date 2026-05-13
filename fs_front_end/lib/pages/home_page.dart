@@ -6636,33 +6636,9 @@ class _HomePageState extends State<HomePage>
                     : null,
                 onTap: () async {
                   Navigator.pop(ctx);
-                  int newSlotIndex = member.slotIndex;
-                  if (position == PlayerPosition.substitute &&
-                      member.slotIndex < 5) {
-                    newSlotIndex = 5;
-                  } else if (position != PlayerPosition.substitute &&
-                      member.slotIndex >= 5) {
-                    switch (position) {
-                      case PlayerPosition.goalkeeper:
-                        newSlotIndex = 0;
-                        break;
-                      case PlayerPosition.defender:
-                        newSlotIndex = 1;
-                        break;
-                      case PlayerPosition.midfielder:
-                        newSlotIndex = 3;
-                        break;
-                      case PlayerPosition.forward:
-                        newSlotIndex = 4;
-                        break;
-                      default:
-                        break;
-                    }
-                  }
                   await context.read<TeamsProvider>().updateMemberPosition(
                     userId: member.user.id,
                     position: position,
-                    slotIndex: newSlotIndex,
                   );
                 },
               ),

@@ -638,19 +638,51 @@ class TeamsProvider with ChangeNotifier {
   Future<bool> updateMemberPosition({
     required int userId,
     required PlayerPosition position,
-    required int slotIndex,
   }) async {
     if (_myTeam == null) return false;
+
+    // Indices occupés par les autres membres (pas le membre qu'on déplace)
+    final othersOccupied = _myTeam!.members
+        .where((m) => m.user.id != userId)
+        .map((m) => m.slotIndex)
+        .toSet();
+
+    int effectiveSlotIndex;
+    if (position == PlayerPosition.substitute) {
+      effectiveSlotIndex = 5;
+      for (final idx in [5, 6, 7]) {
+        if (!othersOccupied.contains(idx)) {
+          effectiveSlotIndex = idx;
+          break;
+        }
+      }
+    } else if (position == PlayerPosition.defender) {
+      effectiveSlotIndex = 1;
+      for (final idx in [1, 4]) {
+        if (!othersOccupied.contains(idx)) {
+          effectiveSlotIndex = idx;
+          break;
+        }
+      }
+    } else {
+      // goalkeeper=0, midfielder=2, forward=3
+      effectiveSlotIndex = position.index;
+    }
 
     final member = await _teamsService.updateMemberPosition(
       _myTeam!.id,
       userId,
       position: position,
-      slotIndex: slotIndex,
+      slotIndex: effectiveSlotIndex,
     );
 
     if (member != null) {
-      await loadMyTeam(); // Recharger pour avoir la liste à jour
+      // Fermer le slot ouvert à la destination s'il y en avait un
+      final openSlot = getOpenSlotForIndex(effectiveSlotIndex);
+      if (openSlot != null) {
+        await closeOpenSlot(openSlot.id);
+      }
+      await loadMyTeam();
       return true;
     }
 
