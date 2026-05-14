@@ -3252,10 +3252,10 @@ class _HomePageState extends State<HomePage>
 
             // Formation 1-2-1-1 : gardien | 2 défenseurs | milieu | attaquant
             final List<List<int>> columns = [
-              [0],    // Gardien (à gauche)
+              [0], // Gardien (à gauche)
               [1, 4], // Défenseurs (centre-gauche)
-              [2],    // Milieu (centre-droit)
-              [3],    // Attaquant (à droite)
+              [2], // Milieu (centre-droit)
+              [3], // Attaquant (à droite)
             ];
 
             TeamMember? getMember(int slotIndex) {
@@ -4684,14 +4684,40 @@ class _HomePageState extends State<HomePage>
 
                 // ── PORTÉE ──
                 const SizedBox(height: 20),
-                Text(
-                  'PORTÉE',
-                  style: GoogleFonts.syne(
-                    color: _kMuted2,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'NOMBRE DE POSTES',
+                      style: GoogleFonts.syne(
+                        color: _kMuted2,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Tooltip(
+                      message:
+                          'Un poste uniquement : Tu choisis manuellement le profil recherché (gardien, défenseur, milieu, attaquant ou remplaçant) et une seule annonce est diffusée pour ce poste précis.\n\nTous les postes disponibles : La fonctionnalité détecte automatiquement les postes vacants dans ton équipe et diffuse une annonce pour chacun d\'eux. Par exemple, s\'il te manque un défenseur et un attaquant, deux annonces seront automatiquement créées et diffusées. Dans ce cas, le choix du profil n\'est pas disponible car les annonces sont générées directement depuis la composition de ton équipe.',
+                      textStyle: GoogleFonts.dmSans(
+                        color: _kWhite,
+                        fontSize: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF23263A),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      preferBelow: false,
+                      triggerMode: TooltipTriggerMode.tap,
+                      showDuration: const Duration(seconds: 8),
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 14,
+                        color: _kMuted2,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -4783,56 +4809,64 @@ class _HomePageState extends State<HomePage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                Text(
-                  'PROFIL RECHERCHÉ',
-                  style: GoogleFonts.syne(
-                    color: _kMuted2,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Builder(builder: (ctx) {
-                  final tp = context.read<TeamsProvider>();
-                  final occupied = (tp.myTeam?.members ?? [])
-                      .map((m) => m.slotIndex)
-                      .toSet();
-                  bool isAvailable(PlayerPosition p) {
-                    if (p == PlayerPosition.substitute) {
-                      final occupiedSubs =
-                          occupied.where((idx) => idx >= 5).length;
-                      final openSubs = tp.myOpenSlots
-                          .where((s) => s.isActive && s.slotIndex >= 5)
-                          .length;
-                      return (occupiedSubs + openSubs) < 3;
-                    }
-                    if (p == PlayerPosition.defender) {
-                      return (!occupied.contains(1) && !tp.isSlotOpen(1)) ||
-                          (!occupied.contains(4) && !tp.isSlotOpen(4));
-                    }
-                    final idx = p.index;
-                    return !occupied.contains(idx) && !tp.isSlotOpen(idx);
-                  }
-                  return Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      ...PlayerPosition.values
-                          .map(
-                            (p) => _buildPositionChip(
-                              label: p.displayName,
-                              selected: preferredPosition == p,
-                              disabled: !isAvailable(p),
-                              onTap: () {
-                                if (preferredPosition == p) return;
-                                setState(() => preferredPosition = p);
-                              },
-                            ),
+                        Text(
+                          'PROFIL RECHERCHÉ',
+                          style: GoogleFonts.syne(
+                            color: _kMuted2,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
                           ),
-                    ],
-                  );
-                }),
+                        ),
+                        const SizedBox(height: 8),
+                        Builder(
+                          builder: (ctx) {
+                            final tp = context.read<TeamsProvider>();
+                            final occupied = (tp.myTeam?.members ?? [])
+                                .map((m) => m.slotIndex)
+                                .toSet();
+                            bool isAvailable(PlayerPosition p) {
+                              if (p == PlayerPosition.substitute) {
+                                final occupiedSubs = occupied
+                                    .where((idx) => idx >= 5)
+                                    .length;
+                                final openSubs = tp.myOpenSlots
+                                    .where(
+                                      (s) => s.isActive && s.slotIndex >= 5,
+                                    )
+                                    .length;
+                                return (occupiedSubs + openSubs) < 3;
+                              }
+                              if (p == PlayerPosition.defender) {
+                                return (!occupied.contains(1) &&
+                                        !tp.isSlotOpen(1)) ||
+                                    (!occupied.contains(4) &&
+                                        !tp.isSlotOpen(4));
+                              }
+                              final idx = p.index;
+                              return !occupied.contains(idx) &&
+                                  !tp.isSlotOpen(idx);
+                            }
+
+                            return Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: [
+                                ...PlayerPosition.values.map(
+                                  (p) => _buildPositionChip(
+                                    label: p.displayName,
+                                    selected: preferredPosition == p,
+                                    disabled: !isAvailable(p),
+                                    onTap: () {
+                                      if (preferredPosition == p) return;
+                                      setState(() => preferredPosition = p);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -5096,7 +5130,8 @@ class _HomePageState extends State<HomePage>
                                     fontSize: 13,
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: 'Lieu du match (ex: Stade Jean-Bouin)',
+                                    hintText:
+                                        'Lieu du match (ex: Stade Jean-Bouin)',
                                     hintStyle: const TextStyle(
                                       color: _kMuted2,
                                       fontSize: 12,
@@ -5142,101 +5177,115 @@ class _HomePageState extends State<HomePage>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Builder(builder: (context) {
-                      final canSubmit = !hasMatch ||
-                          (matchDate != null &&
-                              matchTime != null &&
-                              locationController.text.trim().isNotEmpty);
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: canSubmit
-                              ? () async {
-                                  Navigator.pop(dialogCtx);
-                                  final success = await context
-                                      .read<TeamsProvider>()
-                                      .openSlotForSearch(
-                                        position: openAll
-                                            ? position
-                                            : (preferredPosition ?? position),
-                                        slotIndex: (!openAll && preferredPosition != null)
-                                            ? preferredPosition!.index
-                                            : slotIndex,
-                                        description: descriptionController.text
-                                                .trim()
-                                                .isNotEmpty
-                                            ? descriptionController.text.trim()
-                                            : null,
-                                        openAllSlots: openAll,
-                                        preferredPosition: preferredPosition,
-                                        matchLocation: locationController.text.trim().isNotEmpty
-                                            ? locationController.text.trim()
-                                            : null,
-                                        matchDate: matchDate != null
-                                            ? DateTime(
-                                                matchDate!.year,
-                                                matchDate!.month,
-                                                matchDate!.day,
-                                                matchTime?.hour ?? 0,
-                                                matchTime?.minute ?? 0,
-                                              )
-                                            : null,
-                                      );
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          success
-                                              ? openAll
-                                                    ? 'Tous les postes ouverts aux candidatures !'
-                                                    : 'Poste ouvert aux candidatures !'
-                                              : 'Erreur lors de l\'ouverture du poste',
+                    Builder(
+                      builder: (context) {
+                        final canSubmit =
+                            !hasMatch ||
+                            (matchDate != null &&
+                                matchTime != null &&
+                                locationController.text.trim().isNotEmpty);
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: canSubmit
+                                ? () async {
+                                    Navigator.pop(dialogCtx);
+                                    final success = await context
+                                        .read<TeamsProvider>()
+                                        .openSlotForSearch(
+                                          position: openAll
+                                              ? position
+                                              : (preferredPosition ?? position),
+                                          slotIndex:
+                                              (!openAll &&
+                                                  preferredPosition != null)
+                                              ? preferredPosition!.index
+                                              : slotIndex,
+                                          description:
+                                              descriptionController.text
+                                                  .trim()
+                                                  .isNotEmpty
+                                              ? descriptionController.text
+                                                    .trim()
+                                              : null,
+                                          openAllSlots: openAll,
+                                          preferredPosition: preferredPosition,
+                                          matchLocation:
+                                              locationController.text
+                                                  .trim()
+                                                  .isNotEmpty
+                                              ? locationController.text.trim()
+                                              : null,
+                                          matchDate: matchDate != null
+                                              ? DateTime(
+                                                  matchDate!.year,
+                                                  matchDate!.month,
+                                                  matchDate!.day,
+                                                  matchTime?.hour ?? 0,
+                                                  matchTime?.minute ?? 0,
+                                                )
+                                              : null,
+                                        );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            success
+                                                ? openAll
+                                                      ? 'Tous les postes ouverts aux candidatures !'
+                                                      : 'Poste ouvert aux candidatures !'
+                                                : 'Erreur lors de l\'ouverture du poste',
+                                          ),
+                                          backgroundColor: success
+                                              ? Colors.green
+                                              : Colors.red,
                                         ),
-                                        backgroundColor: success
-                                            ? Colors.green
-                                            : Colors.red,
-                                      ),
-                                    );
+                                      );
+                                    }
                                   }
-                                }
-                              : null,
-                          child: Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: canSubmit
-                                  ? const LinearGradient(
-                                      colors: [_kAmber, _kAmberD],
-                                    )
-                                  : null,
-                              color: canSubmit ? null : _kCard2,
-                              borderRadius: BorderRadius.circular(12),
-                              border: canSubmit
-                                  ? null
-                                  : Border.all(color: _kBorder2),
-                            ),
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person_search,
-                                  color: canSubmit ? Colors.white : _kMuted2,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Ouvrir',
-                                  style: GoogleFonts.syne(
-                                    fontWeight: FontWeight.w600,
+                                : null,
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                gradient: canSubmit
+                                    ? const LinearGradient(
+                                        colors: [_kAmber, _kAmberD],
+                                      )
+                                    : null,
+                                color: canSubmit ? null : _kCard2,
+                                borderRadius: BorderRadius.circular(12),
+                                border: canSubmit
+                                    ? null
+                                    : Border.all(color: _kBorder2),
+                              ),
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person_search,
                                     color: canSubmit ? Colors.white : _kMuted2,
-                                    fontSize: 13,
+                                    size: 16,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Ouvrir',
+                                    style: GoogleFonts.syne(
+                                      fontWeight: FontWeight.w600,
+                                      color: canSubmit
+                                          ? Colors.white
+                                          : _kMuted2,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -5322,55 +5371,59 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
               const SizedBox(height: 8),
-              ...openSubSlots.map((slot) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _showOpenSlotOptions(
-                      context,
-                      slot,
-                      PlayerPosition.substitute,
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _kCard2,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _kAmber.withValues(alpha: 0.4)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.person_search,
-                          color: _kAmber,
-                          size: 20,
+              ...openSubSlots.map(
+                (slot) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _showOpenSlotOptions(
+                        context,
+                        slot,
+                        PlayerPosition.substitute,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _kCard2,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _kAmber.withValues(alpha: 0.4),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Remplaçant · ${slot.applicationsCount} candidature(s)',
-                            style: GoogleFonts.syne(
-                              color: _kWhite,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.person_search,
+                            color: _kAmber,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Remplaçant · ${slot.applicationsCount} candidature(s)',
+                              style: GoogleFonts.syne(
+                                color: _kWhite,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: _kMuted2,
-                        ),
-                      ],
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 14,
+                            color: _kMuted2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              )),
+              ),
               const SizedBox(height: 8),
               Divider(color: _kBorder2, height: 1),
               const SizedBox(height: 16),
@@ -9128,13 +9181,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   margin: const EdgeInsets.symmetric(horizontal: 1.5),
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? _kAmber
-                        : _kCard,
+                    color: isSelected ? _kAmber : _kCard,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isSelected ? _kAmber : _kBorder2,
-                    ),
+                    border: Border.all(color: isSelected ? _kAmber : _kBorder2),
                   ),
                   alignment: Alignment.center,
                   child: Text(
