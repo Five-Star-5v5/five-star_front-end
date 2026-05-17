@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/fields_provider.dart';
@@ -80,6 +81,31 @@ String _mpLogoHexSvg(String d, String fill, String id) => '''
 </svg>
 ''';
 
+// ── Google Maps dark style ────────────────────────────────────────────────
+const _kMapStyle = '''
+[
+  {"elementType":"geometry","stylers":[{"color":"#0d0f14"}]},
+  {"elementType":"labels.icon","stylers":[{"visibility":"off"}]},
+  {"elementType":"labels.text.fill","stylers":[{"color":"#9ea5b0"}]},
+  {"elementType":"labels.text.stroke","stylers":[{"color":"#0a0c10"}]},
+  {"featureType":"administrative","elementType":"geometry","stylers":[{"color":"#1a1d24"}]},
+  {"featureType":"administrative.locality","elementType":"labels.text.fill","stylers":[{"color":"#bbbfc5"}]},
+  {"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},
+  {"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#141a1a"}]},
+  {"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#4caf82"}]},
+  {"featureType":"road","elementType":"geometry","stylers":[{"color":"#1e2029"}]},
+  {"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#141820"}]},
+  {"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#5c6370"}]},
+  {"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#2a2d38"}]},
+  {"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#181a21"}]},
+  {"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#f3d19c"}]},
+  {"featureType":"transit","elementType":"geometry","stylers":[{"color":"#181a21"}]},
+  {"featureType":"transit.station","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},
+  {"featureType":"water","elementType":"geometry","stylers":[{"color":"#060810"}]},
+  {"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#3d3d3d"}]}
+]
+''';
+
 // ── Design tokens ─────────────────────────────────────────────────────────
 const _kAmber = Color(0xFFFF7F2A);
 const _kAmberSoft = Color(0xFFFF9A52);
@@ -104,33 +130,53 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final MapController _mapController = MapController();
+  final Completer<GoogleMapController> _mapCompleter = Completer();
+  GoogleMapController? _mapController;
   SoccerField? _selectedField;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FieldsProvider>().initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<FieldsProvider>().initialize();
+      // Une fois l'init terminée (position connue), centrer la carte
+      await _mapCompleter.future;
+      if (mounted) _centerOnUserLocation();
     });
   }
 
   void _centerOnUserLocation() {
     final provider = context.read<FieldsProvider>();
     if (provider.currentPosition != null) {
-      _mapController.move(
-        LatLng(
-          provider.currentPosition!.latitude,
-          provider.currentPosition!.longitude,
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(
+            provider.currentPosition!.latitude,
+            provider.currentPosition!.longitude,
+          ),
+          14.0,
         ),
-        14.0,
       );
     }
   }
 
   void _selectField(SoccerField field) {
     setState(() => _selectedField = field);
-    _mapController.move(LatLng(field.latitude, field.longitude), 16.0);
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(field.latitude, field.longitude), 16.0),
+    );
+  }
+
+  BitmapDescriptor _markerIcon(Color color) {
+    double hue;
+    if (color == _kAmber) {
+      hue = 25.0; // orange
+    } else if (color == _kSage) {
+      hue = BitmapDescriptor.hueGreen;
+    } else {
+      hue = BitmapDescriptor.hueRose;
+    }
+    return BitmapDescriptor.defaultMarkerWithHue(hue);
   }
 
   Future<void> _openInMaps(SoccerField field) async {
@@ -380,7 +426,7 @@ class _MapPageState extends State<MapPage> {
       return _buildErrorView(provider);
     }
 
-    final defaultCenter = LatLng(48.8566, 2.3522);
+    const defaultCenter = LatLng(48.8566, 2.3522);
     final center =
         provider.currentPosition != null
             ? LatLng(
@@ -389,6 +435,30 @@ class _MapPageState extends State<MapPage> {
             )
             : defaultCenter;
 
+    final markers = <Marker>{
+      if (provider.currentPosition != null)
+        Marker(
+          markerId: const MarkerId('user_location'),
+          position: LatLng(
+            provider.currentPosition!.latitude,
+            provider.currentPosition!.longitude,
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(200),
+          zIndexInt: 2,
+        ),
+      ...provider.fields.map((field) {
+        final isSelected = _selectedField?.id == field.id;
+        final color = _fieldColor(field);
+        return Marker(
+          markerId: MarkerId('field_${field.id}'),
+          position: LatLng(field.latitude, field.longitude),
+          icon: _markerIcon(color),
+          onTap: () => _selectField(field),
+          zIndexInt: isSelected ? 1 : 0,
+        );
+      }),
+    };
+
     return Container(
       margin: const EdgeInsets.fromLTRB(15, 0, 15, 10),
       clipBehavior: Clip.antiAlias,
@@ -396,101 +466,24 @@ class _MapPageState extends State<MapPage> {
       child: Stack(
         children: [
           // Map
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: center,
-              initialZoom: 13.0,
-              onTap: (tapPos, _) => setState(() => _selectedField = null),
-            ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c', 'd'],
-                userAgentPackageName: 'com.fivestar.app',
-              ),
-              // User location dot
-              if (provider.currentPosition != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: LatLng(
-                        provider.currentPosition!.latitude,
-                        provider.currentPosition!.longitude,
-                      ),
-                      width: 16,
-                      height: 16,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF7EB8D4),
-                          shape: BoxShape.circle,
-                          border: Border.fromBorderSide(
-                            BorderSide(color: Colors.white, width: 2.5),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x664FD0F0),
-                              blurRadius: 14,
-                              spreadRadius: 6,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              // Field markers
-              MarkerLayer(
-                markers:
-                    provider.fields.map((field) {
-                      final isSelected = _selectedField?.id == field.id;
-                      final color = _fieldColor(field);
-                      return Marker(
-                        point: LatLng(field.latitude, field.longitude),
-                        width: isSelected ? 34 : 28,
-                        height: isSelected ? 43 : 37,
-                        alignment: Alignment.bottomCenter,
-                        child: GestureDetector(
-                          onTap: () => _selectField(field),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: isSelected ? 30 : 26,
-                                height: isSelected ? 30 : 26,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: isSelected ? 12 : 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    '⚽',
-                                    style: TextStyle(fontSize: 11),
-                                  ),
-                                ),
-                              ),
-                              Container(width: 2, height: 7, color: color),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ],
+          GoogleMap(
+            initialCameraPosition: CameraPosition(target: center, zoom: 13.0),
+            onMapCreated: (controller) {
+              if (!_mapCompleter.isCompleted) _mapCompleter.complete(controller);
+              _mapController = controller;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _centerOnUserLocation();
+              });
+            },
+            style: _kMapStyle,
+            markers: markers,
+            myLocationEnabled: false,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: false,
+            compassEnabled: false,
+            padding: const EdgeInsets.only(bottom: 90),
+            onTap: (_) => setState(() => _selectedField = null),
           ),
 
           // Loading chip overlay
@@ -521,6 +514,26 @@ class _MapPageState extends State<MapPage> {
               right: 12,
               child: _buildFieldCard(_selectedField!),
             ),
+
+          // Zoom controls (+/−)
+          Positioned(
+            right: 12,
+            bottom: _selectedField == null &&
+                    provider.currentPosition != null
+                ? 134
+                : 88,
+            child: Column(
+              children: [
+                _buildZoomButton(Icons.add, () {
+                  _mapController?.animateCamera(CameraUpdate.zoomIn());
+                }),
+                const SizedBox(height: 6),
+                _buildZoomButton(Icons.remove, () {
+                  _mapController?.animateCamera(CameraUpdate.zoomOut());
+                }),
+              ],
+            ),
+          ),
 
           // Location FAB
           if (provider.currentPosition != null && _selectedField == null)
@@ -592,6 +605,29 @@ class _MapPageState extends State<MapPage> {
         const SizedBox(width: 5),
         Text(label, style: GoogleFonts.dmSans(fontSize: 9, color: _kMuted2)),
       ],
+    );
+  }
+
+  Widget _buildZoomButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: _kCard,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _kBorder2),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x80000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: _kAmber, size: 17),
+      ),
     );
   }
 
@@ -1096,53 +1132,6 @@ class _MapPageState extends State<MapPage> {
                           setModalState(() {});
                         },
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    SwitchListTile(
-                      title: Text(
-                        'Foot à 5 uniquement',
-                        style: GoogleFonts.dmSans(
-                          color: _kWhite,
-                          fontSize: 13,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Urban Soccer, Le Five, etc.',
-                        style: GoogleFonts.dmSans(
-                          color: _kMuted2,
-                          fontSize: 11,
-                        ),
-                      ),
-                      value: provider.showOnlyFiveSide,
-                      activeThumbColor: _kAmber,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (_) {
-                        provider.toggleFiveSideFilter();
-                        setModalState(() {});
-                      },
-                    ),
-                    SwitchListTile(
-                      title: Text(
-                        'Indoor uniquement',
-                        style: GoogleFonts.dmSans(
-                          color: _kWhite,
-                          fontSize: 13,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Terrains couverts',
-                        style: GoogleFonts.dmSans(
-                          color: _kMuted2,
-                          fontSize: 11,
-                        ),
-                      ),
-                      value: provider.showOnlyIndoor,
-                      activeThumbColor: _kAmber,
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (_) {
-                        provider.toggleIndoorFilter();
-                        setModalState(() {});
-                      },
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(

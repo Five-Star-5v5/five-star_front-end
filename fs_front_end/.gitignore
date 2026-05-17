@@ -39,6 +39,11 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# API keys (ne jamais committer)
+android/local.properties
+ios/Flutter/GoogleMapsConfig.xcconfig
+web/.env
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile

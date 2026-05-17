@@ -50,6 +50,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>MAPS_API_KEY</key>
+	<string>$(MAPS_API_KEY)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Five Stars a besoin de votre position pour trouver les terrains de foot à proximité.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
