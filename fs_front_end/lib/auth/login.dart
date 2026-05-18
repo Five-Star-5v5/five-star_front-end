@@ -583,7 +583,7 @@ class _LoginPageState extends State<LoginPage> {
           child: _SocialBtn(
             label: 'Google',
             icon: Image.asset('assets/logos/google_logo_icon.png', height: 16),
-            onTap: () => debugPrint('Google'),
+            onTap: null,
           ),
         ),
         const SizedBox(width: 10),
@@ -591,7 +591,7 @@ class _LoginPageState extends State<LoginPage> {
           child: _SocialBtn(
             label: 'Apple',
             icon: Image.asset('assets/logos/apple_logo_icon.png', height: 16),
-            onTap: () => debugPrint('Apple'),
+            onTap: null,
           ),
         ),
       ],

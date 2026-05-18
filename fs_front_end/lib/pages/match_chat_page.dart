@@ -91,11 +91,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
     };
 
     _teamsService.onMatchChatConnected = () {
-      debugPrint('Match chat connecté');
     };
 
     _teamsService.onMatchChatDisconnected = () {
-      debugPrint('Match chat déconnecté');
     };
 
     // Se connecter au WebSocket

@@ -51,7 +51,6 @@ class CloudinaryService {
 
       return null;
     } catch (e) {
-      debugPrint('Erreur upload Cloudinary: $e');
       return null;
     }
   }
@@ -74,7 +73,6 @@ class CloudinaryService {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur delete Cloudinary: $e');
       return false;
     }
   }
@@ -105,7 +103,6 @@ class CloudinaryService {
       final withoutExt = joinedPath.split('.').first;
       return withoutExt;
     } catch (e) {
-      debugPrint('Erreur extraction public_id: $e');
       return null;
     }
   }

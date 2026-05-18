@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -54,6 +56,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   // Recherche dans l'onglet ÉQUIPES
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  Timer? _searchDebounce;
 
   // Tracks optimistic join-request state: teamId → true while sending
   final Set<int> _pendingJoinTeams = {};
@@ -71,6 +74,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 
@@ -380,7 +384,12 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 child: TextField(
                   controller: _searchController,
-                  onChanged: (v) => setState(() => _searchQuery = v),
+                  onChanged: (v) {
+                    _searchDebounce?.cancel();
+                    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+                      setState(() => _searchQuery = v);
+                    });
+                  },
                   style: GoogleFonts.dmSans(color: _dtWhite, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Rechercher une équipe ou un capitaine...',

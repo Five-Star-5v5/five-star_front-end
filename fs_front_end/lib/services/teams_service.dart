@@ -68,7 +68,6 @@ class TeamsService {
       }
       throw Exception('Erreur ${response.statusCode}');
     } catch (e) {
-      debugPrint('Erreur getTeams: $e');
       rethrow;
     }
   }
@@ -86,7 +85,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur getTeam: $e');
       return null;
     }
   }
@@ -115,7 +113,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur createTeam: $e');
       return null;
     }
   }
@@ -143,7 +140,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur updateTeam: $e');
       return null;
     }
   }
@@ -158,7 +154,6 @@ class TeamsService {
 
       return response.statusCode == 204;
     } catch (e) {
-      debugPrint('Erreur deleteTeam: $e');
       return false;
     }
   }
@@ -189,12 +184,8 @@ class TeamsService {
         return TeamMember.fromJson(jsonDecode(response.body));
       }
       // Log response for debugging when add fails
-      debugPrint(
-        'addMember failed: status=${response.statusCode} body=${response.body}',
-      );
       return null;
     } catch (e) {
-      debugPrint('Erreur addMember: $e');
       return null;
     }
   }
@@ -218,7 +209,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur updateMemberPosition: $e');
       return null;
     }
   }
@@ -233,7 +223,6 @@ class TeamsService {
 
       return response.statusCode == 204;
     } catch (e) {
-      debugPrint('Erreur removeMember: $e');
       return false;
     }
   }
@@ -248,7 +237,6 @@ class TeamsService {
 
       return response.statusCode == 204;
     } catch (e) {
-      debugPrint('Erreur leaveTeam: $e');
       return false;
     }
   }
@@ -270,7 +258,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur getMyTeam: $e');
       return null;
     }
   }
@@ -295,7 +282,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur updateMyTeam: $e');
       return null;
     }
   }
@@ -314,7 +300,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getTeamsMemberOf: $e');
       return [];
     }
   }
@@ -353,7 +338,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur createOpenSlot: $e');
       return null;
     }
   }
@@ -372,7 +356,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getTeamOpenSlots: $e');
       return [];
     }
   }
@@ -387,7 +370,6 @@ class TeamsService {
 
       return response.statusCode == 204;
     } catch (e) {
-      debugPrint('Erreur closeOpenSlot: $e');
       return false;
     }
   }
@@ -408,7 +390,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getAllOpenSlots: $e');
       return [];
     }
   }
@@ -425,7 +406,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getAvailablePlayers: $e');
       return [];
     }
   }
@@ -442,16 +422,13 @@ class TeamsService {
           '$baseUrl/$teamId/invitations?invited_user_id=$invitedUserId&position=$position&slot_index=$slotIndex';
       final response = await http.post(Uri.parse(url), headers: await _headers);
       if (response.statusCode == 201) {
-        debugPrint('[sendInvitation] 201 body=${response.body}');
         try {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
           // Extraire l'id réel même si le parsing complet échoue
           final realId = data['id'] as int? ?? -1;
-          debugPrint('[sendInvitation] realId=$realId data.keys=${data.keys.toList()}');
           try {
             return SentInvitation.fromJson(data);
           } catch (e) {
-            debugPrint('[sendInvitation] fromJson failed: $e → fallback id=$realId');
             return SentInvitation(
               id: realId,
               teamId: teamId,
@@ -478,7 +455,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur sendInvitation: $e');
       return null;
     }
   }
@@ -496,7 +472,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getPendingInvitations: $e');
       return [];
     }
   }
@@ -514,7 +489,6 @@ class TeamsService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur respondToInvitation: $e');
       return false;
     }
   }
@@ -532,7 +506,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getSentInvitations: $e');
       return [];
     }
   }
@@ -541,12 +514,9 @@ class TeamsService {
   Future<bool> cancelInvitation(int invitationId) async {
     try {
       final uri = Uri.parse('$baseUrl/invitations/$invitationId');
-      debugPrint('[cancelInvitation] DELETE $uri (id=$invitationId)');
       final response = await http.delete(uri, headers: await _headers);
-      debugPrint('[cancelInvitation] status=${response.statusCode} body=${response.body}');
       return response.statusCode == 204 || response.statusCode == 200;
     } catch (e) {
-      debugPrint('[cancelInvitation] exception: $e');
       return false;
     }
   }
@@ -569,7 +539,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur applyToSlot: $e');
       return null;
     }
   }
@@ -588,7 +557,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMyApplications: $e');
       return [];
     }
   }
@@ -607,7 +575,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getTeamApplications: $e');
       return [];
     }
   }
@@ -629,7 +596,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur respondToApplication: $e');
       return null;
     }
   }
@@ -644,7 +610,6 @@ class TeamsService {
 
       return response.statusCode == 204;
     } catch (e) {
-      debugPrint('Erreur cancelApplication: $e');
       return false;
     }
   }
@@ -669,7 +634,6 @@ class TeamsService {
       }
       return (success: false, alreadyTaken: false);
     } catch (e) {
-      debugPrint('Erreur joinOpenSlotDirectly: $e');
       return (success: false, alreadyTaken: false);
     }
   }
@@ -691,7 +655,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getAllTeamsForDiscover: $e');
       return [];
     }
   }
@@ -709,7 +672,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur sendJoinRequest: $e');
       return null;
     }
   }
@@ -727,7 +689,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getReceivedJoinRequests: $e');
       return [];
     }
   }
@@ -742,7 +703,6 @@ class TeamsService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur respondToJoinRequest: $e');
       return false;
     }
   }
@@ -760,7 +720,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMyJoinRequests: $e');
       return [];
     }
   }
@@ -774,7 +733,6 @@ class TeamsService {
       );
       return response.statusCode == 204 || response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur cancelJoinRequest: $e');
       return false;
     }
   }
@@ -803,7 +761,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getTeamMessages: $e');
       return [];
     }
   }
@@ -822,7 +779,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur sendTeamMessage: $e');
       return null;
     }
   }
@@ -831,9 +787,6 @@ class TeamsService {
   Future<List<TeamChatInfo>> getMyTeamChats() async {
     try {
       final headers = await _headers;
-      debugPrint(
-        'Token utilisé pour chat/my-teams: \\u001b[33m${headers['Authorization']}\\u001b[0m',
-      );
       final response = await http.get(
         Uri.parse('$baseUrl/chat/my-teams'),
         headers: headers,
@@ -845,7 +798,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMyTeamChats: $e');
       return [];
     }
   }
@@ -860,7 +812,6 @@ class TeamsService {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur markMessagesAsRead: $e');
       return false;
     }
   }
@@ -882,13 +833,11 @@ class TeamsService {
 
     final token = await AuthService.instance.getAccessToken();
     if (token == null) {
-      debugPrint('❌ Cannot connect WebSocket: no token');
       return;
     }
 
     try {
       final uri = Uri.parse('$wsUrl/ws/team-chat/$teamId/$token');
-      debugPrint('🔌 Connecting to team chat WebSocket: $uri');
 
       _teamChatChannel = WebSocketChannel.connect(uri);
       _connectedTeamId = teamId;
@@ -901,12 +850,10 @@ class TeamsService {
 
       _isTeamChatConnected = true;
       onTeamChatConnected?.call();
-      debugPrint('✅ Team chat WebSocket connected');
 
       // Démarrer le ping
       _startTeamChatPing();
     } catch (e) {
-      debugPrint('❌ Team chat WebSocket connection error: $e');
     }
   }
 
@@ -919,7 +866,6 @@ class TeamsService {
     _isTeamChatConnected = false;
     _connectedTeamId = null;
     onTeamChatDisconnected?.call();
-    debugPrint('🔌 Team chat WebSocket disconnected');
   }
 
   void _onTeamChatMessage(dynamic data) {
@@ -940,22 +886,18 @@ class TeamsService {
           // Réponse au ping, connexion OK
           break;
         case 'error':
-          debugPrint('Team chat WebSocket error: ${json['message']}');
           break;
       }
     } catch (e) {
-      debugPrint('Error parsing team chat WebSocket message: $e');
     }
   }
 
   void _onTeamChatError(dynamic error) {
-    debugPrint('❌ Team chat WebSocket error: $error');
     _isTeamChatConnected = false;
     onTeamChatDisconnected?.call();
   }
 
   void _onTeamChatDone() {
-    debugPrint('🔌 Team chat WebSocket closed');
     _isTeamChatConnected = false;
     onTeamChatDisconnected?.call();
   }
@@ -1018,7 +960,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur updateSearchPreferences: $e');
       return null;
     }
   }
@@ -1036,7 +977,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur getSearchPreferences: $e');
       return null;
     }
   }
@@ -1057,7 +997,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur searchOpponents: $e');
       return [];
     }
   }
@@ -1093,24 +1032,16 @@ class TeamsService {
           final errorBody = jsonDecode(response.body);
           final errorMessage =
               errorBody['detail'] ?? 'Erreur lors de la création du défi';
-          debugPrint('Erreur createChallenge: $errorMessage');
           throw Exception(errorMessage);
         } catch (_) {
-          debugPrint(
-            'Erreur createChallenge: ${response.statusCode} - ${response.body}',
-          );
           throw Exception(
             'Erreur lors de la création du défi (${response.statusCode})',
           );
         }
       } else {
-        debugPrint(
-          'Erreur createChallenge: ${response.statusCode} - ${response.body}',
-        );
         throw Exception('Erreur serveur lors de la création du défi');
       }
     } catch (e) {
-      debugPrint('Erreur createChallenge: $e');
       rethrow; // Relancer l'exception pour que l'UI puisse l'afficher
     }
   }
@@ -1129,7 +1060,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getSentChallenges: $e');
       return [];
     }
   }
@@ -1148,7 +1078,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getReceivedChallenges: $e');
       return [];
     }
   }
@@ -1174,7 +1103,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur respondToChallenge: $e');
       return null;
     }
   }
@@ -1202,7 +1130,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur submitMatchScore: $e');
       return null;
     }
   }
@@ -1225,7 +1152,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur validateMatchScore: $e');
       return null;
     }
   }
@@ -1250,7 +1176,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getTeamMatches: $e');
       return [];
     }
   }
@@ -1294,7 +1219,6 @@ class TeamsService {
       // Si l'endpoint n'existe pas (404) ou pas d'accès (403), retourner liste vide
       return [];
     } catch (e) {
-      debugPrint('Erreur getCommonPlayers: $e');
       return [];
     }
   }
@@ -1314,7 +1238,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur fetchPublicTeamMembers: $e');
       return [];
     }
   }
@@ -1329,7 +1252,6 @@ class TeamsService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint('Erreur cancelChallenge: $e');
       return false;
     }
   }
@@ -1366,12 +1288,10 @@ class TeamsService {
     try {
       final token = await AuthService.instance.getAccessToken();
       if (token == null) {
-        debugPrint('Pas de token pour le match chat');
         return false;
       }
 
       final wsUri = Uri.parse('$wsUrl/ws/match-chat/$challengeId/$token');
-      debugPrint('Connexion au match chat: $wsUri');
 
       _matchChatChannel = WebSocketChannel.connect(wsUri);
       _connectedChallengeId = challengeId;
@@ -1386,15 +1306,12 @@ class TeamsService {
               onNewMatchMessage?.call(message);
             }
           } catch (e) {
-            debugPrint('Erreur parsing match message: $e');
           }
         },
         onDone: () {
-          debugPrint('Match chat WebSocket fermé');
           _handleMatchChatDisconnect();
         },
         onError: (error) {
-          debugPrint('Erreur Match chat WebSocket: $error');
           _handleMatchChatDisconnect();
         },
       );
@@ -1411,7 +1328,6 @@ class TeamsService {
 
       return true;
     } catch (e) {
-      debugPrint('Erreur connexion match chat: $e');
       _handleMatchChatDisconnect();
       return false;
     }
@@ -1422,7 +1338,6 @@ class TeamsService {
       try {
         _matchChatChannel!.sink.add(jsonEncode({'type': 'ping'}));
       } catch (e) {
-        debugPrint('Erreur ping match chat: $e');
       }
     }
   }
@@ -1444,7 +1359,6 @@ class TeamsService {
       try {
         await _matchChatChannel!.sink.close();
       } catch (e) {
-        debugPrint('Erreur fermeture match chat: $e');
       }
     }
 
@@ -1470,8 +1384,6 @@ class TeamsService {
         headers: await _headers,
       );
 
-      debugPrint('getMatchMessages status: ${response.statusCode}');
-      debugPrint('getMatchMessages body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -1479,7 +1391,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMatchMessages: $e');
       return [];
     }
   }
@@ -1501,7 +1412,6 @@ class TeamsService {
       }
       return null;
     } catch (e) {
-      debugPrint('Erreur sendMatchMessage: $e');
       return null;
     }
   }
@@ -1514,7 +1424,6 @@ class TeamsService {
         headers: await _headers,
       );
     } catch (e) {
-      debugPrint('Erreur markMatchMessagesAsRead: $e');
     }
   }
 
@@ -1532,7 +1441,6 @@ class TeamsService {
       }
       return 0;
     } catch (e) {
-      debugPrint('Erreur getUnreadMessagesCount: $e');
       return 0;
     }
   }
@@ -1554,7 +1462,6 @@ class TeamsService {
       }
       return {};
     } catch (e) {
-      debugPrint('Erreur getAllUnreadCounts: $e');
       return {};
     }
   }
@@ -1565,33 +1472,23 @@ class TeamsService {
   ) async {
     try {
       final body = jsonEncode({'comments': comments});
-      debugPrint(
-        '[submitMatchComments] POST /challenges/$challengeId/comments',
-      );
-      debugPrint('[submitMatchComments] body: $body');
       final response = await http.post(
         Uri.parse('$baseUrl/challenges/$challengeId/comments'),
         headers: await _headers,
         body: body,
       );
-      debugPrint('[submitMatchComments] status: ${response.statusCode}');
-      debugPrint('[submitMatchComments] response: ${response.body}');
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint('Erreur submitMatchComments: $e');
       return false;
     }
   }
 
   Future<List<PlayerCommentData>> getPlayerComments(int userId) async {
     try {
-      debugPrint('[getPlayerComments] GET /users/$userId/comments');
       final response = await http.get(
         Uri.parse('$baseUrl/users/$userId/comments'),
         headers: await _headers,
       );
-      debugPrint('[getPlayerComments] status: ${response.statusCode}');
-      debugPrint('[getPlayerComments] response: ${response.body}');
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data
@@ -1600,7 +1497,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getPlayerComments: $e');
       return [];
     }
   }
@@ -1624,7 +1520,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getPublicMatches: $e');
       return [];
     }
   }
@@ -1658,7 +1553,6 @@ class TeamsService {
           errorMessage: null,
         );
       }
-      debugPrint('applyToPublicMatch: ${response.statusCode} ${response.body}');
       String errorMsg = 'Erreur lors de la candidature';
       try {
         final body = jsonDecode(response.body) as Map<String, dynamic>?;
@@ -1666,7 +1560,6 @@ class TeamsService {
       } catch (_) {}
       return (application: null, errorMessage: errorMsg);
     } catch (e) {
-      debugPrint('Erreur applyToPublicMatch: $e');
       return (application: null, errorMessage: 'Erreur réseau');
     }
   }
@@ -1686,7 +1579,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getReceivedMatchApplications: $e');
       return [];
     }
   }
@@ -1709,7 +1601,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMatchApplicationsReceived: $e');
       return [];
     }
   }
@@ -1729,7 +1620,6 @@ class TeamsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Erreur getMyPublicMatchApplications: $e');
       return [];
     }
   }
@@ -1750,7 +1640,6 @@ class TeamsService {
       final detail = body?['detail'] as String? ?? 'Erreur inconnue';
       return (success: false, errorMessage: detail);
     } catch (e) {
-      debugPrint('Erreur acceptMatchApplication: $e');
       return (success: false, errorMessage: 'Erreur réseau');
     }
   }
@@ -1764,7 +1653,6 @@ class TeamsService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur rejectMatchApplication: $e');
       return false;
     }
   }
@@ -1778,7 +1666,6 @@ class TeamsService {
       );
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Erreur cancelMatchApplication: $e');
       return false;
     }
   }

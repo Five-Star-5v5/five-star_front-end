@@ -52,7 +52,6 @@ class FieldsService {
         ),
       );
     } catch (e) {
-      debugPrint('Position error: $e');
       return null;
     }
   }
@@ -64,20 +63,16 @@ class FieldsService {
   Future<List<SoccerField>> fetchChainVenues({Position? userPosition}) async {
     final cached = await _loadCache(userPosition);
     if (cached != null) {
-      debugPrint('✅ Chain venues depuis cache: ${cached.length}');
       return cached;
     }
 
     if (_apiKey.isNotEmpty) {
-      debugPrint('🔍 Récupération depuis Google Places...');
       final venues = await _fetchFromPlaces(userPosition);
       if (venues.isNotEmpty) {
         await _saveCache(venues);
-        debugPrint('✅ Google Places: ${venues.length} venues');
         return venues;
       }
     } else {
-      debugPrint('⚠️ PLACES_API_KEY non configurée, fallback local');
     }
 
     return _localFallback(userPosition);
@@ -142,18 +137,15 @@ class FieldsService {
             await Future.delayed(const Duration(seconds: 2));
           }
         } else {
-          debugPrint('Places API ${response.statusCode}: $query');
           break;
         }
       } catch (e) {
-        debugPrint('Places API error ($query): $e');
         break;
       }
 
       page++;
     } while (pageToken != null && page < 3);
 
-    debugPrint('📍 "$query" → ${venues.length} résultats');
     return venues;
   }
 
@@ -245,7 +237,6 @@ class FieldsService {
           (jsonDecode(json) as List).cast<Map<String, dynamic>>();
       return list.map((m) => SoccerField.fromJson(m, userPosition)).toList();
     } catch (e) {
-      debugPrint('Cache read error: $e');
       return null;
     }
   }
@@ -262,7 +253,6 @@ class FieldsService {
         DateTime.now().millisecondsSinceEpoch,
       );
     } catch (e) {
-      debugPrint('Cache write error: $e');
     }
   }
 

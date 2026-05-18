@@ -62,7 +62,6 @@ class FieldsProvider extends ChangeNotifier {
         userPosition: _currentPosition,
       );
     } catch (e) {
-      debugPrint('Erreur chargement terrains: $e');
       _error = 'Erreur lors de la recherche des terrains';
     }
   }

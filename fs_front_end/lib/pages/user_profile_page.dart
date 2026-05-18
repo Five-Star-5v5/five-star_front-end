@@ -498,9 +498,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
         }
 
         final uniqueMatches = matchesMap.values.toList();
-        debugPrint(
-          '[History] Total comments: ${comments.length}, Unique matches: ${uniqueMatches.length}',
-        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

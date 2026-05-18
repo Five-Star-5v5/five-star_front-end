@@ -110,7 +110,6 @@ class AuthProvider extends ChangeNotifier {
       }
       return success;
     } catch (e) {
-      debugPrint('Erreur deleteAccount: $e');
       return false;
     }
   }

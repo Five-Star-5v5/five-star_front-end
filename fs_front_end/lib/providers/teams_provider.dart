@@ -905,16 +905,11 @@ class TeamsProvider with ChangeNotifier {
       _receivedApplications = await _teamsService.getTeamApplications(
         _myTeam!.id,
       );
-      debugPrint(
-        'loadReceivedApplications: ${_receivedApplications.length} candidatures chargées',
-      );
       for (var app in _receivedApplications) {
-        debugPrint('  - Candidature ${app.id}: statut ${app.status}');
       }
       _updatePendingApplicationsCount();
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadReceivedApplications: $e');
     }
   }
 
@@ -1019,7 +1014,6 @@ class TeamsProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur cancelApplication: $e');
       return false;
     }
   }
@@ -1107,13 +1101,11 @@ class TeamsProvider with ChangeNotifier {
       _isTeamChatConnected = true;
       _activeTeamChatId = teamId;
       notifyListeners();
-      debugPrint('✅ Team chat WebSocket connected to team $teamId');
     };
     _teamsService.onTeamChatDisconnected = () {
       _isTeamChatConnected = false;
       _activeTeamChatId = null;
       notifyListeners();
-      debugPrint('❌ Team chat WebSocket disconnected');
     };
 
     // Se connecter
@@ -1130,7 +1122,6 @@ class TeamsProvider with ChangeNotifier {
 
   /// Gère un nouveau message reçu via WebSocket
   void _handleNewTeamMessage(TeamChatMessage message) {
-    debugPrint('📩 New team message received in team ${message.teamId}');
 
     // Ajouter le message à la fin de la liste (ordre chronologique: plus ancien -> plus récent)
     // L'API renvoie les messages en ordre chronologique, donc on doit garder cet ordre
@@ -1244,7 +1235,6 @@ class TeamsProvider with ChangeNotifier {
       _myTeamChats = chats;
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadMyTeamChats: $e');
     }
   }
 
@@ -1276,7 +1266,6 @@ class TeamsProvider with ChangeNotifier {
       _isLoadingMessages = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadTeamMessages: $e');
       _isLoadingMessages = false;
       notifyListeners();
     }
@@ -1309,7 +1298,6 @@ class TeamsProvider with ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      debugPrint('Erreur sendMessage: $e');
       _isSendingMessage = false;
       notifyListeners();
       return false;
@@ -1344,7 +1332,6 @@ class TeamsProvider with ChangeNotifier {
         }
       }
     } catch (e) {
-      debugPrint('Erreur markMessagesAsRead: $e');
     }
   }
 
@@ -1371,16 +1358,12 @@ class TeamsProvider with ChangeNotifier {
       }
     });
 
-    debugPrint(
-      '🔄 Chat polling started (every ${_pollingInterval.inSeconds}s)',
-    );
   }
 
   /// Arrête le polling
   void stopChatPolling() {
     _chatPollingTimer?.cancel();
     _chatPollingTimer = null;
-    debugPrint('⏹️ Chat polling stopped');
   }
 
   @override

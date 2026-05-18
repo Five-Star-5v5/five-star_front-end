@@ -368,10 +368,8 @@ class AuthService {
         return true;
       }
 
-      debugPrint('Erreur deleteAccount: ${resp.statusCode} - ${resp.body}');
       return false;
     } catch (e) {
-      debugPrint('Exception deleteAccount: $e');
       return false;
     }
   }

@@ -74,7 +74,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère un nouveau message reçu
   void _handleNewMessage(MessageModel message) {
-    debugPrint('📩 New message received from ${message.senderId}');
 
     // Si on est dans la conversation avec cet utilisateur, ajouter le message
     if (_activeUserId == message.senderId && _activeConversation != null) {
@@ -104,7 +103,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère la confirmation d'envoi de message
   void _handleMessageSent(MessageModel message) {
-    debugPrint('✅ Message sent confirmed: ${message.id}');
 
     // Ajouter le message à la conversation active
     if (_activeConversation != null) {
@@ -185,7 +183,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère la notification que des messages ont été lus
   void _handleMessagesRead(int readerId, List<int> messageIds) {
-    debugPrint('👁️ Messages read by $readerId: $messageIds');
 
     // Mettre à jour le statut des messages dans la conversation active
     if (_activeConversation != null) {

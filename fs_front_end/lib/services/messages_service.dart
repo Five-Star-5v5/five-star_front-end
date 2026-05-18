@@ -54,13 +54,11 @@ class MessagesService {
 
     final token = await AuthService.instance.getAccessToken();
     if (token == null) {
-      debugPrint('❌ Cannot connect WebSocket: no token');
       return;
     }
 
     try {
       final uri = Uri.parse('$wsUrl/ws/$token');
-      debugPrint('🔌 Connecting to WebSocket: $uri');
 
       _channel = WebSocketChannel.connect(uri);
 
@@ -72,12 +70,10 @@ class MessagesService {
 
       _isConnected = true;
       onConnected?.call();
-      debugPrint('✅ WebSocket connected');
 
       // Démarrer le ping pour maintenir la connexion
       _startPing();
     } catch (e) {
-      debugPrint('❌ WebSocket connection error: $e');
       _scheduleReconnect();
     }
   }
@@ -91,7 +87,6 @@ class MessagesService {
     _channel = null;
     _isConnected = false;
     onDisconnected?.call();
-    debugPrint('🔌 WebSocket disconnected');
   }
 
   void _onMessage(dynamic data) {
@@ -122,17 +117,14 @@ class MessagesService {
           break;
         case 'error':
           final errorMessage = (json['message'] as String?) ?? 'Unknown error';
-          debugPrint('WebSocket error: $errorMessage');
           onErrorMessage?.call(errorMessage);
           break;
       }
     } catch (e) {
-      debugPrint('Error parsing WebSocket message: $e');
     }
   }
 
   void _onError(dynamic error) {
-    debugPrint('❌ WebSocket error: $error');
     _isConnected = false;
     onErrorMessage?.call('WebSocket connection error');
     onDisconnected?.call();
@@ -140,7 +132,6 @@ class MessagesService {
   }
 
   void _onDone() {
-    debugPrint('🔌 WebSocket closed');
     _isConnected = false;
     onDisconnected?.call();
     _scheduleReconnect();
@@ -158,7 +149,6 @@ class MessagesService {
   void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(const Duration(seconds: 5), () {
-      debugPrint('🔄 Attempting to reconnect WebSocket...');
       connect();
     });
   }
@@ -172,7 +162,6 @@ class MessagesService {
       _channel!.sink.add(jsonEncode(data));
       return true;
     } catch (e) {
-      debugPrint('❌ WebSocket send failed: $e');
       _isConnected = false;
       onDisconnected?.call();
       _scheduleReconnect();
