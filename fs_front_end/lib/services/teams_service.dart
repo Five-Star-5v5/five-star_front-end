@@ -32,6 +32,7 @@ class TeamsService {
   bool _isTeamChatConnected = false;
   int? _connectedTeamId;
   Timer? _pingTimer;
+  Timer? _teamChatReconnectTimer;
 
   // Callbacks
   TeamMessageCallback? onNewTeamMessage;
@@ -859,6 +860,7 @@ class TeamsService {
 
   /// Déconnecte du WebSocket du chat d'équipe
   void disconnectFromTeamChat() {
+    _teamChatReconnectTimer?.cancel();
     _pingTimer?.cancel();
     _teamChatSubscription?.cancel();
     _teamChatChannel?.sink.close();
@@ -895,11 +897,22 @@ class TeamsService {
   void _onTeamChatError(dynamic error) {
     _isTeamChatConnected = false;
     onTeamChatDisconnected?.call();
+    _scheduleTeamChatReconnect();
   }
 
   void _onTeamChatDone() {
     _isTeamChatConnected = false;
     onTeamChatDisconnected?.call();
+    _scheduleTeamChatReconnect();
+  }
+
+  void _scheduleTeamChatReconnect() {
+    final teamId = _connectedTeamId;
+    if (teamId == null) return;
+    _teamChatReconnectTimer?.cancel();
+    _teamChatReconnectTimer = Timer(const Duration(seconds: 5), () {
+      connectToTeamChat(teamId);
+    });
   }
 
   void _startTeamChatPing() {
@@ -1266,6 +1279,7 @@ class TeamsService {
   bool _isMatchChatConnected = false;
   int? _connectedChallengeId;
   Timer? _matchChatPingTimer;
+  Timer? _matchChatReconnectTimer;
 
   // Callbacks pour le chat de match
   void Function(MatchChatMessage message)? onNewMatchMessage;
@@ -1343,15 +1357,23 @@ class TeamsService {
   }
 
   void _handleMatchChatDisconnect() {
+    final challengeId = _connectedChallengeId;
     _isMatchChatConnected = false;
     _connectedChallengeId = null;
     _matchChatPingTimer?.cancel();
     _matchChatSubscription?.cancel();
     onMatchChatDisconnected?.call();
+    if (challengeId != null) {
+      _matchChatReconnectTimer?.cancel();
+      _matchChatReconnectTimer = Timer(const Duration(seconds: 5), () {
+        connectToMatchChat(challengeId);
+      });
+    }
   }
 
   /// Déconnecte du WebSocket du chat de match
   Future<void> disconnectFromMatchChat() async {
+    _matchChatReconnectTimer?.cancel();
     _matchChatPingTimer?.cancel();
     _matchChatSubscription?.cancel();
 

@@ -60,17 +60,17 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
     try {
       final service = TeamsService.instance;
-      final results = await Future.wait([
+      final (opponents, sent, received) = await (
         service.searchOpponents(skillLevel: _selectedSkillLevel),
         service.getSentChallenges(),
         service.getReceivedChallenges(),
-      ]);
+      ).wait;
 
       if (mounted) {
         setState(() {
-          _opponents = results[0] as List<TeamSearchResult>;
-          _sentChallenges = results[1] as List<MatchChallenge>;
-          _receivedChallenges = results[2] as List<MatchChallenge>;
+          _opponents = opponents;
+          _sentChallenges = sent;
+          _receivedChallenges = received;
           _isLoading = false;
         });
       }
@@ -1929,7 +1929,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
           },
         );
       },
-    );
+    ).then((_) {
+      messageController.dispose();
+      locationController.dispose();
+    });
   }
 
   void _showScoreDialog(
