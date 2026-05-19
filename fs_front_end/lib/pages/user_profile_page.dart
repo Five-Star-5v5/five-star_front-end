@@ -8,21 +8,7 @@ import '../services/friends_service.dart';
 import '../services/teams_service.dart';
 import 'all_comments_page.dart';
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _upBg = Color(0xFF0A0C10);
-const _upNight = Color(0xFF0B0D11);
-const _upCard = Color(0xFF181A21);
-const _upBorder2 = Color(0x21FFFFFF);
-const _upAmber = Color(0xFFFF7F2A);
-const _upAmberSoft = Color(0xFFFF9A55);
-const _upAmberD = Color(0xFFD96820);
-const _upAmberDim = Color(0x1CFF7F2A);
-const _upSage = Color(0xFF4CAF82);
-const _upSageDim = Color(0x1C4CAF82);
-const _upRose = Color(0xFFD4607A);
-const _upRoseDim = Color(0x1CD4607A);
-const _upWhite = Color(0xFFF0F2F5);
-const _upMuted2 = Color(0x9EF0F2F5);
+import '../theme/app_colors.dart';
 
 /// Page pour afficher le profil d'un autre utilisateur
 class UserProfilePage extends StatefulWidget {
@@ -108,14 +94,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   AppBar _buildAppBar(String title) {
     return AppBar(
-      backgroundColor: _upCard,
+      backgroundColor: AppColors.card,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      iconTheme: const IconThemeData(color: _upMuted2),
+      iconTheme: const IconThemeData(color: AppColors.muted2),
       title: Text(
         title,
         style: GoogleFonts.syne(
-          color: _upWhite,
+          color: AppColors.white,
           fontWeight: FontWeight.w700,
           fontSize: 16,
         ),
@@ -133,7 +119,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: _upBorder2),
+        child: Container(height: 1, color: AppColors.border2),
       ),
     );
   }
@@ -144,16 +130,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: _upBg,
+        backgroundColor: AppColors.bg,
         appBar: _buildAppBar('Profil'),
-        body: const Center(child: CircularProgressIndicator(color: _upAmber)),
+        body: const Center(child: CircularProgressIndicator(color: AppColors.amber)),
       );
     }
 
     final user = _fullUser!;
 
     return Scaffold(
-      backgroundColor: _upBg,
+      backgroundColor: AppColors.bg,
       appBar: _buildAppBar(user.username),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
@@ -198,14 +184,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
               height: 80,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_upAmberSoft, _upAmberD],
+                  colors: [AppColors.amberSoft, AppColors.amberD],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: _upAmber.withValues(alpha: 0.12),
+                    color: AppColors.amber.withValues(alpha: 0.12),
                     blurRadius: 80,
                     spreadRadius: 20,
                   ),
@@ -226,7 +212,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
                           fontSize: 26,
-                          color: _upNight,
+                          color: AppColors.night,
                         ),
                       ),
                     ),
@@ -241,7 +227,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
                 letterSpacing: 0.6,
-                color: _upWhite,
+                color: AppColors.white,
               ),
             ),
           ),
@@ -250,7 +236,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Center(
             child: Text(
               '@${user.username.toLowerCase()}${user.preferredPosition != null ? ' · ${user.preferredPosition}' : ''}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2),
+              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
             ),
           ),
           const SizedBox(height: 10),
@@ -279,7 +265,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.dmSans(
                   fontSize: 12,
-                  color: _upMuted2,
+                  color: AppColors.muted2,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -292,14 +278,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _pill(String label, {bool amber = false, bool sage = false}) {
     final color = amber
-        ? _upAmber
+        ? AppColors.amber
         : sage
-        ? _upSage
-        : _upMuted2;
+        ? AppColors.sage
+        : AppColors.muted2;
     final bg = amber
-        ? _upAmberDim
+        ? AppColors.amberDim
         : sage
-        ? _upSageDim
+        ? AppColors.sageDim
         : const Color(0x0DFFFFFF);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -325,10 +311,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final Color color;
     if (rating >= 8.0) {
       label = 'EXPERT';
-      color = _upAmber;
+      color = AppColors.amber;
     } else if (rating >= 6.0) {
       label = 'CONFIRMÉ';
-      color = _upSage;
+      color = AppColors.sage;
     } else if (rating >= 4.0) {
       label = 'INTERMÉDIAIRE';
       color = const Color(0xFF7B6CF6);
@@ -376,13 +362,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 11),
             decoration: BoxDecoration(
-              color: _upCard,
+              color: AppColors.card,
               border: Border(
-                top: const BorderSide(color: _upBorder2),
-                bottom: const BorderSide(color: _upBorder2),
-                left: const BorderSide(color: _upBorder2),
+                top: const BorderSide(color: AppColors.border2),
+                bottom: const BorderSide(color: AppColors.border2),
+                left: const BorderSide(color: AppColors.border2),
                 right: isLast
-                    ? const BorderSide(color: _upBorder2)
+                    ? const BorderSide(color: AppColors.border2)
                     : BorderSide.none,
               ),
               borderRadius: BorderRadius.only(
@@ -399,7 +385,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
-                    color: _upAmber,
+                    color: AppColors.amber,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -409,7 +395,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     fontSize: 8,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
-                    color: _upMuted2,
+                    color: AppColors.muted2,
                   ),
                 ),
               ],
@@ -449,13 +435,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (user.matchesPlayed >= 20)
       list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
     if (user.matchesPlayed >= 10)
-      list.add(_Badge('Régulier ⚡', _upAmber, _upAmberDim));
+      list.add(_Badge('Régulier ⚡', AppColors.amber, AppColors.amberDim));
     if (user.matchesWon >= 5)
       list.add(
         _Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)),
       );
     if (user.matchesPlayed >= 5)
-      list.add(_Badge('Actif', _upAmber, _upAmberDim));
+      list.add(_Badge('Actif', AppColors.amber, AppColors.amberDim));
     return list;
   }
 
@@ -508,7 +494,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: CircularProgressIndicator(
-                    color: _upAmber,
+                    color: AppColors.amber,
                     strokeWidth: 2,
                   ),
                 ),
@@ -539,9 +525,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _upCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _upBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,13 +540,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   style: GoogleFonts.syne(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: _upWhite,
+                    color: AppColors.white,
                   ),
                 ),
               ),
               Text(
                 dateStr,
-                style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+                style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
               ),
             ],
           ),
@@ -570,7 +556,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               Icon(
                 comment.isAbsent ? Icons.close_rounded : Icons.check_rounded,
                 size: 14,
-                color: comment.isAbsent ? _upRose : _upSage,
+                color: comment.isAbsent ? AppColors.rose : AppColors.sage,
               ),
               const SizedBox(width: 6),
               Text(
@@ -578,7 +564,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 style: GoogleFonts.syne(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: comment.isAbsent ? _upRose : _upSage,
+                  color: comment.isAbsent ? AppColors.rose : AppColors.sage,
                 ),
               ),
             ],
@@ -587,7 +573,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             const SizedBox(height: 6),
             Text(
               comment.content!,
-              style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+              style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -630,7 +616,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _upAmber,
+                          color: AppColors.amber,
                         ),
                       ),
                     ),
@@ -642,7 +628,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: CircularProgressIndicator(
-                    color: _upAmber,
+                    color: AppColors.amber,
                     strokeWidth: 2,
                   ),
                 ),
@@ -673,10 +659,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _upCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: c.isAbsent ? _upRose.withValues(alpha: 0.3) : _upBorder2,
+          color: c.isAbsent ? AppColors.rose.withValues(alpha: 0.3) : AppColors.border2,
         ),
       ),
       child: Row(
@@ -686,7 +672,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _upBorder2,
+              color: AppColors.border2,
               shape: BoxShape.circle,
               image: c.authorAvatarUrl != null
                   ? DecorationImage(
@@ -696,7 +682,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   : null,
             ),
             child: c.authorAvatarUrl == null
-                ? const Icon(Icons.person_outline, size: 16, color: _upMuted2)
+                ? const Icon(Icons.person_outline, size: 16, color: AppColors.muted2)
                 : null,
           ),
           const SizedBox(width: 10),
@@ -711,7 +697,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       style: GoogleFonts.syne(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: _upWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     const Spacer(),
@@ -722,7 +708,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: _upRose.withValues(alpha: 0.15),
+                          color: AppColors.rose.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -730,14 +716,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           style: GoogleFonts.syne(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: _upRose,
+                            color: AppColors.rose,
                           ),
                         ),
                       ),
                     const SizedBox(width: 6),
                     Text(
                       dateStr,
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _upMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -745,7 +731,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   const SizedBox(height: 4),
                   Text(
                     c.content!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _upMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ],
@@ -767,7 +753,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
-          color: _upMuted2,
+          color: AppColors.muted2,
         ),
       ),
     );
@@ -778,18 +764,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: _upCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _upBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Column(
         children: [
-          Icon(icon, color: _upMuted2, size: 26),
+          Icon(icon, color: AppColors.muted2, size: 26),
           const SizedBox(height: 8),
           Text(
             title,
             style: GoogleFonts.syne(
-              color: _upWhite,
+              color: AppColors.white,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -797,7 +783,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 3),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(color: _upMuted2, fontSize: 11),
+            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
             textAlign: TextAlign.center,
           ),
         ],
@@ -824,19 +810,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: _upSageDim,
+              color: AppColors.sageDim,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _upSage.withValues(alpha: 0.4)),
+              border: Border.all(color: AppColors.sage.withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check, color: _upSage, size: 16),
+                const Icon(Icons.check, color: AppColors.sage, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'Déjà ami',
                   style: GoogleFonts.syne(
-                    color: _upSage,
+                    color: AppColors.sage,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -849,19 +835,19 @@ class _UserProfilePageState extends State<UserProfilePage> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
-              color: _upAmberDim,
+              color: AppColors.amberDim,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _upAmber.withValues(alpha: 0.4)),
+              border: Border.all(color: AppColors.amber.withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.hourglass_empty, color: _upAmber, size: 16),
+                const Icon(Icons.hourglass_empty, color: AppColors.amber, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   'Demande envoyée',
                   style: GoogleFonts.syne(
-                    color: _upAmber,
+                    color: AppColors.amber,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -889,14 +875,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: _upRoseDim,
+                    color: AppColors.roseDim,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: _upRose),
+                    border: Border.all(color: AppColors.rose),
                   ),
                   child: Text(
                     'Refuser',
                     style: GoogleFonts.syne(
-                      color: _upRose,
+                      color: AppColors.rose,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -915,7 +901,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   messenger.showSnackBar(
                     const SnackBar(
                       content: Text('Demande acceptée !'),
-                      backgroundColor: _upSage,
+                      backgroundColor: AppColors.sage,
                     ),
                   );
                 },
@@ -927,13 +913,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     gradient: const LinearGradient(
-                      colors: [_upAmberSoft, _upAmberD],
+                      colors: [AppColors.amberSoft, AppColors.amberD],
                     ),
                   ),
                   child: Text(
                     'Accepter',
                     style: GoogleFonts.syne(
-                      color: _upNight,
+                      color: AppColors.night,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -950,7 +936,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             messenger.showSnackBar(
               SnackBar(
                 content: Text('Demande envoyée à ${user.username}'),
-                backgroundColor: _upSage,
+                backgroundColor: AppColors.sage,
               ),
             );
           },
@@ -958,17 +944,17 @@ class _UserProfilePageState extends State<UserProfilePage> {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(colors: [_upAmberSoft, _upAmberD]),
+              gradient: const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.person_add, color: _upNight, size: 18),
+                const Icon(Icons.person_add, color: AppColors.night, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   'Ajouter en ami',
                   style: GoogleFonts.syne(
-                    color: _upNight,
+                    color: AppColors.night,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

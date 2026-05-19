@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
 import '../theme_config/colors_config.dart';
+import '../theme/app_colors.dart';
+import '../widgets/kobeta_logo.dart';
 import '../providers/teams_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/auth_provider.dart';
@@ -21,109 +23,24 @@ import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
 
-// ── Design tokens (dark amber system) ──────────────────────────────────────
-const _kBg = Color(0xFF0A0C10);
-const _kNight = Color(0xFF0B0D11);
-const _kCard = Color(0xFF181A21);
-const _kCard2 = Color(0xFF1E2029);
-const _kBorder = Color(0x12FFFFFF);
-const _kBorder2 = Color(0x21FFFFFF);
-const _kAmber = Color(0xFFFF7F2A);
-const _kAmberSoft = Color(0xFFFF9A55);
-const _kAmberD = Color(0xFFD96820);
-const _kAmberDim = Color(0x1CFF7F2A);
-const _kSage = Color(0xFF4CAF82);
-const _kSageDim = Color(0x1C4CAF82);
-const _kRose = Color(0xFFD4607A);
-const _kRoseDim = Color(0x1CD4607A);
-const _kWhite = Color(0xFFF0F2F5);
-const _kMuted2 = Color(0x9EF0F2F5);
-
-// ── Kobeta hex logo SVG paths ────────────────────────────────────────────────
-const _kLogoOrange =
-    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
-    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
-    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
-    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
-    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
-    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
-    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
-    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
-    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
-    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
-    'M 291.9098,673.44632 245.5,646.89264 241.7475,644.43048 '
-    '237.995,641.96832 238.2475,445.90639 238.5,249.84446 256,239.58695 '
-    '273.5,229.32943 305.58644,210.66472 337.67289,192 H 338.83644 340 '
-    'v 94.5 94.5 h 0.51121 0.51121 l 22.23879,-12.6427 22.23879,-12.64271 '
-    '18,-10.21699 18,-10.217 72,-40.78463 72,-40.78462 10,-5.71608 '
-    '10,-5.71607 18.5,-10.51984 18.5,-10.51984 49,-27.73683 49,-27.73683 '
-    '13.8412,-7.88293 L 748.18239,150 h 0.77491 0.7749 l 50.38168,29.25 '
-    '50.38167,29.25 0.002,0.86895 0.002,0.86896 -7.5,4.19949 -7.5,4.1995 '
-    '-33,18.55543 -33,18.55543 -44,24.75584 -44,24.75583 -53.5,30.02161 '
-    '-53.5,30.02161 -15,8.41924 -15,8.41924 -21.713,12.16644 '
-    '-21.71299,12.16644 0.71299,0.6838 0.713,0.68381 51.5,29.18185 '
-    '51.5,29.18185 41.5,23.48412 41.5,23.48411 37.24413,21.16322 '
-    '37.24412,21.16323 -0.004,0.5 -0.004,0.5 -23.73968,13.14967 '
-    'L 715.5,582.79933 687.31534,598.40918 659.13069,614.01903 '
-    '648.81534,608.13201 638.5,602.24499 620,591.76417 601.5,581.28334 '
-    '557,556.27313 512.5,531.26292 473,509.0197 433.5,486.77649 '
-    '415.34425,476.38824 397.18849,466 h -0.97973 -0.97974 '
-    'L 374.86451,477.66965 354.5,489.33929 347.25046,493.41965 '
-    '340.00092,497.5 340.00046,598.75 340,700 h -0.8402 -0.84021 z '
-    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
-    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
-    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
-    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
-    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
-    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
-    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
-    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
-
-const _kLogoGray =
-    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
-    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
-    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
-    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
-    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
-    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
-    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
-    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
-    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
-    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
-    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
-    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
-    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
-    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
-    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
-    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
-    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
-    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
-
-String _logoHexSvg(String d, String fill, String id) =>
-    '''
-<svg width="28" height="28" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
-  <defs><clipPath id="$id"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs>
-  <g clip-path="url(#\$$id)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fill" d="$d"/></g></g>
-</svg>
-''';
 
 Widget _buildAvailChip(IconData icon, String label) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
     decoration: BoxDecoration(
-      color: _kAmberDim,
+      color: AppColors.amberDim,
       borderRadius: BorderRadius.circular(6),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 9, color: _kAmber),
+        Icon(icon, size: 9, color: AppColors.amber),
         const SizedBox(width: 3),
         Text(
           label,
           style: TextStyle(
             fontSize: 9,
-            color: _kAmber,
+            color: AppColors.amber,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -343,20 +260,20 @@ class _HomePageState extends State<HomePage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: const LinearGradient(
-                  colors: [_kAmberSoft, _kAmberD],
+                  colors: [AppColors.amberSoft, AppColors.amberD],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: _kAmber.withValues(alpha: 0.4),
+                    color: AppColors.amber.withValues(alpha: 0.4),
                     blurRadius: 24,
                     spreadRadius: 8,
                   ),
                 ],
               ),
               child: SvgPicture.string(
-                _logoHexSvg(_kLogoOrange, '#0B0D11', 'loadingHex'),
+                buildKobetaLogoSvg(kLogoOrangePaths, '#0B0D11', 28, 'loadingHex'),
                 width: 50,
                 height: 50,
               ),
@@ -368,7 +285,7 @@ class _HomePageState extends State<HomePage>
             style: GoogleFonts.syne(
               fontSize: 24,
               fontWeight: FontWeight.w800,
-              color: _kWhite,
+              color: AppColors.white,
               letterSpacing: 1,
             ),
           ),
@@ -377,7 +294,7 @@ class _HomePageState extends State<HomePage>
             'Préparation en cours...',
             style: GoogleFonts.dmSans(
               fontSize: 13,
-              color: _kMuted2,
+              color: AppColors.muted2,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -405,12 +322,12 @@ class _HomePageState extends State<HomePage>
       isScrollControlled: true,
       builder: (_) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           border: Border(
-            top: BorderSide(color: _kBorder, width: 1),
-            left: BorderSide(color: _kBorder, width: 1),
-            right: BorderSide(color: _kBorder, width: 1),
+            top: BorderSide(color: AppColors.border, width: 1),
+            left: BorderSide(color: AppColors.border, width: 1),
+            right: BorderSide(color: AppColors.border, width: 1),
           ),
         ),
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
@@ -423,7 +340,7 @@ class _HomePageState extends State<HomePage>
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: _kBorder2,
+                  color: AppColors.border2,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -431,7 +348,7 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 20),
             Row(
               children: [
-                const Icon(Icons.info_outline, color: _kAmber, size: 18),
+                const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -439,7 +356,7 @@ class _HomePageState extends State<HomePage>
                     style: GoogleFonts.syne(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: _kWhite,
+                      color: AppColors.white,
                     ),
                   ),
                 ),
@@ -453,7 +370,7 @@ class _HomePageState extends State<HomePage>
                   line,
                   style: GoogleFonts.dmSans(
                     fontSize: 13,
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                     height: 1.55,
                   ),
                 ),
@@ -470,18 +387,18 @@ class _HomePageState extends State<HomePage>
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 8),
       decoration: BoxDecoration(
-        color: _isLookingForOpponent ? _kAmber.withValues(alpha: 0.08) : _kCard,
+        color: _isLookingForOpponent ? AppColors.amber.withValues(alpha: 0.08) : AppColors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isLookingForOpponent
-              ? _kAmber.withValues(alpha: 0.35)
-              : _kBorder2,
+              ? AppColors.amber.withValues(alpha: 0.35)
+              : AppColors.border2,
           width: 1.5,
         ),
         boxShadow: _isLookingForOpponent
             ? [
                 BoxShadow(
-                  color: _kAmber.withValues(alpha: 0.14),
+                  color: AppColors.amber.withValues(alpha: 0.14),
                   blurRadius: 20,
                   offset: const Offset(0, 6),
                 ),
@@ -497,14 +414,14 @@ class _HomePageState extends State<HomePage>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _isLookingForOpponent ? _kAmberDim : _kBorder,
+                    color: _isLookingForOpponent ? AppColors.amberDim : AppColors.border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     _isLookingForOpponent
                         ? Icons.visibility
                         : Icons.visibility_off,
-                    color: _isLookingForOpponent ? _kAmber : _kMuted2,
+                    color: _isLookingForOpponent ? AppColors.amber : AppColors.muted2,
                     size: 20,
                   ),
                 ),
@@ -519,7 +436,7 @@ class _HomePageState extends State<HomePage>
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                           letterSpacing: 0.04 * 13,
-                          color: _isLookingForOpponent ? _kAmber : _kWhite,
+                          color: _isLookingForOpponent ? AppColors.amber : AppColors.white,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -529,7 +446,7 @@ class _HomePageState extends State<HomePage>
                             : 'Activez pour apparaître dans les recherches',
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ],
@@ -541,15 +458,15 @@ class _HomePageState extends State<HomePage>
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: _kAmber,
+                      color: AppColors.amber,
                     ),
                   )
                 else
                   Switch.adaptive(
                     value: _isLookingForOpponent,
                     onChanged: _toggleSearchMode,
-                    activeThumbColor: _kNight,
-                    activeTrackColor: _kAmber,
+                    activeThumbColor: AppColors.night,
+                    activeTrackColor: AppColors.amber,
                   ),
               ],
             ),
@@ -568,8 +485,8 @@ class _HomePageState extends State<HomePage>
                 Icons.info_outline,
                 size: 14,
                 color: _isLookingForOpponent
-                    ? _kAmber.withValues(alpha: 0.65)
-                    : _kMuted2.withValues(alpha: 0.6),
+                    ? AppColors.amber.withValues(alpha: 0.65)
+                    : AppColors.muted2.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -600,7 +517,7 @@ class _HomePageState extends State<HomePage>
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.04 * 13,
-                    color: _kWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -610,17 +527,17 @@ class _HomePageState extends State<HomePage>
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: _kAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(
-                      color: _kAmber.withValues(alpha: 0.25),
+                      color: AppColors.amber.withValues(alpha: 0.25),
                       width: 1,
                     ),
                   ),
                   child: Text(
                     '${_upcomingMatches.length}',
                     style: const TextStyle(
-                      color: _kAmber,
+                      color: AppColors.amber,
                       fontWeight: FontWeight.w700,
                       fontSize: 10,
                     ),
@@ -645,7 +562,7 @@ class _HomePageState extends State<HomePage>
                     child: Icon(
                       Icons.info_outline,
                       size: 14,
-                      color: _kAmber.withValues(alpha: 0.55),
+                      color: AppColors.amber.withValues(alpha: 0.55),
                     ),
                   ),
                 ),
@@ -661,7 +578,7 @@ class _HomePageState extends State<HomePage>
                     style: GoogleFonts.syne(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: _kAmber,
+                      color: AppColors.amber,
                     ),
                   ),
                 ),
@@ -675,26 +592,26 @@ class _HomePageState extends State<HomePage>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             decoration: BoxDecoration(
-              color: _kCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _kBorder, width: 1),
+              border: Border.all(color: AppColors.border, width: 1),
             ),
             child: Column(
               children: [
-                Icon(Icons.sports_soccer_outlined, size: 28, color: _kMuted2),
+                Icon(Icons.sports_soccer_outlined, size: 28, color: AppColors.muted2),
                 const SizedBox(height: 8),
                 Text(
                   'Aucun match à venir',
                   style: GoogleFonts.syne(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Défiez une équipe pour planifier un match',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -729,7 +646,7 @@ class _HomePageState extends State<HomePage>
   //                   fontSize: 13,
   //                   fontWeight: FontWeight.w700,
   //                   letterSpacing: 0.04 * 13,
-  //                   color: _kWhite,
+  //                   color: AppColors.white,
   //                 ),
   //               ),
   //               if (_publicMatches.isNotEmpty) ...[
@@ -769,7 +686,7 @@ class _HomePageState extends State<HomePage>
   //               style: GoogleFonts.syne(
   //                 fontSize: 12,
   //                 fontWeight: FontWeight.w600,
-  //                 color: _kAmber,
+  //                 color: AppColors.amber,
   //               ),
   //             ),
   //           ),
@@ -781,17 +698,17 @@ class _HomePageState extends State<HomePage>
   //           width: double.infinity,
   //           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
   //           decoration: BoxDecoration(
-  //             color: _kCard,
+  //             color: AppColors.card,
   //             borderRadius: BorderRadius.circular(14),
-  //             border: Border.all(color: _kBorder, width: 1),
+  //             border: Border.all(color: AppColors.border, width: 1),
   //           ),
   //           child: Column(
   //             children: [
-  //               Icon(Icons.people_outline, size: 24, color: _kMuted2),
+  //               Icon(Icons.people_outline, size: 24, color: AppColors.muted2),
   //               const SizedBox(height: 6),
   //               Text(
   //                 'Aucun match ouvert pour le moment',
-  //                 style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+  //                 style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
   //               ),
   //             ],
   //           ),
@@ -823,9 +740,9 @@ class _HomePageState extends State<HomePage>
   //       width: 210,
   //       padding: const EdgeInsets.all(12),
   //       decoration: BoxDecoration(
-  //         color: _kCard,
+  //         color: AppColors.card,
   //         borderRadius: BorderRadius.circular(14),
-  //         border: Border.all(color: _kBorder, width: 1),
+  //         border: Border.all(color: AppColors.border, width: 1),
   //       ),
   //       child: Column(
   //         crossAxisAlignment: CrossAxisAlignment.start,
@@ -840,7 +757,7 @@ class _HomePageState extends State<HomePage>
   //                   fontSize: 10,
   //                   fontWeight: FontWeight.w800,
   //                   letterSpacing: 1.5,
-  //                   color: _kMuted2,
+  //                   color: AppColors.muted2,
   //                 ),
   //               ),
   //               const Spacer(),
@@ -853,7 +770,7 @@ class _HomePageState extends State<HomePage>
   //             style: GoogleFonts.syne(
   //               fontSize: 11,
   //               fontWeight: FontWeight.w700,
-  //               color: _kWhite,
+  //               color: AppColors.white,
   //             ),
   //             maxLines: 1,
   //             overflow: TextOverflow.ellipsis,
@@ -862,11 +779,11 @@ class _HomePageState extends State<HomePage>
   //           if (match.proposedDate != null)
   //             Row(
   //               children: [
-  //                 const Icon(Icons.calendar_today, size: 10, color: _kMuted2),
+  //                 const Icon(Icons.calendar_today, size: 10, color: AppColors.muted2),
   //                 const SizedBox(width: 4),
   //                 Text(
   //                   DateFormat('d MMM • HH:mm', 'fr_FR').format(match.proposedDate!),
-  //                   style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+  //                   style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
   //                 ),
   //               ],
   //             ),
@@ -905,9 +822,9 @@ class _HomePageState extends State<HomePage>
   //     width: 34,
   //     height: 34,
   //     decoration: BoxDecoration(
-  //       color: _kAmberDim,
+  //       color: AppColors.amberDim,
   //       borderRadius: BorderRadius.circular(10),
-  //       border: Border.all(color: _kAmber.withValues(alpha: 0.2), width: 1),
+  //       border: Border.all(color: AppColors.amber.withValues(alpha: 0.2), width: 1),
   //     ),
   //     child: team.logoUrl != null
   //         ? ClipRRect(
@@ -918,7 +835,7 @@ class _HomePageState extends State<HomePage>
   //             child: Text(
   //               team.name[0].toUpperCase(),
   //               style: const TextStyle(
-  //                 color: _kAmber,
+  //                 color: AppColors.amber,
   //                 fontWeight: FontWeight.w800,
   //                 fontSize: 14,
   //               ),
@@ -945,9 +862,9 @@ class _HomePageState extends State<HomePage>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: _kCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -960,10 +877,10 @@ class _HomePageState extends State<HomePage>
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: _kAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(11),
                   border: Border.all(
-                    color: _kAmber.withValues(alpha: 0.2),
+                    color: AppColors.amber.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -976,7 +893,7 @@ class _HomePageState extends State<HomePage>
                         child: Text(
                           opponentName[0].toUpperCase(),
                           style: const TextStyle(
-                            color: _kAmber,
+                            color: AppColors.amber,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -994,12 +911,12 @@ class _HomePageState extends State<HomePage>
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         letterSpacing: 0.03 * 13,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     Text(
                       isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -1017,7 +934,7 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: _kCard2,
+                color: AppColors.card2,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -1028,12 +945,12 @@ class _HomePageState extends State<HomePage>
                         const Icon(
                           Icons.calendar_today,
                           size: 14,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           _formatMatchDate(match.proposedDate!),
-                          style: const TextStyle(fontSize: 12, color: _kWhite),
+                          style: const TextStyle(fontSize: 12, color: AppColors.white),
                         ),
                       ],
                     ),
@@ -1046,7 +963,7 @@ class _HomePageState extends State<HomePage>
                         const Icon(
                           Icons.location_on,
                           size: 14,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -1054,7 +971,7 @@ class _HomePageState extends State<HomePage>
                             match.proposedLocation!,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: _kWhite,
+                              color: AppColors.white,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -1268,7 +1185,7 @@ class _HomePageState extends State<HomePage>
                                 fontWeight: FontWeight.w700,
                                 fontSize: 10,
                                 letterSpacing: 0.06 * 10,
-                                color: _kWhite,
+                                color: AppColors.white,
                               ),
                             ),
                           ),
@@ -1282,7 +1199,7 @@ class _HomePageState extends State<HomePage>
                         'Contester = match nul (0-0)',
                         style: GoogleFonts.dmSans(
                           fontSize: 10,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -1356,7 +1273,7 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
               decoration: BoxDecoration(
-                color: _kCard2,
+                color: AppColors.card2,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -1369,7 +1286,7 @@ class _HomePageState extends State<HomePage>
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1382,7 +1299,7 @@ class _HomePageState extends State<HomePage>
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                         letterSpacing: 2,
                       ),
                     ),
@@ -1393,7 +1310,7 @@ class _HomePageState extends State<HomePage>
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       textAlign: TextAlign.right,
                       maxLines: 1,
@@ -1451,7 +1368,7 @@ class _HomePageState extends State<HomePage>
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [_kAmberSoft, _kAmberD],
+                          colors: [AppColors.amberSoft, AppColors.amberD],
                         ),
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: const [
@@ -1468,7 +1385,7 @@ class _HomePageState extends State<HomePage>
                           fontWeight: FontWeight.w700,
                           fontSize: 10,
                           letterSpacing: 0.06 * 10,
-                          color: _kNight,
+                          color: AppColors.night,
                         ),
                       ),
                     ),
@@ -1484,7 +1401,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(9),
-                      border: Border.all(color: _kBorder2, width: 1.5),
+                      border: Border.all(color: AppColors.border2, width: 1.5),
                     ),
                     child: Text(
                       'ANNULER',
@@ -1492,7 +1409,7 @@ class _HomePageState extends State<HomePage>
                         fontWeight: FontWeight.w600,
                         fontSize: 10,
                         letterSpacing: 0.06 * 10,
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                       ),
                     ),
                   ),
@@ -1517,18 +1434,18 @@ class _HomePageState extends State<HomePage>
     IconData icon;
 
     if (match.scoreConflict) {
-      bgColor = _kRose.withValues(alpha: 0.12);
-      textColor = _kRose;
+      bgColor = AppColors.rose.withValues(alpha: 0.12);
+      textColor = AppColors.rose;
       text = 'Conflit';
       icon = Icons.warning;
     } else if (hasSubmitted) {
-      bgColor = _kAmberDim;
-      textColor = _kAmber;
+      bgColor = AppColors.amberDim;
+      textColor = AppColors.amber;
       text = 'En attente';
       icon = Icons.hourglass_empty;
     } else {
-      bgColor = _kSage.withValues(alpha: 0.12);
-      textColor = _kSage;
+      bgColor = AppColors.sage.withValues(alpha: 0.12);
+      textColor = AppColors.sage;
       text = 'À jouer';
       icon = Icons.sports_soccer;
     }
@@ -1595,16 +1512,16 @@ class _HomePageState extends State<HomePage>
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
-              color: _kAmberDim,
+              color: AppColors.amberDim,
               borderRadius: BorderRadius.circular(9),
               border: Border.all(
-                color: _kAmber.withValues(alpha: 0.2),
+                color: AppColors.amber.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
             child: const Icon(
               Icons.chat_bubble_outline,
-              color: _kAmber,
+              color: AppColors.amber,
               size: 17,
             ),
           ),
@@ -1696,10 +1613,10 @@ class _HomePageState extends State<HomePage>
       context: context,
       builder: (context) {
         return Dialog(
-          backgroundColor: _kCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _kBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -1711,13 +1628,13 @@ class _HomePageState extends State<HomePage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
-                    color: _kWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Entrez le score du match contre $opponentName',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -1731,7 +1648,7 @@ class _HomePageState extends State<HomePage>
                             style: GoogleFonts.dmSans(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -1742,24 +1659,24 @@ class _HomePageState extends State<HomePage>
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: _kWhite,
+                              color: AppColors.white,
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: _kMuted2),
+                              hintStyle: const TextStyle(color: AppColors.muted2),
                               filled: true,
-                              fillColor: _kCard2,
+                              fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kAmber),
+                                borderSide: const BorderSide(color: AppColors.amber),
                               ),
                             ),
                           ),
@@ -1773,7 +1690,7 @@ class _HomePageState extends State<HomePage>
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: _kWhite,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -1785,7 +1702,7 @@ class _HomePageState extends State<HomePage>
                             style: GoogleFonts.dmSans(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1798,24 +1715,24 @@ class _HomePageState extends State<HomePage>
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
-                              color: _kWhite,
+                              color: AppColors.white,
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: _kMuted2),
+                              hintStyle: const TextStyle(color: AppColors.muted2),
                               filled: true,
-                              fillColor: _kCard2,
+                              fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: _kAmber),
+                                borderSide: const BorderSide(color: AppColors.amber),
                               ),
                             ),
                           ),
@@ -1828,18 +1745,18 @@ class _HomePageState extends State<HomePage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _kAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: _kAmber, size: 18),
+                      const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'L\'adversaire devra confirmer ce score pour qu\'il soit validé.',
                           style: GoogleFonts.dmSans(
-                            color: _kAmberSoft,
+                            color: AppColors.amberSoft,
                             fontSize: 12,
                           ),
                         ),
@@ -1856,16 +1773,16 @@ class _HomePageState extends State<HomePage>
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: _kCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _kBorder2),
+                            border: Border.all(color: AppColors.border2),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                               fontSize: 13,
                             ),
                           ),
@@ -1888,7 +1805,7 @@ class _HomePageState extends State<HomePage>
                           height: 44,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [_kAmber, _kAmberD],
+                              colors: [AppColors.amber, AppColors.amberD],
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1956,10 +1873,10 @@ class _HomePageState extends State<HomePage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _kCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1971,13 +1888,13 @@ class _HomePageState extends State<HomePage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -1989,16 +1906,16 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                         ),
@@ -2013,7 +1930,7 @@ class _HomePageState extends State<HomePage>
                         height: 44,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_kAmber, _kAmberD],
+                            colors: [AppColors.amber, AppColors.amberD],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -2061,10 +1978,10 @@ class _HomePageState extends State<HomePage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _kCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -2076,14 +1993,14 @@ class _HomePageState extends State<HomePage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
                 'Êtes-vous sûr de vouloir contester ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2095,16 +2012,16 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                         ),
@@ -2118,7 +2035,7 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kRose,
+                          color: AppColors.rose,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -2164,10 +2081,10 @@ class _HomePageState extends State<HomePage>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _kCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -2179,14 +2096,14 @@ class _HomePageState extends State<HomePage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
                 'Cette action ne peut pas être annulée.',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2198,16 +2115,16 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           'Non',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                         ),
@@ -2221,7 +2138,7 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kRose,
+                          color: AppColors.rose,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         alignment: Alignment.center,
@@ -2281,10 +2198,10 @@ class _HomePageState extends State<HomePage>
       context: context,
       builder: (BuildContext dialogContext) {
         return Dialog(
-          backgroundColor: _kCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _kBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -2296,14 +2213,14 @@ class _HomePageState extends State<HomePage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
-                    color: _kWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: _kMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -2315,16 +2232,16 @@ class _HomePageState extends State<HomePage>
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: _kCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _kBorder2),
+                            border: Border.all(color: AppColors.border2),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                               fontSize: 13,
                             ),
                           ),
@@ -2388,7 +2305,7 @@ class _HomePageState extends State<HomePage>
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: _kRose,
+                            color: AppColors.rose,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           alignment: Alignment.center,
@@ -2434,7 +2351,7 @@ class _HomePageState extends State<HomePage>
     final Color titleColor = isDarkMode ? myLightBackground : MyprimaryDark;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -2452,24 +2369,7 @@ class _HomePageState extends State<HomePage>
         ),
         title: Row(
           children: [
-            SizedBox(
-              width: 28,
-              height: 28,
-              child: Stack(
-                children: [
-                  SvgPicture.string(
-                    _logoHexSvg(_kLogoOrange, '#FF7F2A', 'hmHexO'),
-                    width: 28,
-                    height: 28,
-                  ),
-                  SvgPicture.string(
-                    _logoHexSvg(_kLogoGray, '#e6e6e6', 'hmHexG'),
-                    width: 28,
-                    height: 28,
-                  ),
-                ],
-              ),
-            ),
+            const KobetaLogo(size: 28),
             const SizedBox(width: 9),
             RichText(
               text: const TextSpan(
@@ -2482,11 +2382,11 @@ class _HomePageState extends State<HomePage>
                 children: [
                   TextSpan(
                     text: 'Ko',
-                    style: TextStyle(color: _kWhite),
+                    style: TextStyle(color: AppColors.white),
                   ),
                   TextSpan(
                     text: 'beta',
-                    style: TextStyle(color: _kAmber),
+                    style: TextStyle(color: AppColors.amber),
                   ),
                 ],
               ),
@@ -2504,13 +2404,13 @@ class _HomePageState extends State<HomePage>
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: _kCard,
+                      color: AppColors.card,
                       shape: BoxShape.circle,
-                      border: Border.all(color: _kBorder2),
+                      border: Border.all(color: AppColors.border2),
                     ),
                     child: const Icon(
                       Icons.notifications_none_outlined,
-                      color: _kMuted2,
+                      color: AppColors.muted2,
                       size: 17,
                     ),
                   ),
@@ -2522,9 +2422,9 @@ class _HomePageState extends State<HomePage>
                         width: 14,
                         height: 14,
                         decoration: BoxDecoration(
-                          color: _kAmber,
+                          color: AppColors.amber,
                           shape: BoxShape.circle,
-                          border: Border.all(color: _kNight, width: 1.5),
+                          border: Border.all(color: AppColors.night, width: 1.5),
                         ),
                         child: Center(
                           child: Text(
@@ -2534,7 +2434,7 @@ class _HomePageState extends State<HomePage>
                             style: const TextStyle(
                               fontSize: 7,
                               fontWeight: FontWeight.w800,
-                              color: _kNight,
+                              color: AppColors.night,
                             ),
                           ),
                         ),
@@ -2557,7 +2457,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.only(right: 16),
                   child: CircleAvatar(
                     radius: 15,
-                    backgroundColor: _kAmber,
+                    backgroundColor: AppColors.amber,
                     backgroundImage: user?.avatarUrl != null
                         ? NetworkImage(user!.avatarUrl!)
                         : null,
@@ -2565,7 +2465,7 @@ class _HomePageState extends State<HomePage>
                         ? Text(
                             initial,
                             style: const TextStyle(
-                              color: _kNight,
+                              color: AppColors.night,
                               fontWeight: FontWeight.w800,
                               fontSize: 12,
                             ),
@@ -2598,7 +2498,7 @@ class _HomePageState extends State<HomePage>
               // ── Scrollable content ──────────────────────────────────
               Expanded(
                 child: RefreshIndicator(
-                  color: _kAmber,
+                  color: AppColors.amber,
                   onRefresh: () => teamsProvider.loadMyTeam(),
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -2666,17 +2566,17 @@ class _HomePageState extends State<HomePage>
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _kAmberDim,
+                                  color: AppColors.amberDim,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: _kAmber.withValues(alpha: 0.30),
+                                    color: AppColors.amber.withValues(alpha: 0.30),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     const Icon(
                                       Icons.notifications_active,
-                                      color: _kAmber,
+                                      color: AppColors.amber,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 12),
@@ -2684,7 +2584,7 @@ class _HomePageState extends State<HomePage>
                                       child: Text(
                                         '${teamsProvider.pendingApplicationsCount} candidature(s) en attente',
                                         style: const TextStyle(
-                                          color: _kAmber,
+                                          color: AppColors.amber,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 13,
                                         ),
@@ -2699,7 +2599,7 @@ class _HomePageState extends State<HomePage>
                                           vertical: 5,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: _kAmber,
+                                          color: AppColors.amber,
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -2707,7 +2607,7 @@ class _HomePageState extends State<HomePage>
                                         child: const Text(
                                           'VOIR',
                                           style: TextStyle(
-                                            color: _kNight,
+                                            color: AppColors.night,
                                             fontWeight: FontWeight.w800,
                                             fontSize: 10,
                                             letterSpacing: 0.06 * 10,
@@ -2783,9 +2683,9 @@ class _HomePageState extends State<HomePage>
                 width: double.infinity,
                 height: 116,
                 decoration: BoxDecoration(
-                  color: _kCard,
+                  color: AppColors.card,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _kBorder),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Center(
                   child: Column(
@@ -2793,14 +2693,14 @@ class _HomePageState extends State<HomePage>
                     children: [
                       const Icon(
                         Icons.group_add_outlined,
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                         size: 28,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'PAS D\'ÉQUIPE',
                         style: GoogleFonts.syne(
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.06 * 11,
@@ -2832,10 +2732,10 @@ class _HomePageState extends State<HomePage>
                           width: 116,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: _kCard,
+                            color: AppColors.card,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: _kAmber.withValues(alpha: 0.20),
+                              color: AppColors.amber.withValues(alpha: 0.20),
                               width: 1,
                             ),
                           ),
@@ -2848,13 +2748,13 @@ class _HomePageState extends State<HomePage>
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: const BoxDecoration(
-                                      color: _kAmberDim,
+                                      color: AppColors.amberDim,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
                                       Icons.add,
                                       size: 18,
-                                      color: _kAmber,
+                                      color: AppColors.amber,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
@@ -2863,7 +2763,7 @@ class _HomePageState extends State<HomePage>
                                     style: GoogleFonts.syne(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
-                                      color: _kAmber,
+                                      color: AppColors.amber,
                                       letterSpacing: 0.06 * 8,
                                     ),
                                   ),
@@ -2872,7 +2772,7 @@ class _HomePageState extends State<HomePage>
                                     'une équipe',
                                     style: GoogleFonts.dmSans(
                                       fontSize: 9,
-                                      color: _kMuted2,
+                                      color: AppColors.muted2,
                                     ),
                                   ),
                                 ],
@@ -2892,7 +2792,7 @@ class _HomePageState extends State<HomePage>
                                   child: Icon(
                                     Icons.info_outline,
                                     size: 13,
-                                    color: _kAmber.withValues(alpha: 0.65),
+                                    color: AppColors.amber.withValues(alpha: 0.65),
                                   ),
                                 ),
                               ),
@@ -2916,17 +2816,17 @@ class _HomePageState extends State<HomePage>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    _kAmber.withValues(alpha: 0.12),
-                                    _kAmberD.withValues(alpha: 0.06),
+                                    AppColors.amber.withValues(alpha: 0.12),
+                                    AppColors.amberD.withValues(alpha: 0.06),
                                   ],
                                 )
                               : null,
-                          color: isActive ? null : _kCard,
+                          color: isActive ? null : AppColors.card,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isActive
-                                ? _kAmber.withValues(alpha: 0.35)
-                                : _kBorder,
+                                ? AppColors.amber.withValues(alpha: 0.35)
+                                : AppColors.border,
                             width: isActive ? 1.5 : 1,
                           ),
                         ),
@@ -2940,7 +2840,7 @@ class _HomePageState extends State<HomePage>
                                   width: 7,
                                   height: 7,
                                   decoration: const BoxDecoration(
-                                    color: _kAmber,
+                                    color: AppColors.amber,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -2956,13 +2856,13 @@ class _HomePageState extends State<HomePage>
                                   ),
                                   decoration: BoxDecoration(
                                     color: isOwner
-                                        ? _kAmberDim
+                                        ? AppColors.amberDim
                                         : Colors.white.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(100),
                                     border: Border.all(
                                       color: isOwner
-                                          ? _kAmber.withValues(alpha: 0.25)
-                                          : _kBorder2,
+                                          ? AppColors.amber.withValues(alpha: 0.25)
+                                          : AppColors.border2,
                                     ),
                                   ),
                                   child: Text(
@@ -2970,7 +2870,7 @@ class _HomePageState extends State<HomePage>
                                     style: GoogleFonts.syne(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
-                                      color: isOwner ? _kAmber : _kMuted2,
+                                      color: isOwner ? AppColors.amber : AppColors.muted2,
                                       letterSpacing: 0.06 * 8,
                                     ),
                                   ),
@@ -2982,7 +2882,7 @@ class _HomePageState extends State<HomePage>
                                   style: GoogleFonts.syne(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
-                                    color: _kWhite,
+                                    color: AppColors.white,
                                     letterSpacing: 0.04 * 12,
                                   ),
                                   maxLines: 1,
@@ -2994,7 +2894,7 @@ class _HomePageState extends State<HomePage>
                                   '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 10,
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                   ),
                                 ),
                                 const Spacer(),
@@ -3030,7 +2930,7 @@ class _HomePageState extends State<HomePage>
                                             child: Icon(
                                               Icons.chat_bubble_outline,
                                               size: 18,
-                                              color: _kAmber,
+                                              color: AppColors.amber,
                                             ),
                                           ),
                                           if (teamsProvider
@@ -3063,7 +2963,7 @@ class _HomePageState extends State<HomePage>
                                           child: Icon(
                                             Icons.edit_outlined,
                                             size: 17,
-                                            color: _kMuted2,
+                                            color: AppColors.muted2,
                                           ),
                                         ),
                                       ),
@@ -3081,7 +2981,7 @@ class _HomePageState extends State<HomePage>
                                           child: Icon(
                                             Icons.exit_to_app,
                                             size: 18,
-                                            color: _kRose,
+                                            color: AppColors.rose,
                                           ),
                                         ),
                                       ),
@@ -3118,8 +3018,8 @@ class _HomePageState extends State<HomePage>
               height: 20,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _kAmber,
-                border: Border.all(color: _kCard, width: 2),
+                color: AppColors.amber,
+                border: Border.all(color: AppColors.card, width: 2),
               ),
               child: Center(
                 child: Text(
@@ -3129,7 +3029,7 @@ class _HomePageState extends State<HomePage>
                   style: const TextStyle(
                     fontSize: 7,
                     fontWeight: FontWeight.w700,
-                    color: _kNight,
+                    color: AppColors.night,
                   ),
                 ),
               ),
@@ -3144,8 +3044,8 @@ class _HomePageState extends State<HomePage>
               height: 20,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _kCard2,
-                border: Border.all(color: _kCard, width: 2),
+                color: AppColors.card2,
+                border: Border.all(color: AppColors.card, width: 2),
               ),
               child: Center(
                 child: Text(
@@ -3153,7 +3053,7 @@ class _HomePageState extends State<HomePage>
                   style: const TextStyle(
                     fontSize: 6,
                     fontWeight: FontWeight.w600,
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                   ),
                 ),
               ),
@@ -3174,7 +3074,7 @@ class _HomePageState extends State<HomePage>
           height: 6,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
-            color: isActive ? _kAmber : _kBorder2,
+            color: isActive ? AppColors.amber : AppColors.border2,
           ),
         );
       }),
@@ -3186,20 +3086,20 @@ class _HomePageState extends State<HomePage>
       height: 220,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: _kCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _kBorder2, width: 1.5),
+        border: Border.all(color: AppColors.border2, width: 1.5),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.groups_outlined, size: 44, color: _kMuted2),
+            Icon(Icons.groups_outlined, size: 44, color: AppColors.muted2),
             const SizedBox(height: 12),
             const Text(
               'AUCUNE ÉQUIPE',
               style: TextStyle(
-                color: _kWhite,
+                color: AppColors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.06 * 13,
@@ -3208,7 +3108,7 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 6),
             const Text(
               'Ajoutez des amis pour créer votre équipe',
-              style: TextStyle(color: _kMuted2, fontSize: 11),
+              style: TextStyle(color: AppColors.muted2, fontSize: 11),
             ),
           ],
         ),
@@ -3339,7 +3239,7 @@ class _HomePageState extends State<HomePage>
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.04 * 13,
-                color: _kWhite,
+                color: AppColors.white,
               ),
             ),
             GestureDetector(
@@ -3350,14 +3250,14 @@ class _HomePageState extends State<HomePage>
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: _kAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: _kAmber.withValues(alpha: 0.25),
+                    color: AppColors.amber.withValues(alpha: 0.25),
                     width: 1,
                   ),
                 ),
-                child: const Icon(Icons.add, color: _kAmber, size: 18),
+                child: const Icon(Icons.add, color: AppColors.amber, size: 18),
               ),
             ),
           ],
@@ -3367,15 +3267,15 @@ class _HomePageState extends State<HomePage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _kCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _kBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
             child: const Center(
               child: Text(
                 'Aucun remplaçant — appuyez sur + pour ajouter',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _kMuted2, fontSize: 12),
+                style: TextStyle(color: AppColors.muted2, fontSize: 12),
               ),
             ),
           )
@@ -3412,7 +3312,7 @@ class _HomePageState extends State<HomePage>
             fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.04 * 13,
-            color: _kWhite,
+            color: AppColors.white,
           ),
         ),
         const SizedBox(height: 10),
@@ -3420,15 +3320,15 @@ class _HomePageState extends State<HomePage>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _kCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _kBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
             child: const Center(
               child: Text(
                 'Aucun remplaçant',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _kMuted2, fontSize: 12),
+                style: TextStyle(color: AppColors.muted2, fontSize: 12),
               ),
             ),
           )
@@ -3472,7 +3372,7 @@ class _HomePageState extends State<HomePage>
           children: <Widget>[
             CircleAvatar(
               radius: _playerAvatarRadius,
-              backgroundColor: _kAmber,
+              backgroundColor: AppColors.amber,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -3482,7 +3382,7 @@ class _HomePageState extends State<HomePage>
                           ? member.user.username[0].toUpperCase()
                           : position.shortName,
                       style: const TextStyle(
-                        color: _kNight,
+                        color: AppColors.night,
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -3501,7 +3401,7 @@ class _HomePageState extends State<HomePage>
                     ? '${member.user.username.substring(0, 8)}…'
                     : member.user.username,
                 style: const TextStyle(
-                  color: _kWhite,
+                  color: AppColors.white,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3523,10 +3423,10 @@ class _HomePageState extends State<HomePage>
               children: [
                 CircleAvatar(
                   radius: _playerAvatarRadius,
-                  backgroundColor: _kAmber.withValues(alpha: 0.85),
+                  backgroundColor: AppColors.amber.withValues(alpha: 0.85),
                   child: const Icon(
                     Icons.person_search,
-                    color: _kNight,
+                    color: AppColors.night,
                     size: 22,
                   ),
                 ),
@@ -3562,7 +3462,7 @@ class _HomePageState extends State<HomePage>
               child: const Text(
                 'Candidatures',
                 style: TextStyle(
-                  color: _kAmber,
+                  color: AppColors.amber,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),
@@ -3590,10 +3490,10 @@ class _HomePageState extends State<HomePage>
                 children: [
                   CircleAvatar(
                     radius: _playerAvatarRadius,
-                    backgroundColor: _kAmber.withValues(alpha: 0.2),
+                    backgroundColor: AppColors.amber.withValues(alpha: 0.2),
                     child: const Icon(
                       Icons.mail_outline,
-                      color: _kAmber,
+                      color: AppColors.amber,
                       size: 20,
                     ),
                   ),
@@ -3603,7 +3503,7 @@ class _HomePageState extends State<HomePage>
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: _kAmber,
+                        color: AppColors.amber,
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -3622,13 +3522,13 @@ class _HomePageState extends State<HomePage>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _kAmber.withValues(alpha: 0.15),
+                  color: AppColors.amber.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'En attente',
                   style: TextStyle(
-                    color: _kAmber,
+                    color: AppColors.amber,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     shadows: const [
@@ -3689,16 +3589,16 @@ class _HomePageState extends State<HomePage>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: _kBorder2, width: 1),
+          border: Border.all(color: AppColors.border2, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             CircleAvatar(
               radius: 11,
-              backgroundColor: _kAmberDim,
+              backgroundColor: AppColors.amberDim,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -3708,7 +3608,7 @@ class _HomePageState extends State<HomePage>
                           ? member.user.username[0].toUpperCase()
                           : 'R',
                       style: const TextStyle(
-                        color: _kAmber,
+                        color: AppColors.amber,
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                       ),
@@ -3719,7 +3619,7 @@ class _HomePageState extends State<HomePage>
             Text(
               member.user.username,
               style: const TextStyle(
-                color: _kWhite,
+                color: AppColors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -3728,7 +3628,7 @@ class _HomePageState extends State<HomePage>
               const SizedBox(width: 5),
               Text(
                 '⭐${member.user.rating!.toStringAsFixed(1)}',
-                style: const TextStyle(fontSize: 10, color: _kMuted2),
+                style: const TextStyle(fontSize: 10, color: AppColors.muted2),
               ),
             ],
           ],
@@ -3749,7 +3649,7 @@ class _HomePageState extends State<HomePage>
       ),
       builder: (ctx) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -3760,14 +3660,14 @@ class _HomePageState extends State<HomePage>
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             CircleAvatar(
               radius: 30,
-              backgroundColor: _kAmberDim,
+              backgroundColor: AppColors.amberDim,
               backgroundImage: member.user.avatarUrl != null
                   ? NetworkImage(member.user.avatarUrl!)
                   : null,
@@ -3775,7 +3675,7 @@ class _HomePageState extends State<HomePage>
                   ? Text(
                       member.user.username[0].toUpperCase(),
                       style: const TextStyle(
-                        color: _kAmber,
+                        color: AppColors.amber,
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
@@ -3791,7 +3691,7 @@ class _HomePageState extends State<HomePage>
                   style: GoogleFonts.syne(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _kWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 if (isOwner) ...[
@@ -3802,14 +3702,14 @@ class _HomePageState extends State<HomePage>
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: _kAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       'Vous',
                       style: GoogleFonts.syne(
                         fontSize: 12,
-                        color: _kAmber,
+                        color: AppColors.amber,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -3819,10 +3719,10 @@ class _HomePageState extends State<HomePage>
             ),
             Text(
               member.position.displayName,
-              style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
+              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
             ),
             const SizedBox(height: 20),
-            Divider(color: _kBorder2),
+            Divider(color: AppColors.border2),
             if (!isOwner) ...[
               GestureDetector(
                 onTap: () {
@@ -3848,15 +3748,15 @@ class _HomePageState extends State<HomePage>
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: _kCard2,
+                    color: AppColors.card2,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder2),
+                    border: Border.all(color: AppColors.border2),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.person_outline,
-                        color: _kAmber,
+                        color: AppColors.amber,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -3864,7 +3764,7 @@ class _HomePageState extends State<HomePage>
                         'Voir le profil',
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w600,
-                          color: _kWhite,
+                          color: AppColors.white,
                           fontSize: 14,
                         ),
                       ),
@@ -3885,19 +3785,19 @@ class _HomePageState extends State<HomePage>
                   horizontal: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: _kCard2,
+                  color: AppColors.card2,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kBorder2),
+                  border: Border.all(color: AppColors.border2),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.swap_horiz, color: _kAmber, size: 20),
+                    const Icon(Icons.swap_horiz, color: AppColors.amber, size: 20),
                     const SizedBox(width: 12),
                     Text(
                       'Changer de position',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w600,
-                        color: _kWhite,
+                        color: AppColors.white,
                         fontSize: 14,
                       ),
                     ),
@@ -3914,10 +3814,10 @@ class _HomePageState extends State<HomePage>
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (dialogCtx) => Dialog(
-                      backgroundColor: _kCard,
+                      backgroundColor: AppColors.card,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
-                        side: const BorderSide(color: _kBorder2),
+                        side: const BorderSide(color: AppColors.border2),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
@@ -3929,7 +3829,7 @@ class _HomePageState extends State<HomePage>
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
-                                color: _kWhite,
+                                color: AppColors.white,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -3937,7 +3837,7 @@ class _HomePageState extends State<HomePage>
                               'Voulez-vous retirer ${member.user.username} de l\'équipe ?',
                               style: GoogleFonts.dmSans(
                                 fontSize: 13,
-                                color: _kMuted2,
+                                color: AppColors.muted2,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -3951,16 +3851,16 @@ class _HomePageState extends State<HomePage>
                                     child: Container(
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: _kCard2,
+                                        color: AppColors.card2,
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: _kBorder2),
+                                        border: Border.all(color: AppColors.border2),
                                       ),
                                       alignment: Alignment.center,
                                       child: Text(
                                         'Annuler',
                                         style: GoogleFonts.syne(
                                           fontWeight: FontWeight.w600,
-                                          color: _kMuted2,
+                                          color: AppColors.muted2,
                                           fontSize: 13,
                                         ),
                                       ),
@@ -3974,7 +3874,7 @@ class _HomePageState extends State<HomePage>
                                     child: Container(
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: _kRose,
+                                        color: AppColors.rose,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       alignment: Alignment.center,
@@ -4008,19 +3908,19 @@ class _HomePageState extends State<HomePage>
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: _kRoseDim,
+                    color: AppColors.roseDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kRose.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.remove_circle, color: _kRose, size: 20),
+                      const Icon(Icons.remove_circle, color: AppColors.rose, size: 20),
                       const SizedBox(width: 12),
                       Text(
                         'Retirer de l\'équipe',
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w600,
-                          color: _kRose,
+                          color: AppColors.rose,
                           fontSize: 14,
                         ),
                       ),
@@ -4035,7 +3935,7 @@ class _HomePageState extends State<HomePage>
                   'En tant que propriétaire, vous ne pouvez pas quitter l\'équipe.',
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                     fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
@@ -4067,7 +3967,7 @@ class _HomePageState extends State<HomePage>
               maxHeight: MediaQuery.of(ctx).size.height * 0.75,
             ),
             decoration: const BoxDecoration(
-              color: _kCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
@@ -4082,7 +3982,7 @@ class _HomePageState extends State<HomePage>
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: _kBorder2,
+                          color: AppColors.border2,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -4098,14 +3998,14 @@ class _HomePageState extends State<HomePage>
                                   style: GoogleFonts.syne(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: _kWhite,
+                                    color: AppColors.white,
                                   ),
                                 ),
                                 Text(
                                   'Poste : ${position.displayName}',
                                   style: GoogleFonts.dmSans(
                                     fontSize: 12,
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                   ),
                                 ),
                               ],
@@ -4118,10 +4018,10 @@ class _HomePageState extends State<HomePage>
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: _kAmber.withValues(alpha: 0.15),
+                              color: AppColors.amber.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: _kAmber.withValues(alpha: 0.4),
+                                color: AppColors.amber.withValues(alpha: 0.4),
                               ),
                             ),
                             child: Text(
@@ -4129,7 +4029,7 @@ class _HomePageState extends State<HomePage>
                               style: GoogleFonts.syne(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             ),
                           ),
@@ -4138,14 +4038,14 @@ class _HomePageState extends State<HomePage>
                     ],
                   ),
                 ),
-                Divider(color: _kBorder2, height: 1),
+                Divider(color: AppColors.border2, height: 1),
                 // Liste des invitations en attente
                 if (pending.isEmpty)
                   Padding(
                     padding: const EdgeInsets.all(24),
                     child: Text(
                       'Aucune invitation en attente',
-                      style: GoogleFonts.dmSans(color: _kMuted2),
+                      style: GoogleFonts.dmSans(color: AppColors.muted2),
                     ),
                   )
                 else
@@ -4155,12 +4055,12 @@ class _HomePageState extends State<HomePage>
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: pending.length,
                       separatorBuilder: (_, _) =>
-                          Divider(color: _kBorder2, height: 1),
+                          Divider(color: AppColors.border2, height: 1),
                       itemBuilder: (listCtx, index) {
                         final inv = pending[index];
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: _kCard2,
+                            backgroundColor: AppColors.card2,
                             backgroundImage: inv.invitedAvatarUrl != null
                                 ? NetworkImage(inv.invitedAvatarUrl!)
                                 : null,
@@ -4169,14 +4069,14 @@ class _HomePageState extends State<HomePage>
                                     inv.invitedUsername.isNotEmpty
                                         ? inv.invitedUsername[0].toUpperCase()
                                         : '?',
-                                    style: const TextStyle(color: _kAmber),
+                                    style: const TextStyle(color: AppColors.amber),
                                   )
                                 : null,
                           ),
                           title: Text(
                             inv.invitedUsername,
                             style: GoogleFonts.syne(
-                              color: _kWhite,
+                              color: AppColors.white,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
@@ -4184,7 +4084,7 @@ class _HomePageState extends State<HomePage>
                           subtitle: Text(
                             'Envoyée le ${_formatInvitationDate(inv.createdAt)}',
                             style: GoogleFonts.dmSans(
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                               fontSize: 12,
                             ),
                           ),
@@ -4201,7 +4101,7 @@ class _HomePageState extends State<HomePage>
                                       content: Text(
                                         'Invitation annulée pour ${inv.invitedUsername}',
                                       ),
-                                      backgroundColor: _kAmber,
+                                      backgroundColor: AppColors.amber,
                                     ),
                                   );
                                   // Fermer si plus d'invitations
@@ -4216,7 +4116,7 @@ class _HomePageState extends State<HomePage>
                                       content: Text(
                                         'Erreur lors de l\'annulation',
                                       ),
-                                      backgroundColor: _kRose,
+                                      backgroundColor: AppColors.rose,
                                     ),
                                   );
                                 }
@@ -4228,16 +4128,16 @@ class _HomePageState extends State<HomePage>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _kRose.withValues(alpha: 0.15),
+                                color: AppColors.rose.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: _kRose.withValues(alpha: 0.4),
+                                  color: AppColors.rose.withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Text(
                                 'Annuler',
                                 style: GoogleFonts.syne(
-                                  color: _kRose,
+                                  color: AppColors.rose,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                 ),
@@ -4263,7 +4163,7 @@ class _HomePageState extends State<HomePage>
                     child: Container(
                       height: 46,
                       decoration: BoxDecoration(
-                        color: _kAmber,
+                        color: AppColors.amber,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       alignment: Alignment.center,
@@ -4326,7 +4226,7 @@ class _HomePageState extends State<HomePage>
         expand: false,
         builder: (sheetCtx, scrollController) => Container(
           decoration: const BoxDecoration(
-            color: _kCard,
+            color: AppColors.card,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -4339,7 +4239,7 @@ class _HomePageState extends State<HomePage>
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: _kBorder2,
+                        color: AppColors.border2,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -4349,7 +4249,7 @@ class _HomePageState extends State<HomePage>
                       style: GoogleFonts.syne(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                   ],
@@ -4363,20 +4263,20 @@ class _HomePageState extends State<HomePage>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _kAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: _kAmberDim,
+                      backgroundColor: AppColors.amberDim,
                       backgroundImage: currentUser.avatarUrl != null
                           ? NetworkImage(currentUser.avatarUrl!)
                           : null,
                       child: currentUser.avatarUrl == null
                           ? Text(
                               currentUser.username[0].toUpperCase(),
-                              style: const TextStyle(color: _kAmber),
+                              style: const TextStyle(color: AppColors.amber),
                             )
                           : null,
                     ),
@@ -4384,14 +4284,14 @@ class _HomePageState extends State<HomePage>
                       'Me placer ici',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w600,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       '@${currentUser.username}',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
                     ),
-                    trailing: const Icon(Icons.person_add, color: _kAmber),
+                    trailing: const Icon(Icons.person_add, color: AppColors.amber),
                     onTap: () async {
                       Navigator.pop(ctx);
                       await teamsProvider.addMemberToMyTeam(
@@ -4409,7 +4309,7 @@ class _HomePageState extends State<HomePage>
                 preferBelow: false,
                 verticalOffset: 8,
                 decoration: BoxDecoration(
-                  color: _kNight,
+                  color: AppColors.night,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 textStyle: const TextStyle(color: Colors.white, fontSize: 12),
@@ -4419,25 +4319,25 @@ class _HomePageState extends State<HomePage>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _kAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kAmber.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
                   ),
                   child: ListTile(
                     leading: const CircleAvatar(
-                      backgroundColor: _kAmberDim,
-                      child: Icon(Icons.person_search, color: _kAmber),
+                      backgroundColor: AppColors.amberDim,
+                      child: Icon(Icons.person_search, color: AppColors.amber),
                     ),
                     title: Text(
                       'Ouvrir le poste',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w600,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4453,7 +4353,7 @@ class _HomePageState extends State<HomePage>
                             child: Icon(
                               Icons.info_outline,
                               size: 16,
-                              color: _kAmber,
+                              color: AppColors.amber,
                             ),
                           ),
                         ),
@@ -4461,7 +4361,7 @@ class _HomePageState extends State<HomePage>
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                       ],
                     ),
@@ -4478,7 +4378,7 @@ class _HomePageState extends State<HomePage>
                 preferBelow: false,
                 verticalOffset: 8,
                 decoration: BoxDecoration(
-                  color: _kNight,
+                  color: AppColors.night,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 textStyle: const TextStyle(color: Colors.white, fontSize: 12),
@@ -4488,25 +4388,25 @@ class _HomePageState extends State<HomePage>
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _kCard,
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder2),
+                    border: Border.all(color: AppColors.border2),
                   ),
                   child: ListTile(
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFF1A1D26),
-                      child: Icon(Icons.storefront_outlined, color: _kMuted2),
+                      child: Icon(Icons.storefront_outlined, color: AppColors.muted2),
                     ),
                     title: Text(
                       'Recruter sur le store',
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w600,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Parcourir les joueurs disponibles et les inviter',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4522,7 +4422,7 @@ class _HomePageState extends State<HomePage>
                             child: Icon(
                               Icons.info_outline,
                               size: 16,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -4530,7 +4430,7 @@ class _HomePageState extends State<HomePage>
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                       ],
                     ),
@@ -4548,18 +4448,18 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: Row(
                   children: [
-                    Expanded(child: Divider(color: _kBorder2)),
+                    Expanded(child: Divider(color: AppColors.border2)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'ou choisir un ami',
                         style: GoogleFonts.dmSans(
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           fontSize: 12,
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: _kBorder2)),
+                    Expanded(child: Divider(color: AppColors.border2)),
                   ],
                 ),
               ),
@@ -4568,7 +4468,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     'Tous vos amis sont déjà dans l\'équipe !',
-                    style: GoogleFonts.dmSans(color: _kMuted2),
+                    style: GoogleFonts.dmSans(color: AppColors.muted2),
                   ),
                 )
               else
@@ -4580,21 +4480,21 @@ class _HomePageState extends State<HomePage>
                       final friend = availableFriends[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: _kCard2,
+                          backgroundColor: AppColors.card2,
                           backgroundImage: friend.user.avatarUrl != null
                               ? NetworkImage(friend.user.avatarUrl!)
                               : null,
                           child: friend.user.avatarUrl == null
                               ? Text(
                                   friend.user.username[0].toUpperCase(),
-                                  style: const TextStyle(color: _kAmber),
+                                  style: const TextStyle(color: AppColors.amber),
                                 )
                               : null,
                         ),
                         title: Text(
                           friend.user.username,
                           style: GoogleFonts.syne(
-                            color: _kWhite,
+                            color: AppColors.white,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -4602,14 +4502,14 @@ class _HomePageState extends State<HomePage>
                           friend.user.preferredPosition ??
                               'Position non définie',
                           style: GoogleFonts.dmSans(
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 12,
                           ),
                         ),
                         trailing: friend.user.rating != null
                             ? Text(
                                 '⭐ ${friend.user.rating!.toStringAsFixed(1)}',
-                                style: GoogleFonts.dmSans(color: _kMuted2),
+                                style: GoogleFonts.dmSans(color: AppColors.muted2),
                               )
                             : null,
                         onTap: () async {
@@ -4648,10 +4548,10 @@ class _HomePageState extends State<HomePage>
       context: context,
       builder: (dialogCtx) => StatefulBuilder(
         builder: (sbCtx, setState) => Dialog(
-          backgroundColor: _kCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _kBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -4662,7 +4562,7 @@ class _HomePageState extends State<HomePage>
                 // Titre
                 Row(
                   children: [
-                    const Icon(Icons.person_search, color: _kAmber),
+                    const Icon(Icons.person_search, color: AppColors.amber),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -4670,7 +4570,7 @@ class _HomePageState extends State<HomePage>
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: _kWhite,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -4679,7 +4579,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-                  style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 12),
+                  style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 12),
                 ),
 
                 // ── PORTÉE ──
@@ -4689,7 +4589,7 @@ class _HomePageState extends State<HomePage>
                     Text(
                       'NOMBRE DE POSTES',
                       style: GoogleFonts.syne(
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.2,
@@ -4700,7 +4600,7 @@ class _HomePageState extends State<HomePage>
                       message:
                           'Un poste uniquement : Tu choisis manuellement le profil recherché (gardien, défenseur, milieu, attaquant ou remplaçant) et une seule annonce est diffusée pour ce poste précis.\n\nTous les postes disponibles : La fonctionnalité détecte automatiquement les postes vacants dans ton équipe et diffuse une annonce pour chacun d\'eux. Par exemple, s\'il te manque un défenseur et un attaquant, deux annonces seront automatiquement créées et diffusées. Dans ce cas, le choix du profil n\'est pas disponible car les annonces sont générées directement depuis la composition de ton équipe.',
                       textStyle: GoogleFonts.dmSans(
-                        color: _kWhite,
+                        color: AppColors.white,
                         fontSize: 12,
                       ),
                       decoration: BoxDecoration(
@@ -4714,7 +4614,7 @@ class _HomePageState extends State<HomePage>
                       child: Icon(
                         Icons.info_outline,
                         size: 14,
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                       ),
                     ),
                   ],
@@ -4731,17 +4631,17 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: !openAll ? _kAmberDim : _kCard2,
+                            color: !openAll ? AppColors.amberDim : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: !openAll ? _kAmber : _kBorder2,
+                              color: !openAll ? AppColors.amber : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.person_pin,
-                                color: !openAll ? _kAmber : _kMuted2,
+                                color: !openAll ? AppColors.amber : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
@@ -4751,7 +4651,7 @@ class _HomePageState extends State<HomePage>
                                 style: GoogleFonts.syne(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: !openAll ? _kAmber : _kMuted2,
+                                  color: !openAll ? AppColors.amber : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4769,17 +4669,17 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: openAll ? _kAmberDim : _kCard2,
+                            color: openAll ? AppColors.amberDim : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: openAll ? _kAmber : _kBorder2,
+                              color: openAll ? AppColors.amber : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.groups,
-                                color: openAll ? _kAmber : _kMuted2,
+                                color: openAll ? AppColors.amber : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
@@ -4789,7 +4689,7 @@ class _HomePageState extends State<HomePage>
                                 style: GoogleFonts.syne(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: openAll ? _kAmber : _kMuted2,
+                                  color: openAll ? AppColors.amber : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4812,7 +4712,7 @@ class _HomePageState extends State<HomePage>
                         Text(
                           'PROFIL RECHERCHÉ',
                           style: GoogleFonts.syne(
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
@@ -4877,7 +4777,7 @@ class _HomePageState extends State<HomePage>
                 Text(
                   'DESCRIPTION (OPTIONNEL)',
                   style: GoogleFonts.syne(
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
@@ -4887,24 +4787,24 @@ class _HomePageState extends State<HomePage>
                 TextField(
                   controller: descriptionController,
                   maxLines: 2,
-                  style: const TextStyle(color: _kWhite, fontSize: 13),
+                  style: const TextStyle(color: AppColors.white, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Ex: Bon niveau requis, ambiance sympa...',
-                    hintStyle: const TextStyle(color: _kMuted2, fontSize: 12),
+                    hintStyle: const TextStyle(color: AppColors.muted2, fontSize: 12),
                     filled: true,
-                    fillColor: _kCard2,
+                    fillColor: AppColors.card2,
                     contentPadding: const EdgeInsets.all(12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _kBorder2),
+                      borderSide: const BorderSide(color: AppColors.border2),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _kBorder2),
+                      borderSide: const BorderSide(color: AppColors.border2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _kAmber),
+                      borderSide: const BorderSide(color: AppColors.amber),
                     ),
                   ),
                 ),
@@ -4914,7 +4814,7 @@ class _HomePageState extends State<HomePage>
                 Text(
                   'MATCH PRÉVU',
                   style: GoogleFonts.syne(
-                    color: _kMuted2,
+                    color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
@@ -4923,9 +4823,9 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: _kCard2,
+                    color: AppColors.card2,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder2),
+                    border: Border.all(color: AppColors.border2),
                   ),
                   child: Column(
                     children: [
@@ -4939,22 +4839,22 @@ class _HomePageState extends State<HomePage>
                             Icon(
                               Icons.calendar_today,
                               size: 15,
-                              color: hasMatch ? _kAmber : _kMuted2,
+                              color: hasMatch ? AppColors.amber : AppColors.muted2,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Avez-vous un match prévu ?',
                                 style: GoogleFonts.dmSans(
-                                  color: _kWhite,
+                                  color: AppColors.white,
                                   fontSize: 13,
                                 ),
                               ),
                             ),
                             Switch(
                               value: hasMatch,
-                              activeThumbColor: _kAmber,
-                              activeTrackColor: _kAmberDim,
+                              activeThumbColor: AppColors.amber,
+                              activeTrackColor: AppColors.amberDim,
                               onChanged: (v) => setState(() {
                                 hasMatch = v;
                                 if (!v) {
@@ -4970,7 +4870,7 @@ class _HomePageState extends State<HomePage>
                       if (hasMatch) ...[
                         Divider(
                           height: 1,
-                          color: _kBorder2,
+                          color: AppColors.border2,
                           indent: 14,
                           endIndent: 14,
                         ),
@@ -4988,10 +4888,10 @@ class _HomePageState extends State<HomePage>
                               builder: (ctx, child) => Theme(
                                 data: ThemeData.dark().copyWith(
                                   colorScheme: const ColorScheme.dark(
-                                    primary: _kAmber,
+                                    primary: AppColors.amber,
                                     onPrimary: Colors.black,
-                                    surface: _kCard,
-                                    onSurface: _kWhite,
+                                    surface: AppColors.card,
+                                    onSurface: AppColors.white,
                                   ),
                                 ),
                                 child: child!,
@@ -5011,7 +4911,7 @@ class _HomePageState extends State<HomePage>
                                 const Icon(
                                   Icons.event,
                                   size: 15,
-                                  color: _kAmber,
+                                  color: AppColors.amber,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -5020,8 +4920,8 @@ class _HomePageState extends State<HomePage>
                                       : 'Choisir la date du match',
                                   style: GoogleFonts.dmSans(
                                     color: matchDate != null
-                                        ? _kAmber
-                                        : _kMuted2,
+                                        ? AppColors.amber
+                                        : AppColors.muted2,
                                     fontSize: 13,
                                     fontWeight: matchDate != null
                                         ? FontWeight.w600
@@ -5032,7 +4932,7 @@ class _HomePageState extends State<HomePage>
                                 const Icon(
                                   Icons.chevron_right,
                                   size: 16,
-                                  color: _kMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ],
                             ),
@@ -5040,7 +4940,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         Divider(
                           height: 1,
-                          color: _kBorder2,
+                          color: AppColors.border2,
                           indent: 14,
                           endIndent: 14,
                         ),
@@ -5052,10 +4952,10 @@ class _HomePageState extends State<HomePage>
                               builder: (ctx, child) => Theme(
                                 data: ThemeData.dark().copyWith(
                                   colorScheme: const ColorScheme.dark(
-                                    primary: _kAmber,
+                                    primary: AppColors.amber,
                                     onPrimary: Colors.black,
-                                    surface: _kCard,
-                                    onSurface: _kWhite,
+                                    surface: AppColors.card,
+                                    onSurface: AppColors.white,
                                   ),
                                 ),
                                 child: child!,
@@ -5075,7 +4975,7 @@ class _HomePageState extends State<HomePage>
                                 Icon(
                                   Icons.access_time,
                                   size: 15,
-                                  color: matchTime != null ? _kAmber : _kMuted2,
+                                  color: matchTime != null ? AppColors.amber : AppColors.muted2,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -5084,8 +4984,8 @@ class _HomePageState extends State<HomePage>
                                       : 'Choisir l\'heure du match',
                                   style: GoogleFonts.dmSans(
                                     color: matchTime != null
-                                        ? _kAmber
-                                        : _kMuted2,
+                                        ? AppColors.amber
+                                        : AppColors.muted2,
                                     fontSize: 13,
                                     fontWeight: matchTime != null
                                         ? FontWeight.w600
@@ -5096,7 +4996,7 @@ class _HomePageState extends State<HomePage>
                                 const Icon(
                                   Icons.chevron_right,
                                   size: 16,
-                                  color: _kMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ],
                             ),
@@ -5104,7 +5004,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         Divider(
                           height: 1,
-                          color: _kBorder2,
+                          color: AppColors.border2,
                           indent: 14,
                           endIndent: 14,
                         ),
@@ -5118,7 +5018,7 @@ class _HomePageState extends State<HomePage>
                               const Icon(
                                 Icons.location_on_outlined,
                                 size: 15,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -5126,14 +5026,14 @@ class _HomePageState extends State<HomePage>
                                   controller: locationController,
                                   onChanged: (_) => setState(() {}),
                                   style: const TextStyle(
-                                    color: _kWhite,
+                                    color: AppColors.white,
                                     fontSize: 13,
                                   ),
                                   decoration: InputDecoration(
                                     hintText:
                                         'Lieu du match (ex: Stade Jean-Bouin)',
                                     hintStyle: const TextStyle(
-                                      color: _kMuted2,
+                                      color: AppColors.muted2,
                                       fontSize: 12,
                                     ),
                                     border: InputBorder.none,
@@ -5160,16 +5060,16 @@ class _HomePageState extends State<HomePage>
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: _kCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _kBorder2),
+                            border: Border.all(color: AppColors.border2),
                           ),
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                               fontSize: 13,
                             ),
                           ),
@@ -5250,14 +5150,14 @@ class _HomePageState extends State<HomePage>
                               decoration: BoxDecoration(
                                 gradient: canSubmit
                                     ? const LinearGradient(
-                                        colors: [_kAmber, _kAmberD],
+                                        colors: [AppColors.amber, AppColors.amberD],
                                       )
                                     : null,
-                                color: canSubmit ? null : _kCard2,
+                                color: canSubmit ? null : AppColors.card2,
                                 borderRadius: BorderRadius.circular(12),
                                 border: canSubmit
                                     ? null
-                                    : Border.all(color: _kBorder2),
+                                    : Border.all(color: AppColors.border2),
                               ),
                               alignment: Alignment.center,
                               child: Row(
@@ -5265,7 +5165,7 @@ class _HomePageState extends State<HomePage>
                                 children: [
                                   Icon(
                                     Icons.person_search,
-                                    color: canSubmit ? Colors.white : _kMuted2,
+                                    color: canSubmit ? Colors.white : AppColors.muted2,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
@@ -5275,7 +5175,7 @@ class _HomePageState extends State<HomePage>
                                       fontWeight: FontWeight.w600,
                                       color: canSubmit
                                           ? Colors.white
-                                          : _kMuted2,
+                                          : AppColors.muted2,
                                       fontSize: 13,
                                     ),
                                   ),
@@ -5309,16 +5209,16 @@ class _HomePageState extends State<HomePage>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? _kAmberDim : _kCard2,
+            color: selected ? AppColors.amberDim : AppColors.card2,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: selected ? _kAmber : _kBorder2),
+            border: Border.all(color: selected ? AppColors.amber : AppColors.border2),
           ),
           child: Text(
             label,
             style: GoogleFonts.syne(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: selected ? _kAmber : _kMuted2,
+              color: selected ? AppColors.amber : AppColors.muted2,
             ),
           ),
         ),
@@ -5343,7 +5243,7 @@ class _HomePageState extends State<HomePage>
       ),
       builder: (ctx) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -5354,7 +5254,7 @@ class _HomePageState extends State<HomePage>
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -5364,7 +5264,7 @@ class _HomePageState extends State<HomePage>
               Text(
                 'POSTES EN RECHERCHE',
                 style: GoogleFonts.syne(
-                  color: _kMuted2,
+                  color: AppColors.muted2,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -5389,17 +5289,17 @@ class _HomePageState extends State<HomePage>
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: _kCard2,
+                        color: AppColors.card2,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _kAmber.withValues(alpha: 0.4),
+                          color: AppColors.amber.withValues(alpha: 0.4),
                         ),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.person_search,
-                            color: _kAmber,
+                            color: AppColors.amber,
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -5407,7 +5307,7 @@ class _HomePageState extends State<HomePage>
                             child: Text(
                               'Remplaçant · ${slot.applicationsCount} candidature(s)',
                               style: GoogleFonts.syne(
-                                color: _kWhite,
+                                color: AppColors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -5416,7 +5316,7 @@ class _HomePageState extends State<HomePage>
                           const Icon(
                             Icons.arrow_forward_ios,
                             size: 14,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                           ),
                         ],
                       ),
@@ -5425,7 +5325,7 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
               const SizedBox(height: 8),
-              Divider(color: _kBorder2, height: 1),
+              Divider(color: AppColors.border2, height: 1),
               const SizedBox(height: 16),
             ],
             // Ajouter un joueur
@@ -5445,19 +5345,19 @@ class _HomePageState extends State<HomePage>
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: _kCard2,
+                    color: AppColors.card2,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder2),
+                    border: Border.all(color: AppColors.border2),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_add, color: _kAmber, size: 20),
+                      const Icon(Icons.person_add, color: AppColors.amber, size: 20),
                       const SizedBox(width: 12),
                       Text(
                         'Ajouter un remplaçant',
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w600,
-                          color: _kWhite,
+                          color: AppColors.white,
                           fontSize: 14,
                         ),
                       ),
@@ -5486,7 +5386,7 @@ class _HomePageState extends State<HomePage>
       ),
       builder: (ctx) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -5497,15 +5397,15 @@ class _HomePageState extends State<HomePage>
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             const CircleAvatar(
               radius: 30,
-              backgroundColor: _kAmberDim,
-              child: Icon(Icons.person_search, color: _kAmber, size: 30),
+              backgroundColor: AppColors.amberDim,
+              child: Icon(Icons.person_search, color: AppColors.amber, size: 30),
             ),
             const SizedBox(height: 10),
             Text(
@@ -5513,14 +5413,14 @@ class _HomePageState extends State<HomePage>
               style: GoogleFonts.syne(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: _kWhite,
+                color: AppColors.white,
               ),
             ),
             if (openSlot.description != null) ...[
               const SizedBox(height: 8),
               Text(
                 openSlot.description!,
-                style: GoogleFonts.dmSans(color: _kMuted2),
+                style: GoogleFonts.dmSans(color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -5528,13 +5428,13 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _kAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${openSlot.applicationsCount} candidature(s)',
                 style: GoogleFonts.syne(
-                  color: _kAmber,
+                  color: AppColors.amber,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),
@@ -5553,19 +5453,19 @@ class _HomePageState extends State<HomePage>
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: _kCard2,
+                    color: AppColors.card2,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder2),
+                    border: Border.all(color: AppColors.border2),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.people, color: _kAmber, size: 20),
+                      const Icon(Icons.people, color: AppColors.amber, size: 20),
                       const SizedBox(width: 12),
                       Text(
                         'Voir les candidatures',
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w600,
-                          color: _kWhite,
+                          color: AppColors.white,
                           fontSize: 14,
                         ),
                       ),
@@ -5573,7 +5473,7 @@ class _HomePageState extends State<HomePage>
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
-                          color: _kRose,
+                          color: AppColors.rose,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
@@ -5597,10 +5497,10 @@ class _HomePageState extends State<HomePage>
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (dialogCtx) => Dialog(
-                    backgroundColor: _kCard,
+                    backgroundColor: AppColors.card,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: const BorderSide(color: _kBorder2),
+                      side: const BorderSide(color: AppColors.border2),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(24),
@@ -5612,7 +5512,7 @@ class _HomePageState extends State<HomePage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
-                              color: _kWhite,
+                              color: AppColors.white,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -5620,7 +5520,7 @@ class _HomePageState extends State<HomePage>
                             'Les candidatures en attente seront annulées.',
                             style: GoogleFonts.dmSans(
                               fontSize: 13,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -5633,16 +5533,16 @@ class _HomePageState extends State<HomePage>
                                   child: Container(
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: _kCard2,
+                                      color: AppColors.card2,
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: _kBorder2),
+                                      border: Border.all(color: AppColors.border2),
                                     ),
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Annuler',
                                       style: GoogleFonts.syne(
                                         fontWeight: FontWeight.w600,
-                                        color: _kMuted2,
+                                        color: AppColors.muted2,
                                         fontSize: 13,
                                       ),
                                     ),
@@ -5656,7 +5556,7 @@ class _HomePageState extends State<HomePage>
                                   child: Container(
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: _kRose,
+                                      color: AppColors.rose,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     alignment: Alignment.center,
@@ -5688,13 +5588,13 @@ class _HomePageState extends State<HomePage>
                   horizontal: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: _kRoseDim,
+                  color: AppColors.roseDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _kRose.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.close, color: _kRose, size: 20),
+                    const Icon(Icons.close, color: AppColors.rose, size: 20),
                     const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -5703,14 +5603,14 @@ class _HomePageState extends State<HomePage>
                           'Clôturer les candidatures',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kRose,
+                            color: AppColors.rose,
                             fontSize: 14,
                           ),
                         ),
                         Text(
                           'Mettre fin aux candidatures pour ce poste',
                           style: GoogleFonts.dmSans(
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 12,
                           ),
                         ),
@@ -5766,7 +5666,7 @@ class _HomePageState extends State<HomePage>
             expand: false,
             builder: (_, scrollController) => Container(
               decoration: const BoxDecoration(
-                color: _kCard,
+                color: AppColors.card,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
@@ -5777,7 +5677,7 @@ class _HomePageState extends State<HomePage>
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: _kBorder2,
+                      color: AppColors.border2,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -5787,7 +5687,7 @@ class _HomePageState extends State<HomePage>
                       children: [
                         const Icon(
                           Icons.storefront_outlined,
-                          color: _kAmber,
+                          color: AppColors.amber,
                           size: 20,
                         ),
                         const SizedBox(width: 10),
@@ -5796,7 +5696,7 @@ class _HomePageState extends State<HomePage>
                           style: GoogleFonts.syne(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: _kWhite,
+                            color: AppColors.white,
                           ),
                         ),
                         const Spacer(),
@@ -5806,7 +5706,7 @@ class _HomePageState extends State<HomePage>
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: _kAmberDim,
+                            color: AppColors.amberDim,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -5814,14 +5714,14 @@ class _HomePageState extends State<HomePage>
                             style: GoogleFonts.syne(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: _kAmber,
+                              color: AppColors.amber,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Divider(color: _kBorder2, height: 1),
+                  const Divider(color: AppColors.border2, height: 1),
                   Expanded(
                     child: FutureBuilder<List<AvailablePlayer>>(
                       future: TeamsService.instance.getAvailablePlayers(),
@@ -5829,7 +5729,7 @@ class _HomePageState extends State<HomePage>
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                            child: CircularProgressIndicator(color: _kAmber),
+                            child: CircularProgressIndicator(color: AppColors.amber),
                           );
                         }
                         final players = snapshot.data ?? [];
@@ -5840,14 +5740,14 @@ class _HomePageState extends State<HomePage>
                               children: [
                                 const Icon(
                                   Icons.person_off_outlined,
-                                  color: _kMuted2,
+                                  color: AppColors.muted2,
                                   size: 40,
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
                                   'Aucun joueur disponible',
                                   style: GoogleFonts.syne(
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -5855,7 +5755,7 @@ class _HomePageState extends State<HomePage>
                                 Text(
                                   'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
                                   style: GoogleFonts.dmSans(
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                     fontSize: 12,
                                   ),
                                   textAlign: TextAlign.center,
@@ -5899,15 +5799,15 @@ class _HomePageState extends State<HomePage>
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
                                   color: posMatch
-                                      ? _kAmber.withValues(alpha: 0.25)
-                                      : _kBorder2,
+                                      ? AppColors.amber.withValues(alpha: 0.25)
+                                      : AppColors.border2,
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   CircleAvatar(
                                     radius: 22,
-                                    backgroundColor: _kAmberDim,
+                                    backgroundColor: AppColors.amberDim,
                                     backgroundImage: player.avatarUrl != null
                                         ? NetworkImage(player.avatarUrl!)
                                         : null,
@@ -5915,7 +5815,7 @@ class _HomePageState extends State<HomePage>
                                         ? Text(
                                             player.username[0].toUpperCase(),
                                             style: GoogleFonts.syne(
-                                              color: _kAmber,
+                                              color: AppColors.amber,
                                               fontWeight: FontWeight.w700,
                                             ),
                                           )
@@ -5933,7 +5833,7 @@ class _HomePageState extends State<HomePage>
                                               player.username,
                                               style: GoogleFonts.syne(
                                                 fontWeight: FontWeight.w700,
-                                                color: _kWhite,
+                                                color: AppColors.white,
                                                 fontSize: 14,
                                               ),
                                             ),
@@ -5946,7 +5846,7 @@ class _HomePageState extends State<HomePage>
                                                       vertical: 1,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: _kAmberDim,
+                                                  color: AppColors.amberDim,
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                 ),
@@ -5954,7 +5854,7 @@ class _HomePageState extends State<HomePage>
                                                   'Poste correspondant',
                                                   style: GoogleFonts.syne(
                                                     fontSize: 9,
-                                                    color: _kAmber,
+                                                    color: AppColors.amber,
                                                     fontWeight: FontWeight.w700,
                                                   ),
                                                 ),
@@ -5967,7 +5867,7 @@ class _HomePageState extends State<HomePage>
                                           player.preferredPosition ??
                                               'Aucune position',
                                           style: GoogleFonts.dmSans(
-                                            color: _kMuted2,
+                                            color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -6026,7 +5926,7 @@ class _HomePageState extends State<HomePage>
                                         Text(
                                           '★ ${player.rating!.toStringAsFixed(1)}',
                                           style: GoogleFonts.syne(
-                                            color: _kAmber,
+                                            color: AppColors.amber,
                                             fontWeight: FontWeight.w700,
                                             fontSize: 13,
                                           ),
@@ -6040,18 +5940,18 @@ class _HomePageState extends State<HomePage>
                                             vertical: 6,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: _kCard,
+                                            color: AppColors.card,
                                             borderRadius: BorderRadius.circular(
                                               20,
                                             ),
                                             border: Border.all(
-                                              color: _kBorder2,
+                                              color: AppColors.border2,
                                             ),
                                           ),
                                           child: Text(
                                             'Déjà membre',
                                             style: GoogleFonts.syne(
-                                              color: _kMuted2,
+                                              color: AppColors.muted2,
                                               fontWeight: FontWeight.w600,
                                               fontSize: 12,
                                             ),
@@ -6083,8 +5983,8 @@ class _HomePageState extends State<HomePage>
                                                       : 'Erreur lors de l\'annulation',
                                                 ),
                                                 backgroundColor: success
-                                                    ? _kAmber
-                                                    : _kRose,
+                                                    ? AppColors.amber
+                                                    : AppColors.rose,
                                               ),
                                             );
                                           },
@@ -6094,13 +5994,13 @@ class _HomePageState extends State<HomePage>
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: _kRose.withValues(
+                                              color: AppColors.rose.withValues(
                                                 alpha: 0.15,
                                               ),
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               border: Border.all(
-                                                color: _kRose.withValues(
+                                                color: AppColors.rose.withValues(
                                                   alpha: 0.5,
                                                 ),
                                               ),
@@ -6108,7 +6008,7 @@ class _HomePageState extends State<HomePage>
                                             child: Text(
                                               'Annuler',
                                               style: GoogleFonts.syne(
-                                                color: _kRose,
+                                                color: AppColors.rose,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
                                               ),
@@ -6147,8 +6047,8 @@ class _HomePageState extends State<HomePage>
                                                       : 'Erreur lors de l\'envoi',
                                                 ),
                                                 backgroundColor: created != null
-                                                    ? _kAmber
-                                                    : _kRose,
+                                                    ? AppColors.amber
+                                                    : AppColors.rose,
                                               ),
                                             );
                                           },
@@ -6158,7 +6058,7 @@ class _HomePageState extends State<HomePage>
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: _kAmber,
+                                              color: AppColors.amber,
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                             ),
@@ -6215,7 +6115,7 @@ class _HomePageState extends State<HomePage>
         expand: false,
         builder: (sheetCtx, scrollController) => Container(
           decoration: const BoxDecoration(
-            color: _kCard,
+            color: AppColors.card,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -6228,7 +6128,7 @@ class _HomePageState extends State<HomePage>
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: _kBorder2,
+                        color: AppColors.border2,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -6238,7 +6138,7 @@ class _HomePageState extends State<HomePage>
                       style: GoogleFonts.syne(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                     ),
                   ],
@@ -6252,12 +6152,12 @@ class _HomePageState extends State<HomePage>
                       const Icon(
                         Icons.inbox_outlined,
                         size: 48,
-                        color: _kMuted2,
+                        color: AppColors.muted2,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Aucune candidature pour le moment',
-                        style: GoogleFonts.dmSans(color: _kMuted2),
+                        style: GoogleFonts.dmSans(color: AppColors.muted2),
                       ),
                     ],
                   ),
@@ -6276,9 +6176,9 @@ class _HomePageState extends State<HomePage>
                         ),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -6286,7 +6186,7 @@ class _HomePageState extends State<HomePage>
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: _kAmberDim,
+                                  backgroundColor: AppColors.amberDim,
                                   backgroundImage:
                                       app.applicant.avatarUrl != null
                                       ? NetworkImage(app.applicant.avatarUrl!)
@@ -6296,7 +6196,7 @@ class _HomePageState extends State<HomePage>
                                           app.applicant.username[0]
                                               .toUpperCase(),
                                           style: const TextStyle(
-                                            color: _kAmber,
+                                            color: AppColors.amber,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         )
@@ -6313,14 +6213,14 @@ class _HomePageState extends State<HomePage>
                                         style: GoogleFonts.syne(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
-                                          color: _kWhite,
+                                          color: AppColors.white,
                                         ),
                                       ),
                                       if (app.applicant.rating != null)
                                         Text(
                                           '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
                                           style: GoogleFonts.dmSans(
-                                            color: _kMuted2,
+                                            color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -6335,15 +6235,15 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _kBorder.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: _kBorder2),
+                                  border: Border.all(color: AppColors.border2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
                                   style: GoogleFonts.dmSans(
                                     fontStyle: FontStyle.italic,
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -6375,10 +6275,10 @@ class _HomePageState extends State<HomePage>
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _kRoseDim,
+                                      color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kRose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -6386,14 +6286,14 @@ class _HomePageState extends State<HomePage>
                                       children: [
                                         const Icon(
                                           Icons.close,
-                                          color: _kRose,
+                                          color: AppColors.rose,
                                           size: 14,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
                                           style: GoogleFonts.syne(
-                                            color: _kRose,
+                                            color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                           ),
@@ -6428,10 +6328,10 @@ class _HomePageState extends State<HomePage>
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _kSageDim,
+                                      color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kSage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -6439,14 +6339,14 @@ class _HomePageState extends State<HomePage>
                                       children: [
                                         const Icon(
                                           Icons.check,
-                                          color: _kSage,
+                                          color: AppColors.sage,
                                           size: 14,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
                                           style: GoogleFonts.syne(
-                                            color: _kSage,
+                                            color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                           ),
@@ -6492,7 +6392,7 @@ class _HomePageState extends State<HomePage>
         expand: false,
         builder: (sheetCtx, scrollController) => Container(
           decoration: const BoxDecoration(
-            color: _kCard,
+            color: AppColors.card,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -6505,21 +6405,21 @@ class _HomePageState extends State<HomePage>
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: _kBorder2,
+                        color: AppColors.border2,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.inbox, color: _kAmber),
+                        const Icon(Icons.inbox, color: AppColors.amber),
                         const SizedBox(width: 8),
                         Text(
                           'Toutes les candidatures (${applications.length})',
                           style: GoogleFonts.syne(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: _kWhite,
+                            color: AppColors.white,
                           ),
                         ),
                       ],
@@ -6536,12 +6436,12 @@ class _HomePageState extends State<HomePage>
                         const Icon(
                           Icons.inbox_outlined,
                           size: 48,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucune candidature en attente',
-                          style: GoogleFonts.dmSans(color: _kMuted2),
+                          style: GoogleFonts.dmSans(color: AppColors.muted2),
                         ),
                       ],
                     ),
@@ -6566,9 +6466,9 @@ class _HomePageState extends State<HomePage>
                         ),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -6576,7 +6476,7 @@ class _HomePageState extends State<HomePage>
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: _kAmberDim,
+                                  backgroundColor: AppColors.amberDim,
                                   backgroundImage:
                                       app.applicant.avatarUrl != null
                                       ? NetworkImage(app.applicant.avatarUrl!)
@@ -6586,7 +6486,7 @@ class _HomePageState extends State<HomePage>
                                           app.applicant.username[0]
                                               .toUpperCase(),
                                           style: const TextStyle(
-                                            color: _kAmber,
+                                            color: AppColors.amber,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         )
@@ -6603,14 +6503,14 @@ class _HomePageState extends State<HomePage>
                                         style: GoogleFonts.syne(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
-                                          color: _kWhite,
+                                          color: AppColors.white,
                                         ),
                                       ),
                                       if (openSlot != null)
                                         Text(
                                           'Pour : ${openSlot.position.displayName}',
                                           style: GoogleFonts.dmSans(
-                                            color: _kMuted2,
+                                            color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -6624,13 +6524,13 @@ class _HomePageState extends State<HomePage>
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _kAmberDim,
+                                      color: AppColors.amberDim,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
                                       style: GoogleFonts.dmSans(
-                                        color: _kAmberSoft,
+                                        color: AppColors.amberSoft,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -6643,15 +6543,15 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: _kBorder.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: _kBorder2),
+                                  border: Border.all(color: AppColors.border2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
                                   style: GoogleFonts.dmSans(
                                     fontStyle: FontStyle.italic,
-                                    color: _kMuted2,
+                                    color: AppColors.muted2,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -6682,10 +6582,10 @@ class _HomePageState extends State<HomePage>
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _kRoseDim,
+                                      color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kRose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -6693,14 +6593,14 @@ class _HomePageState extends State<HomePage>
                                       children: [
                                         const Icon(
                                           Icons.close,
-                                          color: _kRose,
+                                          color: AppColors.rose,
                                           size: 14,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
                                           style: GoogleFonts.syne(
-                                            color: _kRose,
+                                            color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                           ),
@@ -6735,10 +6635,10 @@ class _HomePageState extends State<HomePage>
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _kSageDim,
+                                      color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: _kSage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -6746,14 +6646,14 @@ class _HomePageState extends State<HomePage>
                                       children: [
                                         const Icon(
                                           Icons.check,
-                                          color: _kSage,
+                                          color: AppColors.sage,
                                           size: 14,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
                                           style: GoogleFonts.syne(
-                                            color: _kSage,
+                                            color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
                                           ),
@@ -6786,7 +6686,7 @@ class _HomePageState extends State<HomePage>
       ),
       builder: (ctx) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
@@ -6799,7 +6699,7 @@ class _HomePageState extends State<HomePage>
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: _kBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -6808,7 +6708,7 @@ class _HomePageState extends State<HomePage>
               style: GoogleFonts.syne(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: _kWhite,
+                color: AppColors.white,
               ),
             ),
             const SizedBox(height: 16),
@@ -6816,12 +6716,12 @@ class _HomePageState extends State<HomePage>
               (position) => ListTile(
                 leading: CircleAvatar(
                   backgroundColor: member.position == position
-                      ? _kAmberDim
-                      : _kCard2,
+                      ? AppColors.amberDim
+                      : AppColors.card2,
                   child: Text(
                     position.shortName,
                     style: TextStyle(
-                      color: member.position == position ? _kAmber : _kMuted2,
+                      color: member.position == position ? AppColors.amber : AppColors.muted2,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -6829,14 +6729,14 @@ class _HomePageState extends State<HomePage>
                 title: Text(
                   position.displayName,
                   style: GoogleFonts.syne(
-                    color: _kWhite,
+                    color: AppColors.white,
                     fontWeight: member.position == position
                         ? FontWeight.w700
                         : FontWeight.w500,
                   ),
                 ),
                 trailing: member.position == position
-                    ? const Icon(Icons.check, color: _kAmber)
+                    ? const Icon(Icons.check, color: AppColors.amber)
                     : null,
                 onTap: () async {
                   Navigator.pop(ctx);
@@ -6861,10 +6761,10 @@ class _HomePageState extends State<HomePage>
     showDialog(
       context: context,
       builder: (dialogCtx) => Dialog(
-        backgroundColor: _kCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -6876,30 +6776,30 @@ class _HomePageState extends State<HomePage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
                 autofocus: true,
-                style: const TextStyle(color: _kWhite),
+                style: const TextStyle(color: AppColors.white),
                 decoration: InputDecoration(
                   labelText: 'Nom',
-                  labelStyle: const TextStyle(color: _kMuted2),
+                  labelStyle: const TextStyle(color: AppColors.muted2),
                   filled: true,
-                  fillColor: _kCard2,
+                  fillColor: AppColors.card2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kBorder2),
+                    borderSide: const BorderSide(color: AppColors.border2),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kBorder2),
+                    borderSide: const BorderSide(color: AppColors.border2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _kAmber),
+                    borderSide: const BorderSide(color: AppColors.amber),
                   ),
                 ),
               ),
@@ -6912,16 +6812,16 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                         ),
@@ -6954,7 +6854,7 @@ class _HomePageState extends State<HomePage>
                         height: 44,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_kAmber, _kAmberD],
+                            colors: [AppColors.amber, AppColors.amberD],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -6990,10 +6890,10 @@ class _HomePageState extends State<HomePage>
     return showDialog<TimeOfDay>(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: _kCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _kBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -7005,7 +6905,7 @@ class _HomePageState extends State<HomePage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 16),
@@ -7018,7 +6918,7 @@ class _HomePageState extends State<HomePage>
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: CupertinoPicker(
@@ -7036,7 +6936,7 @@ class _HomePageState extends State<HomePage>
                                 index.toString().padLeft(2, '0'),
                                 style: const TextStyle(
                                   fontSize: 24,
-                                  color: _kWhite,
+                                  color: AppColors.white,
                                 ),
                               ),
                             ),
@@ -7051,7 +6951,7 @@ class _HomePageState extends State<HomePage>
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: _kWhite,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
@@ -7059,7 +6959,7 @@ class _HomePageState extends State<HomePage>
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: CupertinoPicker(
@@ -7077,7 +6977,7 @@ class _HomePageState extends State<HomePage>
                                 (index * 5).toString().padLeft(2, '0'),
                                 style: const TextStyle(
                                   fontSize: 24,
-                                  color: _kWhite,
+                                  color: AppColors.white,
                                 ),
                               ),
                             ),
@@ -7097,16 +6997,16 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _kCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _kBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
                           style: GoogleFonts.syne(
                             fontWeight: FontWeight.w600,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                         ),
@@ -7126,7 +7026,7 @@ class _HomePageState extends State<HomePage>
                         height: 44,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_kAmber, _kAmberD],
+                            colors: [AppColors.amber, AppColors.amberD],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -7213,10 +7113,10 @@ class _HomePageState extends State<HomePage>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) => Dialog(
-          backgroundColor: _kCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _kBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -7227,13 +7127,13 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.search, color: _kAmber),
+                      const Icon(Icons.search, color: AppColors.amber),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Préférences de recherche',
                           style: GoogleFonts.syne(
-                            color: _kWhite,
+                            color: AppColors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -7247,7 +7147,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     'Jours disponibles *',
                     style: GoogleFonts.syne(
-                      color: _kWhite,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -7263,7 +7163,7 @@ class _HomePageState extends State<HomePage>
                           jour,
                           style: GoogleFonts.syne(
                             fontSize: 12,
-                            color: isSelected ? _kAmber : _kMuted2,
+                            color: isSelected ? AppColors.amber : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7276,13 +7176,13 @@ class _HomePageState extends State<HomePage>
                             }
                           });
                         },
-                        selectedColor: _kAmberDim,
-                        checkmarkColor: _kAmber,
-                        backgroundColor: _kCard2,
+                        selectedColor: AppColors.amberDim,
+                        checkmarkColor: AppColors.amber,
+                        backgroundColor: AppColors.card2,
                         side: BorderSide(
                           color: isSelected
-                              ? _kAmber.withValues(alpha: 0.5)
-                              : _kBorder2,
+                              ? AppColors.amber.withValues(alpha: 0.5)
+                              : AppColors.border2,
                         ),
                       );
                     }).toList(),
@@ -7294,7 +7194,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     'Plage horaire *',
                     style: GoogleFonts.syne(
-                      color: _kWhite,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -7322,8 +7222,8 @@ class _HomePageState extends State<HomePage>
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: _kCard2,
-                              border: Border.all(color: _kBorder2),
+                              color: AppColors.card2,
+                              border: Border.all(color: AppColors.border2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -7335,14 +7235,14 @@ class _HomePageState extends State<HomePage>
                                       : 'Début',
                                   style: TextStyle(
                                     color: startTime != null
-                                        ? _kWhite
-                                        : _kMuted2,
+                                        ? AppColors.white
+                                        : AppColors.muted2,
                                   ),
                                 ),
                                 const Icon(
                                   Icons.access_time,
                                   size: 20,
-                                  color: _kMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ],
                             ),
@@ -7350,7 +7250,7 @@ class _HomePageState extends State<HomePage>
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Icon(Icons.arrow_forward, color: _kAmber),
+                      const Icon(Icons.arrow_forward, color: AppColors.amber),
                       const SizedBox(width: 16),
                       // Heure de fin
                       Expanded(
@@ -7372,8 +7272,8 @@ class _HomePageState extends State<HomePage>
                               vertical: 12,
                             ),
                             decoration: BoxDecoration(
-                              color: _kCard2,
-                              border: Border.all(color: _kBorder2),
+                              color: AppColors.card2,
+                              border: Border.all(color: AppColors.border2),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -7384,13 +7284,13 @@ class _HomePageState extends State<HomePage>
                                       ? '${endTime!.hour.toString().padLeft(2, '0')}h${endTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Fin',
                                   style: TextStyle(
-                                    color: endTime != null ? _kWhite : _kMuted2,
+                                    color: endTime != null ? AppColors.white : AppColors.muted2,
                                   ),
                                 ),
                                 const Icon(
                                   Icons.access_time,
                                   size: 20,
-                                  color: _kMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ],
                             ),
@@ -7406,7 +7306,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     'Niveau de l\'équipe *',
                     style: GoogleFonts.syne(
-                      color: _kWhite,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -7422,7 +7322,7 @@ class _HomePageState extends State<HomePage>
                           niveau,
                           style: GoogleFonts.syne(
                             fontSize: 12,
-                            color: isSelected ? _kAmber : _kMuted2,
+                            color: isSelected ? AppColors.amber : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7431,13 +7331,13 @@ class _HomePageState extends State<HomePage>
                             selectedSkillLevel = selected ? niveau : null;
                           });
                         },
-                        selectedColor: _kAmberDim,
-                        checkmarkColor: _kAmber,
-                        backgroundColor: _kCard2,
+                        selectedColor: AppColors.amberDim,
+                        checkmarkColor: AppColors.amber,
+                        backgroundColor: AppColors.card2,
                         side: BorderSide(
                           color: isSelected
-                              ? _kAmber.withValues(alpha: 0.5)
-                              : _kBorder2,
+                              ? AppColors.amber.withValues(alpha: 0.5)
+                              : AppColors.border2,
                         ),
                       );
                     }).toList(),
@@ -7449,7 +7349,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     'Villes de déplacement *',
                     style: GoogleFonts.syne(
-                      color: _kWhite,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -7466,23 +7366,23 @@ class _HomePageState extends State<HomePage>
                           label: Text(
                             city,
                             style: GoogleFonts.dmSans(
-                              color: _kWhite,
+                              color: AppColors.white,
                               fontSize: 12,
                             ),
                           ),
                           deleteIcon: const Icon(
                             Icons.close,
                             size: 18,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                           ),
                           onDeleted: () {
                             setState(() {
                               selectedCities.remove(city);
                             });
                           },
-                          backgroundColor: _kAmberDim,
+                          backgroundColor: AppColors.amberDim,
                           side: BorderSide(
-                            color: _kAmber.withValues(alpha: 0.3),
+                            color: AppColors.amber.withValues(alpha: 0.3),
                           ),
                         );
                       }).toList(),
@@ -7496,23 +7396,23 @@ class _HomePageState extends State<HomePage>
                       Expanded(
                         child: TextField(
                           controller: cityController,
-                          style: const TextStyle(color: _kWhite),
+                          style: const TextStyle(color: AppColors.white),
                           decoration: InputDecoration(
                             hintText: 'Ajouter une ville',
-                            hintStyle: const TextStyle(color: _kMuted2),
+                            hintStyle: const TextStyle(color: AppColors.muted2),
                             filled: true,
-                            fillColor: _kCard2,
+                            fillColor: AppColors.card2,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: _kBorder2),
+                              borderSide: const BorderSide(color: AppColors.border2),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: _kBorder2),
+                              borderSide: const BorderSide(color: AppColors.border2),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: _kAmber),
+                              borderSide: const BorderSide(color: AppColors.amber),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -7531,7 +7431,7 @@ class _HomePageState extends State<HomePage>
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(Icons.add, color: _kAmber),
+                        icon: const Icon(Icons.add, color: AppColors.amber),
                         onPressed: () {
                           final value = cityController.text.trim();
                           if (value.isNotEmpty) {
@@ -7549,7 +7449,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     '* Champs obligatoires',
                     style: GoogleFonts.dmSans(
-                      color: _kMuted2,
+                      color: AppColors.muted2,
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
                     ),
@@ -7565,16 +7465,16 @@ class _HomePageState extends State<HomePage>
                           child: Container(
                             height: 44,
                             decoration: BoxDecoration(
-                              color: _kCard2,
+                              color: AppColors.card2,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: _kBorder2),
+                              border: Border.all(color: AppColors.border2),
                             ),
                             alignment: Alignment.center,
                             child: Text(
                               'Annuler',
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w600,
-                                color: _kMuted2,
+                                color: AppColors.muted2,
                                 fontSize: 13,
                               ),
                             ),
@@ -7663,7 +7563,7 @@ class _HomePageState extends State<HomePage>
                             height: 44,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [_kAmber, _kAmberD],
+                                colors: [AppColors.amber, AppColors.amberD],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -7868,7 +7768,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: _kCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -7885,7 +7785,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: _kBorder2,
+              color: AppColors.border2,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -7898,7 +7798,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 style: GoogleFonts.syne(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: _kWhite,
+                  color: AppColors.white,
                 ),
               ),
               const Spacer(),
@@ -7909,14 +7809,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: _kAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(color: Color(0x40FF7F2A), width: 1),
                   ),
                   child: Text(
                     '$totalCount',
                     style: const TextStyle(
-                      color: _kAmber,
+                      color: AppColors.amber,
                       fontWeight: FontWeight.w700,
                       fontSize: 10,
                     ),
@@ -7930,7 +7830,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
                 'Aucune notification en attente',
-                style: GoogleFonts.dmSans(color: _kMuted2, fontSize: 13),
+                style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
               ),
             )
           else
@@ -7949,7 +7849,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           letterSpacing: 1,
                         ),
                       ),
@@ -7979,7 +7879,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           letterSpacing: 1,
                         ),
                       ),
@@ -8007,7 +7907,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           letterSpacing: 1,
                         ),
                       ),
@@ -8032,7 +7932,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: _kMuted2,
+                          color: AppColors.muted2,
                           letterSpacing: 1,
                         ),
                       ),
@@ -8076,9 +7976,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -8122,14 +8022,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Invitation · ${invitation.invitingUsername}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -8180,7 +8080,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _kRose,
+                          color: AppColors.rose,
                         ),
                       ),
                     ),
@@ -8208,7 +8108,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: _kAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0x33FF7F2A)),
                     ),
@@ -8219,7 +8119,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             )
                           : Text(
@@ -8227,7 +8127,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             ),
                     ),
@@ -8251,9 +8151,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -8265,7 +8165,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: _kAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Color(0x33FF7F2A), width: 1),
                 ),
@@ -8281,7 +8181,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         child: Text(
                           challenge.challengerTeamName[0].toUpperCase(),
                           style: const TextStyle(
-                            color: _kAmber,
+                            color: AppColors.amber,
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -8298,14 +8198,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -8313,7 +8213,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                 ),
             ],
           ),
@@ -8323,12 +8223,12 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
-                color: _kBg.withValues(alpha: 0.5),
+                color: AppColors.bg.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 challenge.message!,
-                style: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -8339,12 +8239,12 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 12, color: _kMuted2),
+                const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -8368,7 +8268,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(9),
-                    border: Border.all(color: _kRose, width: 1.5),
+                    border: Border.all(color: AppColors.rose, width: 1.5),
                   ),
                   child: Text(
                     'REFUSER',
@@ -8376,7 +8276,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       fontWeight: FontWeight.w600,
                       fontSize: 10,
                       letterSpacing: 0.6,
-                      color: _kRose,
+                      color: AppColors.rose,
                     ),
                   ),
                 ),
@@ -8393,7 +8293,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_kAmberSoft, _kAmberD],
+                      colors: [AppColors.amberSoft, AppColors.amberD],
                     ),
                     borderRadius: BorderRadius.circular(9),
                     boxShadow: const [
@@ -8414,7 +8314,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               height: 12,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: _kNight,
+                                color: AppColors.night,
                               ),
                             ),
                           ),
@@ -8425,7 +8325,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             fontWeight: FontWeight.w700,
                             fontSize: 10,
                             letterSpacing: 0.6,
-                            color: _kNight,
+                            color: AppColors.night,
                           ),
                         ),
                 ),
@@ -8473,9 +8373,9 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -8521,14 +8421,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Veut rejoindre · ${app.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8580,7 +8480,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _kRose,
+                          color: AppColors.rose,
                         ),
                       ),
                     ),
@@ -8606,11 +8506,11 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                                   content: Text(
                                     result.errorMessage!,
                                     style: GoogleFonts.dmSans(
-                                      color: _kWhite,
+                                      color: AppColors.white,
                                       fontSize: 13,
                                     ),
                                   ),
-                                  backgroundColor: _kRose,
+                                  backgroundColor: AppColors.rose,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -8624,7 +8524,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: _kAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0x33FF7F2A)),
                     ),
@@ -8635,7 +8535,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             )
                           : Text(
@@ -8643,7 +8543,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             ),
                     ),
@@ -8670,17 +8570,17 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
         : 'Recherche d\'équipe';
     final sourceColor = request.source == 'match'
         ? const Color(0xFF3B82F6)
-        : _kAmber;
+        : AppColors.amber;
     final sourceBg = request.source == 'match'
         ? const Color(0x1A3B82F6)
-        : _kAmberDim;
+        : AppColors.amberDim;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -8692,7 +8592,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: _kAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: const Color(0x33FF7F2A), width: 1),
                 ),
@@ -8708,7 +8608,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         child: Text(
                           request.requesterUsername[0].toUpperCase(),
                           style: const TextStyle(
-                            color: _kAmber,
+                            color: AppColors.amber,
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -8725,14 +8625,14 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: _kWhite,
+                        color: AppColors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       'Veut rejoindre · ${request.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8778,7 +8678,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: _kRoseDim,
+                      color: AppColors.roseDim,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0x33D4607A)),
                     ),
@@ -8788,7 +8688,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _kRose,
+                          color: AppColors.rose,
                         ),
                       ),
                     ),
@@ -8815,7 +8715,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: _kAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: const Color(0x40FF7F2A)),
                     ),
@@ -8826,7 +8726,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             )
                           : Text(
@@ -8834,7 +8734,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _kAmber,
+                                color: AppColors.amber,
                               ),
                             ),
                     ),
@@ -8987,7 +8887,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
       expand: false,
       builder: (_, scroll) => Container(
         decoration: const BoxDecoration(
-          color: _kCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -8998,7 +8898,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _kBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -9013,7 +8913,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _kAmber.withValues(alpha: 0.15),
+                      color: AppColors.amber.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -9021,7 +8921,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       style: GoogleFonts.syne(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: _kAmber,
+                        color: AppColors.amber,
                       ),
                     ),
                   ),
@@ -9035,14 +8935,14 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                           style: GoogleFonts.syne(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: _kWhite,
+                            color: AppColors.white,
                           ),
                         ),
                         Text(
                           subtitle,
                           style: GoogleFonts.dmSans(
                             fontSize: 11,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                       ],
@@ -9051,12 +8951,12 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: _kBorder2),
+            const Divider(height: 1, color: AppColors.border2),
             // Liste joueurs
             Expanded(
               child: (!isMyTeamStep && _loadingOpponent)
                   ? const Center(
-                      child: CircularProgressIndicator(color: _kAmber),
+                      child: CircularProgressIndicator(color: AppColors.amber),
                     )
                   : ListView.separated(
                       controller: scroll,
@@ -9079,7 +8979,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                    color: _loading ? _kBorder2 : _kAmber,
+                    color: _loading ? AppColors.border2 : AppColors.amber,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   alignment: Alignment.center,
@@ -9137,13 +9037,13 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               margin: const EdgeInsets.only(right: 6),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: _kCard2,
+                color: AppColors.card2,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _kBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
               child: Text(
                 s,
-                style: GoogleFonts.dmSans(fontSize: 11, color: _kMuted2),
+                style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
               ),
             ),
           );
@@ -9162,7 +9062,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
           style: GoogleFonts.syne(
             fontSize: 9,
             fontWeight: FontWeight.w700,
-            color: _kMuted2,
+            color: AppColors.muted2,
             letterSpacing: 0.8,
           ),
         ),
@@ -9181,9 +9081,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   margin: const EdgeInsets.symmetric(horizontal: 1.5),
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isSelected ? _kAmber : _kCard,
+                    color: isSelected ? AppColors.amber : AppColors.card,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: isSelected ? _kAmber : _kBorder2),
+                    border: Border.all(color: isSelected ? AppColors.amber : AppColors.border2),
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -9191,7 +9091,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     style: GoogleFonts.syne(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? Colors.white : _kMuted2,
+                      color: isSelected ? Colors.white : AppColors.muted2,
                     ),
                   ),
                 ),
@@ -9208,10 +9108,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAbsent ? _kRose.withValues(alpha: 0.4) : _kBorder2,
+          color: isAbsent ? AppColors.rose.withValues(alpha: 0.4) : AppColors.border2,
         ),
       ),
       child: Column(
@@ -9240,7 +9140,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: _kBorder2,
+                        color: AppColors.border2,
                         shape: BoxShape.circle,
                         image: member.user.avatarUrl != null
                             ? DecorationImage(
@@ -9253,7 +9153,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                           ? const Icon(
                               Icons.person_outline,
                               size: 20,
-                              color: _kMuted2,
+                              color: AppColors.muted2,
                             )
                           : null,
                     ),
@@ -9266,14 +9166,14 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                           style: GoogleFonts.syne(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: _kWhite,
+                            color: AppColors.white,
                           ),
                         ),
                         Text(
                           member.position.displayName,
                           style: GoogleFonts.dmSans(
                             fontSize: 11,
-                            color: _kMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                       ],
@@ -9293,10 +9193,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: isAbsent ? _kRose.withValues(alpha: 0.2) : _kBorder2,
+                    color: isAbsent ? AppColors.rose.withValues(alpha: 0.2) : AppColors.border2,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isAbsent ? _kRose : Colors.transparent,
+                      color: isAbsent ? AppColors.rose : Colors.transparent,
                     ),
                   ),
                   child: Row(
@@ -9307,7 +9207,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                             ? Icons.warning_rounded
                             : Icons.check_circle_outline,
                         size: 12,
-                        color: isAbsent ? _kRose : _kMuted2,
+                        color: isAbsent ? AppColors.rose : AppColors.muted2,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -9315,7 +9215,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         style: GoogleFonts.syne(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: isAbsent ? _kRose : _kMuted2,
+                          color: isAbsent ? AppColors.rose : AppColors.muted2,
                         ),
                       ),
                     ],
@@ -9329,30 +9229,30 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
           const SizedBox(height: 10),
           TextField(
             controller: _controllers[member.user.id],
-            style: GoogleFonts.dmSans(fontSize: 12, color: _kWhite),
+            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.white),
             maxLines: 2,
             maxLength: 300,
             decoration: InputDecoration(
               hintText: 'Commentaire (optionnel)…',
-              hintStyle: GoogleFonts.dmSans(fontSize: 12, color: _kMuted2),
-              counterStyle: GoogleFonts.dmSans(fontSize: 10, color: _kMuted2),
+              hintStyle: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+              counterStyle: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
               filled: true,
-              fillColor: _kCard,
+              fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 8,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: _kBorder2),
+                borderSide: const BorderSide(color: AppColors.border2),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: _kBorder2),
+                borderSide: const BorderSide(color: AppColors.border2),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: _kAmber),
+                borderSide: const BorderSide(color: AppColors.amber),
               ),
             ),
           ),

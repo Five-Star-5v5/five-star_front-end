@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
-
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _hBg = Color(0xFF0A0C10);
-const _hCard = Color(0xFF181A21);
-const _hBorder = Color(0x21FFFFFF);
-const _hAmber = Color(0xFFFF7F2A);
-const _hSage = Color(0xFF4CAF82);
-const _hRose = Color(0xFFD4607A);
-const _hWhite = Color(0xFFF0F2F5);
-const _hMuted = Color(0x9EF0F2F5);
+import '../theme/app_colors.dart';
 
 class MatchHistoryPage extends StatelessWidget {
   final List<MatchChallenge> matches;
@@ -42,16 +33,16 @@ class MatchHistoryPage extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: _hBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _hCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 18,
-            color: _hWhite,
+            color: AppColors.white,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -60,30 +51,30 @@ class MatchHistoryPage extends StatelessWidget {
           style: GoogleFonts.syne(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: _hWhite,
+            color: AppColors.white,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _hBorder),
+          child: Container(height: 1, color: AppColors.border2),
         ),
       ),
       body: Column(
         children: [
           // Barre de stats
           Container(
-            color: _hCard,
+            color: AppColors.card,
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _statChip('${matches.length}', 'Matchs', _hMuted),
+                _statChip('${matches.length}', 'Matchs', AppColors.muted2),
                 _divider(),
-                _statChip('$wins', 'Victoires', _hSage),
+                _statChip('$wins', 'Victoires', AppColors.sage),
                 _divider(),
-                _statChip('$draws', 'Nuls', _hAmber),
+                _statChip('$draws', 'Nuls', AppColors.amber),
                 _divider(),
-                _statChip('$losses', 'Défaites', _hRose),
+                _statChip('$losses', 'Défaites', AppColors.rose),
               ],
             ),
           ),
@@ -114,12 +105,12 @@ class MatchHistoryPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: GoogleFonts.dmSans(fontSize: 11, color: _hMuted)),
+        Text(label, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
       ],
     );
   }
 
-  Widget _divider() => Container(width: 1, height: 32, color: _hBorder);
+  Widget _divider() => Container(width: 1, height: 32, color: AppColors.border2);
 }
 
 class _MatchCard extends StatelessWidget {
@@ -140,17 +131,17 @@ class _MatchCard extends StatelessWidget {
     final oppScore = iChallenger ? m.challengedScore : m.challengerScore;
 
     String resultLabel = '';
-    Color resultColor = _hMuted;
+    Color resultColor = AppColors.muted2;
     if (myScore != null && oppScore != null) {
       if (myScore > oppScore) {
         resultLabel = 'Victoire';
-        resultColor = _hSage;
+        resultColor = AppColors.sage;
       } else if (myScore < oppScore) {
         resultLabel = 'Défaite';
-        resultColor = _hRose;
+        resultColor = AppColors.rose;
       } else {
         resultLabel = 'Nul';
-        resultColor = _hAmber;
+        resultColor = AppColors.amber;
       }
     }
 
@@ -161,11 +152,11 @@ class _MatchCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: _hCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: resultLabel.isEmpty
-              ? _hBorder
+              ? AppColors.border2
               : resultColor.withValues(alpha: 0.25),
         ),
       ),
@@ -186,14 +177,14 @@ class _MatchCard extends StatelessWidget {
                         style: GoogleFonts.syne(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: _hWhite,
+                          color: AppColors.white,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         'vs $oppName',
-                        style: GoogleFonts.dmSans(fontSize: 12, color: _hMuted),
+                        style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -210,7 +201,7 @@ class _MatchCard extends StatelessWidget {
                         style: GoogleFonts.syne(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: _hWhite,
+                          color: AppColors.white,
                         ),
                       )
                     else
@@ -219,7 +210,7 @@ class _MatchCard extends StatelessWidget {
                         style: GoogleFonts.syne(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: _hMuted,
+                          color: AppColors.muted2,
                         ),
                       ),
                     if (resultLabel.isNotEmpty)
@@ -253,25 +244,25 @@ class _MatchCard extends StatelessWidget {
                 const Icon(
                   Icons.calendar_today_outlined,
                   size: 12,
-                  color: _hMuted,
+                  color: AppColors.muted2,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   dateStr,
-                  style: GoogleFonts.dmSans(fontSize: 11, color: _hMuted),
+                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                 ),
                 if (m.proposedLocation != null) ...[
                   const SizedBox(width: 10),
                   const Icon(
                     Icons.location_on_outlined,
                     size: 12,
-                    color: _hMuted,
+                    color: AppColors.muted2,
                   ),
                   const SizedBox(width: 2),
                   Expanded(
                     child: Text(
                       m.proposedLocation!,
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _hMuted),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

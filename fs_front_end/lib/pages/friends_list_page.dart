@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/friends_provider.dart';
@@ -8,90 +7,8 @@ import '../services/friends_service.dart';
 import 'chat_page.dart';
 import 'user_profile_page.dart';
 
-// ── Design tokens (dark amber system) ──────────────────────────────────────
-const _fBg = Color(0xFF0A0C10);
-const _fNight = Color(0xFF0B0D11);
-const _fCard = Color(0xFF181A21);
-const _fCard2 = Color(0xFF1E2029);
-const _fBorder2 = Color(0x21FFFFFF);
-const _fAmber = Color(0xFFFF7F2A);
-const _fAmberSoft = Color(0xFFFF9A55);
-const _fAmberD = Color(0xFFD96820);
-const _fAmberDim = Color(0x1CFF7F2A);
-const _fSage = Color(0xFF4CAF82);
-const _fSageDim = Color(0x1C4CAF82);
-const _fRose = Color(0xFFD4607A);
-const _fRoseDim = Color(0x1CD4607A);
-const _fWhite = Color(0xFFF0F2F5);
-const _fMuted2 = Color(0x9EF0F2F5);
-
-// ── Kobeta hex logo SVG paths ────────────────────────────────────────────────
-const _fLogoOrange =
-    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
-    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
-    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
-    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
-    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
-    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
-    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
-    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
-    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
-    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
-    'M 291.9098,673.44632 245.5,646.89264 241.7475,644.43048 '
-    '237.995,641.96832 238.2475,445.90639 238.5,249.84446 256,239.58695 '
-    '273.5,229.32943 305.58644,210.66472 337.67289,192 H 338.83644 340 '
-    'v 94.5 94.5 h 0.51121 0.51121 l 22.23879,-12.6427 22.23879,-12.64271 '
-    '18,-10.21699 18,-10.217 72,-40.78463 72,-40.78462 10,-5.71608 '
-    '10,-5.71607 18.5,-10.51984 18.5,-10.51984 49,-27.73683 49,-27.73683 '
-    '13.8412,-7.88293 L 748.18239,150 h 0.77491 0.7749 l 50.38168,29.25 '
-    '50.38167,29.25 0.002,0.86895 0.002,0.86896 -7.5,4.19949 -7.5,4.1995 '
-    '-33,18.55543 -33,18.55543 -44,24.75584 -44,24.75583 -53.5,30.02161 '
-    '-53.5,30.02161 -15,8.41924 -15,8.41924 -21.713,12.16644 '
-    '-21.71299,12.16644 0.71299,0.6838 0.713,0.68381 51.5,29.18185 '
-    '51.5,29.18185 41.5,23.48412 41.5,23.48411 37.24413,21.16322 '
-    '37.24412,21.16323 -0.004,0.5 -0.004,0.5 -23.73968,13.14967 '
-    'L 715.5,582.79933 687.31534,598.40918 659.13069,614.01903 '
-    '648.81534,608.13201 638.5,602.24499 620,591.76417 601.5,581.28334 '
-    '557,556.27313 512.5,531.26292 473,509.0197 433.5,486.77649 '
-    '415.34425,476.38824 397.18849,466 h -0.97973 -0.97974 '
-    'L 374.86451,477.66965 354.5,489.33929 347.25046,493.41965 '
-    '340.00092,497.5 340.00046,598.75 340,700 h -0.8402 -0.84021 z '
-    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
-    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
-    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
-    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
-    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
-    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
-    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
-    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
-
-const _fLogoGray =
-    'M 522.96275,807.1246 467.5,775.34587 437,758.06023 406.5,740.77459 '
-    '402.75,738.37311 399,735.97162 v -58.0928 -58.0928 l 1.46246,0.5612 '
-    '1.46245,0.5612 35.78755,20.38534 35.78754,20.38535 20,11.3484 '
-    '20,11.34839 32,18.43475 32,18.43475 1.0164,0.044 1.01639,0.044 '
-    '46.48361,-26.84474 46.4836,-26.84475 43.5,-25.1139 43.5,-25.1139 '
-    '28.72048,-16.45802 L 816.94096,584.5 816.97048,445.80022 817,307.10045 '
-    '840.75,293.64758 864.5,280.19471 891.34671,265.09735 918.19342,250 '
-    'H 918.59671 919 v 196.31586 196.31586 l -4.25,2.36809 -4.25,2.36809 '
-    '-64,36.95372 -64,36.95372 -16,9.27188 -16,9.27187 -80.5,46.40015 '
-    '-80.5,46.40014 -5.53725,3.14198 -5.53725,3.14198 z '
-    'M 419.5,232.41812 393.5,218.86137 367.26759,205.36365 '
-    '341.03518,191.86594 340.6156,191.18297 340.19602,190.5 '
-    '378.34801,168.56168 416.5,146.62336 l 63,-36.41539 63,-36.415382 '
-    '18.17924,-10.473858 18.17925,-10.473858 43.82075,25.227159 '
-    '43.82076,25.227159 6.31661,3.72768 6.31661,3.72768 -3.31661,2.0091 '
-    '-3.31661,2.0091 -26.5,15.46261 -26.5,15.4626 -39,22.76345 '
-    '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
-    'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
-
-String _fLogoHexSvg(String d, String fill, String id) =>
-    '''
-<svg width="28" height="28" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
-  <defs><clipPath id="$id"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs>
-  <g clip-path="url(#\$$id)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fill" d="$d"/></g></g>
-</svg>
-''';
+import '../theme/app_colors.dart';
+import '../widgets/kobeta_logo.dart';
 
 class FriendsListPage extends StatefulWidget {
   const FriendsListPage({super.key});
@@ -141,7 +58,7 @@ class _FriendsListPageState extends State<FriendsListPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _fBg,
+      backgroundColor: AppColors.bg,
       appBar: _buildAppBar(),
       body: Column(
         children: [
@@ -164,7 +81,7 @@ class _FriendsListPageState extends State<FriendsListPage>
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: _fCard,
+      backgroundColor: AppColors.card,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
@@ -181,24 +98,7 @@ class _FriendsListPageState extends State<FriendsListPage>
       ),
       title: Row(
         children: [
-          SizedBox(
-            width: 28,
-            height: 28,
-            child: Stack(
-              children: [
-                SvgPicture.string(
-                  _fLogoHexSvg(_fLogoOrange, '#FF7F2A', 'flHexO'),
-                  width: 28,
-                  height: 28,
-                ),
-                SvgPicture.string(
-                  _fLogoHexSvg(_fLogoGray, '#e6e6e6', 'flHexG'),
-                  width: 28,
-                  height: 28,
-                ),
-              ],
-            ),
-          ),
+          const KobetaLogo(size: 28),
           const SizedBox(width: 9),
           RichText(
             text: const TextSpan(
@@ -211,11 +111,11 @@ class _FriendsListPageState extends State<FriendsListPage>
               children: [
                 TextSpan(
                   text: 'Ko',
-                  style: TextStyle(color: _fWhite),
+                  style: TextStyle(color: AppColors.white),
                 ),
                 TextSpan(
                   text: 'beta',
-                  style: TextStyle(color: _fAmber),
+                  style: TextStyle(color: AppColors.amber),
                 ),
               ],
             ),
@@ -229,7 +129,7 @@ class _FriendsListPageState extends State<FriendsListPage>
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [_fAmberSoft, _fAmberD]),
+              gradient: const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Text(
@@ -238,7 +138,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
                 letterSpacing: 0.5,
-                color: _fNight,
+                color: AppColors.night,
               ),
             ),
           ),
@@ -246,33 +146,33 @@ class _FriendsListPageState extends State<FriendsListPage>
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: _fBorder2),
+        child: Container(height: 1, color: AppColors.border2),
       ),
     );
   }
 
   Widget _buildSearchBar() {
     return Container(
-      color: _fCard,
+      color: AppColors.card,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: _fCard2,
+          color: AppColors.card2,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: _fBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
         child: TextField(
           controller: _searchController,
-          style: GoogleFonts.dmSans(color: _fWhite, fontSize: 13),
+          style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Rechercher un ami...',
-            hintStyle: GoogleFonts.dmSans(color: _fMuted2, fontSize: 13),
-            prefixIcon: const Icon(Icons.search, color: _fMuted2, size: 16),
+            hintStyle: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+            prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 16),
             suffixIcon: _filterText.isNotEmpty
                 ? GestureDetector(
                     onTap: () => _searchController.clear(),
-                    child: const Icon(Icons.close, color: _fMuted2, size: 16),
+                    child: const Icon(Icons.close, color: AppColors.muted2, size: 16),
                   )
                 : null,
             border: InputBorder.none,
@@ -285,7 +185,7 @@ class _FriendsListPageState extends State<FriendsListPage>
 
   Widget _buildTabBar() {
     return Container(
-      color: _fCard,
+      color: AppColors.card,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Consumer<FriendsProvider>(
         builder: (context, provider, _) {
@@ -322,9 +222,9 @@ class _FriendsListPageState extends State<FriendsListPage>
             height: 36,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: selected ? _fAmber : _fCard2,
+              color: selected ? AppColors.amber : AppColors.card2,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: selected ? _fAmber : _fBorder2),
+              border: Border.all(color: selected ? AppColors.amber : AppColors.border2),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -336,7 +236,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
-                    color: selected ? _fNight : _fMuted2,
+                    color: selected ? AppColors.night : AppColors.muted2,
                   ),
                 ),
                 if (count > 0) ...[
@@ -348,8 +248,8 @@ class _FriendsListPageState extends State<FriendsListPage>
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? _fNight.withValues(alpha: 0.25)
-                          : (isAlert ? _fAmberDim : _fBorder2),
+                          ? AppColors.night.withValues(alpha: 0.25)
+                          : (isAlert ? AppColors.amberDim : AppColors.border2),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Text(
@@ -358,8 +258,8 @@ class _FriendsListPageState extends State<FriendsListPage>
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         color: selected
-                            ? _fNight
-                            : (isAlert ? _fAmber : _fMuted2),
+                            ? AppColors.night
+                            : (isAlert ? AppColors.amber : AppColors.muted2),
                       ),
                     ),
                   ),
@@ -379,7 +279,7 @@ class _FriendsListPageState extends State<FriendsListPage>
       builder: (context, provider, _) {
         if (provider.state == FriendsLoadingState.loading &&
             provider.friends.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: _fAmber));
+          return const Center(child: CircularProgressIndicator(color: AppColors.amber));
         }
 
         if (provider.state == FriendsLoadingState.error) {
@@ -407,8 +307,8 @@ class _FriendsListPageState extends State<FriendsListPage>
 
         return RefreshIndicator(
           onRefresh: () => provider.loadFriends(),
-          color: _fAmber,
-          backgroundColor: _fCard,
+          color: AppColors.amber,
+          backgroundColor: AppColors.card,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
             children: [
@@ -418,7 +318,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   child: Center(
                     child: Text(
                       'Aucun ami correspondant',
-                      style: GoogleFonts.dmSans(color: _fMuted2, fontSize: 13),
+                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
                     ),
                   ),
                 )
@@ -441,9 +341,9 @@ class _FriendsListPageState extends State<FriendsListPage>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _fCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _fBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Row(
         children: [
@@ -454,7 +354,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: _fAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(13),
                 ),
                 child: friend.user.avatarUrl != null
@@ -471,7 +371,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                               ? friend.user.username[0].toUpperCase()
                               : '?',
                           style: GoogleFonts.syne(
-                            color: _fAmber,
+                            color: AppColors.amber,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -485,9 +385,9 @@ class _FriendsListPageState extends State<FriendsListPage>
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: _fSage,
+                    color: AppColors.sage,
                     shape: BoxShape.circle,
-                    border: Border.all(color: _fCard, width: 1.5),
+                    border: Border.all(color: AppColors.card, width: 1.5),
                   ),
                 ),
               ),
@@ -504,7 +404,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: _fWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -512,7 +412,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   children: [
                     Text(
                       friend.user.preferredPosition ?? 'Joueur',
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _fMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                     ),
                     if (friend.user.rating != null) ...[
                       const SizedBox(width: 6),
@@ -520,7 +420,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                         width: 3,
                         height: 3,
                         decoration: const BoxDecoration(
-                          color: _fMuted2,
+                          color: AppColors.muted2,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -529,7 +429,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                         '${friend.user.rating!.toStringAsFixed(1)} ★',
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _fAmber,
+                          color: AppColors.amber,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -570,9 +470,9 @@ class _FriendsListPageState extends State<FriendsListPage>
                             vertical: 7,
                           ),
                           decoration: BoxDecoration(
-                            color: _fCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(9),
-                            border: Border.all(color: _fBorder2),
+                            border: Border.all(color: AppColors.border2),
                           ),
                           child: Text(
                             'Message',
@@ -580,7 +480,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.3,
-                              color: _fWhite,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
@@ -592,9 +492,9 @@ class _FriendsListPageState extends State<FriendsListPage>
                               width: 16,
                               height: 16,
                               decoration: BoxDecoration(
-                                color: _fAmber,
+                                color: AppColors.amber,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: _fBg, width: 1.5),
+                                border: Border.all(color: AppColors.bg, width: 1.5),
                               ),
                               child: Center(
                                 child: Text(
@@ -602,7 +502,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                                   style: const TextStyle(
                                     fontSize: 7,
                                     fontWeight: FontWeight.w800,
-                                    color: _fNight,
+                                    color: AppColors.night,
                                   ),
                                 ),
                               ),
@@ -629,11 +529,11 @@ class _FriendsListPageState extends State<FriendsListPage>
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: _fCard2,
+          color: AppColors.card2,
           borderRadius: BorderRadius.circular(9),
-          border: Border.all(color: _fBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
-        child: const Icon(Icons.more_horiz, color: _fMuted2, size: 16),
+        child: const Icon(Icons.more_horiz, color: AppColors.muted2, size: 16),
       ),
     );
   }
@@ -644,7 +544,7 @@ class _FriendsListPageState extends State<FriendsListPage>
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         decoration: const BoxDecoration(
-          color: _fCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -655,18 +555,18 @@ class _FriendsListPageState extends State<FriendsListPage>
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: _fBorder2,
+                color: AppColors.border2,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_outline, color: _fAmber),
+              leading: const Icon(Icons.person_outline, color: AppColors.amber),
               title: Text(
                 'Voir le profil',
                 style: GoogleFonts.syne(
-                  color: _fWhite,
+                  color: AppColors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -683,14 +583,14 @@ class _FriendsListPageState extends State<FriendsListPage>
                 );
               },
             ),
-            const Divider(color: _fBorder2, height: 1),
+            const Divider(color: AppColors.border2, height: 1),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_remove_outlined, color: _fRose),
+              leading: const Icon(Icons.person_remove_outlined, color: AppColors.rose),
               title: Text(
                 'Supprimer cet ami',
                 style: GoogleFonts.syne(
-                  color: _fRose,
+                  color: AppColors.rose,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -699,10 +599,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                 final confirm = await showDialog<bool>(
                   context: context,
                   builder: (dialogCtx) => Dialog(
-                    backgroundColor: _fCard,
+                    backgroundColor: AppColors.card,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: _fBorder2),
+                      side: BorderSide(color: AppColors.border2),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(20),
@@ -713,7 +613,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                           Text(
                             'Supprimer ${friend.user.username} ?',
                             style: GoogleFonts.syne(
-                              color: _fWhite,
+                              color: AppColors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
@@ -722,7 +622,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                           Text(
                             'Cette action retirera ${friend.user.username} de ta liste d\'amis.',
                             style: GoogleFonts.dmSans(
-                              color: _fMuted2,
+                              color: AppColors.muted2,
                               fontSize: 13,
                             ),
                           ),
@@ -737,15 +637,15 @@ class _FriendsListPageState extends State<FriendsListPage>
                                       vertical: 11,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _fCard2,
+                                      color: AppColors.card2,
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: _fBorder2),
+                                      border: Border.all(color: AppColors.border2),
                                     ),
                                     child: Center(
                                       child: Text(
                                         'Annuler',
                                         style: GoogleFonts.syne(
-                                          color: _fMuted2,
+                                          color: AppColors.muted2,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 12,
                                         ),
@@ -763,17 +663,17 @@ class _FriendsListPageState extends State<FriendsListPage>
                                       vertical: 11,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _fRoseDim,
+                                      color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: _fRose.withValues(alpha: 0.4),
+                                        color: AppColors.rose.withValues(alpha: 0.4),
                                       ),
                                     ),
                                     child: Center(
                                       child: Text(
                                         'Supprimer',
                                         style: GoogleFonts.syne(
-                                          color: _fRose,
+                                          color: AppColors.rose,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 12,
                                         ),
@@ -807,21 +707,21 @@ class _FriendsListPageState extends State<FriendsListPage>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _fAmberDim,
+        color: AppColors.amberDim,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _fAmber.withValues(alpha: 0.18)),
+        border: Border.all(color: AppColors.amber.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.mail_outline, color: _fAmber, size: 14),
+              const Icon(Icons.mail_outline, color: AppColors.amber, size: 14),
               const SizedBox(width: 6),
               Text(
                 'Demandes reçues',
                 style: GoogleFonts.syne(
-                  color: _fAmber,
+                  color: AppColors.amber,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                 ),
@@ -832,7 +732,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 child: Text(
                   'Voir tout →',
                   style: GoogleFonts.dmSans(
-                    color: _fAmber,
+                    color: AppColors.amber,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -856,7 +756,7 @@ class _FriendsListPageState extends State<FriendsListPage>
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _fCard2,
+              color: AppColors.card2,
               borderRadius: BorderRadius.circular(9),
             ),
             child: req.fromUser.avatarUrl != null
@@ -871,7 +771,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                     child: Text(
                       req.fromUser.username[0].toUpperCase(),
                       style: GoogleFonts.syne(
-                        color: _fAmber,
+                        color: AppColors.amber,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
@@ -883,7 +783,7 @@ class _FriendsListPageState extends State<FriendsListPage>
             child: Text(
               req.fromUser.username,
               style: GoogleFonts.syne(
-                color: _fWhite,
+                color: AppColors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -899,11 +799,11 @@ class _FriendsListPageState extends State<FriendsListPage>
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: _fSageDim,
+                color: AppColors.sageDim,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _fSage.withValues(alpha: 0.4)),
+                border: Border.all(color: AppColors.sage.withValues(alpha: 0.4)),
               ),
-              child: const Icon(Icons.check, color: _fSage, size: 14),
+              child: const Icon(Icons.check, color: AppColors.sage, size: 14),
             ),
           ),
           const SizedBox(width: 6),
@@ -917,11 +817,11 @@ class _FriendsListPageState extends State<FriendsListPage>
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: _fRoseDim,
+                color: AppColors.roseDim,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _fRose.withValues(alpha: 0.4)),
+                border: Border.all(color: AppColors.rose.withValues(alpha: 0.4)),
               ),
-              child: const Icon(Icons.close, color: _fRose, size: 14),
+              child: const Icon(Icons.close, color: AppColors.rose, size: 14),
             ),
           ),
         ],
@@ -957,9 +857,9 @@ class _FriendsListPageState extends State<FriendsListPage>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _fCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _fBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Row(
         children: [
@@ -977,7 +877,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _fAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(13),
               ),
               child: request.fromUser.avatarUrl != null
@@ -994,7 +894,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                             ? request.fromUser.username[0].toUpperCase()
                             : '?',
                         style: GoogleFonts.syne(
-                          color: _fAmber,
+                          color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
@@ -1012,13 +912,13 @@ class _FriendsListPageState extends State<FriendsListPage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: _fWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   request.fromUser.preferredPosition ?? 'Joueur',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: _fMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                 ),
               ],
             ),
@@ -1039,7 +939,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(9),
-                    border: Border.all(color: _fRose),
+                    border: Border.all(color: AppColors.rose),
                   ),
                   child: Text(
                     'REFUSER',
@@ -1047,7 +947,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: _fRose,
+                      color: AppColors.rose,
                     ),
                   ),
                 ),
@@ -1066,7 +966,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_fAmberSoft, _fAmberD],
+                      colors: [AppColors.amberSoft, AppColors.amberD],
                     ),
                     borderRadius: BorderRadius.circular(9),
                   ),
@@ -1076,7 +976,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
-                      color: _fNight,
+                      color: AppColors.night,
                     ),
                   ),
                 ),
@@ -1116,9 +1016,9 @@ class _FriendsListPageState extends State<FriendsListPage>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _fCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _fBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Row(
         children: [
@@ -1136,9 +1036,9 @@ class _FriendsListPageState extends State<FriendsListPage>
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _fCard2,
+                color: AppColors.card2,
                 borderRadius: BorderRadius.circular(13),
-                border: Border.all(color: _fBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
               child: request.user.avatarUrl != null
                   ? ClipRRect(
@@ -1154,7 +1054,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                             ? request.user.username[0].toUpperCase()
                             : '?',
                         style: GoogleFonts.syne(
-                          color: _fMuted2,
+                          color: AppColors.muted2,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
@@ -1172,7 +1072,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: _fWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1182,14 +1082,14 @@ class _FriendsListPageState extends State<FriendsListPage>
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: _fAmber,
+                        color: AppColors.amber,
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 5),
                     Text(
                       'En attente',
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _fAmber),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.amber),
                     ),
                   ],
                 ),
@@ -1206,7 +1106,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: _fBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
               child: Text(
                 'ANNULER',
@@ -1214,7 +1114,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: _fMuted2,
+                  color: AppColors.muted2,
                 ),
               ),
             ),
@@ -1239,17 +1139,17 @@ class _FriendsListPageState extends State<FriendsListPage>
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: _fCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _fBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
-            child: Icon(icon, color: _fMuted2, size: 28),
+            child: Icon(icon, color: AppColors.muted2, size: 28),
           ),
           const SizedBox(height: 14),
           Text(
             message,
             style: GoogleFonts.syne(
-              color: _fWhite,
+              color: AppColors.white,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -1257,7 +1157,7 @@ class _FriendsListPageState extends State<FriendsListPage>
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(color: _fMuted2, fontSize: 12),
+            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1272,7 +1172,7 @@ class _FriendsListPageState extends State<FriendsListPage>
         children: [
           Text(
             message ?? 'Une erreur est survenue',
-            style: GoogleFonts.dmSans(color: _fMuted2),
+            style: GoogleFonts.dmSans(color: AppColors.muted2),
           ),
           const SizedBox(height: 16),
           GestureDetector(
@@ -1280,14 +1180,14 @@ class _FriendsListPageState extends State<FriendsListPage>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: _fAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: _fAmber.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
               ),
               child: Text(
                 'Réessayer',
                 style: GoogleFonts.syne(
-                  color: _fAmber,
+                  color: AppColors.amber,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                 ),
@@ -1324,7 +1224,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
     final provider = context.watch<FriendsProvider>();
     return Container(
       decoration: const BoxDecoration(
-        color: _fCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.fromLTRB(
@@ -1341,7 +1241,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: _fBorder2,
+              color: AppColors.border2,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1352,7 +1252,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
             style: GoogleFonts.syne(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: _fWhite,
+              color: AppColors.white,
             ),
           ),
           const SizedBox(height: 14),
@@ -1360,18 +1260,18 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
           Container(
             height: 44,
             decoration: BoxDecoration(
-              color: _fCard2,
+              color: AppColors.card2,
               borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: _fBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
             child: TextField(
               controller: _controller,
               autofocus: true,
-              style: GoogleFonts.dmSans(color: _fWhite, fontSize: 13),
+              style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Rechercher un joueur...',
-                hintStyle: GoogleFonts.dmSans(color: _fMuted2, fontSize: 13),
-                prefixIcon: const Icon(Icons.search, color: _fMuted2, size: 17),
+                hintStyle: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 17),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -1397,7 +1297,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
     if (provider.isSearching) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(child: CircularProgressIndicator(color: _fAmber)),
+        child: Center(child: CircularProgressIndicator(color: AppColors.amber)),
       );
     }
 
@@ -1407,7 +1307,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         child: Center(
           child: Text(
             'Entrez au moins 2 caractères',
-            style: GoogleFonts.dmSans(color: _fMuted2, fontSize: 13),
+            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
           ),
         ),
       );
@@ -1419,7 +1319,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         child: Center(
           child: Text(
             'Aucun résultat trouvé',
-            style: GoogleFonts.dmSans(color: _fMuted2, fontSize: 13),
+            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
           ),
         ),
       );
@@ -1439,9 +1339,9 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _fCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _fBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Row(
         children: [
@@ -1462,7 +1362,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: _fAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: result.user.avatarUrl != null
@@ -1479,7 +1379,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                             ? result.user.username[0].toUpperCase()
                             : '?',
                         style: GoogleFonts.syne(
-                          color: _fAmber,
+                          color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),
@@ -1495,7 +1395,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                 Text(
                   result.user.username,
                   style: GoogleFonts.syne(
-                    color: _fWhite,
+                    color: AppColors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -1503,7 +1403,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                 if (result.user.preferredPosition != null)
                   Text(
                     result.user.preferredPosition!,
-                    style: GoogleFonts.dmSans(color: _fMuted2, fontSize: 11),
+                    style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
                   ),
               ],
             ),
@@ -1525,16 +1425,16 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: _fSageDim,
+          color: AppColors.sageDim,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _fSage.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.sage.withValues(alpha: 0.3)),
         ),
         child: Text(
           'Ami',
           style: GoogleFonts.syne(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _fSage,
+            color: AppColors.sage,
           ),
         ),
       );
@@ -1544,16 +1444,16 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: _fAmberDim,
+          color: AppColors.amberDim,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _fAmber.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
         ),
         child: Text(
           'En attente',
           style: GoogleFonts.syne(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _fAmber,
+            color: AppColors.amber,
           ),
         ),
       );
@@ -1571,7 +1471,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(res['message'] ?? 'Erreur'),
-                    backgroundColor: _fRose,
+                    backgroundColor: AppColors.rose,
                   ),
                 );
               }
@@ -1581,8 +1481,8 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         decoration: BoxDecoration(
           gradient: isSending
               ? null
-              : const LinearGradient(colors: [_fAmberSoft, _fAmberD]),
-          color: isSending ? _fCard : null,
+              : const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
+          color: isSending ? AppColors.card : null,
           borderRadius: BorderRadius.circular(8),
         ),
         child: isSending
@@ -1595,7 +1495,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                     height: 12,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: _fAmber,
+                      color: AppColors.amber,
                     ),
                   ),
                 ),
@@ -1606,7 +1506,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
-                  color: _fNight,
+                  color: AppColors.night,
                 ),
               ),
       ),

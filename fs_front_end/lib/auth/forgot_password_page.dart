@@ -1,21 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-
-// ── Design tokens (même palette que login.dart) ──────────────────────────────
-const _kBg = Color(0xFF0A0C10);
-const _kNight = Color(0xFF0B0D11);
-const _kCard = Color(0xFF181A21);
-const _kAmber = Color(0xFFFF7F2A);
-const _kAmberSoft = Color(0xFFFF9A55);
-const _kAmberD = Color(0xFFD96820);
-const _kSage = Color(0xFF4CAF82);
-const _kWhite = Color(0xFFF0F2F5);
-const _kMuted2 = Color(0x9EF0F2F5);
-const _kMuted = Color(0x61F0F2F5);
-const _kBorder2 = Color(0x21FFFFFF);
-const _kFocusedBg = Color(0xFF1C1510);
-const _kFocusedBorder = Color(0x80FF7F2A);
-const _kRose = Color(0xFFD4607A);
+import '../theme/app_colors.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -114,7 +99,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: _kRose),
+      SnackBar(content: Text(msg), backgroundColor: AppColors.rose),
     );
   }
 
@@ -123,7 +108,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: AppColors.bg,
       body: Stack(
         children: [
           // Amber glow en haut
@@ -175,11 +160,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: _kCard,
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: _kBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 14, color: _kWhite),
+              child: const Icon(Icons.arrow_back_ios_rounded, size: 14, color: AppColors.white),
             ),
           ),
         ],
@@ -227,10 +212,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: _kAmber.withValues(alpha: 0.12),
+            color: AppColors.amber.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.lock_reset_rounded, color: _kAmber, size: 22),
+          child: const Icon(Icons.lock_reset_rounded, color: AppColors.amber, size: 22),
         ),
         const SizedBox(height: 16),
         Text(
@@ -238,7 +223,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: const TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: _kWhite,
+            color: AppColors.white,
             height: 1.15,
             letterSpacing: -0.5,
           ),
@@ -248,7 +233,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           _step == 1
               ? 'Saisis ton adresse email et on t\'envoie un code de réinitialisation.'
               : 'Entre le code reçu par email et choisis un nouveau mot de passe.',
-          style: const TextStyle(fontSize: 13, color: _kMuted2, height: 1.5),
+          style: const TextStyle(fontSize: 13, color: AppColors.muted2, height: 1.5),
         ),
       ],
     );
@@ -258,18 +243,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kSage.withValues(alpha: 0.08),
+        color: AppColors.sage.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _kSage.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.sage.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.email_outlined, size: 14, color: _kSage),
+          const Icon(Icons.email_outlined, size: 14, color: AppColors.sage),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Code envoyé à ${_emailController.text.trim()}',
-              style: const TextStyle(fontSize: 12, color: _kSage),
+              style: const TextStyle(fontSize: 12, color: AppColors.sage),
             ),
           ),
         ],
@@ -288,7 +273,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _kMuted2,
+            color: AppColors.muted2,
             letterSpacing: 1.6,
           ),
         ),
@@ -296,10 +281,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: _emailFocused ? _kFocusedBg : _kCard,
+            color: _emailFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _emailFocused ? _kFocusedBorder : _kBorder2,
+              color: _emailFocused ? AppColors.focusedBorder : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -307,7 +292,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.alternate_email_rounded, size: 16, color: _kMuted),
+                child: Icon(Icons.alternate_email_rounded, size: 16, color: AppColors.muted),
               ),
               Expanded(
                 child: TextField(
@@ -316,10 +301,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _requestReset(),
-                  style: const TextStyle(fontSize: 13, color: _kWhite),
+                  style: const TextStyle(fontSize: 13, color: AppColors.white),
                   decoration: const InputDecoration(
                     hintText: 'ton@email.com',
-                    hintStyle: TextStyle(fontSize: 13, color: _kMuted),
+                    hintStyle: TextStyle(fontSize: 13, color: AppColors.muted),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
                   ),
@@ -341,7 +326,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _kMuted2,
+            color: AppColors.muted2,
             letterSpacing: 1.6,
           ),
         ),
@@ -349,10 +334,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: _tokenFocused ? _kFocusedBg : _kCard,
+            color: _tokenFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _tokenFocused ? _kFocusedBorder : _kBorder2,
+              color: _tokenFocused ? AppColors.focusedBorder : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -360,17 +345,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.tag_rounded, size: 16, color: _kMuted),
+                child: Icon(Icons.tag_rounded, size: 16, color: AppColors.muted),
               ),
               Expanded(
                 child: TextField(
                   controller: _tokenController,
                   focusNode: _tokenFocus,
                   keyboardType: TextInputType.text,
-                  style: const TextStyle(fontSize: 13, color: _kWhite, letterSpacing: 2),
+                  style: const TextStyle(fontSize: 13, color: AppColors.white, letterSpacing: 2),
                   decoration: const InputDecoration(
                     hintText: 'Code reçu par email',
-                    hintStyle: TextStyle(fontSize: 13, color: _kMuted, letterSpacing: 0),
+                    hintStyle: TextStyle(fontSize: 13, color: AppColors.muted, letterSpacing: 0),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
                   ),
@@ -392,7 +377,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: _kMuted2,
+            color: AppColors.muted2,
             letterSpacing: 1.6,
           ),
         ),
@@ -400,10 +385,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: _newPasswordFocused ? _kFocusedBg : _kCard,
+            color: _newPasswordFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _newPasswordFocused ? _kFocusedBorder : _kBorder2,
+              color: _newPasswordFocused ? AppColors.focusedBorder : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -411,17 +396,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.lock_outline_rounded, size: 16, color: _kMuted),
+                child: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.muted),
               ),
               Expanded(
                 child: TextField(
                   controller: _newPasswordController,
                   focusNode: _newPasswordFocus,
                   obscureText: !_newPasswordVisible,
-                  style: const TextStyle(fontSize: 13, color: _kWhite),
+                  style: const TextStyle(fontSize: 13, color: AppColors.white),
                   decoration: const InputDecoration(
                     hintText: '8 caractères minimum',
-                    hintStyle: TextStyle(fontSize: 13, color: _kMuted),
+                    hintStyle: TextStyle(fontSize: 13, color: AppColors.muted),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
                   ),
@@ -436,7 +421,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
                     size: 14,
-                    color: _kMuted,
+                    color: AppColors.muted,
                   ),
                 ),
               ),
@@ -459,14 +444,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         child: Ink(
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [_kAmberSoft, _kAmberD],
+              colors: [AppColors.amberSoft, AppColors.amberD],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(13),
             boxShadow: [
               BoxShadow(
-                color: _kAmber.withValues(alpha: 0.28),
+                color: AppColors.amber.withValues(alpha: 0.28),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -480,7 +465,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: _kNight),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.night),
                   )
                 : Row(
                     mainAxisSize: MainAxisSize.min,
@@ -490,12 +475,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: _kNight,
+                          color: AppColors.night,
                           letterSpacing: 0.84,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward_rounded, size: 16, color: _kNight),
+                      const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
                     ],
                   ),
           ),
@@ -515,10 +500,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: _kSage.withValues(alpha: 0.12),
+            color: AppColors.sage.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded, color: _kSage, size: 36),
+          child: const Icon(Icons.check_rounded, color: AppColors.sage, size: 36),
         ),
         const SizedBox(height: 24),
         const Text(
@@ -527,7 +512,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: _kWhite,
+            color: AppColors.white,
             height: 1.2,
           ),
         ),
@@ -535,7 +520,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         const Text(
           'Tu peux maintenant te connecter avec\nton nouveau mot de passe.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 13, color: _kMuted2, height: 1.5),
+          style: TextStyle(fontSize: 13, color: AppColors.muted2, height: 1.5),
         ),
         const SizedBox(height: 40),
         Material(
@@ -551,14 +536,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: Ink(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [_kAmberSoft, _kAmberD],
+                  colors: [AppColors.amberSoft, AppColors.amberD],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(13),
                 boxShadow: [
                   BoxShadow(
-                    color: _kAmber.withValues(alpha: 0.28),
+                    color: AppColors.amber.withValues(alpha: 0.28),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -576,12 +561,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: _kNight,
+                          color: AppColors.night,
                           letterSpacing: 0.84,
                         ),
                       ),
                       SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_rounded, size: 16, color: _kNight),
+                      Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
                     ],
                   ),
                 ),

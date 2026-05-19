@@ -2,18 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
 
-// ── Design tokens ────────────────────────────────────────────────────────────
-const _mcBg = Color(0xFF0A0C10);
-const _mcCard = Color(0xFF181A21);
-const _mcCard2 = Color(0xFF1E2029);
-const _mcBorder2 = Color(0x21FFFFFF);
-const _mcAmber = Color(0xFFFF7F2A);
-const _mcAmberSoft = Color(0xFFFF9A55);
-const _mcAmberD = Color(0xFFD96820);
-const _mcAmberDim = Color(0x1CFF7F2A);
-const _mcWhite = Color(0xFFF0F2F5);
-const _mcMuted2 = Color(0x9EF0F2F5);
-const _mcNight = Color(0xFF0B0D11);
+import '../theme/app_colors.dart';
 
 /// Page de chat entre deux équipes pour un match confirmé
 class MatchChatPage extends StatefulWidget {
@@ -155,9 +144,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _mcBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _mcCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
@@ -167,11 +156,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
             onTap: () => Navigator.of(context).pop(),
             child: Container(
               decoration: BoxDecoration(
-                color: _mcCard2,
+                color: AppColors.card2,
                 shape: BoxShape.circle,
-                border: Border.all(color: _mcBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: _mcMuted2, size: 16),
+              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
             ),
           ),
         ),
@@ -181,7 +170,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: _mcAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(10),
                 image: widget.opponentTeamLogoUrl != null
                     ? DecorationImage(
@@ -191,7 +180,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     : null,
               ),
               child: widget.opponentTeamLogoUrl == null
-                  ? const Icon(Icons.groups, color: _mcAmber, size: 20)
+                  ? const Icon(Icons.groups, color: AppColors.amber, size: 20)
                   : null,
             ),
             const SizedBox(width: 10),
@@ -204,13 +193,13 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     style: GoogleFonts.syne(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: _mcWhite,
+                      color: AppColors.white,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     'Chat du match',
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _mcMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -235,7 +224,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: _mcAmber),
+                    child: CircularProgressIndicator(color: AppColors.amber),
                   )
                 : _messages.isEmpty
                 ? Center(
@@ -245,21 +234,21 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         const Icon(
                           Icons.forum_outlined,
                           size: 80,
-                          color: _mcMuted2,
+                          color: AppColors.muted2,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
                           style: GoogleFonts.dmSans(
                             fontSize: 18,
-                            color: _mcMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Commencez à discuter avec votre adversaire !',
                           style: GoogleFonts.dmSans(
-                            color: _mcMuted2,
+                            color: AppColors.muted2,
                             fontSize: 13,
                           ),
                           textAlign: TextAlign.center,
@@ -300,7 +289,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                                 _formatDate(message.createdAt),
                                 style: GoogleFonts.dmSans(
                                   fontSize: 11,
-                                  color: _mcMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ),
                             ),
@@ -319,8 +308,8 @@ class _MatchChatPageState extends State<MatchChatPage> {
           SafeArea(
             child: Container(
               decoration: const BoxDecoration(
-                color: _mcCard,
-                border: Border(top: BorderSide(color: _mcBorder2)),
+                color: AppColors.card,
+                border: Border(top: BorderSide(color: AppColors.border2)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
@@ -330,28 +319,28 @@ class _MatchChatPageState extends State<MatchChatPage> {
                       controller: _messageController,
                       decoration: InputDecoration(
                         hintText: 'Écrire un message...',
-                        hintStyle: GoogleFonts.dmSans(color: _mcMuted2),
+                        hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
                         filled: true,
-                        fillColor: _mcCard2,
+                        fillColor: AppColors.card2,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: _mcBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: _mcBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: _mcAmber),
+                          borderSide: const BorderSide(color: AppColors.amber),
                         ),
                       ),
-                      style: GoogleFonts.dmSans(color: _mcWhite),
-                      cursorColor: _mcAmber,
+                      style: GoogleFonts.dmSans(color: AppColors.white),
+                      cursorColor: AppColors.amber,
                       onSubmitted: (_) => _sendMessage(),
                       enabled: !_isSending,
                     ),
@@ -364,11 +353,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                       height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: _isSending ? _mcCard2 : null,
+                        color: _isSending ? AppColors.card2 : null,
                         gradient: _isSending
                             ? null
                             : const LinearGradient(
-                                colors: [_mcAmberSoft, _mcAmberD],
+                                colors: [AppColors.amberSoft, AppColors.amberD],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -380,11 +369,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: _mcAmber,
+                                  color: AppColors.amber,
                                 ),
                               ),
                             )
-                          : const Icon(Icons.send, color: _mcNight, size: 18),
+                          : const Icon(Icons.send, color: AppColors.night, size: 18),
                     ),
                   ),
                 ],
@@ -415,7 +404,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: _mcMuted2,
+                  color: AppColors.muted2,
                   shape: BoxShape.circle,
                   image: message.senderAvatarUrl != null
                       ? DecorationImage(
@@ -431,7 +420,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                               ? message.senderUsername[0].toUpperCase()
                               : '?',
                           style: GoogleFonts.syne(
-                            color: _mcNight,
+                            color: AppColors.night,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -447,15 +436,15 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 padding: const EdgeInsets.all(12),
                 constraints: const BoxConstraints(maxWidth: 280),
                 decoration: BoxDecoration(
-                  color: isMyTeam ? null : _mcCard2,
+                  color: isMyTeam ? null : AppColors.card2,
                   gradient: isMyTeam
                       ? const LinearGradient(
-                          colors: [_mcAmberSoft, _mcAmberD],
+                          colors: [AppColors.amberSoft, AppColors.amberD],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
                       : null,
-                  border: isMyTeam ? null : Border.all(color: _mcBorder2),
+                  border: isMyTeam ? null : Border.all(color: AppColors.border2),
                   borderRadius: BorderRadius.circular(20).copyWith(
                     bottomRight: isMyTeam
                         ? const Radius.circular(6)
@@ -477,7 +466,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         child: Text(
                           '${message.senderUsername} (${message.senderTeamName})',
                           style: GoogleFonts.syne(
-                            color: _mcAmber,
+                            color: AppColors.amber,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -487,7 +476,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     Text(
                       message.content,
                       style: GoogleFonts.dmSans(
-                        color: isMyTeam ? _mcNight : _mcWhite,
+                        color: isMyTeam ? AppColors.night : AppColors.white,
                         fontSize: 14,
                       ),
                     ),
@@ -495,7 +484,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: GoogleFonts.dmSans(color: _mcMuted2, fontSize: 10),
+                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 10),
                     ),
                   ],
                 ),

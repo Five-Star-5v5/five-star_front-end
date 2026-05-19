@@ -6,18 +6,7 @@ import '../providers/messages_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/messages_service.dart';
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _cpBg = Color(0xFF0A0C10);
-const _cpNight = Color(0xFF0B0D11);
-const _cpCard = Color(0xFF181A21);
-const _cpCard2 = Color(0xFF1E2029);
-const _cpBorder2 = Color(0x21FFFFFF);
-const _cpAmber = Color(0xFFFF7F2A);
-const _cpAmberSoft = Color(0xFFFF9A55);
-const _cpAmberD = Color(0xFFD96820);
-const _cpWhite = Color(0xFFF0F2F5);
-const _cpMuted2 = Color(0x9EF0F2F5);
-// ──────────────────────────────────────────────────────────────────────────────
+import '../theme/app_colors.dart';
 
 class ChatPage extends StatefulWidget {
   final int friendId;
@@ -125,9 +114,9 @@ class _ChatPageState extends State<ChatPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: _cpBg,
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
-          backgroundColor: _cpCard,
+          backgroundColor: AppColors.card,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           flexibleSpace: IgnorePointer(
@@ -167,7 +156,7 @@ class _ChatPageState extends State<ChatPage> {
                             ? widget.friendName[0].toUpperCase()
                             : '?',
                         style: GoogleFonts.syne(
-                          color: _cpAmber,
+                          color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
@@ -177,17 +166,17 @@ class _ChatPageState extends State<ChatPage> {
               Text(
                 widget.friendName,
                 style: GoogleFonts.syne(
-                  color: _cpWhite,
+                  color: AppColors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
               ),
             ],
           ),
-          iconTheme: const IconThemeData(color: _cpWhite),
+          iconTheme: const IconThemeData(color: AppColors.white),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1),
-            child: Container(height: 1, color: _cpBorder2),
+            child: Container(height: 1, color: AppColors.border2),
           ),
         ),
         body: Column(
@@ -199,7 +188,7 @@ class _ChatPageState extends State<ChatPage> {
                   if (provider.messagesState == MessagesLoadingState.loading &&
                       provider.activeConversation == null) {
                     return const Center(
-                      child: CircularProgressIndicator(color: _cpAmber),
+                      child: CircularProgressIndicator(color: AppColors.amber),
                     );
                   }
 
@@ -213,20 +202,20 @@ class _ChatPageState extends State<ChatPage> {
                           const Icon(
                             Icons.chat_bubble_outline,
                             size: 80,
-                            color: _cpMuted2,
+                            color: AppColors.muted2,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Aucun message',
                             style: GoogleFonts.dmSans(
                               fontSize: 18,
-                              color: _cpMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Envoyez le premier message !',
-                            style: GoogleFonts.dmSans(color: _cpMuted2),
+                            style: GoogleFonts.dmSans(color: AppColors.muted2),
                           ),
                         ],
                       ),
@@ -257,7 +246,7 @@ class _ChatPageState extends State<ChatPage> {
                               child: Text(
                                 _formatDate(message.createdAt),
                                 style: GoogleFonts.dmSans(
-                                  color: _cpMuted2,
+                                  color: AppColors.muted2,
                                   fontSize: 11,
                                 ),
                               ),
@@ -274,7 +263,7 @@ class _ChatPageState extends State<ChatPage> {
             // ===== BARRE DE SAISIE =====
             SafeArea(
               child: Container(
-                color: _cpCard,
+                color: AppColors.card,
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Consumer<MessagesProvider>(
                   builder: (context, provider, _) {
@@ -285,27 +274,27 @@ class _ChatPageState extends State<ChatPage> {
                             controller: _messageController,
                             decoration: InputDecoration(
                               hintText: 'Écrire un message...',
-                              hintStyle: GoogleFonts.dmSans(color: _cpMuted2),
+                              hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
                               filled: true,
-                              fillColor: _cpCard2,
+                              fillColor: AppColors.card2,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 12,
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: _cpBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: _cpBorder2),
+                                borderSide: const BorderSide(color: AppColors.border2),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: _cpAmber),
+                                borderSide: const BorderSide(color: AppColors.amber),
                               ),
                             ),
-                            style: GoogleFonts.dmSans(color: _cpWhite),
+                            style: GoogleFonts.dmSans(color: AppColors.white),
                             onSubmitted: (_) => _sendMessage(),
                             enabled: !provider.isSending,
                           ),
@@ -318,7 +307,7 @@ class _ChatPageState extends State<ChatPage> {
                                   width: 40,
                                   height: 40,
                                   decoration: const BoxDecoration(
-                                    color: _cpCard2,
+                                    color: AppColors.card2,
                                     shape: BoxShape.circle,
                                   ),
                                   alignment: Alignment.center,
@@ -326,7 +315,7 @@ class _ChatPageState extends State<ChatPage> {
                                     width: 20,
                                     height: 20,
                                     child: CircularProgressIndicator(
-                                      color: _cpNight,
+                                      color: AppColors.night,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -336,14 +325,14 @@ class _ChatPageState extends State<ChatPage> {
                                   height: 40,
                                   decoration: const BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [_cpAmberSoft, _cpAmberD],
+                                      colors: [AppColors.amberSoft, AppColors.amberD],
                                     ),
                                     shape: BoxShape.circle,
                                   ),
                                   alignment: Alignment.center,
                                   child: const Icon(
                                     Icons.send,
-                                    color: _cpNight,
+                                    color: AppColors.night,
                                     size: 18,
                                   ),
                                 ),
@@ -369,10 +358,10 @@ class _ChatPageState extends State<ChatPage> {
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
           gradient: isSender
-              ? const LinearGradient(colors: [_cpAmberSoft, _cpAmberD])
+              ? const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD])
               : null,
-          color: isSender ? null : _cpCard2,
-          border: isSender ? null : Border.all(color: _cpBorder2),
+          color: isSender ? null : AppColors.card2,
+          border: isSender ? null : Border.all(color: AppColors.border2),
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomLeft: isSender
                 ? const Radius.circular(20)
@@ -388,7 +377,7 @@ class _ChatPageState extends State<ChatPage> {
             Text(
               message.content,
               style: GoogleFonts.dmSans(
-                color: isSender ? _cpNight : _cpWhite,
+                color: isSender ? AppColors.night : AppColors.white,
                 fontSize: 14,
               ),
             ),
@@ -400,8 +389,8 @@ class _ChatPageState extends State<ChatPage> {
                   _formatTime(message.createdAt),
                   style: GoogleFonts.dmSans(
                     color: isSender
-                        ? _cpNight.withValues(alpha: 0.6)
-                        : _cpMuted2,
+                        ? AppColors.night.withValues(alpha: 0.6)
+                        : AppColors.muted2,
                     fontSize: 10,
                   ),
                 ),
@@ -412,7 +401,7 @@ class _ChatPageState extends State<ChatPage> {
                     size: 14,
                     color: message.isRead
                         ? Colors.blue
-                        : _cpNight.withValues(alpha: 0.6),
+                        : AppColors.night.withValues(alpha: 0.6),
                   ),
                 ],
               ],

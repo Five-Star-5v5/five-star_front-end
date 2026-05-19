@@ -5,20 +5,7 @@ import '../providers/teams_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const _tcBg = Color(0xFF0A0C10);
-const _tcCard = Color(0xFF181A21);
-const _tcCard2 = Color(0xFF1E2029);
-const _tcBorder2 = Color(0x21FFFFFF);
-const _tcAmber = Color(0xFFFF7F2A);
-const _tcAmberSoft = Color(0xFFFF9A55);
-const _tcAmberD = Color(0xFFD96820);
-const _tcAmberDim = Color(0x1CFF7F2A);
-const _tcRose = Color(0xFFD4607A);
-const _tcRoseDim = Color(0x1CD4607A);
-const _tcWhite = Color(0xFFF0F2F5);
-const _tcMuted2 = Color(0x9EF0F2F5);
-const _tcNight = Color(0xFF0B0D11);
+import '../theme/app_colors.dart';
 
 class TeamChatPage extends StatefulWidget {
   final int teamId;
@@ -118,9 +105,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
     final isOwner = widget.ownerId != null && currentUserId == widget.ownerId;
 
     return Scaffold(
-      backgroundColor: _tcBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _tcCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
@@ -130,11 +117,11 @@ class _TeamChatPageState extends State<TeamChatPage> {
             onTap: () => Navigator.of(context).pop(),
             child: Container(
               decoration: BoxDecoration(
-                color: _tcCard2,
+                color: AppColors.card2,
                 shape: BoxShape.circle,
-                border: Border.all(color: _tcBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: _tcMuted2, size: 16),
+              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
             ),
           ),
         ),
@@ -145,7 +132,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: _tcAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(10),
               ),
               clipBehavior: Clip.antiAlias,
@@ -154,9 +141,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
                       widget.teamLogoUrl!,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) =>
-                          const Icon(Icons.groups, color: _tcAmber, size: 20),
+                          const Icon(Icons.groups, color: AppColors.amber, size: 20),
                     )
-                  : const Icon(Icons.groups, color: _tcAmber, size: 20),
+                  : const Icon(Icons.groups, color: AppColors.amber, size: 20),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -168,13 +155,13 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     style: GoogleFonts.syne(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: _tcWhite,
+                      color: AppColors.white,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     "Chat d'équipe",
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _tcMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -200,8 +187,8 @@ class _TeamChatPageState extends State<TeamChatPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
-                color: _tcCard,
-                border: Border(bottom: BorderSide(color: _tcBorder2, width: 1)),
+                color: AppColors.card,
+                border: Border(bottom: BorderSide(color: AppColors.border2, width: 1)),
               ),
               child: Row(
                 children: [
@@ -212,7 +199,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: _tcAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -220,7 +207,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                       style: GoogleFonts.syne(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: _tcAmber,
+                        color: AppColors.amber,
                         letterSpacing: 1,
                       ),
                     ),
@@ -235,9 +222,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: _tcRoseDim,
+                        color: AppColors.roseDim,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: _tcRose),
+                        border: Border.all(color: AppColors.rose),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -245,7 +232,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           const Icon(
                             Icons.exit_to_app,
                             size: 16,
-                            color: _tcRose,
+                            color: AppColors.rose,
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -253,7 +240,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             style: GoogleFonts.syne(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: _tcRose,
+                              color: AppColors.rose,
                             ),
                           ),
                         ],
@@ -271,7 +258,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 if (provider.isLoadingMessages &&
                     provider.getMessagesForTeam(widget.teamId).isEmpty) {
                   return const Center(
-                    child: CircularProgressIndicator(color: _tcAmber),
+                    child: CircularProgressIndicator(color: AppColors.amber),
                   );
                 }
 
@@ -285,20 +272,20 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         const Icon(
                           Icons.forum_outlined,
                           size: 80,
-                          color: _tcMuted2,
+                          color: AppColors.muted2,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
                           style: GoogleFonts.dmSans(
                             fontSize: 18,
-                            color: _tcMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Démarrez la conversation avec votre équipe !',
-                          style: GoogleFonts.dmSans(color: _tcMuted2),
+                          style: GoogleFonts.dmSans(color: AppColors.muted2),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -343,7 +330,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                               _formatDate(message.createdAt),
                               style: GoogleFonts.dmSans(
                                 fontSize: 11,
-                                color: _tcMuted2,
+                                color: AppColors.muted2,
                               ),
                             ),
                           ),
@@ -368,8 +355,8 @@ class _TeamChatPageState extends State<TeamChatPage> {
           SafeArea(
             child: Container(
               decoration: const BoxDecoration(
-                color: _tcCard,
-                border: Border(top: BorderSide(color: _tcBorder2, width: 1)),
+                color: AppColors.card,
+                border: Border(top: BorderSide(color: AppColors.border2, width: 1)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Consumer<TeamsProvider>(
@@ -381,28 +368,28 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           controller: _messageController,
                           decoration: InputDecoration(
                             hintText: 'Écrire un message...',
-                            hintStyle: GoogleFonts.dmSans(color: _tcMuted2),
+                            hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
                             filled: true,
-                            fillColor: _tcCard2,
+                            fillColor: AppColors.card2,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 12,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: _tcBorder2),
+                              borderSide: const BorderSide(color: AppColors.border2),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: _tcBorder2),
+                              borderSide: const BorderSide(color: AppColors.border2),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: _tcAmber),
+                              borderSide: const BorderSide(color: AppColors.amber),
                             ),
                           ),
-                          style: GoogleFonts.dmSans(color: _tcWhite),
-                          cursorColor: _tcAmber,
+                          style: GoogleFonts.dmSans(color: AppColors.white),
+                          cursorColor: AppColors.amber,
                           onSubmitted: (_) => _sendMessage(),
                           enabled: !provider.isSendingMessage,
                         ),
@@ -418,11 +405,11 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             gradient: provider.isSendingMessage
                                 ? null
                                 : const LinearGradient(
-                                    colors: [_tcAmberSoft, _tcAmberD],
+                                    colors: [AppColors.amberSoft, AppColors.amberD],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                            color: provider.isSendingMessage ? _tcCard2 : null,
+                            color: provider.isSendingMessage ? AppColors.card2 : null,
                           ),
                           child: Center(
                             child: provider.isSendingMessage
@@ -431,12 +418,12 @@ class _TeamChatPageState extends State<TeamChatPage> {
                                     height: 20,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: _tcMuted2,
+                                      color: AppColors.muted2,
                                     ),
                                   )
                                 : const Icon(
                                     Icons.send,
-                                    color: _tcNight,
+                                    color: AppColors.night,
                                     size: 18,
                                   ),
                           ),
@@ -459,21 +446,21 @@ class _TeamChatPageState extends State<TeamChatPage> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: _tcCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _tcBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.info_outline, size: 16, color: _tcMuted2),
+          const Icon(Icons.info_outline, size: 16, color: AppColors.muted2),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               message.content,
               style: GoogleFonts.dmSans(
-                color: _tcMuted2,
+                color: AppColors.muted2,
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
               ),
@@ -505,7 +492,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 height: 28,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _tcAmberDim,
+                  color: AppColors.amberDim,
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: message.sender.avatarUrl != null
@@ -518,7 +505,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                                 ? message.sender.username[0].toUpperCase()
                                 : '?',
                             style: GoogleFonts.syne(
-                              color: _tcAmber,
+                              color: AppColors.amber,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -531,7 +518,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                               ? message.sender.username[0].toUpperCase()
                               : '?',
                           style: GoogleFonts.syne(
-                            color: _tcAmber,
+                            color: AppColors.amber,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -548,13 +535,13 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 decoration: BoxDecoration(
                   gradient: isSender
                       ? const LinearGradient(
-                          colors: [_tcAmberSoft, _tcAmberD],
+                          colors: [AppColors.amberSoft, AppColors.amberD],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
                       : null,
-                  color: isSender ? null : _tcCard2,
-                  border: isSender ? null : Border.all(color: _tcBorder2),
+                  color: isSender ? null : AppColors.card2,
+                  border: isSender ? null : Border.all(color: AppColors.border2),
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(20),
                     topRight: const Radius.circular(20),
@@ -578,7 +565,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         child: Text(
                           message.sender.username,
                           style: GoogleFonts.syne(
-                            color: _tcAmber,
+                            color: AppColors.amber,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -588,7 +575,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     Text(
                       message.content,
                       style: GoogleFonts.dmSans(
-                        color: isSender ? _tcNight : _tcWhite,
+                        color: isSender ? AppColors.night : AppColors.white,
                         fontSize: 14,
                       ),
                     ),
@@ -596,7 +583,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: GoogleFonts.dmSans(color: _tcMuted2, fontSize: 10),
+                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 10),
                     ),
                   ],
                 ),
@@ -614,10 +601,10 @@ class _TeamChatPageState extends State<TeamChatPage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return Dialog(
-          backgroundColor: _tcCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _tcBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -631,12 +618,12 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _tcRoseDim,
+                        color: AppColors.roseDim,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.warning_rounded,
-                        color: _tcRose,
+                        color: AppColors.rose,
                         size: 20,
                       ),
                     ),
@@ -644,7 +631,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     Text(
                       "Quitter l'équipe",
                       style: GoogleFonts.syne(
-                        color: _tcRose,
+                        color: AppColors.rose,
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                       ),
@@ -656,7 +643,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${widget.teamName}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe.',
-                  style: GoogleFonts.dmSans(color: _tcMuted2),
+                  style: GoogleFonts.dmSans(color: AppColors.muted2),
                 ),
                 const SizedBox(height: 24),
                 // Boutons
@@ -668,14 +655,14 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: _tcCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
                             child: Text(
                               'Annuler',
                               style: GoogleFonts.syne(
-                                color: _tcWhite,
+                                color: AppColors.white,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -697,7 +684,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             builder: (BuildContext loadingContext) {
                               return const Center(
                                 child: CircularProgressIndicator(
-                                  color: _tcRose,
+                                  color: AppColors.rose,
                                 ),
                               );
                             },
@@ -742,15 +729,15 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: _tcRoseDim,
+                            color: AppColors.roseDim,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _tcRose),
+                            border: Border.all(color: AppColors.rose),
                           ),
                           child: Center(
                             child: Text(
                               'Quitter',
                               style: GoogleFonts.syne(
-                                color: _tcRose,
+                                color: AppColors.rose,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

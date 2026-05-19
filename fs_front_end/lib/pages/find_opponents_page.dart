@@ -5,22 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
 import '../providers/teams_provider.dart';
 
-// Design tokens
-const _foBg = Color(0xFF0A0C10);
-const _foCard = Color(0xFF181A21);
-const _foCard2 = Color(0xFF1E2029);
-const _foBorder2 = Color(0x21FFFFFF);
-const _foAmber = Color(0xFFFF7F2A);
-const _foAmberSoft = Color(0xFFFF9A55);
-const _foAmberD = Color(0xFFD96820);
-const _foAmberDim = Color(0x1CFF7F2A);
-const _foSage = Color(0xFF4CAF82);
-const _foSageDim = Color(0x1C4CAF82);
-const _foRose = Color(0xFFD4607A);
-const _foRoseDim = Color(0x1CD4607A);
-const _foWhite = Color(0xFFF0F2F5);
-const _foMuted2 = Color(0x9EF0F2F5);
-const _foNight = Color(0xFF0B0D11);
+import '../theme/app_colors.dart';
 
 /// Page pour trouver des adversaires et gérer les défis
 class FindOpponentsPage extends StatefulWidget {
@@ -91,9 +76,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         .length;
 
     return Scaffold(
-      backgroundColor: _foBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _foCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
@@ -103,11 +88,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: _foCard2,
+                color: AppColors.card2,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _foBorder2),
+                border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: _foMuted2, size: 16),
+              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
             ),
           ),
         ),
@@ -117,7 +102,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: _foWhite,
+            color: AppColors.white,
           ),
         ),
         flexibleSpace: IgnorePointer(
@@ -138,8 +123,8 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             builder: (context, _) {
               return Container(
                 decoration: const BoxDecoration(
-                  color: _foCard2,
-                  border: Border(bottom: BorderSide(color: _foBorder2)),
+                  color: AppColors.card2,
+                  border: Border(bottom: BorderSide(color: AppColors.border2)),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -160,7 +145,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: _foAmber))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.amber))
           : TabBarView(
               controller: _tabController,
               children: [
@@ -183,9 +168,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         child: Container(
           height: 32,
           decoration: BoxDecoration(
-            color: isSelected ? _foAmber : _foCard2,
+            color: isSelected ? AppColors.amber : AppColors.card2,
             borderRadius: BorderRadius.circular(6),
-            border: isSelected ? null : Border.all(color: _foBorder2),
+            border: isSelected ? null : Border.all(color: AppColors.border2),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +181,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
-                  color: isSelected ? _foNight : _foMuted2,
+                  color: isSelected ? AppColors.night : AppColors.muted2,
                 ),
               ),
               if (badgeCount != null && badgeCount > 0) ...[
@@ -205,7 +190,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   width: 16,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: isSelected ? _foNight : _foAmber,
+                    color: isSelected ? AppColors.night : AppColors.amber,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -214,7 +199,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       style: GoogleFonts.syne(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        color: isSelected ? _foAmber : _foNight,
+                        color: isSelected ? AppColors.amber : AppColors.night,
                       ),
                     ),
                   ),
@@ -234,7 +219,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadData,
-            color: _foAmber,
+            color: AppColors.amber,
             child: _opponents.isEmpty
                 ? _buildEmptyState(
                     icon: Icons.groups,
@@ -281,16 +266,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: isSelected ? _foAmber : _foCard2,
+                  color: isSelected ? AppColors.amber : AppColors.card2,
                   borderRadius: BorderRadius.circular(8),
-                  border: isSelected ? null : Border.all(color: _foBorder2),
+                  border: isSelected ? null : Border.all(color: AppColors.border2),
                 ),
                 child: Text(
                   level == 'Tous' ? level : _capitalizeFirst(level),
                   style: GoogleFonts.syne(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 11,
-                    color: isSelected ? _foNight : _foMuted2,
+                    color: isSelected ? AppColors.night : AppColors.muted2,
                   ),
                 ),
               ),
@@ -306,9 +291,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: _foCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _foBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -321,7 +306,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: _foAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -335,7 +320,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Text(
                                 team.teamName[0].toUpperCase(),
                                 style: GoogleFonts.syne(
-                                  color: _foAmber,
+                                  color: AppColors.amber,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
@@ -347,7 +332,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Text(
                             team.teamName[0].toUpperCase(),
                             style: GoogleFonts.syne(
-                              color: _foAmber,
+                              color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
                             ),
@@ -364,14 +349,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: _foWhite,
+                          color: AppColors.white,
                         ),
                       ),
                       Text(
                         'par @${team.ownerUsername}',
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ],
@@ -384,7 +369,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _foAmberDim,
+                      color: AppColors.amberDim,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -392,7 +377,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       style: GoogleFonts.syne(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: _foAmber,
+                        color: AppColors.amber,
                       ),
                     ),
                   ),
@@ -402,21 +387,21 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.people, size: 13, color: _foMuted2),
+                const Icon(Icons.people, size: 13, color: AppColors.muted2),
                 const SizedBox(width: 4),
                 Text(
                   '${team.membersCount} membres',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                 ),
                 if (team.preferredDays != null &&
                     team.preferredDays!.isNotEmpty) ...[
                   const SizedBox(width: 12),
-                  const Icon(Icons.calendar_today, size: 13, color: _foMuted2),
+                  const Icon(Icons.calendar_today, size: 13, color: AppColors.muted2),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredDays!.join(', '),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -429,12 +414,12 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 13, color: _foMuted2),
+                  const Icon(Icons.location_on, size: 13, color: AppColors.muted2),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredLocations!.join(', '),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -447,12 +432,12 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 13, color: _foMuted2),
+                  const Icon(Icons.access_time, size: 13, color: AppColors.muted2),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       _formatTimeSlot(team.preferredTimeSlots!.first),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -465,19 +450,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _foCard2,
+                  color: AppColors.card2,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.format_quote, color: _foMuted2, size: 16),
+                    const Icon(Icons.format_quote, color: AppColors.muted2, size: 16),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         team.description!,
                         style: GoogleFonts.dmSans(
                           fontSize: 12,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -494,7 +479,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 height: 44,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [_foAmber, _foAmberD],
+                    colors: [AppColors.amber, AppColors.amberD],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -507,7 +492,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                       letterSpacing: 0.6,
-                      color: _foNight,
+                      color: AppColors.night,
                     ),
                   ),
                 ),
@@ -538,7 +523,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
     return RefreshIndicator(
       onRefresh: _loadData,
-      color: _foAmber,
+      color: AppColors.amber,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: activeSentChallenges.length,
@@ -568,7 +553,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
     return RefreshIndicator(
       onRefresh: _loadData,
-      color: _foAmber,
+      color: AppColors.amber,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: activeReceivedChallenges.length,
@@ -597,9 +582,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: _foCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _foBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -611,7 +596,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _foAmberDim,
+                    color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -625,7 +610,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Text(
                                 opponentTeamName[0].toUpperCase(),
                                 style: GoogleFonts.syne(
-                                  color: _foAmber,
+                                  color: AppColors.amber,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -636,7 +621,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Text(
                             opponentTeamName[0].toUpperCase(),
                             style: GoogleFonts.syne(
-                              color: _foAmber,
+                              color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -651,7 +636,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         isSent ? 'Défi envoyé à' : 'Défi de',
                         style: GoogleFonts.dmSans(
                           fontSize: 10,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                       Text(
@@ -659,14 +644,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
-                          color: _foWhite,
+                          color: AppColors.white,
                         ),
                       ),
                       Text(
                         '@$opponentUsername',
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ],
@@ -679,7 +664,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             if (challenge.proposedDate != null ||
                 challenge.proposedLocation != null) ...[
               const SizedBox(height: 12),
-              Container(height: 1, color: _foBorder2),
+              Container(height: 1, color: AppColors.border2),
               const SizedBox(height: 8),
               if (challenge.proposedDate != null)
                 Row(
@@ -687,7 +672,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     const Icon(
                       Icons.calendar_today,
                       size: 12,
-                      color: _foMuted2,
+                      color: AppColors.muted2,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -695,7 +680,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         'EEEE d MMMM à HH:mm',
                         'fr_FR',
                       ).format(challenge.proposedDate!),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -703,14 +688,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 12, color: _foMuted2),
+                    const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         challenge.proposedLocation!,
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ),
@@ -724,19 +709,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _foCard2,
+                  color: AppColors.card2,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.message, color: _foMuted2, size: 13),
+                    const Icon(Icons.message, color: AppColors.muted2, size: 13),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         challenge.message!,
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ),
@@ -752,7 +737,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: _foAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -763,7 +748,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         challenge.challengerTeamName,
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
-                          color: _foWhite,
+                          color: AppColors.white,
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
@@ -776,7 +761,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: _foAmber,
+                          color: AppColors.amber,
                         ),
                       ),
                     ),
@@ -785,7 +770,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         challenge.challengedTeamName,
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w700,
-                          color: _foWhite,
+                          color: AppColors.white,
                           fontSize: 12,
                         ),
                         textAlign: TextAlign.center,
@@ -804,9 +789,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   child: Container(
                     height: 40,
                     decoration: BoxDecoration(
-                      color: _foCard2,
+                      color: AppColors.card2,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _foBorder2),
+                      border: Border.all(color: AppColors.border2),
                     ),
                     child: Center(
                       child: Text(
@@ -814,7 +799,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontWeight: FontWeight.w600,
                           fontSize: 11,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ),
@@ -829,9 +814,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Container(
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _foRoseDim,
+                            color: AppColors.roseDim,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _foRose),
+                            border: Border.all(color: AppColors.rose),
                           ),
                           child: Center(
                             child: Text(
@@ -839,7 +824,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
-                                color: _foRose,
+                                color: AppColors.rose,
                               ),
                             ),
                           ),
@@ -854,7 +839,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           height: 40,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [_foAmber, _foAmberD],
+                              colors: [AppColors.amber, AppColors.amberD],
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -864,7 +849,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11,
-                                color: _foNight,
+                                color: AppColors.night,
                               ),
                             ),
                           ),
@@ -884,7 +869,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             const SizedBox(height: 8),
             Text(
               'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: _foMuted2),
+              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
             ),
           ],
         ),
@@ -912,9 +897,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _foAmberDim,
+              color: AppColors.amberDim,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _foAmber),
+              border: Border.all(color: AppColors.amber),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -923,7 +908,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   children: [
                     const Icon(
                       Icons.info_outline,
-                      color: _foAmberSoft,
+                      color: AppColors.amberSoft,
                       size: 18,
                     ),
                     const SizedBox(width: 8),
@@ -933,7 +918,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.dmSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: _foAmberSoft,
+                          color: AppColors.amberSoft,
                         ),
                       ),
                     ),
@@ -946,7 +931,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     vertical: 14,
                   ),
                   decoration: BoxDecoration(
-                    color: _foCard2,
+                    color: AppColors.card2,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -959,7 +944,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _foWhite,
+                                color: AppColors.white,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -972,7 +957,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _foAmberDim,
+                                color: AppColors.amberDim,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -980,7 +965,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 style: GoogleFonts.syne(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: _foAmber,
+                                  color: AppColors.amber,
                                 ),
                               ),
                             ),
@@ -994,7 +979,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           style: GoogleFonts.syne(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
-                            color: _foMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                       ),
@@ -1006,7 +991,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _foWhite,
+                                color: AppColors.white,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 2,
@@ -1019,7 +1004,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _foRoseDim,
+                                color: AppColors.roseDim,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -1027,7 +1012,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 style: GoogleFonts.syne(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color: _foRose,
+                                  color: AppColors.rose,
                                 ),
                               ),
                             ),
@@ -1046,9 +1031,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Container(
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _foRoseDim,
+                            color: AppColors.roseDim,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _foRose),
+                            border: Border.all(color: AppColors.rose),
                           ),
                           child: Center(
                             child: Text(
@@ -1056,7 +1041,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
-                                color: _foRose,
+                                color: AppColors.rose,
                               ),
                             ),
                           ),
@@ -1070,9 +1055,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Container(
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _foSageDim,
+                            color: AppColors.sageDim,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _foSage),
+                            border: Border.all(color: AppColors.sage),
                           ),
                           child: Center(
                             child: Text(
@@ -1080,7 +1065,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.syne(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
-                                color: _foSage,
+                                color: AppColors.sage,
                               ),
                             ),
                           ),
@@ -1094,7 +1079,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   'Si vous contestez, le match sera déclaré nul (0-0)',
                   style: GoogleFonts.dmSans(
                     fontSize: 11,
-                    color: _foMuted2,
+                    color: AppColors.muted2,
                     fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
@@ -1106,22 +1091,22 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _foSageDim,
+              color: AppColors.sageDim,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _foSage),
+              border: Border.all(color: AppColors.sage),
             ),
             child: Row(
               children: [
                 const Icon(
                   Icons.hourglass_empty,
-                  color: _foAmberSoft,
+                  color: AppColors.amberSoft,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Score soumis ! En attente de validation par l\'adversaire.',
-                    style: GoogleFonts.dmSans(fontSize: 12, color: _foSage),
+                    style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.sage),
                   ),
                 ),
               ],
@@ -1137,7 +1122,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             child: Container(
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [_foAmber, _foAmberD]),
+                gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -1147,7 +1132,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                     letterSpacing: 0.6,
-                    color: _foNight,
+                    color: AppColors.night,
                   ),
                 ),
               ),
@@ -1162,10 +1147,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _foCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _foBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1177,13 +1162,13 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: _foWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1195,9 +1180,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Center(
                           child: Text(
@@ -1205,7 +1190,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _foMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -1219,9 +1204,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foSageDim,
+                          color: AppColors.sageDim,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foSage),
+                          border: Border.all(color: AppColors.sage),
                         ),
                         child: Center(
                           child: Text(
@@ -1229,7 +1214,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: _foSage,
+                              color: AppColors.sage,
                             ),
                           ),
                         ),
@@ -1254,7 +1239,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Score validé !'),
-            backgroundColor: _foSage,
+            backgroundColor: AppColors.sage,
           ),
         );
         _loadData();
@@ -1266,10 +1251,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _foCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _foBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1281,13 +1266,13 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: _foWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\nÊtes-vous sûr de vouloir contester ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1299,9 +1284,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Center(
                           child: Text(
@@ -1309,7 +1294,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _foMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -1323,9 +1308,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foRoseDim,
+                          color: AppColors.roseDim,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foRose),
+                          border: Border.all(color: AppColors.rose),
                         ),
                         child: Center(
                           child: Text(
@@ -1333,7 +1318,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: _foRose,
+                              color: AppColors.rose,
                             ),
                           ),
                         ),
@@ -1358,7 +1343,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Score contesté - Match nul déclaré'),
-            backgroundColor: _foAmber,
+            backgroundColor: AppColors.amber,
           ),
         );
         _loadData();
@@ -1388,29 +1373,29 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     if (myScore != null && opponentScore != null) {
       if (myScore > opponentScore) {
         resultText = 'Victoire !';
-        resultColor = _foSage;
+        resultColor = AppColors.sage;
         resultIcon = Icons.emoji_events;
       } else if (myScore < opponentScore) {
         resultText = 'Défaite';
-        resultColor = _foRose;
+        resultColor = AppColors.rose;
         resultIcon = Icons.sentiment_dissatisfied;
       } else {
         resultText = 'Match nul';
-        resultColor = _foAmber;
+        resultColor = AppColors.amber;
         resultIcon = Icons.handshake;
       }
     } else {
       resultText = 'Score en attente';
-      resultColor = _foMuted2;
+      resultColor = AppColors.muted2;
       resultIcon = Icons.hourglass_empty;
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _foCard2,
+        color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _foBorder2),
+        border: Border.all(color: AppColors.border2),
       ),
       child: Column(
         children: [
@@ -1428,7 +1413,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: _foCard,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -1441,7 +1426,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _foWhite,
+                          color: AppColors.white,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
@@ -1454,7 +1439,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: _foAmberDim,
+                          color: AppColors.amberDim,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -1462,7 +1447,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           style: GoogleFonts.syne(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color: _foAmber,
+                            color: AppColors.amber,
                           ),
                         ),
                       ),
@@ -1476,7 +1461,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     style: GoogleFonts.syne(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: _foMuted2,
+                      color: AppColors.muted2,
                     ),
                   ),
                 ),
@@ -1488,7 +1473,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         style: GoogleFonts.syne(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: _foWhite,
+                          color: AppColors.white,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
@@ -1501,7 +1486,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: _foRoseDim,
+                          color: AppColors.roseDim,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -1509,7 +1494,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           style: GoogleFonts.syne(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            color: _foRose,
+                            color: AppColors.rose,
                           ),
                         ),
                       ),
@@ -1524,19 +1509,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _foAmberDim,
+                color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.warning_amber, size: 14, color: _foAmber),
+                  const Icon(Icons.warning_amber, size: 14, color: AppColors.amber),
                   const SizedBox(width: 6),
                   Text(
                     'Scores contradictoires → Match nul déclaré',
                     style: GoogleFonts.dmSans(
                       fontSize: 11,
-                      color: _foAmberSoft,
+                      color: AppColors.amberSoft,
                     ),
                   ),
                 ],
@@ -1553,28 +1538,28 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     Color fg;
     switch (status) {
       case ChallengeStatus.pending:
-        bg = _foAmberDim;
-        fg = _foAmber;
+        bg = AppColors.amberDim;
+        fg = AppColors.amber;
         break;
       case ChallengeStatus.accepted:
-        bg = _foSageDim;
-        fg = _foSage;
+        bg = AppColors.sageDim;
+        fg = AppColors.sage;
         break;
       case ChallengeStatus.rejected:
-        bg = _foRoseDim;
-        fg = _foRose;
+        bg = AppColors.roseDim;
+        fg = AppColors.rose;
         break;
       case ChallengeStatus.cancelled:
-        bg = _foCard2;
-        fg = _foMuted2;
+        bg = AppColors.card2;
+        fg = AppColors.muted2;
         break;
       case ChallengeStatus.expired:
-        bg = _foCard2;
-        fg = _foMuted2;
+        bg = AppColors.card2;
+        fg = AppColors.muted2;
         break;
       case ChallengeStatus.completed:
-        bg = _foAmberDim;
-        fg = _foAmber;
+        bg = AppColors.amberDim;
+        fg = AppColors.amber;
         break;
     }
 
@@ -1606,14 +1591,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: _foMuted2),
+            Icon(icon, size: 64, color: AppColors.muted2),
             const SizedBox(height: 16),
             Text(
               message,
               style: GoogleFonts.syne(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: _foMuted2,
+                color: AppColors.muted2,
               ),
               textAlign: TextAlign.center,
             ),
@@ -1621,7 +1606,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1634,7 +1619,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [_foAmber, _foAmberD]),
+                  gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -1642,7 +1627,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   style: GoogleFonts.syne(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
-                    color: _foNight,
+                    color: AppColors.night,
                   ),
                 ),
               ),
@@ -1664,10 +1649,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              backgroundColor: _foCard,
+              backgroundColor: AppColors.card,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: _foBorder2),
+                side: const BorderSide(color: AppColors.border2),
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -1682,14 +1667,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _foAmberDim,
+                            color: AppColors.amberDim,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
                             child: Text(
                               team.teamName[0].toUpperCase(),
                               style: GoogleFonts.syne(
-                                color: _foAmber,
+                                color: AppColors.amber,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
                               ),
@@ -1703,7 +1688,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
-                              color: _foWhite,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
@@ -1748,16 +1733,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: _foCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.calendar_today,
                               size: 16,
-                              color: _foMuted2,
+                              color: AppColors.muted2,
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -1770,8 +1755,8 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.dmSans(
                                 fontSize: 13,
                                 color: selectedDate != null
-                                    ? _foWhite
-                                    : _foMuted2,
+                                    ? AppColors.white
+                                    : AppColors.muted2,
                               ),
                             ),
                           ],
@@ -1783,35 +1768,35 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Lieu
                     TextField(
                       controller: locationController,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
+                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
                       decoration: InputDecoration(
                         hintText: 'Lieu proposé (optionnel)',
                         hintStyle: GoogleFonts.dmSans(
                           fontSize: 13,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                         prefixIcon: const Icon(
                           Icons.location_on,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                           size: 18,
                         ),
                         filled: true,
-                        fillColor: _foCard2,
+                        fillColor: AppColors.card2,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 12,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foAmber),
+                          borderSide: const BorderSide(color: AppColors.amber),
                         ),
                       ),
                     ),
@@ -1820,36 +1805,36 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Message
                     TextField(
                       controller: messageController,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
+                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Message (optionnel)',
                         hintStyle: GoogleFonts.dmSans(
                           fontSize: 13,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                         ),
                         prefixIcon: const Icon(
                           Icons.message,
-                          color: _foMuted2,
+                          color: AppColors.muted2,
                           size: 18,
                         ),
                         filled: true,
-                        fillColor: _foCard2,
+                        fillColor: AppColors.card2,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 12,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _foAmber),
+                          borderSide: const BorderSide(color: AppColors.amber),
                         ),
                       ),
                     ),
@@ -1863,9 +1848,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: _foCard2,
+                                color: AppColors.card2,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _foBorder2),
+                                border: Border.all(color: AppColors.border2),
                               ),
                               child: Center(
                                 child: Text(
@@ -1873,7 +1858,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                   style: GoogleFonts.syne(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
-                                    color: _foMuted2,
+                                    color: AppColors.muted2,
                                   ),
                                 ),
                               ),
@@ -1903,7 +1888,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               height: 44,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [_foAmber, _foAmberD],
+                                  colors: [AppColors.amber, AppColors.amberD],
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -1913,7 +1898,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                   style: GoogleFonts.syne(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
-                                    color: _foNight,
+                                    color: AppColors.night,
                                   ),
                                 ),
                               ),
@@ -1956,10 +1941,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              backgroundColor: _foCard,
+              backgroundColor: AppColors.card,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: _foBorder2),
+                side: const BorderSide(color: AppColors.border2),
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -1971,7 +1956,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       style: GoogleFonts.syne(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
-                        color: _foWhite,
+                        color: AppColors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -1980,14 +1965,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: _foAmberDim,
+                        color: AppColors.amberDim,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.info_outline,
-                            color: _foAmberSoft,
+                            color: AppColors.amberSoft,
                             size: 16,
                           ),
                           const SizedBox(width: 8),
@@ -1996,7 +1981,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               'L\'adversaire devra confirmer ce score',
                               style: GoogleFonts.dmSans(
                                 fontSize: 11,
-                                color: _foAmberSoft,
+                                color: AppColors.amberSoft,
                               ),
                             ),
                           ),
@@ -2015,7 +2000,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 style: GoogleFonts.syne(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
-                                  color: _foWhite,
+                                  color: AppColors.white,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -2023,7 +2008,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 '(Vous)',
                                 style: GoogleFonts.dmSans(
                                   fontSize: 10,
-                                  color: _foMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -2036,7 +2021,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                         : null,
                                     child: Icon(
                                       Icons.remove_circle,
-                                      color: myScore > 0 ? _foAmber : _foMuted2,
+                                      color: myScore > 0 ? AppColors.amber : AppColors.muted2,
                                       size: 28,
                                     ),
                                   ),
@@ -2046,7 +2031,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                     style: GoogleFonts.syne(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w700,
-                                      color: _foWhite,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -2055,7 +2040,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                         setDialogState(() => myScore++),
                                     child: const Icon(
                                       Icons.add_circle,
-                                      color: _foAmber,
+                                      color: AppColors.amber,
                                       size: 28,
                                     ),
                                   ),
@@ -2069,7 +2054,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           style: GoogleFonts.syne(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: _foMuted2,
+                            color: AppColors.muted2,
                           ),
                         ),
                         Expanded(
@@ -2080,7 +2065,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 style: GoogleFonts.syne(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
-                                  color: _foWhite,
+                                  color: AppColors.white,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -2088,7 +2073,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                 '(Adversaire)',
                                 style: GoogleFonts.dmSans(
                                   fontSize: 10,
-                                  color: _foMuted2,
+                                  color: AppColors.muted2,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -2104,8 +2089,8 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                     child: Icon(
                                       Icons.remove_circle,
                                       color: opponentScore > 0
-                                          ? _foAmber
-                                          : _foMuted2,
+                                          ? AppColors.amber
+                                          : AppColors.muted2,
                                       size: 28,
                                     ),
                                   ),
@@ -2115,7 +2100,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                     style: GoogleFonts.syne(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w700,
-                                      color: _foWhite,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -2124,7 +2109,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                         setDialogState(() => opponentScore++),
                                     child: const Icon(
                                       Icons.add_circle,
-                                      color: _foAmber,
+                                      color: AppColors.amber,
                                       size: 28,
                                     ),
                                   ),
@@ -2145,9 +2130,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: _foCard2,
+                                color: AppColors.card2,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _foBorder2),
+                                border: Border.all(color: AppColors.border2),
                               ),
                               child: Center(
                                 child: Text(
@@ -2155,7 +2140,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                   style: GoogleFonts.syne(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
-                                    color: _foMuted2,
+                                    color: AppColors.muted2,
                                   ),
                                 ),
                               ),
@@ -2177,7 +2162,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               height: 44,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [_foAmber, _foAmberD],
+                                  colors: [AppColors.amber, AppColors.amberD],
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -2187,7 +2172,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                   style: GoogleFonts.syne(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
-                                    color: _foNight,
+                                    color: AppColors.night,
                                   ),
                                 ),
                               ),
@@ -2234,10 +2219,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     return showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _foCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _foBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -2245,28 +2230,28 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.warning, color: _foAmber, size: 32),
+              const Icon(Icons.warning, color: AppColors.amber, size: 32),
               const SizedBox(height: 12),
               Text(
                 'Attention !',
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: _foAmber,
+                  color: AppColors.amber,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'L\'équipe "$opponentTeamName" partage ${commonPlayers.length} joueur(s) avec votre équipe :',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _foWhite),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _foAmberDim,
+                  color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _foAmber),
+                  border: Border.all(color: AppColors.amber),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2275,7 +2260,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(Icons.person, size: 14, color: _foAmber),
+                          const Icon(Icons.person, size: 14, color: AppColors.amber),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -2283,7 +2268,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               style: GoogleFonts.dmSans(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 12,
-                                color: _foWhite,
+                                color: AppColors.white,
                               ),
                             ),
                           ),
@@ -2299,7 +2284,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 style: GoogleFonts.dmSans(
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
-                  color: _foMuted2,
+                  color: AppColors.muted2,
                 ),
               ),
               const SizedBox(height: 20),
@@ -2311,9 +2296,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Center(
                           child: Text(
@@ -2321,7 +2306,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _foMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -2336,7 +2321,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         height: 44,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_foAmber, _foAmberD],
+                            colors: [AppColors.amber, AppColors.amberD],
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -2346,7 +2331,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: _foNight,
+                              color: AppColors.night,
                             ),
                           ),
                         ),
@@ -2406,7 +2391,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Défi envoyé !'),
-            backgroundColor: _foSage,
+            backgroundColor: AppColors.sage,
           ),
         );
         _loadData();
@@ -2417,7 +2402,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
-            backgroundColor: _foRose,
+            backgroundColor: AppColors.rose,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -2429,10 +2414,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: _foCard,
+        backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: _foBorder2),
+          side: const BorderSide(color: AppColors.border2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -2444,13 +2429,13 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: _foWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Voulez-vous vraiment annuler ce défi ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _foMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -2462,9 +2447,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foCard2,
+                          color: AppColors.card2,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foBorder2),
+                          border: Border.all(color: AppColors.border2),
                         ),
                         child: Center(
                           child: Text(
@@ -2472,7 +2457,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
-                              color: _foMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -2486,9 +2471,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       child: Container(
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _foRoseDim,
+                          color: AppColors.roseDim,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: _foRose),
+                          border: Border.all(color: AppColors.rose),
                         ),
                         child: Center(
                           child: Text(
@@ -2496,7 +2481,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             style: GoogleFonts.syne(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: _foRose,
+                              color: AppColors.rose,
                             ),
                           ),
                         ),
@@ -2560,7 +2545,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(accept ? 'Défi accepté !' : 'Défi refusé'),
-          backgroundColor: accept ? _foSage : _foMuted2,
+          backgroundColor: accept ? AppColors.sage : AppColors.muted2,
         ),
       );
       _loadData();
@@ -2584,15 +2569,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
       if (result.scoreValidated) {
         message = 'Score validé ! Les deux équipes ont confirmé le résultat.';
-        bgColor = _foSage;
+        bgColor = AppColors.sage;
       } else if (result.scoreConflict) {
         message =
             'Conflit de score ! Le score soumis ne correspond pas à celui de l\'adversaire.';
-        bgColor = _foAmber;
+        bgColor = AppColors.amber;
       } else {
         message =
             'Score enregistré. En attente de confirmation de l\'adversaire.';
-        bgColor = _foAmberD;
+        bgColor = AppColors.amberD;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

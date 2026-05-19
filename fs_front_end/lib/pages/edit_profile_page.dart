@@ -7,18 +7,7 @@ import 'package:image_cropper/image_cropper.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../services/cloudinary_service.dart';
-
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _eBg = Color(0xFF0A0C10);
-const _eCard = Color(0xFF181A21);
-const _eCard2 = Color(0xFF1E2029);
-const _eBorder2 = Color(0x21FFFFFF);
-const _eAmber = Color(0xFFFF7F2A);
-const _eAmberSoft = Color(0xFFFF9A55);
-const _eAmberD = Color(0xFFD96820);
-const _eAmberDim = Color(0x1CFF7F2A);
-const _eWhite = Color(0xFFF0F2F5);
-const _eMuted2 = Color(0x9EF0F2F5);
+import '../theme/app_colors.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -233,9 +222,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _eBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _eCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: GestureDetector(
@@ -245,11 +234,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _eCard2,
+              color: AppColors.card2,
               shape: BoxShape.circle,
-              border: Border.all(color: _eBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
-            child: const Icon(Icons.arrow_back, color: _eMuted2, size: 16),
+            child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
           ),
         ),
         title: Text(
@@ -258,7 +247,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: _eWhite,
+            color: AppColors.white,
           ),
         ),
         centerTitle: true,
@@ -287,13 +276,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 style: GoogleFonts.syne(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: _eWhite,
+                  color: AppColors.white,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Mettez à jour vos informations de profil',
-                style: GoogleFonts.dmSans(fontSize: 13, color: _eMuted2),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
               ),
               const SizedBox(height: 32),
 
@@ -308,15 +297,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     height: 120,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [_eAmberSoft, _eAmberD],
+                        colors: [AppColors.amberSoft, AppColors.amberD],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       shape: BoxShape.circle,
-                      border: Border.all(color: _eAmber, width: 2),
+                      border: Border.all(color: AppColors.amber, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: _eAmber.withValues(alpha: 0.2),
+                          color: AppColors.amber.withValues(alpha: 0.2),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -369,7 +358,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                         style: GoogleFonts.syne(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 32,
-                                          color: _eCard,
+                                          color: AppColors.card,
                                         ),
                                       ),
                                     ),
@@ -385,7 +374,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   style: GoogleFonts.syne(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 32,
-                                    color: _eCard,
+                                    color: AppColors.card,
                                   ),
                                 ),
                               );
@@ -415,7 +404,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         'Appuyez pour changer',
                         style: GoogleFonts.dmSans(
                           fontSize: 11,
-                          color: _eMuted2,
+                          color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
                         ),
                       )
@@ -428,7 +417,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: _eAmberDim,
+                              color: AppColors.amberDim,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -436,7 +425,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               style: GoogleFonts.syne(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: _eAmber,
+                                color: AppColors.amber,
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -448,7 +437,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               'Annuler',
                               style: GoogleFonts.dmSans(
                                 fontSize: 10,
-                                color: _eMuted2,
+                                color: AppColors.muted2,
                                 decoration: TextDecoration.underline,
                               ),
                             ),
@@ -464,25 +453,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                style: GoogleFonts.dmSans(fontSize: 14, color: _eWhite),
-                cursorColor: _eAmber,
+                style: GoogleFonts.dmSans(fontSize: 14, color: AppColors.white),
+                cursorColor: AppColors.amber,
                 decoration: InputDecoration(
                   hintText: 'Ex : 06 12 34 56 78',
-                  hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _eMuted2),
+                  hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                   prefixIcon: const Icon(
                     Icons.phone_outlined,
-                    color: _eAmber,
+                    color: AppColors.amber,
                     size: 18,
                   ),
                   filled: true,
-                  fillColor: _eCard,
+                  fillColor: AppColors.card,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _eBorder2),
+                    borderSide: const BorderSide(color: AppColors.border2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _eAmber, width: 1.5),
+                    borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -520,24 +509,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _selectedPosition,
-                style: GoogleFonts.dmSans(fontSize: 14, color: _eWhite),
-                dropdownColor: _eCard2,
-                iconEnabledColor: _eMuted2,
+                style: GoogleFonts.dmSans(fontSize: 14, color: AppColors.white),
+                dropdownColor: AppColors.card2,
+                iconEnabledColor: AppColors.muted2,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(
                     Icons.sports_soccer_outlined,
-                    color: _eAmber,
+                    color: AppColors.amber,
                     size: 18,
                   ),
                   filled: true,
-                  fillColor: _eCard,
+                  fillColor: AppColors.card,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _eBorder2),
+                    borderSide: const BorderSide(color: AppColors.border2),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _eAmber, width: 1.5),
+                    borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -546,7 +535,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 hint: Text(
                   'Sélectionnez votre poste',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: _eMuted2),
+                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                 ),
                 items: _positions.map((pos) {
                   return DropdownMenuItem<String>(value: pos, child: Text(pos));
@@ -563,14 +552,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   height: 52,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [_eAmberSoft, _eAmberD],
+                      colors: [AppColors.amberSoft, AppColors.amberD],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: _eAmber.withValues(alpha: 0.3),
+                        color: AppColors.amber.withValues(alpha: 0.3),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -609,7 +598,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: _eBorder2, width: 1.5),
+                    border: Border.all(color: AppColors.border2, width: 1.5),
                   ),
                   child: Center(
                     child: Text(
@@ -617,7 +606,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       style: GoogleFonts.syne(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _eMuted2,
+                        color: AppColors.muted2,
                       ),
                     ),
                   ),
@@ -638,7 +627,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         fontSize: 10,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.4,
-        color: _eMuted2,
+        color: AppColors.muted2,
       ),
     );
   }

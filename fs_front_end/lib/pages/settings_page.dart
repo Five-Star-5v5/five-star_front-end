@@ -6,18 +6,7 @@ import '../providers/theme_provider.dart';
 import '../auth/login.dart';
 import '../services/contact_service.dart';
 import 'edit_profile_page.dart';
-
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _sBg = Color(0xFF0A0C10);
-const _sCard = Color(0xFF181A21);
-const _sCard2 = Color(0xFF1E2029);
-const _sBorder2 = Color(0x21FFFFFF);
-const _sAmber = Color(0xFFFF7F2A);
-const _sAmberDim = Color(0x1CFF7F2A);
-const _sRose = Color(0xFFD4607A);
-const _sRoseDim = Color(0x1CD4607A);
-const _sWhite = Color(0xFFF0F2F5);
-const _sMuted2 = Color(0x9EF0F2F5);
+import '../theme/app_colors.dart';
 
 class SettingsPage extends StatelessWidget {
   final AuthProvider authProvider;
@@ -27,9 +16,9 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _sBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _sCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: GestureDetector(
@@ -39,11 +28,11 @@ class SettingsPage extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: _sCard2,
+              color: AppColors.card2,
               shape: BoxShape.circle,
-              border: Border.all(color: _sBorder2),
+              border: Border.all(color: AppColors.border2),
             ),
-            child: const Icon(Icons.arrow_back, color: _sMuted2, size: 16),
+            child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
           ),
         ),
         title: Text(
@@ -52,7 +41,7 @@ class SettingsPage extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: _sWhite,
+            color: AppColors.white,
           ),
         ),
         centerTitle: true,
@@ -78,8 +67,8 @@ class SettingsPage extends StatelessWidget {
           // Modifier le profil
           _buildRow(
             icon: Icons.edit_outlined,
-            iconColor: _sAmber,
-            iconBg: _sAmberDim,
+            iconColor: AppColors.amber,
+            iconBg: AppColors.amberDim,
             label: 'Modifier le profil',
             subtitle: 'Mettre à jour mes informations',
             onTap: () => Navigator.push(
@@ -97,8 +86,8 @@ class SettingsPage extends StatelessWidget {
             builder: (context, themeProvider, _) {
               return _buildToggleRow(
                 icon: themeProvider.isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-                iconColor: _sAmber,
-                iconBg: _sAmberDim,
+                iconColor: AppColors.amber,
+                iconBg: AppColors.amberDim,
                 label: themeProvider.isDark ? 'Thème sombre' : 'Thème clair',
                 subtitle: 'Changer l\'apparence de l\'application',
                 value: themeProvider.isDark,
@@ -114,8 +103,8 @@ class SettingsPage extends StatelessWidget {
 
           _buildRow(
             icon: Icons.mail_outline,
-            iconColor: _sAmber,
-            iconBg: _sAmberDim,
+            iconColor: AppColors.amber,
+            iconBg: AppColors.amberDim,
             label: 'Nous contacter',
             subtitle: 'Envoyer un message à l\'équipe Kobeta',
             onTap: () => _showContactDialog(context),
@@ -129,11 +118,11 @@ class SettingsPage extends StatelessWidget {
           // Supprimer le compte
           _buildRow(
             icon: Icons.delete_outline,
-            iconColor: _sRose,
-            iconBg: _sRoseDim,
+            iconColor: AppColors.rose,
+            iconBg: AppColors.roseDim,
             label: 'Supprimer mon compte',
             subtitle: 'Action irréversible',
-            trailingColor: _sRose,
+            trailingColor: AppColors.rose,
             onTap: () => _showDeleteAccountDialog(context),
           ),
         ],
@@ -151,7 +140,7 @@ class SettingsPage extends StatelessWidget {
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
-          color: _sMuted2,
+          color: AppColors.muted2,
         ),
       ),
     );
@@ -172,9 +161,9 @@ class SettingsPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: _sCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _sBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
         child: Row(
           children: [
@@ -199,20 +188,20 @@ class SettingsPage extends StatelessWidget {
                     style: GoogleFonts.syne(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: trailingColor ?? _sWhite,
+                      color: trailingColor ?? AppColors.white,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _sMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: trailingColor ?? _sMuted2,
+              color: trailingColor ?? AppColors.muted2,
               size: 18,
             ),
           ],
@@ -236,9 +225,9 @@ class SettingsPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: _sCard,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _sBorder2),
+          border: Border.all(color: AppColors.border2),
         ),
         child: Row(
           children: [
@@ -261,13 +250,13 @@ class SettingsPage extends StatelessWidget {
                     style: GoogleFonts.syne(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: _sWhite,
+                      color: AppColors.white,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: _sMuted2),
+                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -275,10 +264,10 @@ class SettingsPage extends StatelessWidget {
             Switch(
               value: value,
               onChanged: (_) => onToggle(),
-              activeThumbColor: _sAmber,
-              activeTrackColor: _sAmberDim,
-              inactiveThumbColor: _sMuted2,
-              inactiveTrackColor: _sCard2,
+              activeThumbColor: AppColors.amber,
+              activeTrackColor: AppColors.amberDim,
+              inactiveThumbColor: AppColors.muted2,
+              inactiveTrackColor: AppColors.card2,
             ),
           ],
         ),
@@ -300,10 +289,10 @@ class SettingsPage extends StatelessWidget {
         return StatefulBuilder(
           builder: (ctx, setDialog) {
             return Dialog(
-              backgroundColor: _sCard,
+              backgroundColor: AppColors.card,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: _sBorder2),
+                side: const BorderSide(color: AppColors.border2),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -318,10 +307,10 @@ class SettingsPage extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: _sAmberDim,
+                            color: AppColors.amberDim,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.mail_outline, color: _sAmber, size: 18),
+                          child: const Icon(Icons.mail_outline, color: AppColors.amber, size: 18),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -329,7 +318,7 @@ class SettingsPage extends StatelessWidget {
                           style: GoogleFonts.syne(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: _sWhite,
+                            color: AppColors.white,
                           ),
                         ),
                       ],
@@ -343,27 +332,27 @@ class SettingsPage extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
-                        color: _sMuted2,
+                        color: AppColors.muted2,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _sWhite),
-                      cursorColor: _sAmber,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'votre@email.com',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _sMuted2),
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                         filled: true,
-                        fillColor: _sCard2,
+                        fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _sBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _sAmber, width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       ),
@@ -377,27 +366,27 @@ class SettingsPage extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
-                        color: _sMuted2,
+                        color: AppColors.muted2,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: messageController,
                       maxLines: 5,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _sWhite),
-                      cursorColor: _sAmber,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'Décrivez votre problème ou votre demande…',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _sMuted2),
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
                         filled: true,
-                        fillColor: _sCard2,
+                        fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _sBorder2),
+                          borderSide: const BorderSide(color: AppColors.border2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: _sAmber, width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         alignLabelWithHint: true,
@@ -409,7 +398,7 @@ class SettingsPage extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         errorMsg!,
-                        style: GoogleFonts.dmSans(fontSize: 11, color: _sRose),
+                        style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.rose),
                       ),
                     ],
 
@@ -424,9 +413,9 @@ class SettingsPage extends StatelessWidget {
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: _sCard2,
+                                color: AppColors.card2,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _sBorder2),
+                                border: Border.all(color: AppColors.border2),
                               ),
                               child: Center(
                                 child: Text(
@@ -434,7 +423,7 @@ class SettingsPage extends StatelessWidget {
                                   style: GoogleFonts.syne(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: _sMuted2,
+                                    color: AppColors.muted2,
                                   ),
                                 ),
                               ),
@@ -474,7 +463,7 @@ class SettingsPage extends StatelessWidget {
                                               'Message envoyé ! Un email de confirmation a été envoyé à $email.',
                                               style: GoogleFonts.dmSans(fontSize: 13),
                                             ),
-                                            backgroundColor: _sAmber,
+                                            backgroundColor: AppColors.amber,
                                             duration: const Duration(seconds: 4),
                                           ),
                                         );
@@ -489,9 +478,9 @@ class SettingsPage extends StatelessWidget {
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: _sAmberDim,
+                                color: AppColors.amberDim,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _sAmber, width: 1.5),
+                                border: Border.all(color: AppColors.amber, width: 1.5),
                               ),
                               child: Center(
                                 child: isLoading
@@ -499,7 +488,7 @@ class SettingsPage extends StatelessWidget {
                                         width: 18,
                                         height: 18,
                                         child: CircularProgressIndicator(
-                                          color: _sAmber,
+                                          color: AppColors.amber,
                                           strokeWidth: 2,
                                         ),
                                       )
@@ -508,7 +497,7 @@ class SettingsPage extends StatelessWidget {
                                         style: GoogleFonts.syne(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
-                                          color: _sAmber,
+                                          color: AppColors.amber,
                                         ),
                                       ),
                               ),
@@ -538,10 +527,10 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return Dialog(
-          backgroundColor: _sCard,
+          backgroundColor: AppColors.card,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: _sBorder2),
+            side: const BorderSide(color: AppColors.border2),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -556,12 +545,12 @@ class SettingsPage extends StatelessWidget {
                       width: 38,
                       height: 38,
                       decoration: BoxDecoration(
-                        color: _sRoseDim,
+                        color: AppColors.roseDim,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.warning_amber_outlined,
-                        color: _sRose,
+                        color: AppColors.rose,
                         size: 18,
                       ),
                     ),
@@ -571,7 +560,7 @@ class SettingsPage extends StatelessWidget {
                       style: GoogleFonts.syne(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: _sRose,
+                        color: AppColors.rose,
                       ),
                     ),
                   ],
@@ -583,7 +572,7 @@ class SettingsPage extends StatelessWidget {
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _sWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -605,7 +594,7 @@ class SettingsPage extends StatelessWidget {
                             width: 4,
                             height: 4,
                             decoration: const BoxDecoration(
-                              color: _sRose,
+                              color: AppColors.rose,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -616,7 +605,7 @@ class SettingsPage extends StatelessWidget {
                             t,
                             style: GoogleFonts.dmSans(
                               fontSize: 12,
-                              color: _sMuted2,
+                              color: AppColors.muted2,
                             ),
                           ),
                         ),
@@ -631,7 +620,7 @@ class SettingsPage extends StatelessWidget {
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _sWhite,
+                    color: AppColors.white,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -642,25 +631,25 @@ class SettingsPage extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
-                    color: _sWhite,
+                    color: AppColors.white,
                   ),
-                  cursorColor: _sRose,
+                  cursorColor: AppColors.rose,
                   decoration: InputDecoration(
                     hintText: 'SUPPRIMER',
                     hintStyle: GoogleFonts.syne(
                       fontSize: 13,
                       letterSpacing: 2,
-                      color: _sMuted2,
+                      color: AppColors.muted2,
                     ),
                     filled: true,
-                    fillColor: _sCard2,
+                    fillColor: AppColors.card2,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _sBorder2),
+                      borderSide: const BorderSide(color: AppColors.border2),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _sRose, width: 1.5),
+                      borderSide: const BorderSide(color: AppColors.rose, width: 1.5),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -678,9 +667,9 @@ class SettingsPage extends StatelessWidget {
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: _sCard2,
+                            color: AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: _sBorder2),
+                            border: Border.all(color: AppColors.border2),
                           ),
                           child: Center(
                             child: Text(
@@ -688,7 +677,7 @@ class SettingsPage extends StatelessWidget {
                               style: GoogleFonts.syne(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _sMuted2,
+                                color: AppColors.muted2,
                               ),
                             ),
                           ),
@@ -708,7 +697,7 @@ class SettingsPage extends StatelessWidget {
                                   barrierDismissible: false,
                                   builder: (_) => const Center(
                                     child: CircularProgressIndicator(
-                                      color: _sRose,
+                                      color: AppColors.rose,
                                     ),
                                   ),
                                 );
@@ -736,7 +725,7 @@ class SettingsPage extends StatelessWidget {
                                         content: Text(
                                           'Erreur lors de la suppression du compte',
                                         ),
-                                        backgroundColor: _sRose,
+                                        backgroundColor: AppColors.rose,
                                       ),
                                     );
                                   }
@@ -747,7 +736,7 @@ class SettingsPage extends StatelessWidget {
                                     content: Text(
                                       'Veuillez taper "SUPPRIMER" pour confirmer',
                                     ),
-                                    backgroundColor: _sRose,
+                                    backgroundColor: AppColors.rose,
                                   ),
                                 );
                               }
@@ -755,9 +744,9 @@ class SettingsPage extends StatelessWidget {
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
-                                color: _sRoseDim,
+                                color: AppColors.roseDim,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: _sRose, width: 1.5),
+                                border: Border.all(color: AppColors.rose, width: 1.5),
                               ),
                               child: Center(
                                 child: Text(
@@ -765,7 +754,7 @@ class SettingsPage extends StatelessWidget {
                                   style: GoogleFonts.syne(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: _sRose,
+                                    color: AppColors.rose,
                                   ),
                                 ),
                               ),

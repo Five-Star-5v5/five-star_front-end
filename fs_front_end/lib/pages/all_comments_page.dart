@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/teams_service.dart';
-
-const _acBg     = Color(0xFF0A0C10);
-const _acCard   = Color(0xFF181A21);
-const _acBorder = Color(0x21FFFFFF);
-const _acRose   = Color(0xFFD4607A);
-const _acWhite  = Color(0xFFF0F2F5);
-const _acMuted  = Color(0x9EF0F2F5);
+import '../theme/app_colors.dart';
 
 class AllCommentsPage extends StatelessWidget {
   final String username;
@@ -22,28 +16,28 @@ class AllCommentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _acBg,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: _acCard,
+        backgroundColor: AppColors.card,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: _acMuted),
+        iconTheme: const IconThemeData(color: AppColors.muted2),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Commentaires reçus',
-              style: GoogleFonts.syne(color: _acWhite, fontWeight: FontWeight.w700, fontSize: 15),
+              style: GoogleFonts.syne(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 15),
             ),
             Text(
               username,
-              style: GoogleFonts.dmSans(color: _acMuted, fontSize: 11),
+              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
             ),
           ],
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: _acBorder),
+          child: Container(height: 1, color: AppColors.border2),
         ),
       ),
       body: comments.isEmpty
@@ -51,9 +45,9 @@ class AllCommentsPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.chat_bubble_outline, color: _acMuted.withValues(alpha: 0.4), size: 40),
+                  Icon(Icons.chat_bubble_outline, color: AppColors.muted2.withValues(alpha: 0.4), size: 40),
                   const SizedBox(height: 12),
-                  Text('Aucun commentaire', style: GoogleFonts.syne(color: _acMuted, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text('Aucun commentaire', style: GoogleFonts.syne(color: AppColors.muted2, fontSize: 14, fontWeight: FontWeight.w600)),
                 ],
               ),
             )
@@ -80,9 +74,9 @@ class _CommentCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _acCard,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.isAbsent ? _acRose.withValues(alpha: 0.3) : _acBorder),
+        border: Border.all(color: c.isAbsent ? AppColors.rose.withValues(alpha: 0.3) : AppColors.border2),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,14 +85,14 @@ class _CommentCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _acBorder,
+              color: AppColors.border2,
               shape: BoxShape.circle,
               image: c.authorAvatarUrl != null
                   ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
                   : null,
             ),
             child: c.authorAvatarUrl == null
-                ? const Icon(Icons.person_outline, size: 18, color: _acMuted)
+                ? const Icon(Icons.person_outline, size: 18, color: AppColors.muted2)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -110,7 +104,7 @@ class _CommentCard extends StatelessWidget {
                   children: [
                     Text(
                       c.authorUsername ?? 'Joueur',
-                      style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: _acWhite),
+                      style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
                     ),
                     const Spacer(),
                     if (c.isAbsent)
@@ -118,17 +112,17 @@ class _CommentCard extends StatelessWidget {
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _acRose.withValues(alpha: 0.15),
+                          color: AppColors.rose.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: _acRose)),
+                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.rose)),
                       ),
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: _acMuted)),
+                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2)),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 12, color: _acMuted)),
+                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2)),
                 ],
               ],
             ),
