@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../auth/login.dart';
+import '../services/contact_service.dart';
 import 'edit_profile_page.dart';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -104,6 +105,20 @@ class SettingsPage extends StatelessWidget {
                 onToggle: () => themeProvider.toggleTheme(),
               );
             },
+          ),
+
+          // ── Section SUPPORT ─────────────────────────────────────────────────
+          const SizedBox(height: 16),
+          _sectionLabel('SUPPORT'),
+          const SizedBox(height: 8),
+
+          _buildRow(
+            icon: Icons.mail_outline,
+            iconColor: _sAmber,
+            iconBg: _sAmberDim,
+            label: 'Nous contacter',
+            subtitle: 'Envoyer un message à l\'équipe Kobeta',
+            onTap: () => _showContactDialog(context),
           ),
 
           // ── Section DANGER ──────────────────────────────────────────────────
@@ -269,6 +284,250 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // ── Contact dialog ─────────────────────────────────────────────────────────
+  void _showContactDialog(BuildContext context) {
+    final emailController = TextEditingController(text: authProvider.currentUser?.email ?? '');
+    final messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        bool isLoading = false;
+        String? errorMsg;
+
+        return StatefulBuilder(
+          builder: (ctx, setDialog) {
+            return Dialog(
+              backgroundColor: _sCard,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: _sBorder2),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: _sAmberDim,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.mail_outline, color: _sAmber, size: 18),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Nous contacter',
+                          style: GoogleFonts.syne(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: _sWhite,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Email field
+                    Text(
+                      'Votre email',
+                      style: GoogleFonts.syne(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.6,
+                        color: _sMuted2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: _sWhite),
+                      cursorColor: _sAmber,
+                      decoration: InputDecoration(
+                        hintText: 'votre@email.com',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _sMuted2),
+                        filled: true,
+                        fillColor: _sCard2,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _sBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _sAmber, width: 1.5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Message field
+                    Text(
+                      'Votre message',
+                      style: GoogleFonts.syne(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.6,
+                        color: _sMuted2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: messageController,
+                      maxLines: 5,
+                      style: GoogleFonts.dmSans(fontSize: 13, color: _sWhite),
+                      cursorColor: _sAmber,
+                      decoration: InputDecoration(
+                        hintText: 'Décrivez votre problème ou votre demande…',
+                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: _sMuted2),
+                        filled: true,
+                        fillColor: _sCard2,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _sBorder2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: _sAmber, width: 1.5),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+
+                    // Error message
+                    if (errorMsg != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        errorMsg!,
+                        style: GoogleFonts.dmSans(fontSize: 11, color: _sRose),
+                      ),
+                    ],
+
+                    const SizedBox(height: 20),
+
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => Navigator.of(dialogContext).pop(),
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: _sCard2,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _sBorder2),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Annuler',
+                                  style: GoogleFonts.syne(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _sMuted2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: isLoading
+                                ? null
+                                : () async {
+                                    final email = emailController.text.trim();
+                                    final msg = messageController.text.trim();
+
+                                    if (email.isEmpty) {
+                                      setDialog(() => errorMsg = 'Veuillez saisir votre email.');
+                                      return;
+                                    }
+                                    if (msg.isEmpty) {
+                                      setDialog(() => errorMsg = 'Veuillez écrire un message.');
+                                      return;
+                                    }
+
+                                    setDialog(() { isLoading = true; errorMsg = null; });
+
+                                    try {
+                                      await ContactService.send(
+                                        fromEmail: email,
+                                        message: msg,
+                                      );
+                                      if (context.mounted) Navigator.of(dialogContext).pop();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Message envoyé ! Un email de confirmation a été envoyé à $email.',
+                                              style: GoogleFonts.dmSans(fontSize: 13),
+                                            ),
+                                            backgroundColor: _sAmber,
+                                            duration: const Duration(seconds: 4),
+                                          ),
+                                        );
+                                      }
+                                    } catch (_) {
+                                      setDialog(() {
+                                        isLoading = false;
+                                        errorMsg = 'Erreur lors de l\'envoi. Réessayez.';
+                                      });
+                                    }
+                                  },
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: _sAmberDim,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: _sAmber, width: 1.5),
+                              ),
+                              child: Center(
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: _sAmber,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text(
+                                        'Envoyer',
+                                        style: GoogleFonts.syne(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: _sAmber,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((_) {
+      emailController.dispose();
+      messageController.dispose();
+    });
   }
 
   // ── Delete account dialog ──────────────────────────────────────────────────
