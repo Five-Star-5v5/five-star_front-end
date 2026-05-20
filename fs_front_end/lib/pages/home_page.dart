@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../theme_config/colors_config.dart';
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
+import '../widgets/city_autocomplete_field.dart';
 import '../providers/teams_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/auth_provider.dart';
@@ -5022,17 +5024,17 @@ class _HomePageState extends State<HomePage>
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: TextField(
+                                child: CityAutocompleteField(
                                   controller: locationController,
                                   onChanged: (_) => setState(() {}),
                                   style: const TextStyle(
                                     color: AppColors.white,
                                     fontSize: 13,
                                   ),
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     hintText:
                                         'Lieu du match (ex: Stade Jean-Bouin)',
-                                    hintStyle: const TextStyle(
+                                    hintStyle: TextStyle(
                                       color: AppColors.muted2,
                                       fontSize: 12,
                                     ),
@@ -7394,7 +7396,7 @@ class _HomePageState extends State<HomePage>
                   Row(
                     children: [
                       Expanded(
-                        child: TextField(
+                        child: CityAutocompleteField(
                           controller: cityController,
                           style: const TextStyle(color: AppColors.white),
                           decoration: InputDecoration(
@@ -7419,6 +7421,14 @@ class _HomePageState extends State<HomePage>
                               vertical: 8,
                             ),
                           ),
+                          onSelected: (city) {
+                            setState(() {
+                              if (!selectedCities.contains(city)) {
+                                selectedCities.add(city);
+                              }
+                              cityController.clear();
+                            });
+                          },
                           onSubmitted: (value) {
                             if (value.trim().isNotEmpty) {
                               setState(() {
@@ -7652,86 +7662,123 @@ class _ModernPitchPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Bandes de gazon alternées
+    final double w = size.width;
+    final double h = size.height;
+
+    // 1. Bandes de gazon alternées — contraste marqué pour effet "tondu"
     final Paint stripePaint = Paint()..style = PaintingStyle.fill;
-    const int stripeCount = 8;
-    final double stripeWidth = size.width / stripeCount;
+    const int stripeCount = 10;
+    final double stripeWidth = w / stripeCount;
     for (int i = 0; i < stripeCount; i++) {
       stripePaint.color = i.isEven
-          ? const Color(0xFF1E4A23)
-          : const Color(0xFF194020);
+          ? const Color(0xFF1F5429) // vert clair (bande tondue)
+          : const Color(0xFF153519); // vert foncé
       canvas.drawRect(
-        Rect.fromLTWH(i * stripeWidth, 0, stripeWidth, size.height),
+        Rect.fromLTWH(i * stripeWidth, 0, stripeWidth, h),
         stripePaint,
       );
     }
 
-    final Paint paint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
+    // 2. Overlay radial gradient — bords légèrement plus sombres pour la profondeur
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()
+        ..shader = RadialGradient(
+          center: Alignment.center,
+          radius: 0.85,
+          colors: [
+            Colors.transparent,
+            Colors.black.withValues(alpha: 0.20),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, w, h)),
+    );
 
-    // Bordure du terrain
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+    // 3. Peintures réutilisables
+    final Paint lp = Paint()
+      ..color = Colors.white.withValues(alpha: 0.78)
+      ..strokeWidth = 1.4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final Paint dotPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.78)
+      ..style = PaintingStyle.fill;
+
+    const double m = 5.0; // marge intérieure
+
+    // Bordure du terrain (coins arrondis subtils)
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(m, m, w - m * 2, h - m * 2),
+        const Radius.circular(2),
+      ),
+      lp,
+    );
 
     // Ligne médiane
-    canvas.drawLine(
-      Offset(size.width / 2, 0),
-      Offset(size.width / 2, size.height),
-      paint,
-    );
+    canvas.drawLine(Offset(w / 2, m), Offset(w / 2, h - m), lp);
 
     // Cercle central
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.height * 0.12,
-      paint,
-    );
+    canvas.drawCircle(Offset(w / 2, h / 2), h * 0.16, lp);
 
     // Point central
-    final centerPaint = Paint()
-      ..color = lineColor
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 2, centerPaint);
+    canvas.drawCircle(Offset(w / 2, h / 2), 3, dotPaint);
 
-    // Zones de but
+    // Grandes surfaces (zones de réparation)
+    final double bigBoxW = w * 0.14;
+    final double bigBoxH = h * 0.56;
+    final double bigBoxY = (h - bigBoxH) / 2;
+    canvas.drawRect(Rect.fromLTWH(m, bigBoxY, bigBoxW, bigBoxH), lp);
     canvas.drawRect(
-      Rect.fromLTWH(
-        0,
-        size.height * 0.25,
-        size.width * 0.12,
-        size.height * 0.5,
-      ),
-      paint,
-    );
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width * 0.88,
-        size.height * 0.25,
-        size.width * 0.12,
-        size.height * 0.5,
-      ),
-      paint,
+      Rect.fromLTWH(w - m - bigBoxW, bigBoxY, bigBoxW, bigBoxH),
+      lp,
     );
 
-    // Petites zones
+    // Petites surfaces (6-yard box)
+    final double smallBoxW = w * 0.065;
+    final double smallBoxH = h * 0.30;
+    final double smallBoxY = (h - smallBoxH) / 2;
+    canvas.drawRect(Rect.fromLTWH(m, smallBoxY, smallBoxW, smallBoxH), lp);
     canvas.drawRect(
-      Rect.fromLTWH(
-        0,
-        size.height * 0.35,
-        size.width * 0.06,
-        size.height * 0.3,
-      ),
-      paint,
+      Rect.fromLTWH(w - m - smallBoxW, smallBoxY, smallBoxW, smallBoxH),
+      lp,
     );
-    canvas.drawRect(
-      Rect.fromLTWH(
-        size.width * 0.94,
-        size.height * 0.35,
-        size.width * 0.06,
-        size.height * 0.3,
-      ),
-      paint,
+
+    // Points de penalty
+    final double penX = w * 0.155;
+    canvas.drawCircle(Offset(penX, h / 2), 3, dotPaint);
+    canvas.drawCircle(Offset(w - penX, h / 2), 3, dotPaint);
+
+    // Arcs de penalty (D) — seulement la partie visible en dehors de la grande surface
+    final double arcR = h * 0.13;
+
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(m + bigBoxW, 0, w, h));
+    canvas.drawCircle(Offset(penX, h / 2), arcR, lp);
+    canvas.restore();
+
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, w - m - bigBoxW, h));
+    canvas.drawCircle(Offset(w - penX, h / 2), arcR, lp);
+    canvas.restore();
+
+    // Arcs de coin
+    final double cr = h * 0.07;
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(m, m), radius: cr),
+      0, math.pi / 2, false, lp,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(m, h - m), radius: cr),
+      -math.pi / 2, math.pi / 2, false, lp,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(w - m, m), radius: cr),
+      math.pi / 2, math.pi / 2, false, lp,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(w - m, h - m), radius: cr),
+      math.pi, math.pi / 2, false, lp,
     );
   }
 

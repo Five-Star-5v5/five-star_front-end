@@ -6,6 +6,7 @@ import '../services/teams_service.dart';
 import '../providers/teams_provider.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/city_autocomplete_field.dart';
 
 /// Page pour trouver des adversaires et gérer les défis
 class FindOpponentsPage extends StatefulWidget {
@@ -1766,7 +1767,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     const SizedBox(height: 12),
 
                     // Lieu
-                    TextField(
+                    CityAutocompleteField(
                       controller: locationController,
                       style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
                       decoration: InputDecoration(

@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
 
 import '../theme/app_colors.dart';
+import '../widgets/city_autocomplete_field.dart';
 
 // ─── Top-level helpers ────────────────────────────────────────────────────────
 
@@ -1703,7 +1704,8 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: CityAutocompleteField(
+                        key: ValueKey('city_${e.key}'),
                         controller: e.value,
                         style: GoogleFonts.dmSans(
                           fontSize: 13,
