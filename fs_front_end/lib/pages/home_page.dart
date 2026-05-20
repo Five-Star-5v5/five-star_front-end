@@ -3557,12 +3557,20 @@ class _HomePageState extends State<HomePage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CircleAvatar(
-            radius: _playerAvatarRadius,
-            backgroundColor: Colors.white.withValues(alpha: 0.08),
+          Container(
+            width: _playerAvatarRadius * 2,
+            height: _playerAvatarRadius * 2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.14),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.45),
+                width: 1.5,
+              ),
+            ),
             child: Icon(
               isEditable ? Icons.add : Icons.person_outline,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.75),
               size: 22,
             ),
           ),
@@ -3570,10 +3578,10 @@ class _HomePageState extends State<HomePage>
           Text(
             position.shortName,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.80),
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              shadows: const [Shadow(color: Colors.black54, blurRadius: 4)],
+              shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
             ),
           ),
         ],
