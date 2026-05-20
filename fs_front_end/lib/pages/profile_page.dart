@@ -128,6 +128,48 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         // Logout
         GestureDetector(
           onTap: () async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: AppColors.card,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: AppColors.border2),
+                ),
+                title: Text(
+                  'Déconnexion',
+                  style: GoogleFonts.syne(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                content: Text(
+                  'Tu veux vraiment te déconnecter ?',
+                  style: GoogleFonts.dmSans(color: AppColors.muted2),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: Text(
+                      'Annuler',
+                      style: GoogleFonts.dmSans(color: AppColors.muted2),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: Text(
+                      'Déconnecter',
+                      style: GoogleFonts.dmSans(
+                        color: AppColors.rose,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed != true) return;
+            if (!context.mounted) return;
             final navigator = Navigator.of(context);
             await authProvider.logout();
             navigator.pushAndRemoveUntil(
