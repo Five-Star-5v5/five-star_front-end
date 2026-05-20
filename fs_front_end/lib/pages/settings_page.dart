@@ -6,6 +6,7 @@ import '../providers/theme_provider.dart';
 import '../auth/login.dart';
 import '../services/contact_service.dart';
 import 'edit_profile_page.dart';
+import 'tos_page.dart';
 import '../theme/app_colors.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -108,6 +109,19 @@ class SettingsPage extends StatelessWidget {
             label: 'Nous contacter',
             subtitle: 'Envoyer un message à l\'équipe Kobeta',
             onTap: () => _showContactDialog(context),
+          ),
+          const SizedBox(height: 8),
+
+          _buildRow(
+            icon: Icons.description_outlined,
+            iconColor: AppColors.amber,
+            iconBg: AppColors.amberDim,
+            label: "Conditions d'utilisation",
+            subtitle: 'CGU — Version 1.1 — 19 mai 2026',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TosPage()),
+            ),
           ),
 
           // ── Section DANGER ──────────────────────────────────────────────────

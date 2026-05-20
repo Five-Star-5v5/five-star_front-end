@@ -1,10 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'login.dart';
 import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
-
+import '../pages/tos_page.dart';
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
 
@@ -612,11 +613,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
   // ── Terms row ─────────────────────────────────────────────────────────────
   Widget _buildTermsRow() {
-    return GestureDetector(
-      onTap: () => setState(() => _acceptTerms = !_acceptTerms),
-      child: Row(
-        children: [
-          AnimatedContainer(
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _acceptTerms = !_acceptTerms),
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             width: 18,
             height: 18,
@@ -632,26 +633,31 @@ class _SignUpPageState extends State<SignUpPage> {
                 ? const Icon(Icons.check_rounded, size: 12, color: AppColors.night)
                 : null,
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: RichText(
-              text: const TextSpan(
-                style: TextStyle(fontSize: 11, color: AppColors.muted2),
-                children: [
-                  TextSpan(text: "J'accepte les "),
-                  TextSpan(
-                    text: "conditions d'utilisation",
-                    style: TextStyle(
-                      color: AppColors.amber,
-                      fontWeight: FontWeight.w700,
-                    ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 11, color: AppColors.muted2),
+              children: [
+                const TextSpan(text: "J'accepte les "),
+                TextSpan(
+                  text: "conditions d'utilisation",
+                  style: const TextStyle(
+                    color: AppColors.amber,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
-              ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TosPage()),
+                        ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
