@@ -471,16 +471,20 @@ class SettingsPage extends StatelessWidget {
                                       );
                                       if (context.mounted) Navigator.of(dialogContext).pop();
                                       if (context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Message envoyé ! Un email de confirmation a été envoyé à $email.',
-                                              style: GoogleFonts.dmSans(fontSize: 13),
-                                            ),
-                                            backgroundColor: AppColors.amber,
-                                            duration: const Duration(seconds: 4),
-                                          ),
-                                        );
+                                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'Message envoyé ! Un email de confirmation a été envoyé à $email.',
+                                                  style: GoogleFonts.dmSans(fontSize: 13),
+                                                ),
+                                                backgroundColor: AppColors.amber,
+                                                duration: const Duration(seconds: 4),
+                                              ),
+                                            );
+                                          }
+                                        });
                                       }
                                     } catch (_) {
                                       setDialog(() {
