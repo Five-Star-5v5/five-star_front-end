@@ -1040,17 +1040,12 @@ class TeamsService {
       if (response.statusCode == 201) {
         return MatchChallenge.fromJson(jsonDecode(response.body));
       } else if (response.statusCode == 400) {
-        // Essayer de décoder le message d'erreur du serveur
+        String errorMessage = 'Erreur lors de la création du défi';
         try {
           final errorBody = jsonDecode(response.body);
-          final errorMessage =
-              errorBody['detail'] ?? 'Erreur lors de la création du défi';
-          throw Exception(errorMessage);
-        } catch (_) {
-          throw Exception(
-            'Erreur lors de la création du défi (${response.statusCode})',
-          );
-        }
+          errorMessage = errorBody['detail'] ?? errorBody['message'] ?? errorMessage;
+        } catch (_) {}
+        throw Exception(errorMessage);
       } else {
         throw Exception('Erreur serveur lors de la création du défi');
       }

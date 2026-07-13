@@ -66,7 +66,7 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
       final resp = await http_client
           .get(uri, headers: {
             'Accept-Language': 'fr',
-            'User-Agent': 'FiveStar5v5App/1.0',
+            'User-Agent': 'KobetaApp/1.0',
           })
           .timeout(const Duration(seconds: 5));
       if (!mounted) return;

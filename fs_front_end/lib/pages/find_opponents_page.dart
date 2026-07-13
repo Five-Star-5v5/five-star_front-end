@@ -474,31 +474,60 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             ],
 
             const SizedBox(height: 14),
-            GestureDetector(
-              onTap: () => _showChallengeDialog(context, team),
-              child: Container(
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.amber, AppColors.amberD],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+            Builder(builder: (context) {
+              final alreadySent = _sentChallenges.any(
+                (c) =>
+                    c.challengedTeamId == team.teamId &&
+                    (c.status == ChallengeStatus.pending ||
+                        c.status == ChallengeStatus.accepted),
+              );
+              if (alreadySent) {
+                return Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.muted2.withValues(alpha: 0.3)),
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(
-                    'Défier',
-                    style: GoogleFonts.syne(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      letterSpacing: 0.6,
-                      color: AppColors.night,
+                  child: Center(
+                    child: Text(
+                      'Défi envoyé',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 0.6,
+                        color: AppColors.muted2,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return GestureDetector(
+                onTap: () => _showChallengeDialog(context, team),
+                child: Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.amber, AppColors.amberD],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Défier',
+                      style: GoogleFonts.syne(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 0.6,
+                        color: AppColors.night,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),
@@ -2395,8 +2424,12 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             backgroundColor: AppColors.sage,
           ),
         );
-        _loadData();
-        _tabController.animateTo(1);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _loadData();
+            _tabController.animateTo(1);
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
