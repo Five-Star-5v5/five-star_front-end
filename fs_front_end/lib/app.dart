@@ -60,6 +60,7 @@ class _FootAppState extends State<FootApp> {
 
         return MaterialApp(
           title: 'Foot 5 Réservation',
+          debugShowCheckedModeBanner: false,
           theme: _lightTheme,
           darkTheme: _darkTheme,
           themeMode: theme.mode,

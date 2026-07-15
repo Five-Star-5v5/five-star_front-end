@@ -359,53 +359,28 @@ class _WelcomePageState extends State<WelcomePage>
               MaterialPageRoute(builder: (_) => const LoginPage()),
             ),
           ),
-          const SizedBox(height: 16),
-          // Divider
-          Row(
-            children: [
-              Expanded(child: Container(height: 1, color: AppColors.border)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  'OU CONTINUER AVEC',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.muted,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              Expanded(child: Container(height: 1, color: AppColors.border)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Social buttons
-          Row(
-            children: [
-              Expanded(
-                child: _SocialButton(
-                  label: 'Google',
-                  icon: Image.asset(
-                    'assets/logos/google_logo_icon.png',
-                    height: 18,
-                  ),
-                  onTap: () {},
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _SocialButton(
-                  label: 'Apple',
-                  icon: Image.asset(
-                    'assets/logos/apple_logo_icon.png',
-                    height: 18,
-                  ),
-                  onTap: () {},
-                ),
-              ),
-            ],
-          ),
+          // TODO: réactiver Google/Apple sign-in
+          // const SizedBox(height: 16),
+          // Row(children: [
+          //   Expanded(child: Container(height: 1, color: AppColors.border)),
+          //   const Padding(
+          //     padding: EdgeInsets.symmetric(horizontal: 10),
+          //     child: Text('OU CONTINUER AVEC',
+          //         style: TextStyle(fontSize: 10, color: AppColors.muted,
+          //             fontWeight: FontWeight.w600, letterSpacing: 1)),
+          //   ),
+          //   Expanded(child: Container(height: 1, color: AppColors.border)),
+          // ]),
+          // const SizedBox(height: 16),
+          // Row(children: [
+          //   Expanded(child: _SocialButton(label: 'Google',
+          //       icon: Image.asset('assets/logos/google_logo_icon.png', height: 18),
+          //       onTap: () {})),
+          //   const SizedBox(width: 10),
+          //   Expanded(child: _SocialButton(label: 'Apple',
+          //       icon: Image.asset('assets/logos/apple_logo_icon.png', height: 18),
+          //       onTap: () {})),
+          // ]),
         ],
       ),
     );
@@ -489,39 +464,27 @@ class _GhostButton extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: icon,
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.muted2,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.border2, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.card,
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        foregroundColor: AppColors.muted2,
-      ),
-    );
-  }
-}
+// TODO: réactiver Google/Apple sign-in
+// class _SocialButton extends StatelessWidget {
+//   const _SocialButton({required this.label, required this.icon, required this.onTap});
+//   final String label;
+//   final Widget icon;
+//   final VoidCallback onTap;
+//   @override
+//   Widget build(BuildContext context) {
+//     return OutlinedButton.icon(
+//       onPressed: onTap, icon: icon,
+//       label: Text(label, style: const TextStyle(fontSize: 11,
+//           fontWeight: FontWeight.w700, color: AppColors.muted2)),
+//       style: OutlinedButton.styleFrom(
+//         side: const BorderSide(color: AppColors.border2, width: 1),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//         backgroundColor: AppColors.card, padding: const EdgeInsets.symmetric(vertical: 11),
+//         foregroundColor: AppColors.muted2,
+//       ),
+//     );
+//   }
+// }
 
 // ── Background painter ─────────────────────────────────────────────────────
 class _BgPainter extends CustomPainter {

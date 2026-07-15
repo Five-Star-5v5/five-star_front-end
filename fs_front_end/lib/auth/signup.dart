@@ -326,10 +326,11 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 16),
                         _buildSignUpButton(),
                         const SizedBox(height: 16),
-                        _buildDivider(),
-                        const SizedBox(height: 14),
-                        _buildSocialButtons(),
-                        const SizedBox(height: 16),
+                        // TODO: réactiver Google/Apple sign-in
+                        // _buildDivider(),
+                        // const SizedBox(height: 14),
+                        // _buildSocialButtons(),
+                        // const SizedBox(height: 16),
                         _buildAuthLink(),
                       ],
                     ),
@@ -728,50 +729,9 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // ── Divider ───────────────────────────────────────────────────────────────
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(child: Container(height: 1, color: AppColors.border)),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            'OU CONTINUER AVEC',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: AppColors.muted,
-              letterSpacing: 1,
-            ),
-          ),
-        ),
-        Expanded(child: Container(height: 1, color: AppColors.border)),
-      ],
-    );
-  }
-
-  // ── Social buttons ────────────────────────────────────────────────────────
-  Widget _buildSocialButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _SocialBtn(
-            label: 'Google',
-            icon: Image.asset('assets/logos/google_logo_icon.png', height: 16),
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _SocialBtn(
-            label: 'Apple',
-            icon: Image.asset('assets/logos/apple_logo_icon.png', height: 16),
-            onTap: () {},
-          ),
-        ),
-      ],
-    );
-  }
+  // TODO: réactiver Google/Apple sign-in
+  // Widget _buildDivider() { ... }
+  // Widget _buildSocialButtons() { ... }
 
   // ── Auth link ─────────────────────────────────────────────────────────────
   Widget _buildAuthLink() {
@@ -802,39 +762,5 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-// ── Social button ─────────────────────────────────────────────────────────────
-class _SocialBtn extends StatelessWidget {
-  const _SocialBtn({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: icon,
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.muted2,
-          letterSpacing: 0.05 * 11,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.border2, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-        backgroundColor: AppColors.card,
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        foregroundColor: AppColors.muted2,
-      ),
-    );
-  }
-}
+// TODO: réactiver Google/Apple sign-in
+// class _SocialBtn extends StatelessWidget { ... }
