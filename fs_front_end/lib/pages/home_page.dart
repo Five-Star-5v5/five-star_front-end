@@ -590,33 +590,53 @@ class _HomePageState extends State<HomePage>
         ),
         const SizedBox(height: 10),
         if (_upcomingMatches.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.border, width: 1),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.sports_soccer_outlined, size: 28, color: AppColors.muted2),
-                const SizedBox(height: 8),
-                Text(
-                  'Aucun match à venir',
-                  style: GoogleFonts.syne(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.muted2,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.border, width: 1),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      'assets/logos/pitchball.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Défiez une équipe pour planifier un match',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                  Positioned.fill(
+                    child: Container(color: Colors.black.withValues(alpha: 0.65)),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.sports_soccer_outlined, size: 28, color: AppColors.muted2),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Aucun match à venir',
+                            style: GoogleFonts.syne(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Défiez une équipe pour planifier un match',
+                            style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         else

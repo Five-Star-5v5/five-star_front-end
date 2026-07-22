@@ -126,9 +126,9 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 48),
                         _buildBrandMini(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 36),
                         _buildUsernameField(),
                         _buildPasswordField(),
                         _buildForgotPassword(),
