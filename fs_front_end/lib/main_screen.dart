@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 
 import 'theme_config/colors_config.dart';
@@ -293,7 +293,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             const SizedBox(height: 3),
             Text(
               label,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 9,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.06 * 9,

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/teams_provider.dart';
 import '../providers/auth_provider.dart';
@@ -113,7 +113,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
         ),
         title: Text(
           'Trouve ton équipe',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -213,7 +213,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                             isAvailable
                                 ? 'PROFIL VISIBLE'
                                 : 'ÊTRE TROUVÉ PAR LES ÉQUIPES',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
@@ -225,7 +225,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                             isAvailable
                                 ? 'Les équipes peuvent t\'inviter'
                                 : 'Active pour recevoir des invitations',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 11,
                               color: isAvailable ? AppColors.white : AppColors.muted2,
                             ),
@@ -324,7 +324,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             ),
             child: Text(
               label,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.8,
@@ -377,10 +377,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       setState(() => _searchQuery = v);
                     });
                   },
-                  style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13),
+                  style: AppTypography.body(color: AppColors.white, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Rechercher une équipe ou un capitaine...',
-                    hintStyle: GoogleFonts.dmSans(
+                    hintStyle: AppTypography.body(
                       color: AppColors.muted2,
                       fontSize: 13,
                     ),
@@ -431,7 +431,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                           padding: const EdgeInsets.all(32),
                           child: Text(
                             'Aucune équipe pour "$_searchQuery"',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.muted2,
                               fontSize: 13,
                             ),
@@ -506,7 +506,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   ? Center(
                       child: Text(
                         team.name[0].toUpperCase(),
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 18,
@@ -523,7 +523,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 children: [
                   Text(
                     team.name,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -540,7 +540,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       const SizedBox(width: 4),
                       Text(
                         '${team.membersCount} joueur${team.membersCount > 1 ? 's' : ''}',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -555,7 +555,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         Flexible(
                           child: Text(
                             '@${team.ownerUsername}',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 11,
                               color: AppColors.amber,
                               fontWeight: FontWeight.w500,
@@ -572,7 +572,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     const SizedBox(height: 4),
                     Text(
                       team.description!,
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         fontSize: 11,
                         color: AppColors.muted2,
                         fontStyle: FontStyle.italic,
@@ -604,7 +604,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     const SizedBox(width: 4),
                     Text(
                       'Membre',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.sage,
@@ -626,7 +626,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 child: Text(
                   'Envoyée',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.amber,
@@ -666,7 +666,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         )
                       : Text(
                           'Rejoindre',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF0B0D11),
@@ -831,7 +831,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       ? Center(
                           child: Text(
                             request.teamName[0].toUpperCase(),
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
@@ -844,7 +844,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 Expanded(
                   child: Text(
                     request.teamName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: AppColors.white,
@@ -867,7 +867,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       const SizedBox(width: 4),
                       Text(
                         statusText,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: statusColor,
                           fontWeight: FontWeight.w700,
                           fontSize: 11,
@@ -881,7 +881,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             const SizedBox(height: 8),
             Text(
               'Envoyée ${_formatDate(request.createdAt)}',
-              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
+              style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
             ),
             if (request.status == ApplicationStatus.pending) ...[
               const SizedBox(height: 12),
@@ -913,7 +913,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                           const SizedBox(width: 6),
                           Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.rose,
                               fontWeight: FontWeight.w700,
                               fontSize: 11,
@@ -979,7 +979,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
         ),
         child: Text(
           label,
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? const Color(0xFF0B0D11) : AppColors.muted2,
@@ -1023,7 +1023,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       ? Center(
                           child: Text(
                             slot.teamName[0].toUpperCase(),
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
@@ -1039,7 +1039,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     children: [
                       Text(
                         slot.teamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.white,
@@ -1048,7 +1048,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       const SizedBox(height: 2),
                       Text(
                         'par @${slot.ownerUsername}',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -1067,7 +1067,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   ),
                   child: Text(
                     slot.position.displayName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.amber,
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
@@ -1091,7 +1091,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     Expanded(
                       child: Text(
                         slot.description!,
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
                           fontSize: 13,
@@ -1129,7 +1129,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     slot.matchDate != null
                         ? 'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year} à ${slot.matchDate!.hour.toString().padLeft(2, '0')}h${slot.matchDate!.minute.toString().padLeft(2, '0')}'
                         : 'Pas de match prévu',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       color: slot.matchDate != null ? AppColors.sage : AppColors.muted2,
                       fontSize: 12,
                       fontWeight: slot.matchDate != null
@@ -1153,7 +1153,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   Expanded(
                     child: Text(
                       slot.matchLocation!,
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         color: AppColors.sage,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -1176,7 +1176,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   const SizedBox(width: 4),
                   Text(
                     'Profil recherché : ${slot.preferredPosition!.displayName}',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       color: AppColors.muted2,
                       fontSize: 11,
                     ),
@@ -1191,7 +1191,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 const SizedBox(width: 4),
                 Text(
                   _formatDate(slot.createdAt),
-                  style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
+                  style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
                 ),
                 const Spacer(),
                 GestureDetector(
@@ -1220,7 +1220,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         const SizedBox(width: 6),
                         Text(
                           'Rejoindre',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 11,
                             letterSpacing: 0.6,
@@ -1284,7 +1284,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
           const SizedBox(height: 16),
           Text(
             message,
-            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 15),
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 15),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -1305,7 +1305,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   const SizedBox(width: 8),
                   Text(
                     'Rafraîchir',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                       color: const Color(0xFF0B0D11),
@@ -1360,7 +1360,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 Expanded(
                   child: Text(
                     title,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -1375,7 +1375,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
                   line,
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 13,
                     color: AppColors.muted2,
                     height: 1.55,
@@ -1411,7 +1411,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             children: [
               Text(
                 'Annuler la demande',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: AppColors.white,
@@ -1420,7 +1420,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               const SizedBox(height: 12),
               Text(
                 'Annuler la demande pour rejoindre "${request.teamName}" ?',
-                style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
               ),
               const SizedBox(height: 24),
               Row(
@@ -1437,7 +1437,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         child: Center(
                           child: Text(
                             'Non',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                               color: AppColors.muted2,
@@ -1478,7 +1478,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         child: Center(
                           child: Text(
                             'Oui, annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                               color: AppColors.rose,
@@ -1596,7 +1596,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
             const SizedBox(height: 16),
             Text(
               'DISPONIBILITÉ',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
@@ -1605,7 +1605,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
             const SizedBox(height: 4),
             Text(
               'Renseigne tes créneaux pour être contacté par les bonnes équipes',
-              style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
             ),
             const SizedBox(height: 20),
             Row(
@@ -1613,7 +1613,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                 Expanded(
                   child: Text(
                     'Jours disponibles',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,
@@ -1640,7 +1640,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                     ),
                     child: Text(
                       'Tous',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: _allSelected ? AppColors.amber : AppColors.muted2,
@@ -1678,7 +1678,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                     child: Text(
                       _fmt(_dates[i]),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: sel ? AppColors.amber : AppColors.muted2,
@@ -1691,7 +1691,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
             const SizedBox(height: 20),
             Text(
               'Zone géographique',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white,
@@ -1707,14 +1707,14 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                       child: CityAutocompleteField(
                         key: ValueKey('city_${e.key}'),
                         controller: e.value,
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 13,
                           color: AppColors.white,
                         ),
                         cursorColor: AppColors.amber,
                         decoration: InputDecoration(
                           hintText: 'Ville (ex: Paris)',
-                          hintStyle: GoogleFonts.dmSans(
+                          hintStyle: AppTypography.body(
                             fontSize: 13,
                             color: AppColors.muted2,
                           ),
@@ -1793,7 +1793,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
             const SizedBox(height: 10),
             Text(
               'Rayon',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.white,
@@ -1821,7 +1821,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                       child: Text(
                         '$km km',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: sel ? AppColors.amber : AppColors.muted2,
@@ -1856,7 +1856,7 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                           )
                         : Text(
                             'ACTIVER MA DISPO',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,

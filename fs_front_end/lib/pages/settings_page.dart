@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
@@ -38,7 +38,7 @@ class SettingsPage extends StatelessWidget {
         ),
         title: Text(
           'PARAMÈTRES',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -150,7 +150,7 @@ class SettingsPage extends StatelessWidget {
       padding: const EdgeInsets.only(left: 2),
       child: Text(
         text,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
@@ -199,7 +199,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: trailingColor ?? AppColors.white,
@@ -208,7 +208,7 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -261,7 +261,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,
@@ -270,7 +270,7 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -329,7 +329,7 @@ class SettingsPage extends StatelessWidget {
                         const SizedBox(width: 12),
                         Text(
                           'Nous contacter',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -342,7 +342,7 @@ class SettingsPage extends StatelessWidget {
                     // Email field
                     Text(
                       'Votre email',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
@@ -353,11 +353,11 @@ class SettingsPage extends StatelessWidget {
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(fontSize: 13, color: AppColors.white),
                       cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'votre@email.com',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                        hintStyle: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                         filled: true,
                         fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
@@ -376,7 +376,7 @@ class SettingsPage extends StatelessWidget {
                     // Message field
                     Text(
                       'Votre message',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
@@ -387,11 +387,11 @@ class SettingsPage extends StatelessWidget {
                     TextField(
                       controller: messageController,
                       maxLines: 5,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(fontSize: 13, color: AppColors.white),
                       cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'Décrivez votre problème ou votre demande…',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                        hintStyle: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                         filled: true,
                         fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
@@ -412,7 +412,7 @@ class SettingsPage extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         errorMsg!,
-                        style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.rose),
+                        style: AppTypography.body(fontSize: 11, color: AppColors.rose),
                       ),
                     ],
 
@@ -434,7 +434,7 @@ class SettingsPage extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   'Annuler',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.muted2,
@@ -477,7 +477,7 @@ class SettingsPage extends StatelessWidget {
                                               SnackBar(
                                                 content: Text(
                                                   'Message envoyé ! Un email de confirmation a été envoyé à $email.',
-                                                  style: GoogleFonts.dmSans(fontSize: 13),
+                                                  style: AppTypography.body(fontSize: 13),
                                                 ),
                                                 backgroundColor: AppColors.amber,
                                                 duration: const Duration(seconds: 4),
@@ -512,7 +512,7 @@ class SettingsPage extends StatelessWidget {
                                       )
                                     : Text(
                                         'Envoyer',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.amber,
@@ -575,7 +575,7 @@ class SettingsPage extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       'Supprimer le compte',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.rose,
@@ -587,7 +587,7 @@ class SettingsPage extends StatelessWidget {
                 // Warning list
                 Text(
                   'Cette action est IRRÉVERSIBLE et entraînera :',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
@@ -621,7 +621,7 @@ class SettingsPage extends StatelessWidget {
                         Expanded(
                           child: Text(
                             t,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 12,
                               color: AppColors.muted2,
                             ),
@@ -635,7 +635,7 @@ class SettingsPage extends StatelessWidget {
                 // Confirmation field
                 Text(
                   'Tapez "SUPPRIMER" pour confirmer :',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
@@ -645,7 +645,7 @@ class SettingsPage extends StatelessWidget {
                 TextField(
                   controller: confirmController,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -654,7 +654,7 @@ class SettingsPage extends StatelessWidget {
                   cursorColor: AppColors.rose,
                   decoration: InputDecoration(
                     hintText: 'SUPPRIMER',
-                    hintStyle: GoogleFonts.syne(
+                    hintStyle: AppTypography.display(
                       fontSize: 13,
                       letterSpacing: 2,
                       color: AppColors.muted2,
@@ -692,7 +692,7 @@ class SettingsPage extends StatelessWidget {
                           child: Center(
                             child: Text(
                               'Annuler',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.muted2,
@@ -769,7 +769,7 @@ class SettingsPage extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   'Supprimer',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.rose,

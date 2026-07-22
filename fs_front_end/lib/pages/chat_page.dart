@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/messages_provider.dart';
 import '../providers/auth_provider.dart';
@@ -155,7 +155,7 @@ class _ChatPageState extends State<ChatPage> {
                         widget.friendName.isNotEmpty
                             ? widget.friendName[0].toUpperCase()
                             : '?',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -165,7 +165,7 @@ class _ChatPageState extends State<ChatPage> {
               const SizedBox(width: 10),
               Text(
                 widget.friendName,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
@@ -207,7 +207,7 @@ class _ChatPageState extends State<ChatPage> {
                           const SizedBox(height: 16),
                           Text(
                             'Aucun message',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 18,
                               color: AppColors.muted2,
                             ),
@@ -215,7 +215,7 @@ class _ChatPageState extends State<ChatPage> {
                           const SizedBox(height: 8),
                           Text(
                             'Envoyez le premier message !',
-                            style: GoogleFonts.dmSans(color: AppColors.muted2),
+                            style: AppTypography.body(color: AppColors.muted2),
                           ),
                         ],
                       ),
@@ -245,7 +245,7 @@ class _ChatPageState extends State<ChatPage> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 _formatDate(message.createdAt),
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   color: AppColors.muted2,
                                   fontSize: 11,
                                 ),
@@ -274,7 +274,7 @@ class _ChatPageState extends State<ChatPage> {
                             controller: _messageController,
                             decoration: InputDecoration(
                               hintText: 'Écrire un message...',
-                              hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
+                              hintStyle: AppTypography.body(color: AppColors.muted2),
                               filled: true,
                               fillColor: AppColors.card2,
                               contentPadding: const EdgeInsets.symmetric(
@@ -294,7 +294,7 @@ class _ChatPageState extends State<ChatPage> {
                                 borderSide: const BorderSide(color: AppColors.amber),
                               ),
                             ),
-                            style: GoogleFonts.dmSans(color: AppColors.white),
+                            style: AppTypography.body(color: AppColors.white),
                             onSubmitted: (_) => _sendMessage(),
                             enabled: !provider.isSending,
                           ),
@@ -376,7 +376,7 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Text(
               message.content,
-              style: GoogleFonts.dmSans(
+              style: AppTypography.body(
                 color: isSender ? AppColors.night : AppColors.white,
                 fontSize: 14,
               ),
@@ -387,7 +387,7 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 Text(
                   _formatTime(message.createdAt),
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     color: isSender
                         ? AppColors.night.withValues(alpha: 0.6)
                         : AppColors.muted2,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/teams_provider.dart';
 import '../providers/auth_provider.dart';
@@ -152,7 +152,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 children: [
                   Text(
                     widget.teamName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: AppColors.white,
@@ -161,7 +161,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                   ),
                   Text(
                     "Chat d'équipe",
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                   ),
                 ],
               ),
@@ -204,7 +204,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     ),
                     child: Text(
                       'MEMBRE',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: AppColors.amber,
@@ -237,7 +237,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           const SizedBox(width: 6),
                           Text(
                             "Quitter l'équipe",
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: AppColors.rose,
@@ -277,7 +277,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 18,
                             color: AppColors.muted2,
                           ),
@@ -285,7 +285,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Démarrez la conversation avec votre équipe !',
-                          style: GoogleFonts.dmSans(color: AppColors.muted2),
+                          style: AppTypography.body(color: AppColors.muted2),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -328,7 +328,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Text(
                               _formatDate(message.createdAt),
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontSize: 11,
                                 color: AppColors.muted2,
                               ),
@@ -368,7 +368,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           controller: _messageController,
                           decoration: InputDecoration(
                             hintText: 'Écrire un message...',
-                            hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
+                            hintStyle: AppTypography.body(color: AppColors.muted2),
                             filled: true,
                             fillColor: AppColors.card2,
                             contentPadding: const EdgeInsets.symmetric(
@@ -388,7 +388,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                               borderSide: const BorderSide(color: AppColors.amber),
                             ),
                           ),
-                          style: GoogleFonts.dmSans(color: AppColors.white),
+                          style: AppTypography.body(color: AppColors.white),
                           cursorColor: AppColors.amber,
                           onSubmitted: (_) => _sendMessage(),
                           enabled: !provider.isSendingMessage,
@@ -459,7 +459,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
           Flexible(
             child: Text(
               message.content,
-              style: GoogleFonts.dmSans(
+              style: AppTypography.body(
                 color: AppColors.muted2,
                 fontSize: 13,
                 fontStyle: FontStyle.italic,
@@ -504,7 +504,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             message.sender.username.isNotEmpty
                                 ? message.sender.username[0].toUpperCase()
                                 : '?',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.amber,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -517,7 +517,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           message.sender.username.isNotEmpty
                               ? message.sender.username[0].toUpperCase()
                               : '?',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.amber,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -564,7 +564,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           message.sender.username,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.amber,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -574,7 +574,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     // Contenu du message
                     Text(
                       message.content,
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         color: isSender ? AppColors.night : AppColors.white,
                         fontSize: 14,
                       ),
@@ -583,7 +583,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 10),
+                      style: AppTypography.body(color: AppColors.muted2, fontSize: 10),
                     ),
                   ],
                 ),
@@ -630,7 +630,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     const SizedBox(width: 12),
                     Text(
                       "Quitter l'équipe",
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         color: AppColors.rose,
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -643,7 +643,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${widget.teamName}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe.',
-                  style: GoogleFonts.dmSans(color: AppColors.muted2),
+                  style: AppTypography.body(color: AppColors.muted2),
                 ),
                 const SizedBox(height: 24),
                 // Boutons
@@ -661,7 +661,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           child: Center(
                             child: Text(
                               'Annuler',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -736,7 +736,7 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           child: Center(
                             child: Text(
                               'Quitter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 color: AppColors.rose,
                                 fontWeight: FontWeight.w700,
                               ),

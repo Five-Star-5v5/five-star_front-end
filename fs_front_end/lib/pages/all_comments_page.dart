@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import '../services/teams_service.dart';
 import '../theme/app_colors.dart';
 
@@ -27,11 +27,11 @@ class AllCommentsPage extends StatelessWidget {
           children: [
             Text(
               'Commentaires reçus',
-              style: GoogleFonts.syne(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 15),
+              style: AppTypography.display(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 15),
             ),
             Text(
               username,
-              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
+              style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
             ),
           ],
         ),
@@ -47,7 +47,7 @@ class AllCommentsPage extends StatelessWidget {
                 children: [
                   Icon(Icons.chat_bubble_outline, color: AppColors.muted2.withValues(alpha: 0.4), size: 40),
                   const SizedBox(height: 12),
-                  Text('Aucun commentaire', style: GoogleFonts.syne(color: AppColors.muted2, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text('Aucun commentaire', style: AppTypography.display(color: AppColors.muted2, fontSize: 14, fontWeight: FontWeight.w600)),
                 ],
               ),
             )
@@ -104,7 +104,7 @@ class _CommentCard extends StatelessWidget {
                   children: [
                     Text(
                       c.authorUsername ?? 'Joueur',
-                      style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
+                      style: AppTypography.display(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
                     ),
                     const Spacer(),
                     if (c.isAbsent)
@@ -115,14 +115,14 @@ class _CommentCard extends StatelessWidget {
                           color: AppColors.rose.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.rose)),
+                        child: Text('Absent', style: AppTypography.display(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.rose)),
                       ),
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2)),
+                    Text(dateStr, style: AppTypography.body(fontSize: 10, color: AppColors.muted2)),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2)),
+                  Text(c.content!, style: AppTypography.body(fontSize: 12, color: AppColors.muted2)),
                 ],
               ],
             ),

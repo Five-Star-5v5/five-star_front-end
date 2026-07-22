@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/friends_provider.dart';
@@ -138,28 +138,28 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 ),
                 title: Text(
                   'Déconnexion',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 content: Text(
                   'Tu veux vraiment te déconnecter ?',
-                  style: GoogleFonts.dmSans(color: AppColors.muted2),
+                  style: AppTypography.body(color: AppColors.muted2),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
                     child: Text(
                       'Annuler',
-                      style: GoogleFonts.dmSans(color: AppColors.muted2),
+                      style: AppTypography.body(color: AppColors.muted2),
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
                     child: Text(
                       'Déconnecter',
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         color: AppColors.rose,
                         fontWeight: FontWeight.w600,
                       ),
@@ -246,7 +246,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   : Center(
                       child: Text(
                         initial,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 24,
                           color: AppColors.night,
@@ -260,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           Center(
             child: Text(
               user.username.toUpperCase(),
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
                 letterSpacing: 0.6,
@@ -273,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           Center(
             child: Text(
               '@${user.username.toLowerCase()}${user.preferredPosition != null ? ' · ${user.preferredPosition}' : ''}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
             ),
           ),
           if (user.codeId.isNotEmpty) ...[
@@ -302,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     children: [
                       Text(
                         '#${user.codeId}',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 10,
                           color: AppColors.muted2,
                           letterSpacing: 0.5,
@@ -340,7 +340,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               child: Text(
                 user.bio!,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2, fontStyle: FontStyle.italic),
+                style: AppTypography.body(fontSize: 12, color: AppColors.muted2, fontStyle: FontStyle.italic),
               ),
             ),
           ],
@@ -361,7 +361,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -396,7 +396,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -444,7 +444,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   children: [
                     Text(
                       stats[i].value,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         color: AppColors.amber,
@@ -453,7 +453,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     const SizedBox(height: 2),
                     Text(
                       stats[i].label,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 8,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.8,
@@ -510,7 +510,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         b.label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -537,7 +537,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
@@ -560,9 +560,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         children: [
           Icon(icon, color: AppColors.muted2, size: 26),
           const SizedBox(height: 8),
-          Text(title, style: GoogleFonts.syne(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+          Text(title, style: AppTypography.display(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w700)),
           const SizedBox(height: 3),
-          Text(subtitle, style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11), textAlign: TextAlign.center),
+          Text(subtitle, style: AppTypography.body(color: AppColors.muted2, fontSize: 11), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -651,7 +651,7 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                       Expanded(
                         child: Text(
                           'HISTORIQUE',
-                          style: GoogleFonts.syne(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.muted2, letterSpacing: 1.1),
+                          style: AppTypography.display(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.muted2, letterSpacing: 1.1),
                         ),
                       ),
                       if (!loading && matches.isNotEmpty)
@@ -667,7 +667,7 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                           },
                           child: Text(
                             'Voir tout →',
-                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
+                            style: AppTypography.display(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
                           ),
                         ),
                     ],
@@ -687,9 +687,9 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                       const SizedBox(height: 8),
                       Icon(Icons.sports_soccer_outlined, size: 32, color: AppColors.muted2.withValues(alpha: 0.4)),
                       const SizedBox(height: 8),
-                      Text('Aucun match joué', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
+                      Text('Aucun match joué', style: AppTypography.display(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
                       const SizedBox(height: 4),
-                      Text("Ton historique apparaîtra ici", style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.5))),
+                      Text("Ton historique apparaîtra ici", style: AppTypography.body(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.5))),
                       const SizedBox(height: 16),
                     ],
                   )
@@ -742,19 +742,19 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
               children: [
                 Text(
                   '$myTeamName vs $oppName',
-                  style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
+                  style: AppTypography.display(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                    Text(dateStr, style: AppTypography.body(fontSize: 11, color: AppColors.muted2)),
                     if (m.proposedLocation != null) ...[
                       const SizedBox(width: 6),
                       const Icon(Icons.location_on_outlined, size: 11, color: Color(0x9EF0F2F5)),
                       Flexible(
-                        child: Text(m.proposedLocation!, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(m.proposedLocation!, style: AppTypography.body(fontSize: 11, color: AppColors.muted2), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ],
@@ -769,7 +769,7 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
               if (myScore != null && oppScore != null)
                 Text(
                   '$myScore – $oppScore',
-                  style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.white),
+                  style: AppTypography.display(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.white),
                 ),
               if (resultLabel.isNotEmpty)
                 Container(
@@ -779,7 +779,7 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                     color: resultColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(resultLabel, style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
+                  child: Text(resultLabel, style: AppTypography.display(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
                 ),
             ],
           ),
@@ -829,7 +829,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                       Expanded(
                         child: Text(
                           'COMMENTAIRES REÇUS',
-                          style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: AppColors.muted2),
+                          style: AppTypography.display(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: AppColors.muted2),
                         ),
                       ),
                       if (!loading && comments.isNotEmpty)
@@ -842,7 +842,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           ),
                           child: Text(
                             'Voir tout →',
-                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
+                            style: AppTypography.display(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
                           ),
                         ),
                     ],
@@ -859,9 +859,9 @@ class _CommentsSectionState extends State<_CommentsSection> {
                       children: [
                         Icon(Icons.chat_bubble_outline, size: 28, color: AppColors.muted2.withValues(alpha: 0.4)),
                         const SizedBox(height: 8),
-                        Text('Aucun commentaire', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
+                        Text('Aucun commentaire', style: AppTypography.display(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
                         const SizedBox(height: 4),
-                        Text('Les avis laissés après vos matchs apparaîtront ici', style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.6)), textAlign: TextAlign.center),
+                        Text('Les avis laissés après vos matchs apparaîtront ici', style: AppTypography.body(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.6)), textAlign: TextAlign.center),
                       ],
                     ),
                   )
@@ -910,7 +910,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
               children: [
                 Row(
                   children: [
-                    Text(c.authorUsername ?? 'Joueur', style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFF0F2F5))),
+                    Text(c.authorUsername ?? 'Joueur', style: AppTypography.display(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFF0F2F5))),
                     const Spacer(),
                     if (c.isAbsent)
                       Container(
@@ -919,15 +919,15 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           color: const Color(0xFFD4607A).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: const Color(0xFFD4607A))),
+                        child: Text('Absent', style: AppTypography.display(fontSize: 9, fontWeight: FontWeight.w700, color: const Color(0xFFD4607A))),
                       ),
                     const SizedBox(width: 6),
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2)),
+                    Text(dateStr, style: AppTypography.body(fontSize: 10, color: AppColors.muted2)),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                  Text(c.content!, style: AppTypography.body(fontSize: 11, color: AppColors.muted2)),
                 ],
               ],
             ),

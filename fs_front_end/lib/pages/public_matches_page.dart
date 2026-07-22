@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +69,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
         ),
         title: Text(
           'MATCHS OUVERTS',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.06 * 15,
@@ -108,13 +108,13 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           const SizedBox(height: 16),
           Text(
             'Aucun match ouvert',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
                 fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.muted2),
           ),
           const SizedBox(height: 6),
           Text(
             'Les matchs avec des places libres apparaîtront ici',
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
             textAlign: TextAlign.center,
           ),
         ],
@@ -146,7 +146,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                     children: [
                       Text(
                         'VS',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 2,
@@ -166,7 +166,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                           ),
                           child: Text(
                             '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
                               color: AppColors.sage,
@@ -186,7 +186,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                 Expanded(
                   child: Text(
                     match.challengerTeam.name,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -199,7 +199,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                 Expanded(
                   child: Text(
                     match.challengedTeam.name,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -227,7 +227,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                     Text(
                       _formatDate(match.proposedDate!),
                       style:
-                          GoogleFonts.dmSans(fontSize: 11, color: AppColors.white),
+                          AppTypography.body(fontSize: 11, color: AppColors.white),
                     ),
                   ],
                   if (match.proposedDate != null &&
@@ -244,7 +244,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                       child: Text(
                         match.proposedLocation!,
                         style:
-                            GoogleFonts.dmSans(fontSize: 11, color: AppColors.white),
+                            AppTypography.body(fontSize: 11, color: AppColors.white),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -254,7 +254,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                       match.proposedLocation == null)
                     Text('Date et lieu à définir',
                         style:
-                            GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                            AppTypography.body(fontSize: 11, color: AppColors.muted2)),
                 ],
               ),
             ),
@@ -281,7 +281,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
               child: Text(
                 'Voir les postes disponibles →',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.amber,
@@ -333,7 +333,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           ),
           child: Text(
             '${team.name.split(' ').first} — complet',
-            style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -353,7 +353,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           children: [
             Text(
               team.name.split(' ').first,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: AppColors.sage,
@@ -461,7 +461,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg,
-            style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13)),
+            style: AppTypography.body(color: AppColors.white, fontSize: 13)),
         backgroundColor: isSuccess ? AppColors.sage : const Color(0xFFD4607A),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -543,7 +543,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'VS',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 2,
@@ -571,7 +571,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                                 size: 13, color: AppColors.muted2),
                             const SizedBox(width: 6),
                             Text(_formatDate(match.proposedDate!),
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                     fontSize: 12, color: AppColors.white)),
                           ],
                           if (match.proposedDate != null &&
@@ -588,7 +588,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(match.proposedLocation!,
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                       fontSize: 12, color: AppColors.white),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
@@ -657,7 +657,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
           const SizedBox(height: 6),
           Text(
             team.name,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
                 fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.white),
             textAlign: TextAlign.center,
             maxLines: 2,
@@ -674,7 +674,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
               ),
               child: Text(
                 '$openCount libre${openCount > 1 ? 's' : ''}',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                     fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.sage),
               ),
             ),
@@ -755,7 +755,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             children: [
               Text(
                 slot.username ?? '—',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white),
@@ -764,7 +764,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
               ),
               Text(
                 slot.position.displayName,
-                style: GoogleFonts.dmSans(fontSize: 9, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 9, color: AppColors.muted2),
               ),
             ],
           ),
@@ -809,7 +809,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                 children: [
                   Text(
                     slot.position.displayName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: hasPending ? AppColors.amber : AppColors.sage,
@@ -817,7 +817,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                   ),
                   Text(
                     hasPending ? 'Candidature envoyée' : 'Poste libre',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       fontSize: 9,
                       color: hasPending
                           ? AppColors.amber.withValues(alpha: 0.7)
@@ -847,7 +847,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
               child: Text(
                 'Postuler',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: AppColors.sage,
@@ -895,7 +895,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             const SizedBox(height: 16),
             Text(
               'Postuler pour ce match ?',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white),
@@ -904,13 +904,13 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             Text(
               'Tu vas postuler pour le poste de ${slot.position.displayName}\ndans l\'équipe ${team.name}.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
             ),
             const SizedBox(height: 6),
             Text(
               'Le capitaine devra accepter ta candidature.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
+              style: AppTypography.body(
                   fontSize: 11,
                   color: AppColors.muted2.withValues(alpha: 0.7)),
             ),
@@ -930,7 +930,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                       child: Text(
                         'Annuler',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppColors.muted2),
@@ -957,7 +957,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                       child: Text(
                         'Confirmer',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,

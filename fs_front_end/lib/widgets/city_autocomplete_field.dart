@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:http/http.dart' as http_client;
 
 import '../theme/app_colors.dart';
@@ -152,7 +152,7 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
                         const SizedBox(width: 8),
                         Text(
                           e.value,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.white,
                             fontSize: 13,
                           ),

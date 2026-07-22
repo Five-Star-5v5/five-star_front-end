@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import '../theme/app_colors.dart';
 
 class TosPage extends StatelessWidget {
@@ -33,7 +33,7 @@ class TosPage extends StatelessWidget {
         ),
         title: Text(
           "CONDITIONS D'UTILISATION",
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -127,7 +127,7 @@ class TosPage extends StatelessWidget {
         children: [
           Text(
             'Application KOBETA',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: AppColors.amber,
@@ -136,7 +136,7 @@ class TosPage extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Version 1.1 — Entrée en vigueur : 19 mai 2026',
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
             textAlign: TextAlign.center,
           ),
         ],
@@ -150,7 +150,7 @@ class TosPage extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppColors.amber,
@@ -162,7 +162,7 @@ class TosPage extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           content,
-          style: GoogleFonts.dmSans(
+          style: AppTypography.body(
             fontSize: 12,
             color: AppColors.muted2,
             height: 1.6,
@@ -179,7 +179,7 @@ class TosPage extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppColors.amber,
@@ -202,7 +202,7 @@ class TosPage extends StatelessWidget {
         if (section.subtitle != null) ...[
           Text(
             section.subtitle!,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AppColors.white,
@@ -212,7 +212,7 @@ class TosPage extends StatelessWidget {
         ],
         Text(
           section.body,
-          style: GoogleFonts.dmSans(
+          style: AppTypography.body(
             fontSize: 12,
             color: AppColors.muted2,
             height: 1.6,
@@ -235,7 +235,7 @@ class TosPage extends StatelessWidget {
         children: [
           Text(
             'CONTACT',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AppColors.amber,
@@ -245,12 +245,12 @@ class TosPage extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'kobeta.fr@gmail.com',
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
           ),
           const SizedBox(height: 10),
           Text(
             'CGU rédigées sur la base du droit français en vigueur — Code civil · Code de la consommation · LCEN 2004 · RGPD (UE) 2016/679 · Loi Informatique et Libertés 1978 modifiée · Code du sport · Code pénal · DSA (UE) 2022/2065',
-            style: GoogleFonts.dmSans(
+            style: AppTypography.body(
               fontSize: 10,
               color: AppColors.muted,
               height: 1.6,

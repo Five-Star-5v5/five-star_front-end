@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
@@ -284,7 +284,7 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 28),
           Text(
             'Kobeta',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 24,
               fontWeight: FontWeight.w800,
               color: AppColors.white,
@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 12),
           Text(
             'Préparation en cours...',
-            style: GoogleFonts.dmSans(
+            style: AppTypography.body(
               fontSize: 13,
               color: AppColors.muted2,
               fontStyle: FontStyle.italic,
@@ -355,7 +355,7 @@ class _HomePageState extends State<HomePage>
                 Expanded(
                   child: Text(
                     title,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -370,7 +370,7 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
                   line,
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 13,
                     color: AppColors.muted2,
                     height: 1.55,
@@ -434,7 +434,7 @@ class _HomePageState extends State<HomePage>
                     children: [
                       Text(
                         'Disponible pour un match',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                           letterSpacing: 0.04 * 13,
@@ -446,7 +446,7 @@ class _HomePageState extends State<HomePage>
                         _isLookingForOpponent
                             ? 'Votre équipe est visible par les équipes qui cherchent un adversaire'
                             : 'Activez pour apparaître dans les recherches',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -515,7 +515,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'MATCHS À VENIR',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.04 * 13,
@@ -577,7 +577,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Text(
                     'Trouver →',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.amber,
@@ -619,7 +619,7 @@ class _HomePageState extends State<HomePage>
                           const SizedBox(height: 8),
                           Text(
                             'Aucun match à venir',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppColors.white,
@@ -628,7 +628,7 @@ class _HomePageState extends State<HomePage>
                           const SizedBox(height: 4),
                           Text(
                             'Défiez une équipe pour planifier un match',
-                            style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                            style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -664,7 +664,7 @@ class _HomePageState extends State<HomePage>
   //             children: [
   //               Text(
   //                 'MATCHS OUVERTS',
-  //                 style: GoogleFonts.syne(
+  //                 style: AppTypography.display(
   //                   fontSize: 13,
   //                   fontWeight: FontWeight.w700,
   //                   letterSpacing: 0.04 * 13,
@@ -705,7 +705,7 @@ class _HomePageState extends State<HomePage>
   //             ),
   //             child: Text(
   //               'Voir tout →',
-  //               style: GoogleFonts.syne(
+  //               style: AppTypography.display(
   //                 fontSize: 12,
   //                 fontWeight: FontWeight.w600,
   //                 color: AppColors.amber,
@@ -730,7 +730,7 @@ class _HomePageState extends State<HomePage>
   //               const SizedBox(height: 6),
   //               Text(
   //                 'Aucun match ouvert pour le moment',
-  //                 style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+  //                 style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
   //               ),
   //             ],
   //           ),
@@ -775,7 +775,7 @@ class _HomePageState extends State<HomePage>
   //               const Spacer(),
   //               Text(
   //                 'VS',
-  //                 style: GoogleFonts.syne(
+  //                 style: AppTypography.display(
   //                   fontSize: 10,
   //                   fontWeight: FontWeight.w800,
   //                   letterSpacing: 1.5,
@@ -789,7 +789,7 @@ class _HomePageState extends State<HomePage>
   //           const SizedBox(height: 8),
   //           Text(
   //             '${match.challengerTeam.name.split(' ').first} — ${match.challengedTeam.name.split(' ').first}',
-  //             style: GoogleFonts.syne(
+  //             style: AppTypography.display(
   //               fontSize: 11,
   //               fontWeight: FontWeight.w700,
   //               color: AppColors.white,
@@ -805,7 +805,7 @@ class _HomePageState extends State<HomePage>
   //                 const SizedBox(width: 4),
   //                 Text(
   //                   DateFormat('d MMM • HH:mm', 'fr_FR').format(match.proposedDate!),
-  //                   style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+  //                   style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
   //                 ),
   //               ],
   //             ),
@@ -824,7 +824,7 @@ class _HomePageState extends State<HomePage>
   //                 const SizedBox(width: 4),
   //                 Text(
   //                   '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
-  //                   style: GoogleFonts.syne(
+  //                   style: AppTypography.display(
   //                     fontSize: 9,
   //                     fontWeight: FontWeight.w700,
   //                     color: sageColor,
@@ -929,7 +929,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       'VS $opponentName',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         letterSpacing: 0.03 * 13,
@@ -938,7 +938,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     Text(
                       isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -1180,7 +1180,7 @@ class _HomePageState extends State<HomePage>
                             ),
                             child: Text(
                               'CONTESTER',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 10,
                                 letterSpacing: 0.06 * 10,
@@ -1203,7 +1203,7 @@ class _HomePageState extends State<HomePage>
                             ),
                             child: Text(
                               'VALIDER',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 10,
                                 letterSpacing: 0.06 * 10,
@@ -1219,7 +1219,7 @@ class _HomePageState extends State<HomePage>
                       alignment: Alignment.centerRight,
                       child: Text(
                         'Contester = match nul (0-0)',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 10,
                           color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
@@ -1305,7 +1305,7 @@ class _HomePageState extends State<HomePage>
                       isChallenger
                           ? match.challengerTeamName
                           : match.challengedTeamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
                         color: AppColors.white,
@@ -1318,7 +1318,7 @@ class _HomePageState extends State<HomePage>
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
                       '? – ?',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                         color: AppColors.muted2,
@@ -1329,7 +1329,7 @@ class _HomePageState extends State<HomePage>
                   Expanded(
                     child: Text(
                       opponentName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
                         color: AppColors.white,
@@ -1403,7 +1403,7 @@ class _HomePageState extends State<HomePage>
                       ),
                       child: Text(
                         'RÉSULTAT',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 10,
                           letterSpacing: 0.06 * 10,
@@ -1427,7 +1427,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     child: Text(
                       'ANNULER',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         fontSize: 10,
                         letterSpacing: 0.06 * 10,
@@ -1647,7 +1647,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'Enregistrer le résultat',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: AppColors.white,
@@ -1656,7 +1656,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Entrez le score du match contre $opponentName',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -1667,7 +1667,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             'Votre équipe',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1721,7 +1721,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             opponentName,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1777,7 +1777,7 @@ class _HomePageState extends State<HomePage>
                       Expanded(
                         child: Text(
                           'L\'adversaire devra confirmer ce score pour qu\'il soit validé.',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.amberSoft,
                             fontSize: 12,
                           ),
@@ -1802,7 +1802,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -1834,7 +1834,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Valider',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                               fontSize: 13,
@@ -1907,7 +1907,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Valider le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -1916,7 +1916,7 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -1935,7 +1935,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -1959,7 +1959,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Valider',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -2012,7 +2012,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Contester le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -2022,7 +2022,7 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
                 'Êtes-vous sûr de vouloir contester ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2041,7 +2041,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -2063,7 +2063,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Contester',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -2115,7 +2115,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Annuler le match',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -2125,7 +2125,7 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
                 'Cette action ne peut pas être annulée.',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2144,7 +2144,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Non',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -2166,7 +2166,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Oui, annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -2232,7 +2232,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'Quitter l\'équipe',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: AppColors.white,
@@ -2242,7 +2242,7 @@ class _HomePageState extends State<HomePage>
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -2261,7 +2261,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -2333,7 +2333,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Quitter',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                               fontSize: 13,
@@ -2721,7 +2721,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(height: 8),
                       Text(
                         'PAS D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.muted2,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -2782,7 +2782,7 @@ class _HomePageState extends State<HomePage>
                                   const SizedBox(height: 6),
                                   Text(
                                     'REJOINDRE',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.amber,
@@ -2792,7 +2792,7 @@ class _HomePageState extends State<HomePage>
                                   const SizedBox(height: 2),
                                   Text(
                                     'une équipe',
-                                    style: GoogleFonts.dmSans(
+                                    style: AppTypography.body(
                                       fontSize: 9,
                                       color: AppColors.muted2,
                                     ),
@@ -2889,7 +2889,7 @@ class _HomePageState extends State<HomePage>
                                   ),
                                   child: Text(
                                     isOwner ? 'MON ÉQUIPE' : 'MEMBRE',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
                                       color: isOwner ? AppColors.amber : AppColors.muted2,
@@ -2901,7 +2901,7 @@ class _HomePageState extends State<HomePage>
                                 // Team name
                                 Text(
                                   team.name.toUpperCase(),
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.white,
@@ -2914,7 +2914,7 @@ class _HomePageState extends State<HomePage>
                                 // Meta
                                 Text(
                                   '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontSize: 10,
                                     color: AppColors.muted2,
                                   ),
@@ -3718,7 +3718,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   member.user.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
@@ -3737,7 +3737,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     child: Text(
                       'Vous',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 12,
                         color: AppColors.amber,
                         fontWeight: FontWeight.w600,
@@ -3749,7 +3749,7 @@ class _HomePageState extends State<HomePage>
             ),
             Text(
               member.position.displayName,
-              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+              style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
             ),
             const SizedBox(height: 20),
             Divider(color: AppColors.border2),
@@ -3792,7 +3792,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 12),
                       Text(
                         'Voir le profil',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -3825,7 +3825,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(width: 12),
                     Text(
                       'Changer de position',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                         fontSize: 14,
@@ -3856,7 +3856,7 @@ class _HomePageState extends State<HomePage>
                           children: [
                             Text(
                               'Retirer ce joueur ?',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                                 color: AppColors.white,
@@ -3865,7 +3865,7 @@ class _HomePageState extends State<HomePage>
                             const SizedBox(height: 12),
                             Text(
                               'Voulez-vous retirer ${member.user.username} de l\'équipe ?',
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontSize: 13,
                                 color: AppColors.muted2,
                               ),
@@ -3888,7 +3888,7 @@ class _HomePageState extends State<HomePage>
                                       alignment: Alignment.center,
                                       child: Text(
                                         'Annuler',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.muted2,
                                           fontSize: 13,
@@ -3910,7 +3910,7 @@ class _HomePageState extends State<HomePage>
                                       alignment: Alignment.center,
                                       child: Text(
                                         'Retirer',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
                                           fontSize: 13,
@@ -3948,7 +3948,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 12),
                       Text(
                         'Retirer de l\'équipe',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
                           fontSize: 14,
@@ -3963,7 +3963,7 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'En tant que propriétaire, vous ne pouvez pas quitter l\'équipe.',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     color: AppColors.muted2,
                     fontStyle: FontStyle.italic,
@@ -4025,7 +4025,7 @@ class _HomePageState extends State<HomePage>
                               children: [
                                 Text(
                                   'Invitations envoyées',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.white,
@@ -4033,7 +4033,7 @@ class _HomePageState extends State<HomePage>
                                 ),
                                 Text(
                                   'Poste : ${position.displayName}',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontSize: 12,
                                     color: AppColors.muted2,
                                   ),
@@ -4056,7 +4056,7 @@ class _HomePageState extends State<HomePage>
                             ),
                             child: Text(
                               '${pending.length} en attente',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.amber,
@@ -4075,7 +4075,7 @@ class _HomePageState extends State<HomePage>
                     padding: const EdgeInsets.all(24),
                     child: Text(
                       'Aucune invitation en attente',
-                      style: GoogleFonts.dmSans(color: AppColors.muted2),
+                      style: AppTypography.body(color: AppColors.muted2),
                     ),
                   )
                 else
@@ -4105,7 +4105,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           title: Text(
                             inv.invitedUsername,
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.white,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
@@ -4113,7 +4113,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           subtitle: Text(
                             'Envoyée le ${_formatInvitationDate(inv.createdAt)}',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.muted2,
                               fontSize: 12,
                             ),
@@ -4166,7 +4166,7 @@ class _HomePageState extends State<HomePage>
                               ),
                               child: Text(
                                 'Annuler',
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   color: AppColors.rose,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
@@ -4199,7 +4199,7 @@ class _HomePageState extends State<HomePage>
                       alignment: Alignment.center,
                       child: Text(
                         'Inviter une autre personne',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: Colors.black,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -4276,7 +4276,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 12),
                     Text(
                       'Ajouter un ${position.displayName}',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -4312,14 +4312,14 @@ class _HomePageState extends State<HomePage>
                     ),
                     title: Text(
                       'Me placer ici',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       '@${currentUser.username}',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
                     ),
                     trailing: const Icon(Icons.person_add, color: AppColors.amber),
                     onTap: () async {
@@ -4360,14 +4360,14 @@ class _HomePageState extends State<HomePage>
                     ),
                     title: Text(
                       'Ouvrir le poste',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4429,14 +4429,14 @@ class _HomePageState extends State<HomePage>
                     ),
                     title: Text(
                       'Recruter sur le store',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Parcourir les joueurs disponibles et les inviter',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4483,7 +4483,7 @@ class _HomePageState extends State<HomePage>
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'ou choisir un ami',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           color: AppColors.muted2,
                           fontSize: 12,
                         ),
@@ -4498,7 +4498,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     'Tous vos amis sont déjà dans l\'équipe !',
-                    style: GoogleFonts.dmSans(color: AppColors.muted2),
+                    style: AppTypography.body(color: AppColors.muted2),
                   ),
                 )
               else
@@ -4523,7 +4523,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         title: Text(
                           friend.user.username,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -4531,7 +4531,7 @@ class _HomePageState extends State<HomePage>
                         subtitle: Text(
                           friend.user.preferredPosition ??
                               'Position non définie',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.muted2,
                             fontSize: 12,
                           ),
@@ -4539,7 +4539,7 @@ class _HomePageState extends State<HomePage>
                         trailing: friend.user.rating != null
                             ? Text(
                                 '⭐ ${friend.user.rating!.toStringAsFixed(1)}',
-                                style: GoogleFonts.dmSans(color: AppColors.muted2),
+                                style: AppTypography.body(color: AppColors.muted2),
                               )
                             : null,
                         onTap: () async {
@@ -4597,7 +4597,7 @@ class _HomePageState extends State<HomePage>
                     Expanded(
                       child: Text(
                         'Ouvrir le poste de ${position.displayName}',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                           color: AppColors.white,
@@ -4609,7 +4609,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-                  style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 12),
+                  style: AppTypography.body(color: AppColors.muted2, fontSize: 12),
                 ),
 
                 // ── PORTÉE ──
@@ -4618,7 +4618,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       'NOMBRE DE POSTES',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         color: AppColors.muted2,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
@@ -4629,7 +4629,7 @@ class _HomePageState extends State<HomePage>
                     Tooltip(
                       message:
                           'Un poste uniquement : Tu choisis manuellement le profil recherché (gardien, défenseur, milieu, attaquant ou remplaçant) et une seule annonce est diffusée pour ce poste précis.\n\nTous les postes disponibles : La fonctionnalité détecte automatiquement les postes vacants dans ton équipe et diffuse une annonce pour chacun d\'eux. Par exemple, s\'il te manque un défenseur et un attaquant, deux annonces seront automatiquement créées et diffusées. Dans ce cas, le choix du profil n\'est pas disponible car les annonces sont générées directement depuis la composition de ton équipe.',
-                      textStyle: GoogleFonts.dmSans(
+                      textStyle: AppTypography.body(
                         color: AppColors.white,
                         fontSize: 12,
                       ),
@@ -4678,7 +4678,7 @@ class _HomePageState extends State<HomePage>
                               Text(
                                 'Un poste uniquement',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: !openAll ? AppColors.amber : AppColors.muted2,
@@ -4716,7 +4716,7 @@ class _HomePageState extends State<HomePage>
                               Text(
                                 'Tous les postes disponibles',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: openAll ? AppColors.amber : AppColors.muted2,
@@ -4741,7 +4741,7 @@ class _HomePageState extends State<HomePage>
                       children: [
                         Text(
                           'PROFIL RECHERCHÉ',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.muted2,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -4806,7 +4806,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 20),
                 Text(
                   'DESCRIPTION (OPTIONNEL)',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -4843,7 +4843,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 20),
                 Text(
                   'MATCH PRÉVU',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -4875,7 +4875,7 @@ class _HomePageState extends State<HomePage>
                             Expanded(
                               child: Text(
                                 'Avez-vous un match prévu ?',
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   color: AppColors.white,
                                   fontSize: 13,
                                 ),
@@ -4948,7 +4948,7 @@ class _HomePageState extends State<HomePage>
                                   matchDate != null
                                       ? '${matchDate!.day.toString().padLeft(2, '0')}/${matchDate!.month.toString().padLeft(2, '0')}/${matchDate!.year}'
                                       : 'Choisir la date du match',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: matchDate != null
                                         ? AppColors.amber
                                         : AppColors.muted2,
@@ -5012,7 +5012,7 @@ class _HomePageState extends State<HomePage>
                                   matchTime != null
                                       ? '${matchTime!.hour.toString().padLeft(2, '0')}h${matchTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Choisir l\'heure du match',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: matchTime != null
                                         ? AppColors.amber
                                         : AppColors.muted2,
@@ -5097,7 +5097,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -5201,7 +5201,7 @@ class _HomePageState extends State<HomePage>
                                   const SizedBox(width: 6),
                                   Text(
                                     'Ouvrir',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontWeight: FontWeight.w600,
                                       color: canSubmit
                                           ? Colors.white
@@ -5245,7 +5245,7 @@ class _HomePageState extends State<HomePage>
           ),
           child: Text(
             label,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: selected ? AppColors.amber : AppColors.muted2,
@@ -5293,7 +5293,7 @@ class _HomePageState extends State<HomePage>
             if (openSubSlots.isNotEmpty) ...[
               Text(
                 'POSTES EN RECHERCHE',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.muted2,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -5336,7 +5336,7 @@ class _HomePageState extends State<HomePage>
                           Expanded(
                             child: Text(
                               'Remplaçant · ${slot.applicationsCount} candidature(s)',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
@@ -5385,7 +5385,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 12),
                       Text(
                         'Ajouter un remplaçant',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -5440,7 +5440,7 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 10),
             Text(
               'Poste ${position.displayName} — candidatures ouvertes',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
@@ -5450,7 +5450,7 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 8),
               Text(
                 openSlot.description!,
-                style: GoogleFonts.dmSans(color: AppColors.muted2),
+                style: AppTypography.body(color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -5463,7 +5463,7 @@ class _HomePageState extends State<HomePage>
               ),
               child: Text(
                 '${openSlot.applicationsCount} candidature(s)',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.amber,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
@@ -5493,7 +5493,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 12),
                       Text(
                         'Voir les candidatures',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -5539,7 +5539,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             'Clôturer les candidatures ?',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                               color: AppColors.white,
@@ -5548,7 +5548,7 @@ class _HomePageState extends State<HomePage>
                           const SizedBox(height: 12),
                           Text(
                             'Les candidatures en attente seront annulées.',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 13,
                               color: AppColors.muted2,
                             ),
@@ -5570,7 +5570,7 @@ class _HomePageState extends State<HomePage>
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Annuler',
-                                      style: GoogleFonts.syne(
+                                      style: AppTypography.display(
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.muted2,
                                         fontSize: 13,
@@ -5592,7 +5592,7 @@ class _HomePageState extends State<HomePage>
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Fermer',
-                                      style: GoogleFonts.syne(
+                                      style: AppTypography.display(
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                         fontSize: 13,
@@ -5631,7 +5631,7 @@ class _HomePageState extends State<HomePage>
                       children: [
                         Text(
                           'Clôturer les candidatures',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.rose,
                             fontSize: 14,
@@ -5639,7 +5639,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         Text(
                           'Mettre fin aux candidatures pour ce poste',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.muted2,
                             fontSize: 12,
                           ),
@@ -5723,7 +5723,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(width: 10),
                         Text(
                           'Joueurs disponibles',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -5741,7 +5741,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           child: Text(
                             position.displayName,
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: AppColors.amber,
@@ -5776,7 +5776,7 @@ class _HomePageState extends State<HomePage>
                                 const SizedBox(height: 12),
                                 Text(
                                   'Aucun joueur disponible',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     color: AppColors.muted2,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -5784,7 +5784,7 @@ class _HomePageState extends State<HomePage>
                                 const SizedBox(height: 4),
                                 Text(
                                   'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: AppColors.muted2,
                                     fontSize: 12,
                                   ),
@@ -5844,7 +5844,7 @@ class _HomePageState extends State<HomePage>
                                     child: player.avatarUrl == null
                                         ? Text(
                                             player.username[0].toUpperCase(),
-                                            style: GoogleFonts.syne(
+                                            style: AppTypography.display(
                                               color: AppColors.amber,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -5861,7 +5861,7 @@ class _HomePageState extends State<HomePage>
                                           children: [
                                             Text(
                                               player.username,
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 fontWeight: FontWeight.w700,
                                                 color: AppColors.white,
                                                 fontSize: 14,
@@ -5882,7 +5882,7 @@ class _HomePageState extends State<HomePage>
                                                 ),
                                                 child: Text(
                                                   'Poste correspondant',
-                                                  style: GoogleFonts.syne(
+                                                  style: AppTypography.display(
                                                     fontSize: 9,
                                                     color: AppColors.amber,
                                                     fontWeight: FontWeight.w700,
@@ -5896,7 +5896,7 @@ class _HomePageState extends State<HomePage>
                                         Text(
                                           player.preferredPosition ??
                                               'Aucune position',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -5955,7 +5955,7 @@ class _HomePageState extends State<HomePage>
                                       if (player.rating != null)
                                         Text(
                                           '★ ${player.rating!.toStringAsFixed(1)}',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.amber,
                                             fontWeight: FontWeight.w700,
                                             fontSize: 13,
@@ -5980,7 +5980,7 @@ class _HomePageState extends State<HomePage>
                                           ),
                                           child: Text(
                                             'Déjà membre',
-                                            style: GoogleFonts.syne(
+                                            style: AppTypography.display(
                                               color: AppColors.muted2,
                                               fontWeight: FontWeight.w600,
                                               fontSize: 12,
@@ -6037,7 +6037,7 @@ class _HomePageState extends State<HomePage>
                                             ),
                                             child: Text(
                                               'Annuler',
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 color: AppColors.rose,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
@@ -6094,7 +6094,7 @@ class _HomePageState extends State<HomePage>
                                             ),
                                             child: Text(
                                               'Inviter',
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 color: Colors.black,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
@@ -6165,7 +6165,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 12),
                     Text(
                       'Candidatures (${applications.length})',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -6187,7 +6187,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(height: 16),
                       Text(
                         'Aucune candidature pour le moment',
-                        style: GoogleFonts.dmSans(color: AppColors.muted2),
+                        style: AppTypography.body(color: AppColors.muted2),
                       ),
                     ],
                   ),
@@ -6240,7 +6240,7 @@ class _HomePageState extends State<HomePage>
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
                                           color: AppColors.white,
@@ -6249,7 +6249,7 @@ class _HomePageState extends State<HomePage>
                                       if (app.applicant.rating != null)
                                         Text(
                                           '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -6271,7 +6271,7 @@ class _HomePageState extends State<HomePage>
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontStyle: FontStyle.italic,
                                     color: AppColors.muted2,
                                     fontSize: 13,
@@ -6322,7 +6322,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6375,7 +6375,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6446,7 +6446,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(width: 8),
                         Text(
                           'Toutes les candidatures (${applications.length})',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -6471,7 +6471,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(height: 16),
                         Text(
                           'Aucune candidature en attente',
-                          style: GoogleFonts.dmSans(color: AppColors.muted2),
+                          style: AppTypography.body(color: AppColors.muted2),
                         ),
                       ],
                     ),
@@ -6530,7 +6530,7 @@ class _HomePageState extends State<HomePage>
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
                                           color: AppColors.white,
@@ -6539,7 +6539,7 @@ class _HomePageState extends State<HomePage>
                                       if (openSlot != null)
                                         Text(
                                           'Pour : ${openSlot.position.displayName}',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -6559,7 +6559,7 @@ class _HomePageState extends State<HomePage>
                                     ),
                                     child: Text(
                                       '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                      style: GoogleFonts.dmSans(
+                                      style: AppTypography.body(
                                         color: AppColors.amberSoft,
                                         fontSize: 12,
                                       ),
@@ -6579,7 +6579,7 @@ class _HomePageState extends State<HomePage>
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontStyle: FontStyle.italic,
                                     color: AppColors.muted2,
                                     fontSize: 13,
@@ -6629,7 +6629,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6682,7 +6682,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6735,7 +6735,7 @@ class _HomePageState extends State<HomePage>
             ),
             Text(
               'Changer la position de ${member.user.username}',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
@@ -6758,7 +6758,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 title: Text(
                   position.displayName,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.white,
                     fontWeight: member.position == position
                         ? FontWeight.w700
@@ -6803,7 +6803,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Nom de l\'équipe',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -6849,7 +6849,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -6891,7 +6891,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Enregistrer',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -6932,7 +6932,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Sélectionner l\'heure',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -7034,7 +7034,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -7063,7 +7063,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'OK',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -7162,7 +7162,7 @@ class _HomePageState extends State<HomePage>
                       Expanded(
                         child: Text(
                           'Préférences de recherche',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -7176,7 +7176,7 @@ class _HomePageState extends State<HomePage>
                   // Jours disponibles
                   Text(
                     'Jours disponibles *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7191,7 +7191,7 @@ class _HomePageState extends State<HomePage>
                       return FilterChip(
                         label: Text(
                           jour,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 12,
                             color: isSelected ? AppColors.amber : AppColors.muted2,
                           ),
@@ -7223,7 +7223,7 @@ class _HomePageState extends State<HomePage>
                   // Plage horaire
                   Text(
                     'Plage horaire *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7335,7 +7335,7 @@ class _HomePageState extends State<HomePage>
                   // Niveau de l'équipe
                   Text(
                     'Niveau de l\'équipe *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7350,7 +7350,7 @@ class _HomePageState extends State<HomePage>
                       return ChoiceChip(
                         label: Text(
                           niveau,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 12,
                             color: isSelected ? AppColors.amber : AppColors.muted2,
                           ),
@@ -7378,7 +7378,7 @@ class _HomePageState extends State<HomePage>
                   // Villes
                   Text(
                     'Villes de déplacement *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7395,7 +7395,7 @@ class _HomePageState extends State<HomePage>
                         return Chip(
                           label: Text(
                             city,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.white,
                               fontSize: 12,
                             ),
@@ -7486,7 +7486,7 @@ class _HomePageState extends State<HomePage>
                   const SizedBox(height: 16),
                   Text(
                     '* Champs obligatoires',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       color: AppColors.muted2,
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
@@ -7510,7 +7510,7 @@ class _HomePageState extends State<HomePage>
                             alignment: Alignment.center,
                             child: Text(
                               'Annuler',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.muted2,
                                 fontSize: 13,
@@ -7608,7 +7608,7 @@ class _HomePageState extends State<HomePage>
                             alignment: Alignment.center,
                             child: Text(
                               'Valider',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 fontSize: 13,
@@ -7870,7 +7870,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             children: [
               Text(
                 'Notifications',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
@@ -7905,7 +7905,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
                 'Aucune notification en attente',
-                style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
               ),
             )
           else
@@ -7921,7 +7921,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'DEMANDES D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -7951,7 +7951,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'CANDIDATURES MATCH PUBLIC',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -7979,7 +7979,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'INVITATIONS D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -8004,7 +8004,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'DÉFIS DE MATCH',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -8094,7 +8094,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       invitation.teamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8104,7 +8104,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Invitation · ${invitation.invitingUsername}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -8152,7 +8152,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8199,7 +8199,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8270,7 +8270,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       challenge.challengerTeamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8280,7 +8280,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                     ),
                   ],
                 ),
@@ -8288,7 +8288,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                  style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                 ),
             ],
           ),
@@ -8303,7 +8303,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               ),
               child: Text(
                 challenge.message!,
-                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -8319,7 +8319,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -8347,7 +8347,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   ),
                   child: Text(
                     'REFUSER',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w600,
                       fontSize: 10,
                       letterSpacing: 0.6,
@@ -8396,7 +8396,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         )
                       : Text(
                           'ACCEPTER',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 10,
                             letterSpacing: 0.6,
@@ -8493,7 +8493,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       app.applicantUsername,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8503,7 +8503,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${app.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8552,7 +8552,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8580,7 +8580,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                                 SnackBar(
                                   content: Text(
                                     result.errorMessage!,
-                                    style: GoogleFonts.dmSans(
+                                    style: AppTypography.body(
                                       color: AppColors.white,
                                       fontSize: 13,
                                     ),
@@ -8615,7 +8615,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8697,7 +8697,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       request.requesterUsername,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8707,7 +8707,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${request.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8760,7 +8760,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8806,7 +8806,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8993,7 +8993,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     ),
                     child: Text(
                       '${_step + 1}/2',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.amber,
@@ -9007,7 +9007,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       children: [
                         Text(
                           title,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -9015,7 +9015,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         ),
                         Text(
                           subtitle,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 11,
                             color: AppColors.muted2,
                           ),
@@ -9069,7 +9069,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         )
                       : Text(
                           _step == 0 ? 'Équipe adverse →' : 'Terminer',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -9118,7 +9118,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               ),
               child: Text(
                 s,
-                style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
               ),
             ),
           );
@@ -9134,7 +9134,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
       children: [
         Text(
           'NOTE (optionnel)',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 9,
             fontWeight: FontWeight.w700,
             color: AppColors.muted2,
@@ -9163,7 +9163,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   alignment: Alignment.center,
                   child: Text(
                     '$note',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? Colors.white : AppColors.muted2,
@@ -9238,7 +9238,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       children: [
                         Text(
                           member.user.username,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -9246,7 +9246,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         ),
                         Text(
                           member.position.displayName,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 11,
                             color: AppColors.muted2,
                           ),
@@ -9287,7 +9287,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       const SizedBox(width: 4),
                       Text(
                         isAbsent ? 'Absent' : 'Présent',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: isAbsent ? AppColors.rose : AppColors.muted2,
@@ -9304,13 +9304,13 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
           const SizedBox(height: 10),
           TextField(
             controller: _controllers[member.user.id],
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.white),
+            style: AppTypography.body(fontSize: 12, color: AppColors.white),
             maxLines: 2,
             maxLength: 300,
             decoration: InputDecoration(
               hintText: 'Commentaire (optionnel)…',
-              hintStyle: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
-              counterStyle: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+              hintStyle: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+              counterStyle: AppTypography.body(fontSize: 10, color: AppColors.muted2),
               filled: true,
               fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(

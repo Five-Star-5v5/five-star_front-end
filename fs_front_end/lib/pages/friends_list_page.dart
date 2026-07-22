@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/messages_provider.dart';
@@ -134,7 +134,7 @@ class _FriendsListPageState extends State<FriendsListPage>
             ),
             child: Text(
               '+ AJOUTER',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
                 letterSpacing: 0.5,
@@ -164,10 +164,10 @@ class _FriendsListPageState extends State<FriendsListPage>
         ),
         child: TextField(
           controller: _searchController,
-          style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13),
+          style: AppTypography.body(color: AppColors.white, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Rechercher un ami...',
-            hintStyle: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+            hintStyle: AppTypography.body(color: AppColors.muted2, fontSize: 13),
             prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 16),
             suffixIcon: _filterText.isNotEmpty
                 ? GestureDetector(
@@ -232,7 +232,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -254,7 +254,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                     ),
                     child: Text(
                       '$count',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         color: selected
@@ -318,7 +318,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   child: Center(
                     child: Text(
                       'Aucun ami correspondant',
-                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                      style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
                     ),
                   ),
                 )
@@ -370,7 +370,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                           friend.user.username.isNotEmpty
                               ? friend.user.username[0].toUpperCase()
                               : '?',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.amber,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
@@ -401,7 +401,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               children: [
                 Text(
                   friend.user.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: AppColors.white,
@@ -412,7 +412,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   children: [
                     Text(
                       friend.user.preferredPosition ?? 'Joueur',
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                     ),
                     if (friend.user.rating != null) ...[
                       const SizedBox(width: 6),
@@ -427,7 +427,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                       const SizedBox(width: 6),
                       Text(
                         '${friend.user.rating!.toStringAsFixed(1)} ★',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.amber,
                           fontWeight: FontWeight.w600,
@@ -476,7 +476,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                           ),
                           child: Text(
                             'Message',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.3,
@@ -565,7 +565,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               leading: const Icon(Icons.person_outline, color: AppColors.amber),
               title: Text(
                 'Voir le profil',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -589,7 +589,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               leading: const Icon(Icons.person_remove_outlined, color: AppColors.rose),
               title: Text(
                 'Supprimer cet ami',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.rose,
                   fontWeight: FontWeight.w600,
                 ),
@@ -612,7 +612,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                         children: [
                           Text(
                             'Supprimer ${friend.user.username} ?',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
@@ -621,7 +621,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                           const SizedBox(height: 10),
                           Text(
                             'Cette action retirera ${friend.user.username} de ta liste d\'amis.',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.muted2,
                               fontSize: 13,
                             ),
@@ -644,7 +644,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                                     child: Center(
                                       child: Text(
                                         'Annuler',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           color: AppColors.muted2,
                                           fontWeight: FontWeight.w600,
                                           fontSize: 12,
@@ -672,7 +672,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                                     child: Center(
                                       child: Text(
                                         'Supprimer',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           color: AppColors.rose,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 12,
@@ -720,7 +720,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               const SizedBox(width: 6),
               Text(
                 'Demandes reçues',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.amber,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
@@ -731,7 +731,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 onTap: () => _tabController.animateTo(1),
                 child: Text(
                   'Voir tout →',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     color: AppColors.amber,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -770,7 +770,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 : Center(
                     child: Text(
                       req.fromUser.username[0].toUpperCase(),
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         color: AppColors.amber,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -782,7 +782,7 @@ class _FriendsListPageState extends State<FriendsListPage>
           Expanded(
             child: Text(
               req.fromUser.username,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 color: AppColors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -893,7 +893,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                         request.fromUser.username.isNotEmpty
                             ? request.fromUser.username[0].toUpperCase()
                             : '?',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -909,7 +909,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               children: [
                 Text(
                   request.fromUser.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: AppColors.white,
@@ -918,7 +918,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                 const SizedBox(height: 2),
                 Text(
                   request.fromUser.preferredPosition ?? 'Joueur',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
                 ),
               ],
             ),
@@ -943,7 +943,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   ),
                   child: Text(
                     'REFUSER',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
@@ -972,7 +972,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                   ),
                   child: Text(
                     'ACCEPTER',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
@@ -1053,7 +1053,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                         request.user.username.isNotEmpty
                             ? request.user.username[0].toUpperCase()
                             : '?',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.muted2,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
@@ -1069,7 +1069,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               children: [
                 Text(
                   request.user.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                     color: AppColors.white,
@@ -1089,7 +1089,7 @@ class _FriendsListPageState extends State<FriendsListPage>
                     const SizedBox(width: 5),
                     Text(
                       'En attente',
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.amber),
+                      style: AppTypography.body(fontSize: 11, color: AppColors.amber),
                     ),
                   ],
                 ),
@@ -1110,7 +1110,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               ),
               child: Text(
                 'ANNULER',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
@@ -1148,7 +1148,7 @@ class _FriendsListPageState extends State<FriendsListPage>
           const SizedBox(height: 14),
           Text(
             message,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               color: AppColors.white,
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -1157,7 +1157,7 @@ class _FriendsListPageState extends State<FriendsListPage>
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 12),
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1172,7 +1172,7 @@ class _FriendsListPageState extends State<FriendsListPage>
         children: [
           Text(
             message ?? 'Une erreur est survenue',
-            style: GoogleFonts.dmSans(color: AppColors.muted2),
+            style: AppTypography.body(color: AppColors.muted2),
           ),
           const SizedBox(height: 16),
           GestureDetector(
@@ -1186,7 +1186,7 @@ class _FriendsListPageState extends State<FriendsListPage>
               ),
               child: Text(
                 'Réessayer',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.amber,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
@@ -1249,7 +1249,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
           // Header
           Text(
             'Ajouter un ami',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: AppColors.white,
@@ -1267,10 +1267,10 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
             child: TextField(
               controller: _controller,
               autofocus: true,
-              style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13),
+              style: AppTypography.body(color: AppColors.white, fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Rechercher un joueur...',
-                hintStyle: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                hintStyle: AppTypography.body(color: AppColors.muted2, fontSize: 13),
                 prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 17),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -1307,7 +1307,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         child: Center(
           child: Text(
             'Entrez au moins 2 caractères',
-            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
           ),
         ),
       );
@@ -1319,7 +1319,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         child: Center(
           child: Text(
             'Aucun résultat trouvé',
-            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
           ),
         ),
       );
@@ -1378,7 +1378,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                         result.user.username.isNotEmpty
                             ? result.user.username[0].toUpperCase()
                             : '?',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.amber,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
@@ -1394,7 +1394,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
               children: [
                 Text(
                   result.user.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.white,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
@@ -1403,7 +1403,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                 if (result.user.preferredPosition != null)
                   Text(
                     result.user.preferredPosition!,
-                    style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
+                    style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
                   ),
               ],
             ),
@@ -1431,7 +1431,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         ),
         child: Text(
           'Ami',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: AppColors.sage,
@@ -1450,7 +1450,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         ),
         child: Text(
           'En attente',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: AppColors.amber,
@@ -1502,7 +1502,7 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
               )
             : Text(
                 '+ AJOUTER',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
