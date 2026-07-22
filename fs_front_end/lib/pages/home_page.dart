@@ -25,7 +25,6 @@ import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
 
-
 Widget _buildAvailChip(IconData icon, String label) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -275,7 +274,12 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
               child: SvgPicture.string(
-                buildKobetaLogoSvg(kLogoOrangePaths, '#0B0D11', 28, 'loadingHex'),
+                buildKobetaLogoSvg(
+                  kLogoOrangePaths,
+                  '#0B0D11',
+                  28,
+                  'loadingHex',
+                ),
                 width: 50,
                 height: 50,
               ),
@@ -350,7 +354,11 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 20),
             Row(
               children: [
-                const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
+                const Icon(
+                  Icons.info_outline,
+                  color: AppColors.amber,
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -389,7 +397,9 @@ class _HomePageState extends State<HomePage>
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 8),
       decoration: BoxDecoration(
-        color: _isLookingForOpponent ? AppColors.amber.withValues(alpha: 0.08) : AppColors.card,
+        color: _isLookingForOpponent
+            ? AppColors.amber.withValues(alpha: 0.08)
+            : AppColors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isLookingForOpponent
@@ -416,14 +426,18 @@ class _HomePageState extends State<HomePage>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _isLookingForOpponent ? AppColors.amberDim : AppColors.border,
+                    color: _isLookingForOpponent
+                        ? AppColors.amberDim
+                        : AppColors.border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     _isLookingForOpponent
                         ? Icons.visibility
                         : Icons.visibility_off,
-                    color: _isLookingForOpponent ? AppColors.amber : AppColors.muted2,
+                    color: _isLookingForOpponent
+                        ? AppColors.amber
+                        : AppColors.muted2,
                     size: 20,
                   ),
                 ),
@@ -438,7 +452,9 @@ class _HomePageState extends State<HomePage>
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                           letterSpacing: 0.04 * 13,
-                          color: _isLookingForOpponent ? AppColors.amber : AppColors.white,
+                          color: _isLookingForOpponent
+                              ? AppColors.amber
+                              : AppColors.white,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -606,16 +622,25 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                   Positioned.fill(
-                    child: Container(color: Colors.black.withValues(alpha: 0.65)),
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.65),
+                    ),
                   ),
                   SizedBox(
                     width: double.infinity,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 16,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.sports_soccer_outlined, size: 28, color: AppColors.muted2),
+                          Icon(
+                            Icons.sports_soccer_outlined,
+                            size: 28,
+                            color: AppColors.muted2,
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             'Aucun match à venir',
@@ -628,7 +653,10 @@ class _HomePageState extends State<HomePage>
                           const SizedBox(height: 4),
                           Text(
                             'Défiez une équipe pour planifier un match',
-                            style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                            style: AppTypography.body(
+                              fontSize: 11,
+                              color: AppColors.muted2,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -882,563 +910,756 @@ class _HomePageState extends State<HomePage>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border, width: 1),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.amber.withValues(alpha: 0.06),
+            blurRadius: 26,
+            spreadRadius: -6,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // En-tête avec adversaire
-          Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2A2C37), Color(0xFF16181E)],
+              stops: [0.0, 0.8],
+            ),
+            border: Border.all(color: AppColors.border2, width: 1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
             children: [
-              // Icône match
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.amberDim,
-                  borderRadius: BorderRadius.circular(11),
-                  border: Border.all(
-                    color: AppColors.amber.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                ),
-                child: opponentLogo != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(opponentLogo, fit: BoxFit.cover),
-                      )
-                    : Center(
-                        child: Text(
-                          opponentName[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: AppColors.amber,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 11, 11, 11),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'VS $opponentName',
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        letterSpacing: 0.03 * 13,
-                        color: AppColors.white,
-                      ),
-                    ),
-                    Text(
-                      isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
-                    ),
-                  ],
-                ),
-              ),
-              // Bouton chat avec badge de messages non lus
-              _buildMatchChatButton(match, myTeamId, isDarkMode),
-              const SizedBox(width: 8),
-              // Statut
-              _buildMatchStatusBadge(match, hasSubmitted, isDarkMode),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Infos du match
-          if (match.proposedDate != null || match.proposedLocation != null)
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.card2,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  if (match.proposedDate != null)
+                    // ── Barre haute : statut + chat ──
                     Row(
                       children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: AppColors.muted2,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _formatMatchDate(match.proposedDate!),
-                          style: const TextStyle(fontSize: 12, color: AppColors.white),
-                        ),
+                        _buildMatchStatusBadge(match, hasSubmitted, isDarkMode),
+                        const Spacer(),
+                        _buildMatchChatButton(match, myTeamId, isDarkMode),
                       ],
                     ),
-                  if (match.proposedDate != null &&
-                      match.proposedLocation != null)
-                    const SizedBox(height: 6),
-                  if (match.proposedLocation != null)
+                    const SizedBox(height: 16),
+                    // ── Affiche du match : équipe vs équipe ──
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: AppColors.muted2,
-                        ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            match.proposedLocation!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.white,
+                          child: _buildMatchTeamSide(
+                            name: isChallenger
+                                ? match.challengerTeamName
+                                : match.challengedTeamName,
+                            logoUrl: isChallenger
+                                ? match.challengerTeamLogoUrl
+                                : match.challengedTeamLogoUrl,
+                            isMine: true,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 12),
-
-          // Afficher le score de l'adversaire s'il a soumis et que je n'ai pas soumis
-          if (opponentSubmittedScore != null && !hasSubmitted) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'L\'adversaire a soumis le score suivant :',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode
-                                ? Colors.orange[200]
-                                : Colors.orange[800],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Affichage du score avec noms d'équipes
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey[800] : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Équipe challenger
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                match.challengerTeamName,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.04),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: AppColors.border2,
+                                width: 1,
                               ),
-                              const SizedBox(height: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                            ),
+                            child: Text(
+                              'VS',
+                              style: AppTypography.display(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 11,
+                                letterSpacing: 0.08 * 11,
+                                color: AppColors.muted2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildMatchTeamSide(
+                            name: opponentName,
+                            logoUrl: opponentLogo,
+                            isMine: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        isChallenger ? 'Défi envoyé' : 'Défi reçu',
+                        style: AppTypography.body(
+                          fontSize: 10,
+                          letterSpacing: 0.04 * 10,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 1,
+                      width: double.infinity,
+                      color: AppColors.border,
+                    ),
+                    const SizedBox(height: 12),
+                    // Infos du match
+                    if (match.proposedDate != null ||
+                        match.proposedLocation != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (match.proposedDate != null)
+                            _buildMatchInfoChip(
+                              Icons.calendar_today,
+                              _formatMatchDate(match.proposedDate!),
+                            ),
+                          if (match.proposedDate != null &&
+                              match.proposedLocation != null)
+                            const SizedBox(height: 6),
+                          if (match.proposedLocation != null)
+                            _buildMatchInfoChip(
+                              Icons.location_on,
+                              match.proposedLocation!,
+                              maxLines: 2,
+                            ),
+                        ],
+                      ),
+                    const SizedBox(height: 12),
+
+                    // Afficher le score de l'adversaire s'il a soumis et que je n'ai pas soumis
+                    if (opponentSubmittedScore != null && !hasSubmitted) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.orange.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.orange,
+                                  size: 20,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(10),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'L\'adversaire a soumis le score suivant :',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDarkMode
+                                          ? Colors.orange[200]
+                                          : Colors.orange[800],
+                                    ),
+                                  ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            // Affichage du score avec noms d'équipes
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  // Équipe challenger
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          match.challengerTeamName,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${opponentSubmittedScore['challengerScore']}',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDarkMode
+                                                  ? Colors.blue[300]
+                                                  : Colors.blue[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Séparateur
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                    ),
+                                    child: Text(
+                                      '-',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600],
+                                      ),
+                                    ),
+                                  ),
+                                  // Équipe challengée
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          match.challengedTeamName,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${opponentSubmittedScore['challengedScore']}',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDarkMode
+                                                  ? Colors.red[300]
+                                                  : Colors.red[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Boutons Valider / Contester - seulement pour l'owner
+                            if (isOwner) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _contestMatchScore(match),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(9),
+                                        border: Border.all(
+                                          color: const Color(0xFFD4607A),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'CONTESTER',
+                                        style: AppTypography.display(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 10,
+                                          letterSpacing: 0.06 * 10,
+                                          color: const Color(0xFFD4607A),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => _validateMatchScore(match),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A7A4B),
+                                        borderRadius: BorderRadius.circular(9),
+                                      ),
+                                      child: Text(
+                                        'VALIDER',
+                                        style: AppTypography.display(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 10,
+                                          letterSpacing: 0.06 * 10,
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Align(
+                                alignment: Alignment.centerRight,
                                 child: Text(
-                                  '${opponentSubmittedScore['challengerScore']}',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.blue[300]
-                                        : Colors.blue[700],
+                                  'Contester = match nul (0-0)',
+                                  style: AppTypography.body(
+                                    fontSize: 10,
+                                    color: AppColors.muted2,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ),
+                            ] else ...[
+                              // Message pour les membres non-owner
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.orange.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.orange[700],
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'En attente de la validation du score par le capitaine',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isDarkMode
+                                              ? Colors.orange[300]
+                                              : Colors.orange[700],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
-                          ),
+                          ],
                         ),
-                        // Séparateur
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text(
-                            '-',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                      ),
+                    ]
+                    // Si j'ai déjà soumis, attente de validation
+                    else if (hasSubmitted) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.hourglass_empty,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Score soumis ! En attente de validation par l\'adversaire.',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // Owner — score pas encore soumis (match à jouer)
+                    else if (isOwner) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.card2,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                isChallenger
+                                    ? match.challengerTeamName
+                                    : match.challengedTeamName,
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: AppColors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              child: Text(
+                                '? – ?',
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: AppColors.muted2,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                opponentName,
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: AppColors.white,
+                                ),
+                                textAlign: TextAlign.right,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // Membre mais pas owner - afficher un message
+                    else if (!isOwner) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
                               color: isDarkMode
                                   ? Colors.grey[400]
                                   : Colors.grey[600],
+                              size: 20,
                             ),
-                          ),
-                        ),
-                        // Équipe challengée
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                match.challengedTeamName,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'En attente que le capitaine enregistre le résultat.',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
                                   color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
+                                  fontSize: 13,
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 6),
-                              Container(
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    // Boutons d'action compacts (droite)
+                    if (isOwner) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (!hasSubmitted &&
+                              opponentSubmittedScore == null) ...[
+                            GestureDetector(
+                              onTap: () =>
+                                  _showSubmitScoreDialog(match, myTeamId),
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
-                                  vertical: 6,
+                                  vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(10),
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.amberSoft,
+                                      AppColors.amberD,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x47FF7F2A),
+                                      blurRadius: 12,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
                                 child: Text(
-                                  '${opponentSubmittedScore['challengedScore']}',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.red[300]
-                                        : Colors.red[700],
+                                  'RÉSULTAT',
+                                  style: AppTypography.display(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                    letterSpacing: 0.06 * 10,
+                                    color: AppColors.night,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Boutons Valider / Contester - seulement pour l'owner
-                  if (isOwner) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _contestMatchScore(match),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(9),
-                              border: Border.all(
-                                color: const Color(0xFFD4607A),
-                                width: 1.5,
+                            const SizedBox(width: 8),
+                          ],
+                          GestureDetector(
+                            onTap: () => _cancelMatch(match),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            ),
-                            child: Text(
-                              'CONTESTER',
-                              style: AppTypography.display(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10,
-                                letterSpacing: 0.06 * 10,
-                                color: const Color(0xFFD4607A),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(9),
+                                border: Border.all(
+                                  color: AppColors.border2,
+                                  width: 1.5,
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () => _validateMatchScore(match),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2A7A4B),
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                            child: Text(
-                              'VALIDER',
-                              style: AppTypography.display(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10,
-                                letterSpacing: 0.06 * 10,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'Contester = match nul (0-0)',
-                        style: AppTypography.body(
-                          fontSize: 10,
-                          color: AppColors.muted2,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    // Message pour les membres non-owner
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.orange.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.orange[700],
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'En attente de la validation du score par le capitaine',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDarkMode
-                                    ? Colors.orange[300]
-                                    : Colors.orange[700],
+                              child: Text(
+                                'ANNULER',
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                  letterSpacing: 0.06 * 10,
+                                  color: AppColors.muted2,
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ]
-          // Si j'ai déjà soumis, attente de validation
-          else if (hasSubmitted) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.hourglass_empty,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Score soumis ! En attente de validation par l\'adversaire.',
-                      style: TextStyle(color: Colors.green[700], fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]
-          // Owner — score pas encore soumis (match à jouer)
-          else if (isOwner) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.card2,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      isChallenger
-                          ? match.challengerTeamName
-                          : match.challengedTeamName,
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        color: AppColors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Text(
-                      '? – ?',
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        color: AppColors.muted2,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      opponentName,
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        color: AppColors.white,
-                      ),
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]
-          // Membre mais pas owner - afficher un message
-          else if (!isOwner) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'En attente que le capitaine enregistre le résultat.',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          // Boutons d'action compacts (droite)
-          if (isOwner) ...[
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!hasSubmitted && opponentSubmittedScore == null) ...[
-                  GestureDetector(
-                    onTap: () => _showSubmitScoreDialog(match, myTeamId),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.amberSoft, AppColors.amberD],
-                        ),
-                        borderRadius: BorderRadius.circular(9),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x47FF7F2A),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        'RÉSULTAT',
-                        style: AppTypography.display(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.06 * 10,
-                          color: AppColors.night,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                GestureDetector(
-                  onTap: () => _cancelMatch(match),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(color: AppColors.border2, width: 1.5),
-                    ),
-                    child: Text(
-                      'ANNULER',
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10,
-                        letterSpacing: 0.06 * 10,
-                        color: AppColors.muted2,
-                      ),
+              // Barre d'accent amber (bord gauche)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 3,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.amber, AppColors.amberD],
                     ),
                   ),
                 ),
-              ],
+              ),
+              // Liseré lumineux sur le bord haut (« éclairé du dessus »)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withValues(alpha: 0.16),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Un côté de l'affiche de match : blason + nom d'équipe.
+  /// [isMine] met en avant l'équipe du user (anneau + halo amber).
+  Widget _buildMatchTeamSide({
+    required String name,
+    required String? logoUrl,
+    required bool isMine,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isMine
+                  ? [
+                      AppColors.amber.withValues(alpha: 0.24),
+                      AppColors.amberD.withValues(alpha: 0.06),
+                    ]
+                  : [
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.white.withValues(alpha: 0.02),
+                    ],
             ),
-          ],
+            border: Border.all(
+              color: isMine
+                  ? AppColors.amber.withValues(alpha: 0.45)
+                  : AppColors.border2,
+              width: 1.5,
+            ),
+            boxShadow: isMine
+                ? [
+                    BoxShadow(
+                      color: AppColors.amber.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                      spreadRadius: -2,
+                    ),
+                  ]
+                : null,
+          ),
+          child: logoUrl != null
+              ? ClipOval(child: Image.network(logoUrl, fit: BoxFit.cover))
+              : Center(
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                    style: AppTypography.display(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 19,
+                      color: isMine ? AppColors.amber : AppColors.white,
+                    ),
+                  ),
+                ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name.toUpperCase(),
+          style: AppTypography.display(
+            fontWeight: FontWeight.w700,
+            fontSize: 10,
+            letterSpacing: 0.06 * 10,
+            color: isMine ? AppColors.white : AppColors.muted2,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  /// Petite pill (date, lieu) — style premium pour la card de match.
+  Widget _buildMatchInfoChip(IconData icon, String label, {int maxLines = 1}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.amber.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: AppColors.amber.withValues(alpha: 0.16),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.amber),
+          const SizedBox(width: 7),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.body(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: AppColors.white,
+              ),
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
@@ -1656,7 +1877,10 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Entrez le score du match contre $opponentName',
-                  style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -1685,20 +1909,28 @@ class _HomePageState extends State<HomePage>
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: AppColors.muted2),
+                              hintStyle: const TextStyle(
+                                color: AppColors.muted2,
+                              ),
                               filled: true,
                               fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.amber),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
                           ),
@@ -1741,20 +1973,28 @@ class _HomePageState extends State<HomePage>
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: AppColors.muted2),
+                              hintStyle: const TextStyle(
+                                color: AppColors.muted2,
+                              ),
                               filled: true,
                               fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.amber),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
                           ),
@@ -1772,7 +2012,11 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
+                      const Icon(
+                        Icons.info_outline,
+                        color: AppColors.amber,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -1916,7 +2160,10 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2022,7 +2269,10 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
                 'Êtes-vous sûr de vouloir contester ?',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2125,7 +2375,10 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
                 'Cette action ne peut pas être annulée.',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2242,7 +2495,10 @@ class _HomePageState extends State<HomePage>
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
-                  style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -2446,7 +2702,10 @@ class _HomePageState extends State<HomePage>
                         decoration: BoxDecoration(
                           color: AppColors.amber,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.night, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.night,
+                            width: 1.5,
+                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -2591,7 +2850,9 @@ class _HomePageState extends State<HomePage>
                                   color: AppColors.amberDim,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: AppColors.amber.withValues(alpha: 0.30),
+                                    color: AppColors.amber.withValues(
+                                      alpha: 0.30,
+                                    ),
                                   ),
                                 ),
                                 child: Row(
@@ -2814,7 +3075,9 @@ class _HomePageState extends State<HomePage>
                                   child: Icon(
                                     Icons.info_outline,
                                     size: 13,
-                                    color: AppColors.amber.withValues(alpha: 0.65),
+                                    color: AppColors.amber.withValues(
+                                      alpha: 0.65,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2883,7 +3146,9 @@ class _HomePageState extends State<HomePage>
                                     borderRadius: BorderRadius.circular(100),
                                     border: Border.all(
                                       color: isOwner
-                                          ? AppColors.amber.withValues(alpha: 0.25)
+                                          ? AppColors.amber.withValues(
+                                              alpha: 0.25,
+                                            )
                                           : AppColors.border2,
                                     ),
                                   ),
@@ -2892,7 +3157,9 @@ class _HomePageState extends State<HomePage>
                                     style: AppTypography.display(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
-                                      color: isOwner ? AppColors.amber : AppColors.muted2,
+                                      color: isOwner
+                                          ? AppColors.amber
+                                          : AppColors.muted2,
                                       letterSpacing: 0.06 * 8,
                                     ),
                                   ),
@@ -3821,7 +4088,11 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.swap_horiz, color: AppColors.amber, size: 20),
+                    const Icon(
+                      Icons.swap_horiz,
+                      color: AppColors.amber,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       'Changer de position',
@@ -3883,7 +4154,9 @@ class _HomePageState extends State<HomePage>
                                       decoration: BoxDecoration(
                                         color: AppColors.card2,
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: AppColors.border2),
+                                        border: Border.all(
+                                          color: AppColors.border2,
+                                        ),
                                       ),
                                       alignment: Alignment.center,
                                       child: Text(
@@ -3940,11 +4213,17 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.roseDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.rose.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.remove_circle, color: AppColors.rose, size: 20),
+                      const Icon(
+                        Icons.remove_circle,
+                        color: AppColors.rose,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Retirer de l\'équipe',
@@ -4099,7 +4378,9 @@ class _HomePageState extends State<HomePage>
                                     inv.invitedUsername.isNotEmpty
                                         ? inv.invitedUsername[0].toUpperCase()
                                         : '?',
-                                    style: const TextStyle(color: AppColors.amber),
+                                    style: const TextStyle(
+                                      color: AppColors.amber,
+                                    ),
                                   )
                                 : null,
                           ),
@@ -4295,7 +4576,9 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.amber.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -4319,9 +4602,15 @@ class _HomePageState extends State<HomePage>
                     ),
                     subtitle: Text(
                       '@${currentUser.username}',
-                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
-                    trailing: const Icon(Icons.person_add, color: AppColors.amber),
+                    trailing: const Icon(
+                      Icons.person_add,
+                      color: AppColors.amber,
+                    ),
                     onTap: () async {
                       Navigator.pop(ctx);
                       await teamsProvider.addMemberToMyTeam(
@@ -4351,7 +4640,9 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.amber.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: ListTile(
                     leading: const CircleAvatar(
@@ -4367,7 +4658,10 @@ class _HomePageState extends State<HomePage>
                     ),
                     subtitle: Text(
                       'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
-                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4425,7 +4719,10 @@ class _HomePageState extends State<HomePage>
                   child: ListTile(
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFF1A1D26),
-                      child: Icon(Icons.storefront_outlined, color: AppColors.muted2),
+                      child: Icon(
+                        Icons.storefront_outlined,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     title: Text(
                       'Recruter sur le store',
@@ -4436,7 +4733,10 @@ class _HomePageState extends State<HomePage>
                     ),
                     subtitle: Text(
                       'Parcourir les joueurs disponibles et les inviter',
-                      style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4517,7 +4817,9 @@ class _HomePageState extends State<HomePage>
                           child: friend.user.avatarUrl == null
                               ? Text(
                                   friend.user.username[0].toUpperCase(),
-                                  style: const TextStyle(color: AppColors.amber),
+                                  style: const TextStyle(
+                                    color: AppColors.amber,
+                                  ),
                                 )
                               : null,
                         ),
@@ -4539,7 +4841,9 @@ class _HomePageState extends State<HomePage>
                         trailing: friend.user.rating != null
                             ? Text(
                                 '⭐ ${friend.user.rating!.toStringAsFixed(1)}',
-                                style: AppTypography.body(color: AppColors.muted2),
+                                style: AppTypography.body(
+                                  color: AppColors.muted2,
+                                ),
                               )
                             : null,
                         onTap: () async {
@@ -4609,7 +4913,10 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-                  style: AppTypography.body(color: AppColors.muted2, fontSize: 12),
+                  style: AppTypography.body(
+                    color: AppColors.muted2,
+                    fontSize: 12,
+                  ),
                 ),
 
                 // ── PORTÉE ──
@@ -4661,17 +4968,23 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: !openAll ? AppColors.amberDim : AppColors.card2,
+                            color: !openAll
+                                ? AppColors.amberDim
+                                : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: !openAll ? AppColors.amber : AppColors.border2,
+                              color: !openAll
+                                  ? AppColors.amber
+                                  : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.person_pin,
-                                color: !openAll ? AppColors.amber : AppColors.muted2,
+                                color: !openAll
+                                    ? AppColors.amber
+                                    : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
@@ -4681,7 +4994,9 @@ class _HomePageState extends State<HomePage>
                                 style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: !openAll ? AppColors.amber : AppColors.muted2,
+                                  color: !openAll
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4699,17 +5014,23 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: openAll ? AppColors.amberDim : AppColors.card2,
+                            color: openAll
+                                ? AppColors.amberDim
+                                : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: openAll ? AppColors.amber : AppColors.border2,
+                              color: openAll
+                                  ? AppColors.amber
+                                  : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.groups,
-                                color: openAll ? AppColors.amber : AppColors.muted2,
+                                color: openAll
+                                    ? AppColors.amber
+                                    : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
@@ -4719,7 +5040,9 @@ class _HomePageState extends State<HomePage>
                                 style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: openAll ? AppColors.amber : AppColors.muted2,
+                                  color: openAll
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4820,7 +5143,10 @@ class _HomePageState extends State<HomePage>
                   style: const TextStyle(color: AppColors.white, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Ex: Bon niveau requis, ambiance sympa...',
-                    hintStyle: const TextStyle(color: AppColors.muted2, fontSize: 12),
+                    hintStyle: const TextStyle(
+                      color: AppColors.muted2,
+                      fontSize: 12,
+                    ),
                     filled: true,
                     fillColor: AppColors.card2,
                     contentPadding: const EdgeInsets.all(12),
@@ -4869,7 +5195,9 @@ class _HomePageState extends State<HomePage>
                             Icon(
                               Icons.calendar_today,
                               size: 15,
-                              color: hasMatch ? AppColors.amber : AppColors.muted2,
+                              color: hasMatch
+                                  ? AppColors.amber
+                                  : AppColors.muted2,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -5005,7 +5333,9 @@ class _HomePageState extends State<HomePage>
                                 Icon(
                                   Icons.access_time,
                                   size: 15,
-                                  color: matchTime != null ? AppColors.amber : AppColors.muted2,
+                                  color: matchTime != null
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
@@ -5180,7 +5510,10 @@ class _HomePageState extends State<HomePage>
                               decoration: BoxDecoration(
                                 gradient: canSubmit
                                     ? const LinearGradient(
-                                        colors: [AppColors.amber, AppColors.amberD],
+                                        colors: [
+                                          AppColors.amber,
+                                          AppColors.amberD,
+                                        ],
                                       )
                                     : null,
                                 color: canSubmit ? null : AppColors.card2,
@@ -5195,7 +5528,9 @@ class _HomePageState extends State<HomePage>
                                 children: [
                                   Icon(
                                     Icons.person_search,
-                                    color: canSubmit ? Colors.white : AppColors.muted2,
+                                    color: canSubmit
+                                        ? Colors.white
+                                        : AppColors.muted2,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
@@ -5241,7 +5576,9 @@ class _HomePageState extends State<HomePage>
           decoration: BoxDecoration(
             color: selected ? AppColors.amberDim : AppColors.card2,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: selected ? AppColors.amber : AppColors.border2),
+            border: Border.all(
+              color: selected ? AppColors.amber : AppColors.border2,
+            ),
           ),
           child: Text(
             label,
@@ -5381,7 +5718,11 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_add, color: AppColors.amber, size: 20),
+                      const Icon(
+                        Icons.person_add,
+                        color: AppColors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Ajouter un remplaçant',
@@ -5435,7 +5776,11 @@ class _HomePageState extends State<HomePage>
             const CircleAvatar(
               radius: 30,
               backgroundColor: AppColors.amberDim,
-              child: Icon(Icons.person_search, color: AppColors.amber, size: 30),
+              child: Icon(
+                Icons.person_search,
+                color: AppColors.amber,
+                size: 30,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -5489,7 +5834,11 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.people, color: AppColors.amber, size: 20),
+                      const Icon(
+                        Icons.people,
+                        color: AppColors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Voir les candidatures',
@@ -5565,7 +5914,9 @@ class _HomePageState extends State<HomePage>
                                     decoration: BoxDecoration(
                                       color: AppColors.card2,
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: AppColors.border2),
+                                      border: Border.all(
+                                        color: AppColors.border2,
+                                      ),
                                     ),
                                     alignment: Alignment.center,
                                     child: Text(
@@ -5620,7 +5971,9 @@ class _HomePageState extends State<HomePage>
                 decoration: BoxDecoration(
                   color: AppColors.roseDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.rose.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -5759,7 +6112,9 @@ class _HomePageState extends State<HomePage>
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                            child: CircularProgressIndicator(color: AppColors.amber),
+                            child: CircularProgressIndicator(
+                              color: AppColors.amber,
+                            ),
                           );
                         }
                         final players = snapshot.data ?? [];
@@ -6030,9 +6385,8 @@ class _HomePageState extends State<HomePage>
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               border: Border.all(
-                                                color: AppColors.rose.withValues(
-                                                  alpha: 0.5,
-                                                ),
+                                                color: AppColors.rose
+                                                    .withValues(alpha: 0.5),
                                               ),
                                             ),
                                             child: Text(
@@ -6265,7 +6619,9 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.border.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: AppColors.border2),
                                 ),
@@ -6308,7 +6664,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.rose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6361,7 +6719,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.sage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6573,7 +6933,9 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.border.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: AppColors.border2),
                                 ),
@@ -6615,7 +6977,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.rose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6668,7 +7032,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.sage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6751,7 +7117,9 @@ class _HomePageState extends State<HomePage>
                   child: Text(
                     position.shortName,
                     style: TextStyle(
-                      color: member.position == position ? AppColors.amber : AppColors.muted2,
+                      color: member.position == position
+                          ? AppColors.amber
+                          : AppColors.muted2,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -7193,7 +7561,9 @@ class _HomePageState extends State<HomePage>
                           jour,
                           style: AppTypography.display(
                             fontSize: 12,
-                            color: isSelected ? AppColors.amber : AppColors.muted2,
+                            color: isSelected
+                                ? AppColors.amber
+                                : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7314,7 +7684,9 @@ class _HomePageState extends State<HomePage>
                                       ? '${endTime!.hour.toString().padLeft(2, '0')}h${endTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Fin',
                                   style: TextStyle(
-                                    color: endTime != null ? AppColors.white : AppColors.muted2,
+                                    color: endTime != null
+                                        ? AppColors.white
+                                        : AppColors.muted2,
                                   ),
                                 ),
                                 const Icon(
@@ -7352,7 +7724,9 @@ class _HomePageState extends State<HomePage>
                           niveau,
                           style: AppTypography.display(
                             fontSize: 12,
-                            color: isSelected ? AppColors.amber : AppColors.muted2,
+                            color: isSelected
+                                ? AppColors.amber
+                                : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7434,15 +7808,21 @@ class _HomePageState extends State<HomePage>
                             fillColor: AppColors.card2,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.amber),
+                              borderSide: const BorderSide(
+                                color: AppColors.amber,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -7714,10 +8094,7 @@ class _ModernPitchPainter extends CustomPainter {
         ..shader = RadialGradient(
           center: Alignment.center,
           radius: 0.85,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.20),
-          ],
+          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.20)],
         ).createShader(Rect.fromLTWH(0, 0, w, h)),
     );
 
@@ -7794,19 +8171,31 @@ class _ModernPitchPainter extends CustomPainter {
     final double cr = h * 0.07;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(m, m), radius: cr),
-      0, math.pi / 2, false, lp,
+      0,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(m, h - m), radius: cr),
-      -math.pi / 2, math.pi / 2, false, lp,
+      -math.pi / 2,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(w - m, m), radius: cr),
-      math.pi / 2, math.pi / 2, false, lp,
+      math.pi / 2,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(w - m, h - m), radius: cr),
-      math.pi, math.pi / 2, false, lp,
+      math.pi,
+      math.pi / 2,
+      false,
+      lp,
     );
   }
 
@@ -7905,7 +8294,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
                 'Aucune notification en attente',
-                style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
               ),
             )
           else
@@ -8104,7 +8496,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Invitation · ${invitation.invitingUsername}',
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -8280,7 +8675,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Défi reçu',
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -8288,7 +8686,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 10,
+                    color: AppColors.muted2,
+                  ),
                 ),
             ],
           ),
@@ -8303,7 +8704,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               ),
               child: Text(
                 challenge.message!,
-                style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 12,
+                  color: AppColors.muted2,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -8314,12 +8718,19 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                const Icon(
+                  Icons.location_on,
+                  size: 12,
+                  color: AppColors.muted2,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -8503,7 +8914,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${app.teamName}',
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8707,7 +9121,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${request.teamName}',
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -9118,7 +9535,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               ),
               child: Text(
                 s,
-                style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 11,
+                  color: AppColors.muted2,
+                ),
               ),
             ),
           );
@@ -9158,7 +9578,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.amber : AppColors.card,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: isSelected ? AppColors.amber : AppColors.border2),
+                    border: Border.all(
+                      color: isSelected ? AppColors.amber : AppColors.border2,
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -9186,7 +9608,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
         color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAbsent ? AppColors.rose.withValues(alpha: 0.4) : AppColors.border2,
+          color: isAbsent
+              ? AppColors.rose.withValues(alpha: 0.4)
+              : AppColors.border2,
         ),
       ),
       child: Column(
@@ -9268,7 +9692,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: isAbsent ? AppColors.rose.withValues(alpha: 0.2) : AppColors.border2,
+                    color: isAbsent
+                        ? AppColors.rose.withValues(alpha: 0.2)
+                        : AppColors.border2,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isAbsent ? AppColors.rose : Colors.transparent,
@@ -9309,8 +9735,14 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
             maxLength: 300,
             decoration: InputDecoration(
               hintText: 'Commentaire (optionnel)…',
-              hintStyle: AppTypography.body(fontSize: 12, color: AppColors.muted2),
-              counterStyle: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+              hintStyle: AppTypography.body(
+                fontSize: 12,
+                color: AppColors.muted2,
+              ),
+              counterStyle: AppTypography.body(
+                fontSize: 10,
+                color: AppColors.muted2,
+              ),
               filled: true,
               fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(
