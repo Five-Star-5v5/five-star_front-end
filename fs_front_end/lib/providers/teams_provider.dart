@@ -313,7 +313,13 @@ class TeamsProvider with ChangeNotifier {
 
   /// Charge "Mon Équipe" (équipe par défaut) ET les équipes où je suis membre
   Future<void> loadMyTeam() async {
-    _isLoadingInitial = true;
+    // « Initial » veut dire « rien à afficher pour l'instant », pas « une
+    // requête est en cours ». Sans cette condition, revenir sur l'onglet
+    // Équipe rechargeait avec des données déjà en mémoire et faisait clignoter
+    // l'écran : contenu → loader Kobeta → contenu.
+    if (_myTeam == null && _teamsMemberOf.isEmpty) {
+      _isLoadingInitial = true;
+    }
     _state = TeamsLoadingState.loading;
     _errorMessage = null;
     notifyListeners();
