@@ -822,14 +822,19 @@ class SettingsPage extends StatelessWidget {
                                 }
                                 if (success) {
                                   if (context.mounted) {
-                                    Navigator.of(context).pushAndRemoveUntil(
+                                    // On dépile jusqu'à la racine (redevenue
+                                    // WelcomePage) au lieu de la détruire,
+                                    // puis on empile LoginPage pour son
+                                    // message de confirmation.
+                                    final navigator = Navigator.of(context);
+                                    navigator.popUntil((r) => r.isFirst);
+                                    navigator.push(
                                       MaterialPageRoute(
                                         builder: (_) => const LoginPage(
                                           successMessage:
                                               'Votre compte a été supprimé avec succès',
                                         ),
                                       ),
-                                      (route) => false,
                                     );
                                   }
                                 } else {

@@ -132,6 +132,18 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _selectedIndex = 1;
 
+  /// Références capturées tant que l'élément est vivant : `context.read` est
+  /// interdit dans dispose(), l'arbre n'y est plus consultable.
+  FriendsProvider? _friendsProvider;
+  TeamsProvider? _teamsProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _friendsProvider = context.read<FriendsProvider>();
+    _teamsProvider = context.read<TeamsProvider>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -175,8 +187,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     requestedTab.removeListener(_onTabRequested);
-    context.read<FriendsProvider>().stopPolling();
-    context.read<TeamsProvider>().stopPollingNotifications();
+    _friendsProvider?.stopPolling();
+    _teamsProvider?.stopPollingNotifications();
     super.dispose();
   }
 

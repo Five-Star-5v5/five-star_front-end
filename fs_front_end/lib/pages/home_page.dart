@@ -87,6 +87,16 @@ class _HomePageState extends State<HomePage>
   bool _tourChecking = false;
   Timer? _tourRetryTimer;
 
+  /// Référence conservée tant que l'élément est vivant, pour pouvoir retirer
+  /// le listener dans dispose() sans passer par le context.
+  TeamsProvider? _teamsProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _teamsProvider = context.read<TeamsProvider>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -134,9 +144,10 @@ class _HomePageState extends State<HomePage>
     _matchPollingTimer?.cancel();
     _tourRetryTimer?.cancel();
     _loadingAnimationController.dispose();
-    try {
-      context.read<TeamsProvider>().removeListener(_onTeamChanged);
-    } catch (_) {}
+    // Référence capturée : `context.read` lève dans dispose(), et le try/catch
+    // qui masquait l'erreur laissait le listener attaché — une fuite à chaque
+    // changement d'onglet, puisque HomePage est reconstruite à chaque fois.
+    _teamsProvider?.removeListener(_onTeamChanged);
     super.dispose();
   }
 

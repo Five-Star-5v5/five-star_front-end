@@ -9,7 +9,6 @@ import '../providers/friends_provider.dart';
 import '../providers/teams_provider.dart';
 import '../models/user_model.dart';
 import '../services/teams_service.dart';
-import '../auth/login.dart';
 import 'settings_page.dart';
 import 'match_history_page.dart';
 import 'all_comments_page.dart';
@@ -187,10 +186,11 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             if (!context.mounted) return;
             final navigator = Navigator.of(context);
             await authProvider.logout();
-            navigator.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginPage()),
-              (route) => false,
-            );
+            // Ne pas reconstruire la pile : app.dart remet déjà la racine sur
+            // WelcomePage dès que `isAuthenticated` retombe à false. Détruire
+            // la route racine laissait LoginPage seule au fond de la pile, et
+            // la reconnexion n'avait alors plus rien vers quoi revenir.
+            navigator.popUntil((r) => r.isFirst);
           },
           child: Container(
             width: 32,
