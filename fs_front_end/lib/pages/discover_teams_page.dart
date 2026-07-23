@@ -686,7 +686,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                           ),
                         )
                       : Text(
-                          'Rejoindre',
+                          // Adhésion soumise à validation du capitaine, à ne
+                          // pas confondre avec le bouton « Rejoindre » des
+                          // postes ouverts, qui lui est immédiat.
+                          'Postuler',
                           style: AppTypography.display(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -707,7 +710,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   ) async {
     setState(() => _pendingJoinTeams.add(team.id));
     final messenger = ScaffoldMessenger.of(context);
-    final success = await teamsProvider.sendJoinRequest(
+    final result = await teamsProvider.sendJoinRequest(
       team.id,
       source: 'discover',
     );
@@ -716,11 +719,13 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          success
+          result.success
               ? 'Demande envoyée à ${team.name} !'
-              : 'Erreur lors de l\'envoi de la demande',
+              // Le message de l'API précise le motif (déjà membre, candidature
+              // en attente…) ; le texte générique ne sert que de repli réseau.
+              : result.error ?? 'Erreur lors de l\'envoi de la demande',
         ),
-        backgroundColor: success ? AppColors.sage : AppColors.rose,
+        backgroundColor: result.success ? AppColors.sage : AppColors.rose,
       ),
     );
   }
@@ -730,6 +735,14 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   Widget _buildOpenSlotsTab() {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, _) {
+        // L'API exclut les équipes qu'on possède, mais pas celles dont on est
+        // simplement membre : sans ce filtre, on propose de rejoindre une
+        // équipe qu'on a déjà rejointe, et le serveur refuse forcément.
+        final myTeamIds = teamsProvider.allTeams.map((t) => t.id).toSet();
+        final slots = teamsProvider.allOpenSlots
+            .where((s) => !myTeamIds.contains(s.teamId))
+            .toList();
+
         return Column(
           children: [
             _buildPositionFilter(),
@@ -739,7 +752,7 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 onRefresh: () => teamsProvider.loadAllOpenSlots(
                   position: _selectedPositionFilter,
                 ),
-                child: teamsProvider.allOpenSlots.isEmpty
+                child: slots.isEmpty
                     ? _buildEmptyState(
                         icon: Icons.sports_soccer,
                         message: 'Aucun poste ouvert disponible pour le moment',
@@ -749,10 +762,12 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: teamsProvider.allOpenSlots.length,
+                        itemCount: slots.length,
                         itemBuilder: (context, index) {
-                          final slot = teamsProvider.allOpenSlots[index];
-                          return _buildOpenSlotCard(slot, teamsProvider);
+                          return _buildOpenSlotCard(
+                            slots[index],
+                            teamsProvider,
+                          );
                         },
                       ),
               ),
@@ -1290,21 +1305,20 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
         ),
       );
       Navigator.of(context).pop();
-    } else if (result.alreadyTaken) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Cette place a déjà été prise par un autre joueur.'),
-          backgroundColor: AppColors.rose,
-        ),
-      );
-    } else {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Une erreur est survenue, réessaie plus tard.'),
-          backgroundColor: AppColors.rose,
-        ),
-      );
+      return;
     }
+
+    // L'API explicite le refus : place déjà prise, déjà membre de l'équipe,
+    // sa propre équipe, poste supprimé. Le texte générique ne reste que pour
+    // les pannes réseau, où l'on n'a aucun message à afficher.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.error ?? 'Une erreur est survenue, réessaie plus tard.',
+        ),
+        backgroundColor: AppColors.rose,
+      ),
+    );
   }
 
   // ── Empty state ─────────────────────────────────────────────────────────────

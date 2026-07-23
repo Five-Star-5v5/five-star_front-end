@@ -51,6 +51,24 @@ class TeamsService {
     };
   }
 
+  /// Message d'erreur renvoyé par l'API (champ `detail` de FastAPI).
+  ///
+  /// Ces messages sont rédigés pour l'utilisateur final — les afficher tels
+  /// quels vaut mieux que d'inventer un texte générique côté client.
+  /// On décode explicitement en UTF-8 : FastAPI n'annonce pas de charset, et
+  /// `response.body` retomberait alors sur latin1, ce qui abîmerait les accents.
+  String? _errorDetail(http.Response response) {
+    try {
+      final body = jsonDecode(utf8.decode(response.bodyBytes));
+      if (body is Map && body['detail'] is String) {
+        return body['detail'] as String;
+      }
+    } catch (_) {
+      // Corps vide ou non-JSON : on laissera l'appelant afficher son message.
+    }
+    return null;
+  }
+
   // ============================================================
   // Équipes
   // ============================================================
@@ -619,23 +637,28 @@ class TeamsService {
   // Rejoindre directement un poste ouvert
   // ============================================================
 
-  /// Rejoindre directement un poste ouvert (sans validation du capitaine)
-  Future<({bool success, bool alreadyTaken})> joinOpenSlotDirectly(
-    int slotId,
-  ) async {
+  /// Rejoindre directement un poste ouvert (sans validation du capitaine).
+  ///
+  /// [error] porte le message de l'API : place déjà prise, déjà membre,
+  /// sa propre équipe, poste introuvable.
+  Future<({bool success, bool alreadyTaken, String? error})>
+  joinOpenSlotDirectly(int slotId) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/open-slots/$slotId/join'),
         headers: await _headers,
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return (success: true, alreadyTaken: false);
-      } else if (response.statusCode == 409) {
-        return (success: false, alreadyTaken: true);
+        return (success: true, alreadyTaken: false, error: null);
       }
-      return (success: false, alreadyTaken: false);
+      return (
+        success: false,
+        // 409 = la place vient d'être prise : la liste affichée est périmée.
+        alreadyTaken: response.statusCode == 409,
+        error: _errorDetail(response),
+      );
     } catch (e) {
-      return (success: false, alreadyTaken: false);
+      return (success: false, alreadyTaken: false, error: null);
     }
   }
 
@@ -661,7 +684,14 @@ class TeamsService {
   }
 
   /// Envoie une demande pour rejoindre une équipe
-  Future<TeamJoinRequest?> sendJoinRequest(int teamId, {String? source}) async {
+  /// Envoie une candidature pour rejoindre une équipe.
+  ///
+  /// [error] porte le message de l'API : déjà membre, sa propre équipe,
+  /// candidature déjà en attente, équipe introuvable.
+  Future<({TeamJoinRequest? request, String? error})> sendJoinRequest(
+    int teamId, {
+    String? source,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/$teamId/join-requests'),
@@ -669,11 +699,16 @@ class TeamsService {
         body: jsonEncode({'source': source}),
       );
       if (response.statusCode == 201) {
-        return TeamJoinRequest.fromJson(jsonDecode(response.body));
+        return (
+          request: TeamJoinRequest.fromJson(
+            jsonDecode(utf8.decode(response.bodyBytes)),
+          ),
+          error: null,
+        );
       }
-      return null;
+      return (request: null, error: _errorDetail(response));
     } catch (e) {
-      return null;
+      return (request: null, error: null);
     }
   }
 

@@ -3408,63 +3408,70 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  /// Pastilles d'avatars qui se chevauchent.
+  ///
+  /// Volontairement en Stack positionné plutôt qu'une Row + Transform :
+  /// `Transform.translate` ne décale qu'à la peinture, la Row mesurerait donc
+  /// la largeur sans chevauchement (20px par pastille) et réclamerait plus de
+  /// place qu'elle n'en occupe — ce qui faisait déborder la carte dès le
+  /// 4ᵉ membre. Ici la largeur annoncée est exactement celle peinte.
   Widget _buildStackedAvatars(TeamDetail team) {
+    const double size = 20;
+    const double step = 15; // 20 de large, 5 de chevauchement
+
     final starters = team.starters.take(3).toList();
     final extra = team.members.length > 3 ? team.members.length - 3 : 0;
-    return Row(
-      children: [
-        ...starters.asMap().entries.map((entry) {
-          final i = entry.key;
-          final m = entry.value;
-          return Transform.translate(
-            offset: Offset(i * -5.0, 0),
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.amber,
-                border: Border.all(color: AppColors.card, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  m.user.username.isNotEmpty
-                      ? m.user.username[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 7,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.night,
-                  ),
+    final count = starters.length + (extra > 0 ? 1 : 0);
+    if (count == 0) return const SizedBox.shrink();
+
+    Widget bubble(Color background, String label, TextStyle style) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: background,
+          border: Border.all(color: AppColors.card, width: 2),
+        ),
+        child: Center(child: Text(label, style: style)),
+      );
+    }
+
+    return SizedBox(
+      width: (count - 1) * step + size,
+      height: size,
+      child: Stack(
+        children: [
+          for (var i = 0; i < starters.length; i++)
+            Positioned(
+              left: i * step,
+              child: bubble(
+                AppColors.amber,
+                starters[i].user.username.isNotEmpty
+                    ? starters[i].user.username[0].toUpperCase()
+                    : '?',
+                const TextStyle(
+                  fontSize: 7,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.night,
                 ),
               ),
             ),
-          );
-        }),
-        if (extra > 0)
-          Transform.translate(
-            offset: Offset(starters.length * -5.0, 0),
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.card2,
-                border: Border.all(color: AppColors.card, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  '+$extra',
-                  style: const TextStyle(
-                    fontSize: 6,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.muted2,
-                  ),
+          if (extra > 0)
+            Positioned(
+              left: starters.length * step,
+              child: bubble(
+                AppColors.card2,
+                '+$extra',
+                const TextStyle(
+                  fontSize: 6,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.muted2,
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

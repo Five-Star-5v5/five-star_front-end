@@ -1041,7 +1041,7 @@ class TeamsProvider with ChangeNotifier {
   // ============================================================
 
   /// Rejoindre directement un poste ouvert (sans validation)
-  Future<({bool success, bool alreadyTaken})> joinSlotDirectly(
+  Future<({bool success, bool alreadyTaken, String? error})> joinSlotDirectly(
     int slotId,
   ) async {
     try {
@@ -1053,7 +1053,7 @@ class TeamsProvider with ChangeNotifier {
       }
       return result;
     } catch (e) {
-      return (success: false, alreadyTaken: false);
+      return (success: false, alreadyTaken: false, error: null);
     }
   }
 
@@ -1078,20 +1078,24 @@ class TeamsProvider with ChangeNotifier {
   }
 
   /// Envoie une demande pour rejoindre une équipe
-  Future<bool> sendJoinRequest(int teamId, {String? source}) async {
+  Future<({bool success, String? error})> sendJoinRequest(
+    int teamId, {
+    String? source,
+  }) async {
     try {
-      final request = await _teamsService.sendJoinRequest(
+      final result = await _teamsService.sendJoinRequest(
         teamId,
         source: source,
       );
+      final request = result.request;
       if (request != null) {
         _myJoinRequests.add(request);
         notifyListeners();
-        return true;
+        return (success: true, error: null);
       }
-      return false;
+      return (success: false, error: result.error);
     } catch (_) {
-      return false;
+      return (success: false, error: null);
     }
   }
 
