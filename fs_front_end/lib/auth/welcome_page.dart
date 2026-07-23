@@ -44,6 +44,10 @@ class _WelcomePageState extends State<WelcomePage>
   final _pageCtrl = PageController();
   int _page = 0;
 
+  /// Vrai dès que l'utilisateur a fait défiler lui-même : on renonce alors à
+  /// l'avance automatique pour ne pas lui reprendre la main.
+  bool _userSwiped = false;
+
   static const _slides = <_SlideData>[
     _SlideData(
       image: 'assets/logos/trouve_ton_terrain.png',
@@ -163,6 +167,20 @@ class _WelcomePageState extends State<WelcomePage>
     Future.delayed(const Duration(milliseconds: 2600), () {
       if (mounted) _floatCtrl.repeat(reverse: true);
     });
+
+    // ── Avance automatique vers la première slide ──
+    // La carte du bas finit son animation vers 2800 ms ; on laisse respirer,
+    // puis on glisse pour montrer qu'il y a du contenu à découvrir. Sans ça,
+    // l'onboarding reste invisible : la page 1 ressemble à l'ancien écran.
+    Future.delayed(const Duration(milliseconds: 3400), () {
+      if (!mounted || _userSwiped) return;
+      if (!_pageCtrl.hasClients || _page != 0) return;
+      _pageCtrl.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
@@ -190,13 +208,22 @@ class _WelcomePageState extends State<WelcomePage>
               children: [
                 // Carrousel : révélation de la marque, puis les 3 slides
                 Expanded(
-                  child: PageView(
-                    controller: _pageCtrl,
-                    onPageChanged: (i) => setState(() => _page = i),
-                    children: [
-                      _buildLogoArea(),
-                      ..._slides.map((s) => _FeatureSlide(slide: s)),
-                    ],
+                  // `dragDetails` n'est renseigné que pour un défilement à la
+                  // main : c'est ce qui distingue le geste de l'utilisateur de
+                  // notre propre animation.
+                  child: NotificationListener<ScrollStartNotification>(
+                    onNotification: (n) {
+                      if (n.dragDetails != null) _userSwiped = true;
+                      return false;
+                    },
+                    child: PageView(
+                      controller: _pageCtrl,
+                      onPageChanged: (i) => setState(() => _page = i),
+                      children: [
+                        _buildLogoArea(),
+                        ..._slides.map((s) => _FeatureSlide(slide: s)),
+                      ],
+                    ),
                   ),
                 ),
                 // Dots

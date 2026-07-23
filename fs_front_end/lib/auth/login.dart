@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'signup.dart';
 import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
-import '../main_screen.dart';
 
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
@@ -79,10 +78,11 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (res['ok'] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
+      // Ne pas pousser MainScreen ici : app.dart bascule déjà dessus dès que
+      // `isAuthenticated` passe à true. En empiler une seconde instance, on se
+      // retrouvait avec deux HomePage vivantes — et donc deux tutos superposés.
+      // Il suffit de dépiler jusqu'à la route racine, devenue MainScreen.
+      Navigator.popUntil(context, (r) => r.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

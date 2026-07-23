@@ -28,15 +28,23 @@ class CoachMarkStep {
   });
 }
 
+/// Vrai tant qu'un tuto est affiché. L'overlay se pose sur le Navigator
+/// racine : deux tutos simultanés s'empileraient, le voile de l'un assombrissant
+/// la bulle de l'autre. Un seul à la fois, quelle qu'en soit la source.
+bool _coachMarksVisible = false;
+
 /// Affiche un tuto guidé par-dessus l'écran courant.
 ///
 /// Le futur se complète quand l'utilisateur a terminé ou passé le tuto.
 /// Les étapes dont la cible n'est pas rendue à l'écran sont ignorées.
+/// L'appel est ignoré si un tuto est déjà à l'écran.
 Future<void> showCoachMarks(
   BuildContext context,
   List<CoachMarkStep> steps,
 ) async {
-  if (steps.isEmpty) return;
+  if (steps.isEmpty || _coachMarksVisible) return;
+  _coachMarksVisible = true;
+
   final overlay = Overlay.of(context);
   final completer = Completer<void>();
 
@@ -46,6 +54,7 @@ Future<void> showCoachMarks(
       steps: steps,
       onDone: () {
         entry.remove();
+        _coachMarksVisible = false;
         if (!completer.isCompleted) completer.complete();
       },
     ),
