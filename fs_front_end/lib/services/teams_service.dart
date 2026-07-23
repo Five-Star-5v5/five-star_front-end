@@ -695,7 +695,10 @@ class TeamsService {
   }
 
   /// Le capitaine accepte ou refuse une demande de rejoindre
-  Future<bool> respondToJoinRequest(int requestId, {required bool accept}) async {
+  Future<bool> respondToJoinRequest(
+    int requestId, {
+    required bool accept,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/join-requests/$requestId/respond'),
@@ -854,8 +857,7 @@ class TeamsService {
 
       // Démarrer le ping
       _startTeamChatPing();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Déconnecte du WebSocket du chat d'équipe
@@ -890,8 +892,7 @@ class TeamsService {
         case 'error':
           break;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   void _onTeamChatError(dynamic error) {
@@ -1043,7 +1044,8 @@ class TeamsService {
         String errorMessage = 'Erreur lors de la création du défi';
         try {
           final errorBody = jsonDecode(response.body);
-          errorMessage = errorBody['detail'] ?? errorBody['message'] ?? errorMessage;
+          errorMessage =
+              errorBody['detail'] ?? errorBody['message'] ?? errorMessage;
         } catch (_) {}
         throw Exception(errorMessage);
       } else {
@@ -1314,8 +1316,7 @@ class TeamsService {
               final message = MatchChatMessage.fromJson(json['message']);
               onNewMatchMessage?.call(message);
             }
-          } catch (e) {
-          }
+          } catch (e) {}
         },
         onDone: () {
           _handleMatchChatDisconnect();
@@ -1346,8 +1347,7 @@ class TeamsService {
     if (_isMatchChatConnected && _matchChatChannel != null) {
       try {
         _matchChatChannel!.sink.add(jsonEncode({'type': 'ping'}));
-      } catch (e) {
-      }
+      } catch (e) {}
     }
   }
 
@@ -1375,8 +1375,7 @@ class TeamsService {
     if (_matchChatChannel != null) {
       try {
         await _matchChatChannel!.sink.close();
-      } catch (e) {
-      }
+      } catch (e) {}
     }
 
     _matchChatChannel = null;
@@ -1400,7 +1399,6 @@ class TeamsService {
         Uri.parse('$baseUrl/challenges/$challengeId/messages'),
         headers: await _headers,
       );
-
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -1440,8 +1438,7 @@ class TeamsService {
         Uri.parse('$baseUrl/challenges/$challengeId/messages/read'),
         headers: await _headers,
       );
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Récupère le nombre de messages non lus pour un match
@@ -1543,7 +1540,8 @@ class TeamsService {
 
   /// Postule pour un slot dans un match public
   /// Retourne (application: ..., errorMessage: ...) — errorMessage non null si erreur
-  Future<({MatchApplication? application, String? errorMessage})> applyToPublicMatch({
+  Future<({MatchApplication? application, String? errorMessage})>
+  applyToPublicMatch({
     required int matchId,
     required int teamId,
     required String teamName,
@@ -1566,7 +1564,8 @@ class TeamsService {
       if (response.statusCode == 201) {
         return (
           application: MatchApplication.fromJson(
-              jsonDecode(response.body) as Map<String, dynamic>),
+            jsonDecode(response.body) as Map<String, dynamic>,
+          ),
           errorMessage: null,
         );
       }
@@ -1643,7 +1642,8 @@ class TeamsService {
 
   /// Accepte une candidature — annule toutes les autres du même joueur sur ce match
   Future<({bool success, String? errorMessage})> acceptMatchApplication(
-      int applicationId) async {
+    int applicationId,
+  ) async {
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/match-applications/$applicationId/accept'),
@@ -2709,7 +2709,8 @@ class PublicMatchTeamInfo {
   });
 
   int get openSlotsCount => slots.where((s) => s.isOpen).length;
-  List<PublicMatchTeamSlot> get openSlots => slots.where((s) => s.isOpen).toList();
+  List<PublicMatchTeamSlot> get openSlots =>
+      slots.where((s) => s.isOpen).toList();
 
   factory PublicMatchTeamInfo.fromJson(Map<String, dynamic> json) {
     return PublicMatchTeamInfo(
@@ -2749,9 +2750,11 @@ class PublicMatch {
     return PublicMatch(
       id: json['id'] as int,
       challengerTeam: PublicMatchTeamInfo.fromJson(
-          json['challenger_team'] as Map<String, dynamic>),
+        json['challenger_team'] as Map<String, dynamic>,
+      ),
       challengedTeam: PublicMatchTeamInfo.fromJson(
-          json['challenged_team'] as Map<String, dynamic>),
+        json['challenged_team'] as Map<String, dynamic>,
+      ),
       proposedDate: json['proposed_date'] != null
           ? DateTime.parse(json['proposed_date'] as String)
           : null,

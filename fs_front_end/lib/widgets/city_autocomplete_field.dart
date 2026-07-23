@@ -64,10 +64,10 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
         'countrycodes': 'fr',
       });
       final resp = await http_client
-          .get(uri, headers: {
-            'Accept-Language': 'fr',
-            'User-Agent': 'KobetaApp/1.0',
-          })
+          .get(
+            uri,
+            headers: {'Accept-Language': 'fr', 'User-Agent': 'KobetaApp/1.0'},
+          )
           .timeout(const Duration(seconds: 5));
       if (!mounted) return;
       if (resp.statusCode == 200) {
@@ -77,10 +77,12 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
         for (final item in data) {
           final addr = item['address'] as Map<String, dynamic>?;
           if (addr == null) continue;
-          final name = (addr['city'] ??
-              addr['town'] ??
-              addr['village'] ??
-              addr['municipality']) as String?;
+          final name =
+              (addr['city'] ??
+                      addr['town'] ??
+                      addr['village'] ??
+                      addr['municipality'])
+                  as String?;
           if (name != null && seen.add(name)) cities.add(name);
           if (cities.length >= 5) break;
         }
@@ -91,8 +93,7 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
 
   void _select(String city) {
     widget.controller.text = city;
-    widget.controller.selection =
-        TextSelection.collapsed(offset: city.length);
+    widget.controller.selection = TextSelection.collapsed(offset: city.length);
     widget.onSelected?.call(city);
     setState(() => _suggestions = []);
   }
@@ -127,19 +128,19 @@ class _CityAutocompleteFieldState extends State<CityAutocompleteField> {
                   onTap: () => _select(e.value),
                   borderRadius: BorderRadius.vertical(
                     top: e.key == 0 ? const Radius.circular(10) : Radius.zero,
-                    bottom:
-                        isLast ? const Radius.circular(10) : Radius.zero,
+                    bottom: isLast ? const Radius.circular(10) : Radius.zero,
                   ),
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       border: isLast
                           ? null
                           : const Border(
-                              bottom:
-                                  BorderSide(color: AppColors.border2),
+                              bottom: BorderSide(color: AppColors.border2),
                             ),
                     ),
                     child: Row(

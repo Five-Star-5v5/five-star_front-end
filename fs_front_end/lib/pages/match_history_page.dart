@@ -105,12 +105,16 @@ class MatchHistoryPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: AppTypography.body(fontSize: 11, color: AppColors.muted2)),
+        Text(
+          label,
+          style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+        ),
       ],
     );
   }
 
-  Widget _divider() => Container(width: 1, height: 32, color: AppColors.border2);
+  Widget _divider() =>
+      Container(width: 1, height: 32, color: AppColors.border2);
 }
 
 class _MatchCard extends StatelessWidget {
@@ -184,7 +188,10 @@ class _MatchCard extends StatelessWidget {
                       ),
                       Text(
                         'vs $oppName',
-                        style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+                        style: AppTypography.body(
+                          fontSize: 12,
+                          color: AppColors.muted2,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -249,7 +256,10 @@ class _MatchCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   dateStr,
-                  style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 11,
+                    color: AppColors.muted2,
+                  ),
                 ),
                 if (m.proposedLocation != null) ...[
                   const SizedBox(width: 10),
@@ -262,7 +272,10 @@ class _MatchCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       m.proposedLocation!,
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

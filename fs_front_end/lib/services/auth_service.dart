@@ -301,7 +301,9 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
-      if (resp.statusCode == 200 || resp.statusCode == 201 || resp.statusCode == 204) {
+      if (resp.statusCode == 200 ||
+          resp.statusCode == 201 ||
+          resp.statusCode == 204) {
         return {'ok': true};
       }
       try {

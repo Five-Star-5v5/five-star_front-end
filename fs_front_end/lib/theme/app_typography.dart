@@ -11,8 +11,10 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTypography {
   const AppTypography._();
 
-  static TextStyle _display(TextStyle style) => GoogleFonts.inter(textStyle: style);
-  static TextStyle _body(TextStyle style) => GoogleFonts.inter(textStyle: style);
+  static TextStyle _display(TextStyle style) =>
+      GoogleFonts.inter(textStyle: style);
+  static TextStyle _body(TextStyle style) =>
+      GoogleFonts.inter(textStyle: style);
 
   /// Titles, labels, buttons (previously Syne).
   static TextStyle display({

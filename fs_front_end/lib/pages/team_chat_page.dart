@@ -121,7 +121,11 @@ class _TeamChatPageState extends State<TeamChatPage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.muted2,
+                size: 16,
+              ),
             ),
           ),
         ),
@@ -140,8 +144,11 @@ class _TeamChatPageState extends State<TeamChatPage> {
                   ? Image.network(
                       widget.teamLogoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          const Icon(Icons.groups, color: AppColors.amber, size: 20),
+                      errorBuilder: (_, _, _) => const Icon(
+                        Icons.groups,
+                        color: AppColors.amber,
+                        size: 20,
+                      ),
                     )
                   : const Icon(Icons.groups, color: AppColors.amber, size: 20),
             ),
@@ -161,7 +168,10 @@ class _TeamChatPageState extends State<TeamChatPage> {
                   ),
                   Text(
                     "Chat d'équipe",
-                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ),
@@ -188,7 +198,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
                 color: AppColors.card,
-                border: Border(bottom: BorderSide(color: AppColors.border2, width: 1)),
+                border: Border(
+                  bottom: BorderSide(color: AppColors.border2, width: 1),
+                ),
               ),
               child: Row(
                 children: [
@@ -356,7 +368,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
             child: Container(
               decoration: const BoxDecoration(
                 color: AppColors.card,
-                border: Border(top: BorderSide(color: AppColors.border2, width: 1)),
+                border: Border(
+                  top: BorderSide(color: AppColors.border2, width: 1),
+                ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Consumer<TeamsProvider>(
@@ -368,7 +382,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
                           controller: _messageController,
                           decoration: InputDecoration(
                             hintText: 'Écrire un message...',
-                            hintStyle: AppTypography.body(color: AppColors.muted2),
+                            hintStyle: AppTypography.body(
+                              color: AppColors.muted2,
+                            ),
                             filled: true,
                             fillColor: AppColors.card2,
                             contentPadding: const EdgeInsets.symmetric(
@@ -377,15 +393,21 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.amber),
+                              borderSide: const BorderSide(
+                                color: AppColors.amber,
+                              ),
                             ),
                           ),
                           style: AppTypography.body(color: AppColors.white),
@@ -405,11 +427,16 @@ class _TeamChatPageState extends State<TeamChatPage> {
                             gradient: provider.isSendingMessage
                                 ? null
                                 : const LinearGradient(
-                                    colors: [AppColors.amberSoft, AppColors.amberD],
+                                    colors: [
+                                      AppColors.amberSoft,
+                                      AppColors.amberD,
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                            color: provider.isSendingMessage ? AppColors.card2 : null,
+                            color: provider.isSendingMessage
+                                ? AppColors.card2
+                                : null,
                           ),
                           child: Center(
                             child: provider.isSendingMessage
@@ -541,7 +568,9 @@ class _TeamChatPageState extends State<TeamChatPage> {
                         )
                       : null,
                   color: isSender ? null : AppColors.card2,
-                  border: isSender ? null : Border.all(color: AppColors.border2),
+                  border: isSender
+                      ? null
+                      : Border.all(color: AppColors.border2),
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(20),
                     topRight: const Radius.circular(20),
@@ -583,7 +612,10 @@ class _TeamChatPageState extends State<TeamChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: AppTypography.body(color: AppColors.muted2, fontSize: 10),
+                      style: AppTypography.body(
+                        color: AppColors.muted2,
+                        fontSize: 10,
+                      ),
                     ),
                   ],
                 ),

@@ -27,7 +27,11 @@ class AllCommentsPage extends StatelessWidget {
           children: [
             Text(
               'Commentaires reçus',
-              style: AppTypography.display(color: AppColors.white, fontWeight: FontWeight.w700, fontSize: 15),
+              style: AppTypography.display(
+                color: AppColors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
             ),
             Text(
               username,
@@ -45,9 +49,20 @@ class AllCommentsPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.chat_bubble_outline, color: AppColors.muted2.withValues(alpha: 0.4), size: 40),
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    color: AppColors.muted2.withValues(alpha: 0.4),
+                    size: 40,
+                  ),
                   const SizedBox(height: 12),
-                  Text('Aucun commentaire', style: AppTypography.display(color: AppColors.muted2, fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Aucun commentaire',
+                    style: AppTypography.display(
+                      color: AppColors.muted2,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -76,7 +91,11 @@ class _CommentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.isAbsent ? AppColors.rose.withValues(alpha: 0.3) : AppColors.border2),
+        border: Border.all(
+          color: c.isAbsent
+              ? AppColors.rose.withValues(alpha: 0.3)
+              : AppColors.border2,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,11 +107,18 @@ class _CommentCard extends StatelessWidget {
               color: AppColors.border2,
               shape: BoxShape.circle,
               image: c.authorAvatarUrl != null
-                  ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
+                  ? DecorationImage(
+                      image: NetworkImage(c.authorAvatarUrl!),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
             child: c.authorAvatarUrl == null
-                ? const Icon(Icons.person_outline, size: 18, color: AppColors.muted2)
+                ? const Icon(
+                    Icons.person_outline,
+                    size: 18,
+                    color: AppColors.muted2,
+                  )
                 : null,
           ),
           const SizedBox(width: 12),
@@ -104,25 +130,51 @@ class _CommentCard extends StatelessWidget {
                   children: [
                     Text(
                       c.authorUsername ?? 'Joueur',
-                      style: AppTypography.display(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
+                      style: AppTypography.display(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.white,
+                      ),
                     ),
                     const Spacer(),
                     if (c.isAbsent)
                       Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.rose.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: AppTypography.display(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.rose)),
+                        child: Text(
+                          'Absent',
+                          style: AppTypography.display(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.rose,
+                          ),
+                        ),
                       ),
-                    Text(dateStr, style: AppTypography.body(fontSize: 10, color: AppColors.muted2)),
+                    Text(
+                      dateStr,
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
+                    ),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(c.content!, style: AppTypography.body(fontSize: 12, color: AppColors.muted2)),
+                  Text(
+                    c.content!,
+                    style: AppTypography.body(
+                      fontSize: 12,
+                      color: AppColors.muted2,
+                    ),
+                  ),
                 ],
               ],
             ),

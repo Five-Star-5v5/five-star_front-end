@@ -85,6 +85,9 @@ flutter:
     - assets/logos/pitch.png
     - assets/logos/pitchball.png
     - assets/logos/image_badge.png
+    - assets/logos/trouve_ton_terrain.png
+    - assets/logos/monte_ton_equipe.png
+    - assets/logos/defie_autre_equipes.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

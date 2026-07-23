@@ -132,7 +132,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return Scaffold(
         backgroundColor: AppColors.bg,
         appBar: _buildAppBar('Profil'),
-        body: const Center(child: CircularProgressIndicator(color: AppColors.amber)),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.amber),
+        ),
       );
     }
 
@@ -546,7 +548,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
               Text(
                 dateStr,
-                style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 10,
+                  color: AppColors.muted2,
+                ),
               ),
             ],
           ),
@@ -662,7 +667,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: c.isAbsent ? AppColors.rose.withValues(alpha: 0.3) : AppColors.border2,
+          color: c.isAbsent
+              ? AppColors.rose.withValues(alpha: 0.3)
+              : AppColors.border2,
         ),
       ),
       child: Row(
@@ -682,7 +689,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   : null,
             ),
             child: c.authorAvatarUrl == null
-                ? const Icon(Icons.person_outline, size: 16, color: AppColors.muted2)
+                ? const Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: AppColors.muted2,
+                  )
                 : null,
           ),
           const SizedBox(width: 10),
@@ -723,7 +734,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     const SizedBox(width: 6),
                     Text(
                       dateStr,
-                      style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -731,7 +745,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   const SizedBox(height: 4),
                   Text(
                     c.content!,
-                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ],
@@ -842,7 +859,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.hourglass_empty, color: AppColors.amber, size: 16),
+                const Icon(
+                  Icons.hourglass_empty,
+                  color: AppColors.amber,
+                  size: 16,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Demande envoyée',
@@ -944,7 +965,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
+              gradient: const LinearGradient(
+                colors: [AppColors.amberSoft, AppColors.amberD],
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -24,14 +24,15 @@ class CloudinaryService {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = _uploadPreset
-        ..fields['public_id'] =
-            'kobeta_avatars/user_${userId}_$timestamp'
+        ..fields['public_id'] = 'kobeta_avatars/user_${userId}_$timestamp'
         ..fields['resource_type'] = 'auto'
-        ..files.add(http.MultipartFile.fromBytes(
-          'file',
-          imageBytes,
-          filename: 'avatar.jpg',
-        ));
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            imageBytes,
+            filename: 'avatar.jpg',
+          ),
+        );
 
       final response = await request.send().timeout(
         const Duration(seconds: 30),

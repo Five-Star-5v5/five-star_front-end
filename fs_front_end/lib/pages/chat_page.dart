@@ -274,7 +274,9 @@ class _ChatPageState extends State<ChatPage> {
                             controller: _messageController,
                             decoration: InputDecoration(
                               hintText: 'Écrire un message...',
-                              hintStyle: AppTypography.body(color: AppColors.muted2),
+                              hintStyle: AppTypography.body(
+                                color: AppColors.muted2,
+                              ),
                               filled: true,
                               fillColor: AppColors.card2,
                               contentPadding: const EdgeInsets.symmetric(
@@ -283,15 +285,21 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
-                                borderSide: const BorderSide(color: AppColors.amber),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
                             style: AppTypography.body(color: AppColors.white),
@@ -325,7 +333,10 @@ class _ChatPageState extends State<ChatPage> {
                                   height: 40,
                                   decoration: const BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [AppColors.amberSoft, AppColors.amberD],
+                                      colors: [
+                                        AppColors.amberSoft,
+                                        AppColors.amberD,
+                                      ],
                                     ),
                                     shape: BoxShape.circle,
                                   ),
@@ -358,7 +369,9 @@ class _ChatPageState extends State<ChatPage> {
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
           gradient: isSender
-              ? const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD])
+              ? const LinearGradient(
+                  colors: [AppColors.amberSoft, AppColors.amberD],
+                )
               : null,
           color: isSender ? null : AppColors.card2,
           border: isSender ? null : Border.all(color: AppColors.border2),

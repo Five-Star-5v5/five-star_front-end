@@ -12,6 +12,8 @@ import '../theme_config/colors_config.dart';
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
 import '../widgets/city_autocomplete_field.dart';
+import '../widgets/coach_mark.dart';
+import '../services/onboarding_prefs.dart';
 import '../providers/teams_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/auth_provider.dart';
@@ -72,6 +74,19 @@ class _HomePageState extends State<HomePage>
   late AnimationController _loadingAnimationController;
   Timer? _matchPollingTimer;
 
+  // ── Tuto guidé (première visite de l'onglet Équipe) ──────────────────────
+  final _tourTeamCardsKey = GlobalKey();
+  final _tourSearchToggleKey = GlobalKey();
+  final _tourPitchKey = GlobalKey();
+  final _tourSubsKey = GlobalKey();
+  final _tourMatchesKey = GlobalKey();
+  bool _tourStarted = false;
+
+  /// Garde-fou de réentrance : le timer peut refirer pendant que la lecture
+  /// asynchrone de la préférence est encore en cours.
+  bool _tourChecking = false;
+  Timer? _tourRetryTimer;
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +105,15 @@ class _HomePageState extends State<HomePage>
       provider.addListener(_onTeamChanged);
       _loadSearchPreferences();
       // _loadPublicMatches(); // SECTION MATCHS OUVERTS
+
+      // Le tuto ne peut démarrer qu'une fois les cibles réellement rendues.
+      // On sonde à intervalle court plutôt que d'attendre une notification du
+      // provider, qui peut n'arriver que plusieurs secondes plus tard.
+      _maybeStartTeamTour();
+      _tourRetryTimer = Timer.periodic(
+        const Duration(milliseconds: 250),
+        (_) => _maybeStartTeamTour(),
+      );
     });
 
     _matchPollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -108,6 +132,7 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _matchPollingTimer?.cancel();
+    _tourRetryTimer?.cancel();
     _loadingAnimationController.dispose();
     try {
       context.read<TeamsProvider>().removeListener(_onTeamChanged);
@@ -121,6 +146,71 @@ class _HomePageState extends State<HomePage>
     final currentTeam = provider.currentDisplayedTeam;
     if (currentTeam != null && currentTeam.id != _lastLoadedTeamId) {
       _loadSearchPreferences();
+    }
+    _maybeStartTeamTour();
+  }
+
+  /// Lance le tuto guidé à la première visite de l'onglet Équipe.
+  ///
+  /// Appelé à chaque mise à jour du provider : tant que les cibles ne sont pas
+  /// rendues (équipe encore en chargement), on repart sans rien marquer, et
+  /// une prochaine mise à jour retentera.
+  Future<void> _maybeStartTeamTour() async {
+    if (_tourStarted || _tourChecking) return;
+    if (_tourTeamCardsKey.currentContext == null) return;
+
+    _tourChecking = true;
+    try {
+      if (await OnboardingPrefs.hasSeenTeamTour()) {
+        _tourStarted = true; // inutile de relire la préférence ensuite
+        _tourRetryTimer?.cancel();
+        return;
+      }
+      if (!mounted) return;
+      _tourStarted = true;
+      _tourRetryTimer?.cancel();
+
+      await showCoachMarks(context, [
+        CoachMarkStep(
+          key: _tourTeamCardsKey,
+          title: 'Tes équipes',
+          body:
+              'Fais défiler pour passer d\'une équipe à l\'autre. '
+              'La dernière carte te permet d\'en rejoindre une nouvelle.',
+        ),
+        CoachMarkStep(
+          key: _tourSearchToggleKey,
+          title: 'Disponible pour un match',
+          body:
+              'Active ce bouton pour que ton équipe soit visible '
+              'par celles qui cherchent un adversaire.',
+        ),
+        CoachMarkStep(
+          key: _tourPitchKey,
+          title: 'Ta composition',
+          body:
+              'Place tes joueurs sur le terrain. Touche un emplacement '
+              'libre pour y installer un membre de l\'équipe.',
+        ),
+        CoachMarkStep(
+          key: _tourSubsKey,
+          title: 'Les remplaçants',
+          body:
+              'Les membres qui ne sont pas encore sur le terrain '
+              'attendent ici.',
+        ),
+        CoachMarkStep(
+          key: _tourMatchesKey,
+          title: 'Tes matchs à venir',
+          body:
+              'Tes prochaines rencontres s\'affichent ici. '
+              'Utilise « Trouver » pour défier une autre équipe.',
+        ),
+      ]);
+
+      await OnboardingPrefs.markTeamTourSeen();
+    } finally {
+      _tourChecking = false;
     }
   }
 
@@ -2789,26 +2879,35 @@ class _HomePageState extends State<HomePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           // ── Team cards (scrollable) ─────────────────────
-                          _buildTeamHeader(
-                            context: context,
-                            teamsProvider: teamsProvider,
-                            titleColor: titleColor,
-                            isDarkMode: isDarkMode,
+                          KeyedSubtree(
+                            key: _tourTeamCardsKey,
+                            child: _buildTeamHeader(
+                              context: context,
+                              teamsProvider: teamsProvider,
+                              titleColor: titleColor,
+                              isDarkMode: isDarkMode,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           // Widget pour activer le mode recherche d'adversaire
                           if (teamsProvider.isCurrentTeamMine &&
                               teamsProvider.currentDisplayedTeam != null)
-                            _buildSearchModeToggle(isDarkMode),
+                            KeyedSubtree(
+                              key: _tourSearchToggleKey,
+                              child: _buildSearchModeToggle(isDarkMode),
+                            ),
                           const SizedBox(height: 12),
                           if (allTeams.isEmpty)
                             _buildEmptyTeamPlaceholder(isDarkMode)
                           else
-                            _buildTeamPitch(
-                              context,
-                              team: teamsProvider.currentDisplayedTeam!,
-                              isMyTeam: teamsProvider.isCurrentTeamMine,
-                              isDarkMode: isDarkMode,
+                            KeyedSubtree(
+                              key: _tourPitchKey,
+                              child: _buildTeamPitch(
+                                context,
+                                team: teamsProvider.currentDisplayedTeam!,
+                                isMyTeam: teamsProvider.isCurrentTeamMine,
+                                isDarkMode: isDarkMode,
+                              ),
                             ),
                           const SizedBox(height: 10),
                           if (allTeams.length > 1)
@@ -2819,11 +2918,14 @@ class _HomePageState extends State<HomePage>
                             ),
                           const SizedBox(height: 20),
                           if (teamsProvider.isCurrentTeamMine)
-                            _buildSubstitutesSection(
-                              context,
-                              teamsProvider: teamsProvider,
-                              titleColor: titleColor,
-                              isDarkMode: isDarkMode,
+                            KeyedSubtree(
+                              key: _tourSubsKey,
+                              child: _buildSubstitutesSection(
+                                context,
+                                teamsProvider: teamsProvider,
+                                titleColor: titleColor,
+                                isDarkMode: isDarkMode,
+                              ),
                             )
                           else if (teamsProvider.currentDisplayedTeam != null)
                             _buildOtherTeamSubstitutes(
@@ -2904,11 +3006,14 @@ class _HomePageState extends State<HomePage>
                             ),
                           // Section des matchs à venir (visible pour tous les membres)
                           if (teamsProvider.isPartOfCurrentTeam)
-                            _buildUpcomingMatchesSection(
-                              teamsProvider.currentDisplayedTeam!.id,
-                              isDarkMode,
-                              titleColor,
-                              teamsProvider.isCurrentTeamMine,
+                            KeyedSubtree(
+                              key: _tourMatchesKey,
+                              child: _buildUpcomingMatchesSection(
+                                teamsProvider.currentDisplayedTeam!.id,
+                                isDarkMode,
+                                titleColor,
+                                teamsProvider.isCurrentTeamMine,
+                              ),
                             ),
                           // Section matchs publics ouverts aux candidatures — désactivée
                           // _buildOpenMatchesSection(), // SECTION MATCHS OUVERTS

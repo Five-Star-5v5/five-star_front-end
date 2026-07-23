@@ -10,6 +10,7 @@ import 'pages/profile_page.dart';
 import 'providers/messages_provider.dart';
 import 'providers/friends_provider.dart';
 import 'providers/teams_provider.dart';
+import 'services/tab_navigation.dart';
 
 class FootApp extends StatefulWidget {
   const FootApp({super.key});
@@ -135,6 +136,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    requestedTab.addListener(_onTabRequested);
     // Initialiser le WebSocket et charger les conversations
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final messagesProvider = context.read<MessagesProvider>();
@@ -172,9 +174,20 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    requestedTab.removeListener(_onTabRequested);
     context.read<FriendsProvider>().stopPolling();
     context.read<TeamsProvider>().stopPollingNotifications();
     super.dispose();
+  }
+
+  /// Honore une demande de changement d'onglet venue d'une route extérieure.
+  void _onTabRequested() {
+    final index = requestedTab.value;
+    if (index == null || !mounted) return;
+    setState(() => _selectedIndex = index);
+    // On consomme la demande pour qu'elle ne soit pas rejouée. Le listener se
+    // redéclenche, mais ressort aussitôt puisque la valeur est nulle.
+    requestedTab.value = null;
   }
 
   static const List<Widget> _widgetOptions = <Widget>[

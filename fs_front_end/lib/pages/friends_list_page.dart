@@ -129,7 +129,9 @@ class _FriendsListPageState extends State<FriendsListPage>
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
+              gradient: const LinearGradient(
+                colors: [AppColors.amberSoft, AppColors.amberD],
+              ),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Text(
@@ -167,12 +169,23 @@ class _FriendsListPageState extends State<FriendsListPage>
           style: AppTypography.body(color: AppColors.white, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Rechercher un ami...',
-            hintStyle: AppTypography.body(color: AppColors.muted2, fontSize: 13),
-            prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 16),
+            hintStyle: AppTypography.body(
+              color: AppColors.muted2,
+              fontSize: 13,
+            ),
+            prefixIcon: const Icon(
+              Icons.search,
+              color: AppColors.muted2,
+              size: 16,
+            ),
             suffixIcon: _filterText.isNotEmpty
                 ? GestureDetector(
                     onTap: () => _searchController.clear(),
-                    child: const Icon(Icons.close, color: AppColors.muted2, size: 16),
+                    child: const Icon(
+                      Icons.close,
+                      color: AppColors.muted2,
+                      size: 16,
+                    ),
                   )
                 : null,
             border: InputBorder.none,
@@ -224,7 +237,9 @@ class _FriendsListPageState extends State<FriendsListPage>
             decoration: BoxDecoration(
               color: selected ? AppColors.amber : AppColors.card2,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: selected ? AppColors.amber : AppColors.border2),
+              border: Border.all(
+                color: selected ? AppColors.amber : AppColors.border2,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -279,7 +294,9 @@ class _FriendsListPageState extends State<FriendsListPage>
       builder: (context, provider, _) {
         if (provider.state == FriendsLoadingState.loading &&
             provider.friends.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.amber));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.amber),
+          );
         }
 
         if (provider.state == FriendsLoadingState.error) {
@@ -318,7 +335,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                   child: Center(
                     child: Text(
                       'Aucun ami correspondant',
-                      style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
+                      style: AppTypography.body(
+                        color: AppColors.muted2,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 )
@@ -412,7 +432,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                   children: [
                     Text(
                       friend.user.preferredPosition ?? 'Joueur',
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     if (friend.user.rating != null) ...[
                       const SizedBox(width: 6),
@@ -494,7 +517,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                               decoration: BoxDecoration(
                                 color: AppColors.amber,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.bg, width: 1.5),
+                                border: Border.all(
+                                  color: AppColors.bg,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -586,7 +612,10 @@ class _FriendsListPageState extends State<FriendsListPage>
             const Divider(color: AppColors.border2, height: 1),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_remove_outlined, color: AppColors.rose),
+              leading: const Icon(
+                Icons.person_remove_outlined,
+                color: AppColors.rose,
+              ),
               title: Text(
                 'Supprimer cet ami',
                 style: AppTypography.display(
@@ -639,7 +668,9 @@ class _FriendsListPageState extends State<FriendsListPage>
                                     decoration: BoxDecoration(
                                       color: AppColors.card2,
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: AppColors.border2),
+                                      border: Border.all(
+                                        color: AppColors.border2,
+                                      ),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -666,7 +697,9 @@ class _FriendsListPageState extends State<FriendsListPage>
                                       color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: AppColors.rose.withValues(alpha: 0.4),
+                                        color: AppColors.rose.withValues(
+                                          alpha: 0.4,
+                                        ),
                                       ),
                                     ),
                                     child: Center(
@@ -801,7 +834,9 @@ class _FriendsListPageState extends State<FriendsListPage>
               decoration: BoxDecoration(
                 color: AppColors.sageDim,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.sage.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: AppColors.sage.withValues(alpha: 0.4),
+                ),
               ),
               child: const Icon(Icons.check, color: AppColors.sage, size: 14),
             ),
@@ -819,7 +854,9 @@ class _FriendsListPageState extends State<FriendsListPage>
               decoration: BoxDecoration(
                 color: AppColors.roseDim,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.rose.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: AppColors.rose.withValues(alpha: 0.4),
+                ),
               ),
               child: const Icon(Icons.close, color: AppColors.rose, size: 14),
             ),
@@ -918,7 +955,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                 const SizedBox(height: 2),
                 Text(
                   request.fromUser.preferredPosition ?? 'Joueur',
-                  style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 11,
+                    color: AppColors.muted2,
+                  ),
                 ),
               ],
             ),
@@ -1089,7 +1129,10 @@ class _FriendsListPageState extends State<FriendsListPage>
                     const SizedBox(width: 5),
                     Text(
                       'En attente',
-                      style: AppTypography.body(fontSize: 11, color: AppColors.amber),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.amber,
+                      ),
                     ),
                   ],
                 ),
@@ -1182,7 +1225,9 @@ class _FriendsListPageState extends State<FriendsListPage>
               decoration: BoxDecoration(
                 color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.amber.withValues(alpha: 0.3),
+                ),
               ),
               child: Text(
                 'Réessayer',
@@ -1270,8 +1315,15 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
               style: AppTypography.body(color: AppColors.white, fontSize: 13),
               decoration: InputDecoration(
                 hintText: 'Rechercher un joueur...',
-                hintStyle: AppTypography.body(color: AppColors.muted2, fontSize: 13),
-                prefixIcon: const Icon(Icons.search, color: AppColors.muted2, size: 17),
+                hintStyle: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.muted2,
+                  size: 17,
+                ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -1403,7 +1455,10 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
                 if (result.user.preferredPosition != null)
                   Text(
                     result.user.preferredPosition!,
-                    style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
+                    style: AppTypography.body(
+                      color: AppColors.muted2,
+                      fontSize: 11,
+                    ),
                   ),
               ],
             ),
@@ -1481,7 +1536,9 @@ class _AddFriendSheetState extends State<_AddFriendSheet> {
         decoration: BoxDecoration(
           gradient: isSending
               ? null
-              : const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
+              : const LinearGradient(
+                  colors: [AppColors.amberSoft, AppColors.amberD],
+                ),
           color: isSending ? AppColors.card : null,
           borderRadius: BorderRadius.circular(8),
         ),

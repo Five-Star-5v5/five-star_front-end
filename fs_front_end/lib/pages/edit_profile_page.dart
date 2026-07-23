@@ -198,10 +198,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 initAspectRatio: CropAspectRatioPreset.square,
                 lockAspectRatio: true,
               ),
-              IOSUiSettings(
-                title: 'Crop Avatar',
-                minimumAspectRatio: 1.0,
-              ),
+              IOSUiSettings(title: 'Crop Avatar', minimumAspectRatio: 1.0),
             ],
           );
 
@@ -212,9 +209,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
       }
     }
   }
@@ -238,7 +235,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border2),
             ),
-            child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+            child: const Icon(
+              Icons.arrow_back,
+              color: AppColors.muted2,
+              size: 16,
+            ),
           ),
         ),
         title: Text(
@@ -282,7 +283,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 4),
               Text(
                 'Mettez à jour vos informations de profil',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
               ),
               const SizedBox(height: 32),
 
@@ -457,7 +461,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 cursorColor: AppColors.amber,
                 decoration: InputDecoration(
                   hintText: 'Ex : 06 12 34 56 78',
-                  hintStyle: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                  hintStyle: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                   prefixIcon: const Icon(
                     Icons.phone_outlined,
                     color: AppColors.amber,
@@ -471,7 +478,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppColors.amber,
+                      width: 1.5,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -526,7 +536,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
+                    borderSide: const BorderSide(
+                      color: AppColors.amber,
+                      width: 1.5,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -535,7 +548,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 hint: Text(
                   'Sélectionnez votre poste',
-                  style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                 ),
                 items: _positions.map((pos) {
                   return DropdownMenuItem<String>(value: pos, child: Text(pos));

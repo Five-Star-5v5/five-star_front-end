@@ -215,8 +215,14 @@ class _LoginPageState extends State<LoginPage> {
                 height: 1,
               ),
               children: [
-                TextSpan(text: 'Ko', style: TextStyle(color: AppColors.white)),
-                TextSpan(text: 'beta', style: TextStyle(color: AppColors.amber)),
+                TextSpan(
+                  text: 'Ko',
+                  style: TextStyle(color: AppColors.white),
+                ),
+                TextSpan(
+                  text: 'beta',
+                  style: TextStyle(color: AppColors.amber),
+                ),
               ],
             ),
           ),
@@ -252,8 +258,8 @@ class _LoginPageState extends State<LoginPage> {
               color: isValid
                   ? AppColors.validBorder
                   : isFocused
-                      ? AppColors.focusedBorder
-                      : AppColors.border2,
+                  ? AppColors.focusedBorder
+                  : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -261,7 +267,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.person_outline_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -282,7 +292,11 @@ class _LoginPageState extends State<LoginPage> {
               if (isValid)
                 const Padding(
                   padding: EdgeInsets.only(right: 13),
-                  child: Icon(Icons.check_rounded, size: 14, color: AppColors.sage),
+                  child: Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: AppColors.sage,
+                  ),
                 ),
             ],
           ),
@@ -323,7 +337,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -343,7 +361,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => _passwordVisible = !_passwordVisible),
+                onTap: () =>
+                    setState(() => _passwordVisible = !_passwordVisible),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 13),
                   child: Icon(
@@ -436,7 +455,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           SizedBox(width: 8),
-                          Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 16,
+                            color: AppColors.night,
+                          ),
                         ],
                       ),
               ),

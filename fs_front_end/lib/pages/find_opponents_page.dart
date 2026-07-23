@@ -93,7 +93,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.muted2,
+                size: 16,
+              ),
             ),
           ),
         ),
@@ -146,7 +150,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.amber))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.amber),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -269,7 +275,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.amber : AppColors.card2,
                   borderRadius: BorderRadius.circular(8),
-                  border: isSelected ? null : Border.all(color: AppColors.border2),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: AppColors.border2),
                 ),
                 child: Text(
                   level == 'Tous' ? level : _capitalizeFirst(level),
@@ -392,17 +400,27 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(width: 4),
                 Text(
                   '${team.membersCount} membres',
-                  style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 11,
+                    color: AppColors.muted2,
+                  ),
                 ),
                 if (team.preferredDays != null &&
                     team.preferredDays!.isNotEmpty) ...[
                   const SizedBox(width: 12),
-                  const Icon(Icons.calendar_today, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredDays!.join(', '),
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -415,12 +433,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.location_on,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredLocations!.join(', '),
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -433,12 +458,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.access_time,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       _formatTimeSlot(team.preferredTimeSlots!.first),
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -456,7 +488,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.format_quote, color: AppColors.muted2, size: 16),
+                    const Icon(
+                      Icons.format_quote,
+                      color: AppColors.muted2,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -474,60 +510,64 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             ],
 
             const SizedBox(height: 14),
-            Builder(builder: (context) {
-              final alreadySent = _sentChallenges.any(
-                (c) =>
-                    c.challengedTeamId == team.teamId &&
-                    (c.status == ChallengeStatus.pending ||
-                        c.status == ChallengeStatus.accepted),
-              );
-              if (alreadySent) {
-                return Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.muted2.withValues(alpha: 0.3)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Défi envoyé',
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        letterSpacing: 0.6,
-                        color: AppColors.muted2,
+            Builder(
+              builder: (context) {
+                final alreadySent = _sentChallenges.any(
+                  (c) =>
+                      c.challengedTeamId == team.teamId &&
+                      (c.status == ChallengeStatus.pending ||
+                          c.status == ChallengeStatus.accepted),
+                );
+                if (alreadySent) {
+                  return Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.muted2.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Défi envoyé',
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          color: AppColors.muted2,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return GestureDetector(
+                  onTap: () => _showChallengeDialog(context, team),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.amber, AppColors.amberD],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Défier',
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          color: AppColors.night,
+                        ),
                       ),
                     ),
                   ),
                 );
-              }
-              return GestureDetector(
-                onTap: () => _showChallengeDialog(context, team),
-                child: Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.amber, AppColors.amberD],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Défier',
-                      style: AppTypography.display(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        letterSpacing: 0.6,
-                        color: AppColors.night,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
+              },
+            ),
           ],
         ),
       ),
@@ -710,7 +750,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         'EEEE d MMMM à HH:mm',
                         'fr_FR',
                       ).format(challenge.proposedDate!),
-                      style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -718,7 +761,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                    const Icon(
+                      Icons.location_on,
+                      size: 12,
+                      color: AppColors.muted2,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -744,7 +791,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.message, color: AppColors.muted2, size: 13),
+                    const Icon(
+                      Icons.message,
+                      color: AppColors.muted2,
+                      size: 13,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1136,7 +1187,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 Expanded(
                   child: Text(
                     'Score soumis ! En attente de validation par l\'adversaire.',
-                    style: AppTypography.body(fontSize: 12, color: AppColors.sage),
+                    style: AppTypography.body(
+                      fontSize: 12,
+                      color: AppColors.sage,
+                    ),
                   ),
                 ),
               ],
@@ -1152,7 +1206,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             child: Container(
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
+                gradient: const LinearGradient(
+                  colors: [AppColors.amber, AppColors.amberD],
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
@@ -1198,7 +1254,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1302,7 +1361,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\nÊtes-vous sûr de vouloir contester ?',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1545,7 +1607,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.warning_amber, size: 14, color: AppColors.amber),
+                  const Icon(
+                    Icons.warning_amber,
+                    size: 14,
+                    color: AppColors.amber,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Scores contradictoires → Match nul déclaré',
@@ -1636,7 +1702,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1649,7 +1718,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.amber, AppColors.amberD],
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -1798,7 +1869,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Lieu
                     CityAutocompleteField(
                       controller: locationController,
-                      style: AppTypography.body(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Lieu proposé (optionnel)',
                         hintStyle: AppTypography.body(
@@ -1818,11 +1892,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1835,7 +1913,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Message
                     TextField(
                       controller: messageController,
-                      style: AppTypography.body(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Message (optionnel)',
@@ -1856,11 +1937,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -2051,7 +2136,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                         : null,
                                     child: Icon(
                                       Icons.remove_circle,
-                                      color: myScore > 0 ? AppColors.amber : AppColors.muted2,
+                                      color: myScore > 0
+                                          ? AppColors.amber
+                                          : AppColors.muted2,
                                       size: 28,
                                     ),
                                   ),
@@ -2290,7 +2377,11 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(Icons.person, size: 14, color: AppColors.amber),
+                          const Icon(
+                            Icons.person,
+                            size: 14,
+                            color: AppColors.amber,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -2469,7 +2560,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Voulez-vous vraiment annuler ce défi ?',
-                style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),

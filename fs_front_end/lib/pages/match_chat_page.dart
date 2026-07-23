@@ -79,11 +79,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
       }
     };
 
-    _teamsService.onMatchChatConnected = () {
-    };
+    _teamsService.onMatchChatConnected = () {};
 
-    _teamsService.onMatchChatDisconnected = () {
-    };
+    _teamsService.onMatchChatDisconnected = () {};
 
     // Se connecter au WebSocket
     _teamsService.connectToMatchChat(widget.challengeId);
@@ -160,7 +158,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.muted2,
+                size: 16,
+              ),
             ),
           ),
         ),
@@ -199,7 +201,10 @@ class _MatchChatPageState extends State<MatchChatPage> {
                   ),
                   Text(
                     'Chat du match',
-                    style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ),
@@ -328,11 +333,15 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -373,7 +382,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                                 ),
                               ),
                             )
-                          : const Icon(Icons.send, color: AppColors.night, size: 18),
+                          : const Icon(
+                              Icons.send,
+                              color: AppColors.night,
+                              size: 18,
+                            ),
                     ),
                   ),
                 ],
@@ -444,7 +457,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
                           end: Alignment.bottomRight,
                         )
                       : null,
-                  border: isMyTeam ? null : Border.all(color: AppColors.border2),
+                  border: isMyTeam
+                      ? null
+                      : Border.all(color: AppColors.border2),
                   borderRadius: BorderRadius.circular(20).copyWith(
                     bottomRight: isMyTeam
                         ? const Radius.circular(6)
@@ -484,7 +499,10 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: AppTypography.body(color: AppColors.muted2, fontSize: 10),
+                      style: AppTypography.body(
+                        color: AppColors.muted2,
+                        fontSize: 10,
+                      ),
                     ),
                   ],
                 ),

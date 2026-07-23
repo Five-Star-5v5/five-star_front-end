@@ -191,7 +191,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: isAvailable ? AppColors.amberDim : const Color(0x0FFFFFFF),
+                    color: isAvailable
+                        ? AppColors.amberDim
+                        : const Color(0x0FFFFFFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -217,7 +219,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
-                              color: isAvailable ? AppColors.amber : AppColors.muted2,
+                              color: isAvailable
+                                  ? AppColors.amber
+                                  : AppColors.muted2,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -227,7 +231,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                                 : 'Active pour recevoir des invitations',
                             style: AppTypography.body(
                               fontSize: 11,
-                              color: isAvailable ? AppColors.white : AppColors.muted2,
+                              color: isAvailable
+                                  ? AppColors.white
+                                  : AppColors.muted2,
                             ),
                           ),
                         ],
@@ -262,7 +268,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   width: 42,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: isAvailable ? AppColors.amber : const Color(0xFF2A2D38),
+                    color: isAvailable
+                        ? AppColors.amber
+                        : const Color(0xFF2A2D38),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: AnimatedAlign(
@@ -373,11 +381,17 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                   controller: _searchController,
                   onChanged: (v) {
                     _searchDebounce?.cancel();
-                    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
-                      setState(() => _searchQuery = v);
-                    });
+                    _searchDebounce = Timer(
+                      const Duration(milliseconds: 300),
+                      () {
+                        setState(() => _searchQuery = v);
+                      },
+                    );
                   },
-                  style: AppTypography.body(color: AppColors.white, fontSize: 13),
+                  style: AppTypography.body(
+                    color: AppColors.white,
+                    fontSize: 13,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Rechercher une équipe ou un capitaine...',
                     hintStyle: AppTypography.body(
@@ -549,7 +563,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         const SizedBox(width: 8),
                         const Text(
                           '·',
-                          style: TextStyle(color: AppColors.muted2, fontSize: 11),
+                          style: TextStyle(
+                            color: AppColors.muted2,
+                            fontSize: 11,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Flexible(
@@ -595,7 +612,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 decoration: BoxDecoration(
                   color: AppColors.sageDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.sage.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.sage.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -622,7 +641,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 decoration: BoxDecoration(
                   color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.amber.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   'Envoyée',
@@ -1086,7 +1107,11 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.format_quote, color: AppColors.muted2, size: 18),
+                    const Icon(
+                      Icons.format_quote,
+                      color: AppColors.muted2,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1107,7 +1132,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: slot.matchDate != null ? AppColors.sageDim : AppColors.card2,
+                color: slot.matchDate != null
+                    ? AppColors.sageDim
+                    : AppColors.card2,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: slot.matchDate != null
@@ -1122,7 +1149,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         ? Icons.event_available
                         : Icons.event_busy,
                     size: 14,
-                    color: slot.matchDate != null ? AppColors.sage : AppColors.muted2,
+                    color: slot.matchDate != null
+                        ? AppColors.sage
+                        : AppColors.muted2,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -1130,7 +1159,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                         ? 'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year} à ${slot.matchDate!.hour.toString().padLeft(2, '0')}h${slot.matchDate!.minute.toString().padLeft(2, '0')}'
                         : 'Pas de match prévu',
                     style: AppTypography.body(
-                      color: slot.matchDate != null ? AppColors.sage : AppColors.muted2,
+                      color: slot.matchDate != null
+                          ? AppColors.sage
+                          : AppColors.muted2,
                       fontSize: 12,
                       fontWeight: slot.matchDate != null
                           ? FontWeight.w600
@@ -1187,11 +1218,18 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(Icons.access_time, size: 13, color: AppColors.muted2),
+                const Icon(
+                  Icons.access_time,
+                  size: 13,
+                  color: AppColors.muted2,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   _formatDate(slot.createdAt),
-                  style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
+                  style: AppTypography.body(
+                    color: AppColors.muted2,
+                    fontSize: 11,
+                  ),
                 ),
                 const Spacer(),
                 GestureDetector(
@@ -1355,7 +1393,11 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             const SizedBox(height: 20),
             Row(
               children: [
-                const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
+                const Icon(
+                  Icons.info_outline,
+                  color: AppColors.amber,
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -1420,7 +1462,10 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
               const SizedBox(height: 12),
               Text(
                 'Annuler la demande pour rejoindre "${request.teamName}" ?',
-                style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 24),
               Row(
@@ -1464,7 +1509,9 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                                   ? 'Demande annulée'
                                   : 'Erreur lors de l\'annulation',
                             ),
-                            backgroundColor: success ? AppColors.sage : AppColors.rose,
+                            backgroundColor: success
+                                ? AppColors.sage
+                                : AppColors.rose,
                           ),
                         );
                       },
@@ -1643,7 +1690,9 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                       style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: _allSelected ? AppColors.amber : AppColors.muted2,
+                        color: _allSelected
+                            ? AppColors.amber
+                            : AppColors.muted2,
                       ),
                     ),
                   ),
@@ -1726,11 +1775,15 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.border2),
+                            borderSide: const BorderSide(
+                              color: AppColors.border2,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: AppColors.border2),
+                            borderSide: const BorderSide(
+                              color: AppColors.border2,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -1810,7 +1863,9 @@ class _AvailabilitySheetState extends State<_AvailabilitySheet> {
                       margin: const EdgeInsets.only(right: 6),
                       padding: const EdgeInsets.symmetric(vertical: 9),
                       decoration: BoxDecoration(
-                        color: sel ? AppColors.amberDim : const Color(0x08FFFFFF),
+                        color: sel
+                            ? AppColors.amberDim
+                            : const Color(0x08FFFFFF),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: sel
