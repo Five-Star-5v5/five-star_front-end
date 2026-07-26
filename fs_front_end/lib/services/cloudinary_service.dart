@@ -24,14 +24,15 @@ class CloudinaryService {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = _uploadPreset
-        ..fields['public_id'] =
-            'five_star_avatars/user_${userId}_$timestamp'
+        ..fields['public_id'] = 'kobeta_avatars/user_${userId}_$timestamp'
         ..fields['resource_type'] = 'auto'
-        ..files.add(http.MultipartFile.fromBytes(
-          'file',
-          imageBytes,
-          filename: 'avatar.jpg',
-        ));
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            imageBytes,
+            filename: 'avatar.jpg',
+          ),
+        );
 
       final response = await request.send().timeout(
         const Duration(seconds: 30),
@@ -56,7 +57,7 @@ class CloudinaryService {
   }
 
   /// Supprime une image de Cloudinary
-  /// publicId ex: "five_star_avatars/user_123"
+  /// publicId ex: "kobeta_avatars/user_123"
   Future<bool> deleteAvatar(String publicId) async {
     try {
       final url = Uri.parse(
@@ -78,8 +79,8 @@ class CloudinaryService {
   }
 
   /// Extrait le public_id depuis une URL Cloudinary
-  /// Ex: "https://res.cloudinary.com/abc/image/upload/v123/five_star_avatars/user_123.jpg"
-  /// Retourne: "five_star_avatars/user_123"
+  /// Ex: "https://res.cloudinary.com/abc/image/upload/v123/kobeta_avatars/user_123.jpg"
+  /// Retourne: "kobeta_avatars/user_123"
   static String? extractPublicIdFromUrl(String? url) {
     if (url == null) return null;
     try {

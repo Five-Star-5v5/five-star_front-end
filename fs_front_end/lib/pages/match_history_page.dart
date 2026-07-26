@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import '../services/teams_service.dart';
 import '../theme/app_colors.dart';
 
@@ -48,7 +48,7 @@ class MatchHistoryPage extends StatelessWidget {
         ),
         title: Text(
           'Historique des matchs',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: AppColors.white,
@@ -98,19 +98,23 @@ class MatchHistoryPage extends StatelessWidget {
       children: [
         Text(
           value,
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: color,
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+        Text(
+          label,
+          style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
+        ),
       ],
     );
   }
 
-  Widget _divider() => Container(width: 1, height: 32, color: AppColors.border2);
+  Widget _divider() =>
+      Container(width: 1, height: 32, color: AppColors.border2);
 }
 
 class _MatchCard extends StatelessWidget {
@@ -174,7 +178,7 @@ class _MatchCard extends StatelessWidget {
                     children: [
                       Text(
                         myTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: AppColors.white,
@@ -184,7 +188,10 @@ class _MatchCard extends StatelessWidget {
                       ),
                       Text(
                         'vs $oppName',
-                        style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                        style: AppTypography.body(
+                          fontSize: 12,
+                          color: AppColors.muted2,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -198,7 +205,7 @@ class _MatchCard extends StatelessWidget {
                     if (myScore != null && oppScore != null)
                       Text(
                         '$myScore – $oppScore',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: AppColors.white,
@@ -207,7 +214,7 @@ class _MatchCard extends StatelessWidget {
                     else
                       Text(
                         '– – –',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: AppColors.muted2,
@@ -226,7 +233,7 @@ class _MatchCard extends StatelessWidget {
                         ),
                         child: Text(
                           resultLabel,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: resultColor,
@@ -249,7 +256,10 @@ class _MatchCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   dateStr,
-                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 11,
+                    color: AppColors.muted2,
+                  ),
                 ),
                 if (m.proposedLocation != null) ...[
                   const SizedBox(width: 10),
@@ -262,7 +272,10 @@ class _MatchCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       m.proposedLocation!,
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

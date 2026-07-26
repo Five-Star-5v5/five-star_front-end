@@ -13,8 +13,7 @@ class FieldsService {
     'PLACES_API_KEY',
     defaultValue: '',
   );
-  static const String _baseUrl =
-      'https://maps.googleapis.com/maps/api/place';
+  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
   // Cache 7 jours
   static const Duration _cacheTtl = Duration(days: 7);
@@ -72,8 +71,7 @@ class FieldsService {
         await _saveCache(venues);
         return venues;
       }
-    } else {
-    }
+    } else {}
 
     return _localFallback(userPosition);
   }
@@ -108,9 +106,9 @@ class FieldsService {
         if (pageToken != null) 'pagetoken': pageToken,
       };
 
-      final uri = Uri.parse('$_baseUrl/textsearch/json').replace(
-        queryParameters: params,
-      );
+      final uri = Uri.parse(
+        '$_baseUrl/textsearch/json',
+      ).replace(queryParameters: params);
 
       try {
         final response = await http
@@ -119,8 +117,8 @@ class FieldsService {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
-          final results =
-              (data['results'] as List? ?? []).cast<Map<String, dynamic>>();
+          final results = (data['results'] as List? ?? [])
+              .cast<Map<String, dynamic>>();
 
           for (final place in results) {
             final id = place['place_id'] as String? ?? '';
@@ -156,8 +154,7 @@ class FieldsService {
   ) {
     try {
       final name = place['name'] as String? ?? '';
-      final geo =
-          place['geometry']?['location'] as Map<String, dynamic>?;
+      final geo = place['geometry']?['location'] as Map<String, dynamic>?;
       if (geo == null) return null;
 
       final lat = (geo['lat'] as num).toDouble();
@@ -233,8 +230,7 @@ class FieldsService {
       final json = prefs.getString(_cacheKey);
       if (json == null) return null;
 
-      final list =
-          (jsonDecode(json) as List).cast<Map<String, dynamic>>();
+      final list = (jsonDecode(json) as List).cast<Map<String, dynamic>>();
       return list.map((m) => SoccerField.fromJson(m, userPosition)).toList();
     } catch (e) {
       return null;
@@ -248,12 +244,8 @@ class FieldsService {
         _cacheKey,
         jsonEncode(venues.map((v) => v.toJson()).toList()),
       );
-      await prefs.setInt(
-        _cacheTsKey,
-        DateTime.now().millisecondsSinceEpoch,
-      );
-    } catch (e) {
-    }
+      await prefs.setInt(_cacheTsKey, DateTime.now().millisecondsSinceEpoch);
+    } catch (e) {}
   }
 
   /// Force le rechargement depuis l'API (ignore le cache)
@@ -301,40 +293,278 @@ class FieldsService {
 
   static final List<Map<String, dynamic>> _knownCenters = [
     // ── Urban Soccer ──────────────────────────────────────────────────────────
-    {'id': 'us_evry', 'name': 'Urban Soccer Évry', 'lat': 48.6289, 'lon': 2.4301, 'address': 'ZAC du Bois Briard, Évry', 'phone': '+33 1 60 79 20 20', 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_aubervilliers', 'name': 'Urban Soccer Aubervilliers', 'lat': 48.9075, 'lon': 2.3743, 'address': 'Rue des Gardinoux, Aubervilliers', 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_puteaux', 'name': 'Urban Soccer Puteaux', 'lat': 48.8760, 'lon': 2.2435, 'address': '1 Allée des Sports, Puteaux', 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_creteil', 'name': 'Urban Soccer Créteil', 'lat': 48.7775, 'lon': 2.4628, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_torcy', 'name': 'Urban Soccer Torcy', 'lat': 48.8501, 'lon': 2.6563, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_orsay', 'name': 'Urban Soccer Orsay', 'lat': 48.7084, 'lon': 2.1782, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_asnieres', 'name': 'Urban Soccer Asnières', 'lat': 48.9128, 'lon': 2.2853, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_lyon', 'name': 'Urban Soccer Lyon', 'lat': 45.7117, 'lon': 4.9047, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_lille', 'name': 'Urban Soccer Lille', 'lat': 50.6167, 'lon': 3.0995, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_nantes', 'name': 'Urban Soccer Nantes', 'lat': 47.1903, 'lon': -1.4848, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_strasbourg', 'name': 'Urban Soccer Strasbourg', 'lat': 48.5935, 'lon': 7.7316, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
-    {'id': 'us_montpellier', 'name': 'Urban Soccer Montpellier', 'lat': 43.6287, 'lon': 3.9093, 'website': 'https://www.urbansoccer.fr', 'operator': 'Urban Soccer'},
+    {
+      'id': 'us_evry',
+      'name': 'Urban Soccer Évry',
+      'lat': 48.6289,
+      'lon': 2.4301,
+      'address': 'ZAC du Bois Briard, Évry',
+      'phone': '+33 1 60 79 20 20',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_aubervilliers',
+      'name': 'Urban Soccer Aubervilliers',
+      'lat': 48.9075,
+      'lon': 2.3743,
+      'address': 'Rue des Gardinoux, Aubervilliers',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_puteaux',
+      'name': 'Urban Soccer Puteaux',
+      'lat': 48.8760,
+      'lon': 2.2435,
+      'address': '1 Allée des Sports, Puteaux',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_creteil',
+      'name': 'Urban Soccer Créteil',
+      'lat': 48.7775,
+      'lon': 2.4628,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_torcy',
+      'name': 'Urban Soccer Torcy',
+      'lat': 48.8501,
+      'lon': 2.6563,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_orsay',
+      'name': 'Urban Soccer Orsay',
+      'lat': 48.7084,
+      'lon': 2.1782,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_asnieres',
+      'name': 'Urban Soccer Asnières',
+      'lat': 48.9128,
+      'lon': 2.2853,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_lyon',
+      'name': 'Urban Soccer Lyon',
+      'lat': 45.7117,
+      'lon': 4.9047,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_lille',
+      'name': 'Urban Soccer Lille',
+      'lat': 50.6167,
+      'lon': 3.0995,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_nantes',
+      'name': 'Urban Soccer Nantes',
+      'lat': 47.1903,
+      'lon': -1.4848,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_strasbourg',
+      'name': 'Urban Soccer Strasbourg',
+      'lat': 48.5935,
+      'lon': 7.7316,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_montpellier',
+      'name': 'Urban Soccer Montpellier',
+      'lat': 43.6287,
+      'lon': 3.9093,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
     // ── Le Five ───────────────────────────────────────────────────────────────
-    {'id': 'five_paris18', 'name': 'Le Five Paris 18', 'lat': 48.8978, 'lon': 2.3698, 'address': "217 Rue d'Aubervilliers, Paris 18", 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_paris17', 'name': 'Le Five Paris 17', 'lat': 48.9004, 'lon': 2.3221, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_paris13', 'name': 'Le Five Paris 13', 'lat': 48.8180, 'lon': 2.3655, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_bobigny', 'name': 'Le Five Bobigny', 'lat': 48.9014, 'lon': 2.4316, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_sarcelles', 'name': 'Le Five Sarcelles', 'lat': 48.9978, 'lon': 2.3901, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_creteil', 'name': 'Le Five Créteil', 'lat': 48.7639, 'lon': 2.4705, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_lyon', 'name': 'Le Five Lyon', 'lat': 45.7275, 'lon': 4.8320, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_bordeaux', 'name': 'Le Five Bordeaux', 'lat': 44.8799, 'lon': -0.5594, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_strasbourg', 'name': 'Le Five Strasbourg', 'lat': 48.5900, 'lon': 7.6805, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_roubaix', 'name': 'Le Five Roubaix', 'lat': 50.6919, 'lon': 3.1632, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
-    {'id': 'five_reims', 'name': 'Le Five Reims', 'lat': 49.2691, 'lon': 4.0380, 'website': 'https://www.lefive.fr', 'operator': 'Le Five'},
+    {
+      'id': 'five_paris18',
+      'name': 'Le Five Paris 18',
+      'lat': 48.8978,
+      'lon': 2.3698,
+      'address': "217 Rue d'Aubervilliers, Paris 18",
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_paris17',
+      'name': 'Le Five Paris 17',
+      'lat': 48.9004,
+      'lon': 2.3221,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_paris13',
+      'name': 'Le Five Paris 13',
+      'lat': 48.8180,
+      'lon': 2.3655,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_bobigny',
+      'name': 'Le Five Bobigny',
+      'lat': 48.9014,
+      'lon': 2.4316,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_sarcelles',
+      'name': 'Le Five Sarcelles',
+      'lat': 48.9978,
+      'lon': 2.3901,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_creteil',
+      'name': 'Le Five Créteil',
+      'lat': 48.7639,
+      'lon': 2.4705,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_lyon',
+      'name': 'Le Five Lyon',
+      'lat': 45.7275,
+      'lon': 4.8320,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_bordeaux',
+      'name': 'Le Five Bordeaux',
+      'lat': 44.8799,
+      'lon': -0.5594,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_strasbourg',
+      'name': 'Le Five Strasbourg',
+      'lat': 48.5900,
+      'lon': 7.6805,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_roubaix',
+      'name': 'Le Five Roubaix',
+      'lat': 50.6919,
+      'lon': 3.1632,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_reims',
+      'name': 'Le Five Reims',
+      'lat': 49.2691,
+      'lon': 4.0380,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
     // ── Z5 ────────────────────────────────────────────────────────────────────
-    {'id': 'z5_paris15', 'name': 'Z5 Paris 15', 'lat': 48.8417, 'lon': 2.2944, 'address': 'Paris 15e', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_paris19', 'name': 'Z5 Paris 19', 'lat': 48.8872, 'lon': 2.3831, 'address': 'Paris 19e', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_vincennes', 'name': 'Z5 Vincennes', 'lat': 48.8472, 'lon': 2.4399, 'address': 'Vincennes', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_lyon', 'name': 'Z5 Lyon', 'lat': 45.7640, 'lon': 4.8357, 'address': 'Lyon', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_marseille', 'name': 'Z5 Marseille', 'lat': 43.2965, 'lon': 5.3698, 'address': 'Marseille', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_bordeaux', 'name': 'Z5 Bordeaux', 'lat': 44.8378, 'lon': -0.5792, 'address': 'Bordeaux', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_toulouse', 'name': 'Z5 Toulouse', 'lat': 43.6047, 'lon': 1.4442, 'address': 'Toulouse', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_lille', 'name': 'Z5 Lille', 'lat': 50.6292, 'lon': 3.0573, 'address': 'Lille', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
-    {'id': 'z5_nantes', 'name': 'Z5 Nantes', 'lat': 47.2184, 'lon': -1.5536, 'address': 'Nantes', 'website': 'https://www.z5.fr', 'operator': 'Z5'},
+    {
+      'id': 'z5_paris15',
+      'name': 'Z5 Paris 15',
+      'lat': 48.8417,
+      'lon': 2.2944,
+      'address': 'Paris 15e',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_paris19',
+      'name': 'Z5 Paris 19',
+      'lat': 48.8872,
+      'lon': 2.3831,
+      'address': 'Paris 19e',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_vincennes',
+      'name': 'Z5 Vincennes',
+      'lat': 48.8472,
+      'lon': 2.4399,
+      'address': 'Vincennes',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_lyon',
+      'name': 'Z5 Lyon',
+      'lat': 45.7640,
+      'lon': 4.8357,
+      'address': 'Lyon',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_marseille',
+      'name': 'Z5 Marseille',
+      'lat': 43.2965,
+      'lon': 5.3698,
+      'address': 'Marseille',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_bordeaux',
+      'name': 'Z5 Bordeaux',
+      'lat': 44.8378,
+      'lon': -0.5792,
+      'address': 'Bordeaux',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_toulouse',
+      'name': 'Z5 Toulouse',
+      'lat': 43.6047,
+      'lon': 1.4442,
+      'address': 'Toulouse',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_lille',
+      'name': 'Z5 Lille',
+      'lat': 50.6292,
+      'lon': 3.0573,
+      'address': 'Lille',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_nantes',
+      'name': 'Z5 Nantes',
+      'lat': 47.2184,
+      'lon': -1.5536,
+      'address': 'Nantes',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
   ];
 }
 

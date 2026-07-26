@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../providers/friends_provider.dart';
@@ -100,7 +100,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       iconTheme: const IconThemeData(color: AppColors.muted2),
       title: Text(
         title,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           color: AppColors.white,
           fontWeight: FontWeight.w700,
           fontSize: 16,
@@ -132,7 +132,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return Scaffold(
         backgroundColor: AppColors.bg,
         appBar: _buildAppBar('Profil'),
-        body: const Center(child: CircularProgressIndicator(color: AppColors.amber)),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.amber),
+        ),
       );
     }
 
@@ -209,7 +211,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   : Center(
                       child: Text(
                         initial,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 26,
                           color: AppColors.night,
@@ -223,7 +225,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Center(
             child: Text(
               user.username.toUpperCase(),
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
                 letterSpacing: 0.6,
@@ -236,7 +238,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           Center(
             child: Text(
               '@${user.username.toLowerCase()}${user.preferredPosition != null ? ' · ${user.preferredPosition}' : ''}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
             ),
           ),
           const SizedBox(height: 10),
@@ -263,7 +265,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               child: Text(
                 user.bio!,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(
+                style: AppTypography.body(
                   fontSize: 12,
                   color: AppColors.muted2,
                   fontStyle: FontStyle.italic,
@@ -296,7 +298,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -331,7 +333,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -382,7 +384,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               children: [
                 Text(
                   stats[i].value,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: AppColors.amber,
@@ -391,7 +393,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 const SizedBox(height: 2),
                 Text(
                   stats[i].label,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 8,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
@@ -455,7 +457,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
       child: Text(
         b.label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -537,7 +539,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               Expanded(
                 child: Text(
                   'Match #${comment.challengeId}',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
@@ -546,7 +548,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
               Text(
                 dateStr,
-                style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 10,
+                  color: AppColors.muted2,
+                ),
               ),
             ],
           ),
@@ -561,7 +566,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
               const SizedBox(width: 6),
               Text(
                 comment.isAbsent ? 'Absent' : 'Présent',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: comment.isAbsent ? AppColors.rose : AppColors.sage,
@@ -573,7 +578,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             const SizedBox(height: 6),
             Text(
               comment.content!,
-              style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -613,7 +618,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       child: Text(
                         'Voir tout →',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.amber,
@@ -662,7 +667,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: c.isAbsent ? AppColors.rose.withValues(alpha: 0.3) : AppColors.border2,
+          color: c.isAbsent
+              ? AppColors.rose.withValues(alpha: 0.3)
+              : AppColors.border2,
         ),
       ),
       child: Row(
@@ -682,7 +689,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   : null,
             ),
             child: c.authorAvatarUrl == null
-                ? const Icon(Icons.person_outline, size: 16, color: AppColors.muted2)
+                ? const Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: AppColors.muted2,
+                  )
                 : null,
           ),
           const SizedBox(width: 10),
@@ -694,7 +705,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     Text(
                       c.authorUsername ?? 'Joueur',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -713,7 +724,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         ),
                         child: Text(
                           'Absent',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
                             color: AppColors.rose,
@@ -723,7 +734,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     const SizedBox(width: 6),
                     Text(
                       dateStr,
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -731,7 +745,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   const SizedBox(height: 4),
                   Text(
                     c.content!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ],
@@ -749,7 +766,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
@@ -774,7 +791,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 8),
           Text(
             title,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               color: AppColors.white,
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -783,7 +800,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           const SizedBox(height: 3),
           Text(
             subtitle,
-            style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11),
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
             textAlign: TextAlign.center,
           ),
         ],
@@ -821,7 +838,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 const SizedBox(width: 8),
                 Text(
                   'Déjà ami',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.sage,
                     fontWeight: FontWeight.w700,
                   ),
@@ -842,11 +859,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.hourglass_empty, color: AppColors.amber, size: 16),
+                const Icon(
+                  Icons.hourglass_empty,
+                  color: AppColors.amber,
+                  size: 16,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Demande envoyée',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.amber,
                     fontWeight: FontWeight.w700,
                   ),
@@ -881,7 +902,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                   child: Text(
                     'Refuser',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.rose,
                       fontWeight: FontWeight.w700,
                     ),
@@ -918,7 +939,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                   child: Text(
                     'Accepter',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.night,
                       fontWeight: FontWeight.w700,
                     ),
@@ -944,7 +965,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              gradient: const LinearGradient(colors: [AppColors.amberSoft, AppColors.amberD]),
+              gradient: const LinearGradient(
+                colors: [AppColors.amberSoft, AppColors.amberD],
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -953,7 +976,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 const SizedBox(width: 8),
                 Text(
                   'Ajouter en ami',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.night,
                     fontWeight: FontWeight.w700,
                   ),

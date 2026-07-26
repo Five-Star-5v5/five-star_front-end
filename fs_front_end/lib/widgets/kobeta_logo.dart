@@ -60,7 +60,12 @@ const kLogoGrayPaths =
     '-39,22.76344 -33,19.25601 -33,19.256 -13.97096,8.13157 '
     'L 447.55807,246 446.52904,245.9874 445.5,245.9748 Z';
 
-String buildKobetaLogoSvg(String pathData, String fillColor, double size, String clipId) =>
+String buildKobetaLogoSvg(
+  String pathData,
+  String fillColor,
+  double size,
+  String clipId,
+) =>
     '<svg width="${size.toStringAsFixed(0)}" height="${size.toStringAsFixed(0)}" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="$clipId"><polygon points="65,6 112,32 112,84 65,110 18,84 18,32"/></clipPath></defs><g clip-path="url(#\$$clipId)"><g transform="translate(-6,4) scale(0.1234)"><path fill="$fillColor" d="$pathData"/></g></g></svg>';
 
 class KobetaLogo extends StatelessWidget {
@@ -76,11 +81,13 @@ class KobetaLogo extends StatelessWidget {
         children: [
           SvgPicture.string(
             buildKobetaLogoSvg(kLogoOrangePaths, '#FF7F2A', size, 'kbHexO'),
-            width: size, height: size,
+            width: size,
+            height: size,
           ),
           SvgPicture.string(
             buildKobetaLogoSvg(kLogoGrayPaths, '#e6e6e6', size, 'kbHexG'),
-            width: size, height: size,
+            width: size,
+            height: size,
           ),
         ],
       ),

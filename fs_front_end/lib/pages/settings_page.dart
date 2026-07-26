@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../auth/login.dart';
 import '../services/contact_service.dart';
+import '../services/onboarding_prefs.dart';
+import '../services/tab_navigation.dart';
 import 'edit_profile_page.dart';
 import 'tos_page.dart';
 import '../theme/app_colors.dart';
@@ -33,12 +35,16 @@ class SettingsPage extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border2),
             ),
-            child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+            child: const Icon(
+              Icons.arrow_back,
+              color: AppColors.muted2,
+              size: 16,
+            ),
           ),
         ),
         title: Text(
           'PARAMÈTRES',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -86,7 +92,9 @@ class SettingsPage extends StatelessWidget {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, _) {
               return _buildToggleRow(
-                icon: themeProvider.isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                icon: themeProvider.isDark
+                    ? Icons.dark_mode_outlined
+                    : Icons.light_mode_outlined,
                 iconColor: AppColors.amber,
                 iconBg: AppColors.amberDim,
                 label: themeProvider.isDark ? 'Thème sombre' : 'Thème clair',
@@ -123,6 +131,26 @@ class SettingsPage extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const TosPage()),
             ),
           ),
+          const SizedBox(height: 8),
+
+          _buildRow(
+            icon: Icons.school_outlined,
+            iconColor: AppColors.amber,
+            iconBg: AppColors.amberDim,
+            label: 'Revoir le tutoriel',
+            subtitle: 'Rejouer le guide de l\'onglet Équipe',
+            onTap: () async {
+              await OnboardingPrefs.reset();
+              if (!context.mounted) return;
+              // On ferme d'abord les routes empilées : l'overlay du tuto se
+              // pose sur le Navigator racine, il passerait par-dessus les
+              // Réglages s'ils étaient encore affichés.
+              Navigator.popUntil(context, (r) => r.isFirst);
+              // HomePage est reconstruite en revenant sur l'onglet, donc le
+              // tuto se relance de lui-même.
+              requestedTab.value = 1;
+            },
+          ),
 
           // ── Section DANGER ──────────────────────────────────────────────────
           const SizedBox(height: 16),
@@ -150,7 +178,7 @@ class SettingsPage extends StatelessWidget {
       padding: const EdgeInsets.only(left: 2),
       child: Text(
         text,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,
@@ -199,7 +227,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: trailingColor ?? AppColors.white,
@@ -208,7 +236,10 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ),
@@ -261,7 +292,7 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: AppColors.white,
@@ -270,7 +301,10 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ),
@@ -291,7 +325,9 @@ class SettingsPage extends StatelessWidget {
 
   // ── Contact dialog ─────────────────────────────────────────────────────────
   void _showContactDialog(BuildContext context) {
-    final emailController = TextEditingController(text: authProvider.currentUser?.email ?? '');
+    final emailController = TextEditingController(
+      text: authProvider.currentUser?.email ?? '',
+    );
     final messageController = TextEditingController();
 
     showDialog(
@@ -324,12 +360,16 @@ class SettingsPage extends StatelessWidget {
                             color: AppColors.amberDim,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(Icons.mail_outline, color: AppColors.amber, size: 18),
+                          child: const Icon(
+                            Icons.mail_outline,
+                            color: AppColors.amber,
+                            size: 18,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
                           'Nous contacter',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -342,7 +382,7 @@ class SettingsPage extends StatelessWidget {
                     // Email field
                     Text(
                       'Votre email',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
@@ -353,22 +393,36 @@ class SettingsPage extends StatelessWidget {
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'votre@email.com',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                        hintStyle: AppTypography.body(
+                          fontSize: 13,
+                          color: AppColors.muted2,
+                        ),
                         filled: true,
                         fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: AppColors.amber,
+                            width: 1.5,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -376,7 +430,7 @@ class SettingsPage extends StatelessWidget {
                     // Message field
                     Text(
                       'Votre message',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.6,
@@ -387,22 +441,36 @@ class SettingsPage extends StatelessWidget {
                     TextField(
                       controller: messageController,
                       maxLines: 5,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       cursorColor: AppColors.amber,
                       decoration: InputDecoration(
                         hintText: 'Décrivez votre problème ou votre demande…',
-                        hintStyle: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                        hintStyle: AppTypography.body(
+                          fontSize: 13,
+                          color: AppColors.muted2,
+                        ),
                         filled: true,
                         fillColor: AppColors.card2,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.amber, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: AppColors.amber,
+                            width: 1.5,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -412,7 +480,10 @@ class SettingsPage extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         errorMsg!,
-                        style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.rose),
+                        style: AppTypography.body(
+                          fontSize: 11,
+                          color: AppColors.rose,
+                        ),
                       ),
                     ],
 
@@ -434,7 +505,7 @@ class SettingsPage extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   'Annuler',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.muted2,
@@ -454,42 +525,61 @@ class SettingsPage extends StatelessWidget {
                                     final msg = messageController.text.trim();
 
                                     if (email.isEmpty) {
-                                      setDialog(() => errorMsg = 'Veuillez saisir votre email.');
+                                      setDialog(
+                                        () => errorMsg =
+                                            'Veuillez saisir votre email.',
+                                      );
                                       return;
                                     }
                                     if (msg.isEmpty) {
-                                      setDialog(() => errorMsg = 'Veuillez écrire un message.');
+                                      setDialog(
+                                        () => errorMsg =
+                                            'Veuillez écrire un message.',
+                                      );
                                       return;
                                     }
 
-                                    setDialog(() { isLoading = true; errorMsg = null; });
+                                    setDialog(() {
+                                      isLoading = true;
+                                      errorMsg = null;
+                                    });
 
                                     try {
                                       await ContactService.send(
                                         fromEmail: email,
                                         message: msg,
                                       );
-                                      if (context.mounted) Navigator.of(dialogContext).pop();
+                                      if (context.mounted)
+                                        Navigator.of(dialogContext).pop();
                                       if (context.mounted) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'Message envoyé ! Un email de confirmation a été envoyé à $email.',
-                                                  style: GoogleFonts.dmSans(fontSize: 13),
-                                                ),
-                                                backgroundColor: AppColors.amber,
-                                                duration: const Duration(seconds: 4),
-                                              ),
-                                            );
-                                          }
-                                        });
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      'Message envoyé ! Un email de confirmation a été envoyé à $email.',
+                                                      style: AppTypography.body(
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                    backgroundColor:
+                                                        AppColors.amber,
+                                                    duration: const Duration(
+                                                      seconds: 4,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            });
                                       }
                                     } catch (_) {
                                       setDialog(() {
                                         isLoading = false;
-                                        errorMsg = 'Erreur lors de l\'envoi. Réessayez.';
+                                        errorMsg =
+                                            'Erreur lors de l\'envoi. Réessayez.';
                                       });
                                     }
                                   },
@@ -498,7 +588,10 @@ class SettingsPage extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppColors.amberDim,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.amber, width: 1.5),
+                                border: Border.all(
+                                  color: AppColors.amber,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Center(
                                 child: isLoading
@@ -512,7 +605,7 @@ class SettingsPage extends StatelessWidget {
                                       )
                                     : Text(
                                         'Envoyer',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.amber,
@@ -575,7 +668,7 @@ class SettingsPage extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       'Supprimer le compte',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.rose,
@@ -587,7 +680,7 @@ class SettingsPage extends StatelessWidget {
                 // Warning list
                 Text(
                   'Cette action est IRRÉVERSIBLE et entraînera :',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
@@ -621,7 +714,7 @@ class SettingsPage extends StatelessWidget {
                         Expanded(
                           child: Text(
                             t,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 12,
                               color: AppColors.muted2,
                             ),
@@ -635,7 +728,7 @@ class SettingsPage extends StatelessWidget {
                 // Confirmation field
                 Text(
                   'Tapez "SUPPRIMER" pour confirmer :',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,
@@ -645,7 +738,7 @@ class SettingsPage extends StatelessWidget {
                 TextField(
                   controller: confirmController,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -654,7 +747,7 @@ class SettingsPage extends StatelessWidget {
                   cursorColor: AppColors.rose,
                   decoration: InputDecoration(
                     hintText: 'SUPPRIMER',
-                    hintStyle: GoogleFonts.syne(
+                    hintStyle: AppTypography.display(
                       fontSize: 13,
                       letterSpacing: 2,
                       color: AppColors.muted2,
@@ -667,7 +760,10 @@ class SettingsPage extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: AppColors.rose, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppColors.rose,
+                        width: 1.5,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -692,7 +788,7 @@ class SettingsPage extends StatelessWidget {
                           child: Center(
                             child: Text(
                               'Annuler',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.muted2,
@@ -726,14 +822,19 @@ class SettingsPage extends StatelessWidget {
                                 }
                                 if (success) {
                                   if (context.mounted) {
-                                    Navigator.of(context).pushAndRemoveUntil(
+                                    // On dépile jusqu'à la racine (redevenue
+                                    // WelcomePage) au lieu de la détruire,
+                                    // puis on empile LoginPage pour son
+                                    // message de confirmation.
+                                    final navigator = Navigator.of(context);
+                                    navigator.popUntil((r) => r.isFirst);
+                                    navigator.push(
                                       MaterialPageRoute(
                                         builder: (_) => const LoginPage(
                                           successMessage:
                                               'Votre compte a été supprimé avec succès',
                                         ),
                                       ),
-                                      (route) => false,
                                     );
                                   }
                                 } else {
@@ -764,12 +865,15 @@ class SettingsPage extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppColors.roseDim,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.rose, width: 1.5),
+                                border: Border.all(
+                                  color: AppColors.rose,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Center(
                                 child: Text(
                                   'Supprimer',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.rose,

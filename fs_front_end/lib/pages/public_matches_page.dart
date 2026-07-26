@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -65,11 +65,15 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
         elevation: 0,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Icon(Icons.arrow_back_ios_new, color: AppColors.white, size: 18),
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.white,
+            size: 18,
+          ),
         ),
         title: Text(
           'MATCHS OUVERTS',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.06 * 15,
@@ -84,18 +88,22 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.amber, strokeWidth: 2))
+              child: CircularProgressIndicator(
+                color: AppColors.amber,
+                strokeWidth: 2,
+              ),
+            )
           : _matches.isEmpty
-              ? _buildEmpty()
-              : RefreshIndicator(
-                  color: AppColors.amber,
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                    itemCount: _matches.length,
-                    itemBuilder: (_, i) => _buildMatchCard(_matches[i]),
-                  ),
-                ),
+          ? _buildEmpty()
+          : RefreshIndicator(
+              color: AppColors.amber,
+              onRefresh: _load,
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                itemCount: _matches.length,
+                itemBuilder: (_, i) => _buildMatchCard(_matches[i]),
+              ),
+            ),
     );
   }
 
@@ -108,13 +116,16 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           const SizedBox(height: 16),
           Text(
             'Aucun match ouvert',
-            style: GoogleFonts.syne(
-                fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.muted2),
+            style: AppTypography.display(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.muted2,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             'Les matchs avec des places libres apparaîtront ici',
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
             textAlign: TextAlign.center,
           ),
         ],
@@ -146,7 +157,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                     children: [
                       Text(
                         'VS',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 2,
@@ -157,16 +168,20 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                         Container(
                           margin: const EdgeInsets.only(top: 4),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.sageDim,
                             borderRadius: BorderRadius.circular(100),
                             border: Border.all(
-                                color: AppColors.sage.withValues(alpha: 0.3), width: 1),
+                              color: AppColors.sage.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
                           ),
                           child: Text(
                             '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
                               color: AppColors.sage,
@@ -186,7 +201,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                 Expanded(
                   child: Text(
                     match.challengerTeam.name,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -199,7 +214,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                 Expanded(
                   child: Text(
                     match.challengedTeam.name,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -222,29 +237,42 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
               child: Row(
                 children: [
                   if (match.proposedDate != null) ...[
-                    const Icon(Icons.calendar_today, size: 12, color: AppColors.muted2),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 12,
+                      color: AppColors.muted2,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _formatDate(match.proposedDate!),
-                      style:
-                          GoogleFonts.dmSans(fontSize: 11, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.white,
+                      ),
                     ),
                   ],
                   if (match.proposedDate != null &&
                       match.proposedLocation != null)
                     Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        width: 1,
-                        height: 12,
-                        color: AppColors.border2),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 1,
+                      height: 12,
+                      color: AppColors.border2,
+                    ),
                   if (match.proposedLocation != null) ...[
-                    const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                    const Icon(
+                      Icons.location_on,
+                      size: 12,
+                      color: AppColors.muted2,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         match.proposedLocation!,
-                        style:
-                            GoogleFonts.dmSans(fontSize: 11, color: AppColors.white),
+                        style: AppTypography.body(
+                          fontSize: 11,
+                          color: AppColors.white,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -252,9 +280,13 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
                   ],
                   if (match.proposedDate == null &&
                       match.proposedLocation == null)
-                    Text('Date et lieu à définir',
-                        style:
-                            GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                    Text(
+                      'Date et lieu à définir',
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -275,13 +307,15 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
               decoration: BoxDecoration(
                 color: AppColors.amberDim,
                 borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: AppColors.amber.withValues(alpha: 0.25), width: 1),
+                border: Border.all(
+                  color: AppColors.amber.withValues(alpha: 0.25),
+                  width: 1,
+                ),
               ),
               child: Text(
                 'Voir les postes disponibles →',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: AppColors.amber,
@@ -301,7 +335,10 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
       decoration: BoxDecoration(
         color: AppColors.amberDim,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.amber.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: AppColors.amber.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: team.logoUrl != null
           ? ClipRRect(
@@ -333,7 +370,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           ),
           child: Text(
             '${team.name.split(' ').first} — complet',
-            style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -353,7 +390,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
           children: [
             Text(
               team.name.split(' ').first,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: AppColors.sage,
@@ -364,10 +401,14 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
               spacing: 4,
               runSpacing: 2,
               children: open
-                  .map((slot) => _hasPending(matchId, team.id, slot.slotIndex)
-                      ? _chip('✓ ${slot.position.shortDisplayName}',
-                          AppColors.amber.withValues(alpha: 0.8))
-                      : _chip(slot.position.shortDisplayName, AppColors.sage))
+                  .map(
+                    (slot) => _hasPending(matchId, team.id, slot.slotIndex)
+                        ? _chip(
+                            '✓ ${slot.position.shortDisplayName}',
+                            AppColors.amber.withValues(alpha: 0.8),
+                          )
+                        : _chip(slot.position.shortDisplayName, AppColors.sage),
+                  )
                   .toList(),
             ),
           ],
@@ -386,7 +427,10 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
       child: Text(
         label,
         style: TextStyle(
-            fontSize: 8, fontWeight: FontWeight.w700, color: color),
+          fontSize: 8,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
       ),
     );
   }
@@ -401,14 +445,16 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
       builder: (_) => _MatchDetailSheet(
         match: match,
         pendingApplicationKeys: _pendingApplicationKeys,
-        onApply: (teamId, slotIndex) =>
-            _applyToSlot(match, teamId, slotIndex),
+        onApply: (teamId, slotIndex) => _applyToSlot(match, teamId, slotIndex),
       ),
     );
   }
 
   Future<void> _applyToSlot(
-      PublicMatch match, int teamId, int slotIndex) async {
+    PublicMatch match,
+    int teamId,
+    int slotIndex,
+  ) async {
     final auth = context.read<AuthProvider>();
     final userId = auth.currentUser?.id;
     final username = auth.currentUser?.username ?? '';
@@ -419,8 +465,7 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
     final teamInfo = match.challengerTeam.id == teamId
         ? match.challengerTeam
         : match.challengedTeam;
-    final slot =
-        teamInfo.slots.firstWhere((s) => s.slotIndex == slotIndex);
+    final slot = teamInfo.slots.firstWhere((s) => s.slotIndex == slotIndex);
 
     final key = _appKey(match.id, teamId, slotIndex);
 
@@ -442,12 +487,15 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
 
       if (result.application != null) {
         _showSnack(
-            'Candidature envoyée pour ${slot.position.displayName} — ${teamInfo.name}',
-            isSuccess: true);
+          'Candidature envoyée pour ${slot.position.displayName} — ${teamInfo.name}',
+          isSuccess: true,
+        );
       } else {
         setState(() => _pendingApplicationKeys.remove(key));
-        _showSnack(result.errorMessage ?? 'Erreur lors de la candidature',
-            isSuccess: false);
+        _showSnack(
+          result.errorMessage ?? 'Erreur lors de la candidature',
+          isSuccess: false,
+        );
       }
     } catch (_) {
       if (mounted) {
@@ -460,8 +508,10 @@ class _PublicMatchesPageState extends State<PublicMatchesPage> {
   void _showSnack(String msg, {required bool isSuccess}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg,
-            style: GoogleFonts.dmSans(color: AppColors.white, fontSize: 13)),
+        content: Text(
+          msg,
+          style: AppTypography.body(color: AppColors.white, fontSize: 13),
+        ),
         backgroundColor: isSuccess ? AppColors.sage : const Color(0xFFD4607A),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -494,9 +544,8 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
   String _appKey(int matchId, int teamId, int slotIndex) =>
       '$matchId-$teamId-$slotIndex';
 
-  bool _hasPending(int teamId, int slotIndex) =>
-      widget.pendingApplicationKeys
-          .contains(_appKey(widget.match.id, teamId, slotIndex));
+  bool _hasPending(int teamId, int slotIndex) => widget.pendingApplicationKeys
+      .contains(_appKey(widget.match.id, teamId, slotIndex));
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -543,7 +592,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'VS',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 2,
@@ -567,31 +616,45 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                       child: Row(
                         children: [
                           if (match.proposedDate != null) ...[
-                            const Icon(Icons.calendar_today,
-                                size: 13, color: AppColors.muted2),
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 13,
+                              color: AppColors.muted2,
+                            ),
                             const SizedBox(width: 6),
-                            Text(_formatDate(match.proposedDate!),
-                                style: GoogleFonts.dmSans(
-                                    fontSize: 12, color: AppColors.white)),
+                            Text(
+                              _formatDate(match.proposedDate!),
+                              style: AppTypography.body(
+                                fontSize: 12,
+                                color: AppColors.white,
+                              ),
+                            ),
                           ],
                           if (match.proposedDate != null &&
                               match.proposedLocation != null)
                             Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                width: 1,
-                                height: 12,
-                                color: AppColors.border2),
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              width: 1,
+                              height: 12,
+                              color: AppColors.border2,
+                            ),
                           if (match.proposedLocation != null) ...[
-                            const Icon(Icons.location_on,
-                                size: 13, color: AppColors.muted2),
+                            const Icon(
+                              Icons.location_on,
+                              size: 13,
+                              color: AppColors.muted2,
+                            ),
                             const SizedBox(width: 4),
                             Expanded(
-                              child: Text(match.proposedLocation!,
-                                  style: GoogleFonts.dmSans(
-                                      fontSize: 12, color: AppColors.white),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                match.proposedLocation!,
+                                style: AppTypography.body(
+                                  fontSize: 12,
+                                  color: AppColors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ],
@@ -636,8 +699,10 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             decoration: BoxDecoration(
               color: AppColors.amberDim,
               borderRadius: BorderRadius.circular(14),
-              border:
-                  Border.all(color: AppColors.amber.withValues(alpha: 0.2), width: 1),
+              border: Border.all(
+                color: AppColors.amber.withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
             child: team.logoUrl != null
                 ? ClipRRect(
@@ -648,17 +713,21 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                     child: Text(
                       team.name[0].toUpperCase(),
                       style: const TextStyle(
-                          color: AppColors.amber,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20),
+                        color: AppColors.amber,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
           ),
           const SizedBox(height: 6),
           Text(
             team.name,
-            style: GoogleFonts.syne(
-                fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.white),
+            style: AppTypography.display(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.white,
+            ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -666,16 +735,18 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
           if (openCount > 0) ...[
             const SizedBox(height: 4),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: AppColors.sageDim,
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Text(
                 '$openCount libre${openCount > 1 ? 's' : ''}',
-                style: GoogleFonts.syne(
-                    fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.sage),
+                style: AppTypography.display(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.sage,
+                ),
               ),
             ),
           ],
@@ -687,9 +758,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
   Widget _buildTeamSlots(PublicMatchTeamInfo team) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...team.slots.map((slot) => _buildSlotRow(team, slot)),
-      ],
+      children: [...team.slots.map((slot) => _buildSlotRow(team, slot))],
     );
   }
 
@@ -702,15 +771,15 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
       decoration: BoxDecoration(
         color: slot.isOpen
             ? (hasPending
-                ? AppColors.amberDim
-                : AppColors.sageDim.withValues(alpha: 0.5))
+                  ? AppColors.amberDim
+                  : AppColors.sageDim.withValues(alpha: 0.5))
             : AppColors.card2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: slot.isOpen
               ? (hasPending
-                  ? AppColors.amber.withValues(alpha: 0.4)
-                  : AppColors.sage.withValues(alpha: 0.3))
+                    ? AppColors.amber.withValues(alpha: 0.4)
+                    : AppColors.sage.withValues(alpha: 0.3))
               : AppColors.border,
           width: 1,
           strokeAlign: BorderSide.strokeAlignInside,
@@ -733,7 +802,9 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             shape: BoxShape.circle,
             image: slot.avatarUrl != null
                 ? DecorationImage(
-                    image: NetworkImage(slot.avatarUrl!), fit: BoxFit.cover)
+                    image: NetworkImage(slot.avatarUrl!),
+                    fit: BoxFit.cover,
+                  )
                 : null,
           ),
           child: slot.avatarUrl == null
@@ -741,9 +812,10 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                   child: Text(
                     (slot.username ?? '?')[0].toUpperCase(),
                     style: const TextStyle(
-                        color: AppColors.muted2,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700),
+                      color: AppColors.muted2,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 )
               : null,
@@ -755,16 +827,17 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
             children: [
               Text(
                 slot.username ?? '—',
-                style: GoogleFonts.syne(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.white),
+                style: AppTypography.display(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
                 slot.position.displayName,
-                style: GoogleFonts.dmSans(fontSize: 9, color: AppColors.muted2),
+                style: AppTypography.body(fontSize: 9, color: AppColors.muted2),
               ),
             ],
           ),
@@ -774,7 +847,10 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
   }
 
   Widget _buildOpenSlot(
-      PublicMatchTeamInfo team, PublicMatchTeamSlot slot, bool hasPending) {
+    PublicMatchTeamInfo team,
+    PublicMatchTeamSlot slot,
+    bool hasPending,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -809,7 +885,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                 children: [
                   Text(
                     slot.position.displayName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: hasPending ? AppColors.amber : AppColors.sage,
@@ -817,7 +893,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                   ),
                   Text(
                     hasPending ? 'Candidature envoyée' : 'Poste libre',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       fontSize: 9,
                       color: hasPending
                           ? AppColors.amber.withValues(alpha: 0.7)
@@ -832,9 +908,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
         if (!hasPending) ...[
           const SizedBox(height: 8),
           GestureDetector(
-            onTap: _isApplying
-                ? null
-                : () => _confirmApply(team, slot),
+            onTap: _isApplying ? null : () => _confirmApply(team, slot),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 7),
@@ -842,12 +916,14 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                 color: AppColors.sage.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                    color: AppColors.sage.withValues(alpha: 0.4), width: 1),
+                  color: AppColors.sage.withValues(alpha: 0.4),
+                  width: 1,
+                ),
               ),
               child: Text(
                 'Postuler',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: AppColors.sage,
@@ -877,8 +953,9 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                  color: AppColors.border2,
-                  borderRadius: BorderRadius.circular(2)),
+                color: AppColors.border2,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             const SizedBox(height: 20),
             Container(
@@ -888,31 +965,39 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                 color: AppColors.sageDim,
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: AppColors.sage.withValues(alpha: 0.3), width: 1.5),
+                  color: AppColors.sage.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
               ),
-              child: const Icon(Icons.sports_soccer, color: AppColors.sage, size: 26),
+              child: const Icon(
+                Icons.sports_soccer,
+                color: AppColors.sage,
+                size: 26,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'Postuler pour ce match ?',
-              style: GoogleFonts.syne(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.white),
+              style: AppTypography.display(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.white,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tu vas postuler pour le poste de ${slot.position.displayName}\ndans l\'équipe ${team.name}.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
             ),
             const SizedBox(height: 6),
             Text(
               'Le capitaine devra accepter ta candidature.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(
-                  fontSize: 11,
-                  color: AppColors.muted2.withValues(alpha: 0.7)),
+              style: AppTypography.body(
+                fontSize: 11,
+                color: AppColors.muted2.withValues(alpha: 0.7),
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -930,10 +1015,11 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                       child: Text(
                         'Annuler',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.syne(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.muted2),
+                        style: AppTypography.display(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.muted2,
+                        ),
                       ),
                     ),
                   ),
@@ -957,7 +1043,7 @@ class _MatchDetailSheetState extends State<_MatchDetailSheet> {
                       child: Text(
                         'Confirmer',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,

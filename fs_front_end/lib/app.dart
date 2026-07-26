@@ -9,6 +9,7 @@ import 'auth/forgot_password_page.dart';
 import 'main_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
+import 'theme/app_colors.dart';
 
 class FootApp extends StatefulWidget {
   const FootApp({super.key});
@@ -49,17 +50,22 @@ class _FootAppState extends State<FootApp> {
         if (auth.isLoading) {
           return MaterialApp(
             title: 'Foot 5 Réservation',
+            debugShowCheckedModeBanner: false,
             theme: _lightTheme,
             darkTheme: _darkTheme,
             themeMode: theme.mode,
             home: const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              backgroundColor: AppColors.bg,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.amber),
+              ),
             ),
           );
         }
 
         return MaterialApp(
           title: 'Foot 5 Réservation',
+          debugShowCheckedModeBanner: false,
           theme: _lightTheme,
           darkTheme: _darkTheme,
           themeMode: theme.mode,

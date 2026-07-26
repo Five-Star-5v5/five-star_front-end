@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'login.dart';
 import 'signup.dart';
 import '../theme/app_colors.dart';
+import '../widgets/kobeta_backdrop.dart';
 import '../widgets/kobeta_logo.dart';
 
 // ── Widget ─────────────────────────────────────────────────────────────────
@@ -38,6 +39,38 @@ class _WelcomePageState extends State<WelcomePage>
 
   // Float
   late final Animation<double> _float;
+
+  // ── Carrousel ──
+  final _pageCtrl = PageController();
+  int _page = 0;
+
+  /// Vrai dès que l'utilisateur a fait défiler lui-même : on renonce alors à
+  /// l'avance automatique pour ne pas lui reprendre la main.
+  bool _userSwiped = false;
+
+  static const _slides = <_SlideData>[
+    _SlideData(
+      image: 'assets/logos/trouve_ton_terrain.png',
+      title: 'Trouve ton terrain',
+      body:
+          'Repère les terrains autour de toi sur la carte, '
+          'consulte leurs infos et choisis où jouer.',
+    ),
+    _SlideData(
+      image: 'assets/logos/monte_ton_equipe.png',
+      title: 'Monte ton équipe',
+      body:
+          'Crée ton équipe, choisis tes joueurs et place-les '
+          'sur le terrain pour bâtir ta composition.',
+    ),
+    _SlideData(
+      image: 'assets/logos/defie_autre_equipes.png',
+      title: 'Défie d\'autres équipes',
+      body:
+          'Envoie un défi, cale la date et le lieu dans le chat, '
+          'puis enregistre le score après le match.',
+    ),
+  ];
 
   @override
   void initState() {
@@ -134,6 +167,20 @@ class _WelcomePageState extends State<WelcomePage>
     Future.delayed(const Duration(milliseconds: 2600), () {
       if (mounted) _floatCtrl.repeat(reverse: true);
     });
+
+    // ── Avance automatique vers la première slide ──
+    // La carte du bas finit son animation vers 2800 ms ; on laisse respirer,
+    // puis on glisse pour montrer qu'il y a du contenu à découvrir. Sans ça,
+    // l'onboarding reste invisible : la page 1 ressemble à l'ancien écran.
+    Future.delayed(const Duration(milliseconds: 3400), () {
+      if (!mounted || _userSwiped) return;
+      if (!_pageCtrl.hasClients || _page != 0) return;
+      _pageCtrl.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override
@@ -143,6 +190,7 @@ class _WelcomePageState extends State<WelcomePage>
     _taglineCtrl.dispose();
     _cardCtrl.dispose();
     _floatCtrl.dispose();
+    _pageCtrl.dispose();
     super.dispose();
   }
 
@@ -154,12 +202,30 @@ class _WelcomePageState extends State<WelcomePage>
       body: Stack(
         children: [
           // Background mesh + grid
-          CustomPaint(painter: _BgPainter(), size: Size.infinite),
+          const KobetaBackdrop(),
           SafeArea(
             child: Column(
               children: [
-                // Logo area (flex = 1)
-                Expanded(child: _buildLogoArea()),
+                // Carrousel : révélation de la marque, puis les 3 slides
+                Expanded(
+                  // `dragDetails` n'est renseigné que pour un défilement à la
+                  // main : c'est ce qui distingue le geste de l'utilisateur de
+                  // notre propre animation.
+                  child: NotificationListener<ScrollStartNotification>(
+                    onNotification: (n) {
+                      if (n.dragDetails != null) _userSwiped = true;
+                      return false;
+                    },
+                    child: PageView(
+                      controller: _pageCtrl,
+                      onPageChanged: (i) => setState(() => _page = i),
+                      children: [
+                        _buildLogoArea(),
+                        ..._slides.map((s) => _FeatureSlide(slide: s)),
+                      ],
+                    ),
+                  ),
+                ),
                 // Dots
                 _buildDots(),
                 const SizedBox(height: 24),
@@ -202,7 +268,12 @@ class _WelcomePageState extends State<WelcomePage>
                   child: SlideTransition(
                     position: _orangeSlide,
                     child: SvgPicture.string(
-                      buildKobetaLogoSvg(kLogoOrangePaths, '#FF7F2A', 130, 'hexClipO'),
+                      buildKobetaLogoSvg(
+                        kLogoOrangePaths,
+                        '#FF7F2A',
+                        130,
+                        'hexClipO',
+                      ),
                       width: 130,
                       height: 130,
                     ),
@@ -214,7 +285,12 @@ class _WelcomePageState extends State<WelcomePage>
                   child: SlideTransition(
                     position: _graySlide,
                     child: SvgPicture.string(
-                      buildKobetaLogoSvg(kLogoGrayPaths, '#e6e6e6', 130, 'hexClipG'),
+                      buildKobetaLogoSvg(
+                        kLogoGrayPaths,
+                        '#e6e6e6',
+                        130,
+                        'hexClipG',
+                      ),
                       width: 130,
                       height: 130,
                     ),
@@ -274,38 +350,27 @@ class _WelcomePageState extends State<WelcomePage>
   }
 
   // ── Dots ───────────────────────────────────────────────────────────────
+  // Une pastille par page : la marque + les 3 slides.
   Widget _buildDots() {
+    final count = _slides.length + 1;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Active dot (wider, amber)
-        Container(
-          width: 22,
+      children: List.generate(count, (i) {
+        final active = i == _page;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: active ? 22 : 6,
           height: 6,
           decoration: BoxDecoration(
-            color: AppColors.amber,
+            color: active
+                ? AppColors.amber
+                : Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(3),
           ),
-        ),
-        const SizedBox(width: 6),
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-      ],
+        );
+      }),
     );
   }
 
@@ -359,52 +424,133 @@ class _WelcomePageState extends State<WelcomePage>
               MaterialPageRoute(builder: (_) => const LoginPage()),
             ),
           ),
-          const SizedBox(height: 16),
-          // Divider
-          Row(
-            children: [
-              Expanded(child: Container(height: 1, color: AppColors.border)),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  'OU CONTINUER AVEC',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.muted,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1,
-                  ),
+          // TODO: réactiver Google/Apple sign-in
+          // const SizedBox(height: 16),
+          // Row(children: [
+          //   Expanded(child: Container(height: 1, color: AppColors.border)),
+          //   const Padding(
+          //     padding: EdgeInsets.symmetric(horizontal: 10),
+          //     child: Text('OU CONTINUER AVEC',
+          //         style: TextStyle(fontSize: 10, color: AppColors.muted,
+          //             fontWeight: FontWeight.w600, letterSpacing: 1)),
+          //   ),
+          //   Expanded(child: Container(height: 1, color: AppColors.border)),
+          // ]),
+          // const SizedBox(height: 16),
+          // Row(children: [
+          //   Expanded(child: _SocialButton(label: 'Google',
+          //       icon: Image.asset('assets/logos/google_logo_icon.png', height: 18),
+          //       onTap: () {})),
+          //   const SizedBox(width: 10),
+          //   Expanded(child: _SocialButton(label: 'Apple',
+          //       icon: Image.asset('assets/logos/apple_logo_icon.png', height: 18),
+          //       onTap: () {})),
+          // ]),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Slides du carrousel ────────────────────────────────────────────────────
+
+class _SlideData {
+  final String image;
+  final String title;
+  final String body;
+
+  const _SlideData({
+    required this.image,
+    required this.title,
+    required this.body,
+  });
+}
+
+class _FeatureSlide extends StatelessWidget {
+  const _FeatureSlide({required this.slide});
+
+  final _SlideData slide;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+                BoxShadow(
+                  color: AppColors.amber.withValues(alpha: 0.08),
+                  blurRadius: 32,
+                  spreadRadius: -8,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: AspectRatio(
+                aspectRatio: 3 / 2,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // L'illustration porte déjà son texte et ses icônes : pas
+                    // de voile. Le léger zoom écarte le cadre incrusté au PNG.
+                    Transform.scale(
+                      scale: 1.06,
+                      child: Image.asset(slide.image, fit: BoxFit.cover),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 1,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              Colors.white.withValues(alpha: 0.18),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Expanded(child: Container(height: 1, color: AppColors.border)),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
-          // Social buttons
-          Row(
-            children: [
-              Expanded(
-                child: _SocialButton(
-                  label: 'Google',
-                  icon: Image.asset(
-                    'assets/logos/google_logo_icon.png',
-                    height: 18,
-                  ),
-                  onTap: () {},
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _SocialButton(
-                  label: 'Apple',
-                  icon: Image.asset(
-                    'assets/logos/apple_logo_icon.png',
-                    height: 18,
-                  ),
-                  onTap: () {},
-                ),
-              ),
-            ],
+          const SizedBox(height: 26),
+          Text(
+            slide.title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: AppColors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            slide.body,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w300,
+              height: 1.6,
+              color: AppColors.muted2,
+            ),
           ),
         ],
       ),
@@ -489,75 +635,27 @@ class _GhostButton extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
+// TODO: réactiver Google/Apple sign-in
+// class _SocialButton extends StatelessWidget {
+//   const _SocialButton({required this.label, required this.icon, required this.onTap});
+//   final String label;
+//   final Widget icon;
+//   final VoidCallback onTap;
+//   @override
+//   Widget build(BuildContext context) {
+//     return OutlinedButton.icon(
+//       onPressed: onTap, icon: icon,
+//       label: Text(label, style: const TextStyle(fontSize: 11,
+//           fontWeight: FontWeight.w700, color: AppColors.muted2)),
+//       style: OutlinedButton.styleFrom(
+//         side: const BorderSide(color: AppColors.border2, width: 1),
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+//         backgroundColor: AppColors.card, padding: const EdgeInsets.symmetric(vertical: 11),
+//         foregroundColor: AppColors.muted2,
+//       ),
+//     );
+//   }
+// }
 
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: icon,
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.muted2,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.border2, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: AppColors.card,
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        foregroundColor: AppColors.muted2,
-      ),
-    );
-  }
-}
-
-// ── Background painter ─────────────────────────────────────────────────────
-class _BgPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Amber radial glow at top-center
-    final amberGlow = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(0, -0.7),
-        radius: 0.7,
-        colors: [const Color(0xFFE8923A).withValues(alpha: 0.13), Colors.transparent],
-      ).createShader(Offset.zero & size);
-    canvas.drawRect(Offset.zero & size, amberGlow);
-
-    // Green radial glow at bottom-left
-    final greenGlow = Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.7, 0.6),
-        radius: 0.5,
-        colors: [const Color(0xFF4CAF82).withValues(alpha: 0.06), Colors.transparent],
-      ).createShader(Offset.zero & size);
-    canvas.drawRect(Offset.zero & size, greenGlow);
-
-    // Grid lines 32px
-    final gridPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03)
-      ..strokeWidth = 1;
-    const step = 32.0;
-    for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
-    }
-    for (double y = 0; y < size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+// Le fond (halos + grille) vit désormais dans widgets/kobeta_backdrop.dart,
+// partagé avec l'onboarding.

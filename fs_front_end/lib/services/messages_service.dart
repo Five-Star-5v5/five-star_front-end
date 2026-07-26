@@ -120,8 +120,7 @@ class MessagesService {
           onErrorMessage?.call(errorMessage);
           break;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   void _onError(dynamic error) {

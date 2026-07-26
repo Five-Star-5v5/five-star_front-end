@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -159,10 +159,9 @@ class _MapPageState extends State<MapPage> {
   Widget _buildTopSection(BuildContext context, FieldsProvider provider) {
     final top = MediaQuery.of(context).padding.top;
     final user = context.watch<AuthProvider>().currentUser;
-    final initials =
-        user != null && user.username.isNotEmpty
-            ? user.username.substring(0, 1).toUpperCase()
-            : '?';
+    final initials = user != null && user.username.isNotEmpty
+        ? user.username.substring(0, 1).toUpperCase()
+        : '?';
 
     return Container(
       color: AppColors.bg,
@@ -191,7 +190,10 @@ class _MapPageState extends State<MapPage> {
                           decoration: BoxDecoration(
                             color: AppColors.card,
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.border2, width: 1),
+                            border: Border.all(
+                              color: AppColors.border2,
+                              width: 1,
+                            ),
                           ),
                           child: const Icon(
                             Icons.notifications_outlined,
@@ -209,7 +211,10 @@ class _MapPageState extends State<MapPage> {
                               decoration: BoxDecoration(
                                 color: AppColors.amber,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.night, width: 1.5),
+                                border: Border.all(
+                                  color: AppColors.night,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Center(
                                 child: Text(
@@ -248,7 +253,7 @@ class _MapPageState extends State<MapPage> {
                   child: Center(
                     child: Text(
                       initials,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.bg,
@@ -281,9 +286,12 @@ class _MapPageState extends State<MapPage> {
                     provider.currentPosition != null
                         ? 'Position actuelle'
                         : (provider.isLoading
-                            ? 'Localisation...'
-                            : 'Paris, Île-de-France'),
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                              ? 'Localisation...'
+                              : 'Paris, Île-de-France'),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -299,7 +307,7 @@ class _MapPageState extends State<MapPage> {
                     ),
                     child: Text(
                       'Filtrer',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.06,
@@ -328,13 +336,12 @@ class _MapPageState extends State<MapPage> {
     }
 
     const defaultCenter = LatLng(48.8566, 2.3522);
-    final center =
-        provider.currentPosition != null
-            ? LatLng(
-              provider.currentPosition!.latitude,
-              provider.currentPosition!.longitude,
-            )
-            : defaultCenter;
+    final center = provider.currentPosition != null
+        ? LatLng(
+            provider.currentPosition!.latitude,
+            provider.currentPosition!.longitude,
+          )
+        : defaultCenter;
 
     final markers = <Marker>{
       if (provider.currentPosition != null)
@@ -370,7 +377,8 @@ class _MapPageState extends State<MapPage> {
           GoogleMap(
             initialCameraPosition: CameraPosition(target: center, zoom: 13.0),
             onMapCreated: (controller) {
-              if (!_mapCompleter.isCompleted) _mapCompleter.complete(controller);
+              if (!_mapCompleter.isCompleted)
+                _mapCompleter.complete(controller);
               _mapController = controller;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _centerOnUserLocation();
@@ -419,8 +427,7 @@ class _MapPageState extends State<MapPage> {
           // Zoom controls (+/−)
           Positioned(
             right: 12,
-            bottom: _selectedField == null &&
-                    provider.currentPosition != null
+            bottom: _selectedField == null && provider.currentPosition != null
                 ? 134
                 : 88,
             child: Column(
@@ -504,7 +511,10 @@ class _MapPageState extends State<MapPage> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
-        Text(label, style: GoogleFonts.dmSans(fontSize: 9, color: AppColors.muted2)),
+        Text(
+          label,
+          style: AppTypography.body(fontSize: 9, color: AppColors.muted2),
+        ),
       ],
     );
   }
@@ -551,7 +561,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           Text(
             '${provider.fields.length} terrain${provider.fields.length != 1 ? 's' : ''} autour de toi',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.06,
@@ -588,12 +598,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Widget _pill(
-    String text,
-    Color textColor,
-    Color bgColor,
-    Color borderColor,
-  ) {
+  Widget _pill(String text, Color textColor, Color bgColor, Color borderColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
@@ -603,7 +608,7 @@ class _MapPageState extends State<MapPage> {
       ),
       child: Text(
         text,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.08,
@@ -656,7 +661,7 @@ class _MapPageState extends State<MapPage> {
                   children: [
                     Text(
                       field.name,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -675,7 +680,7 @@ class _MapPageState extends State<MapPage> {
                         const SizedBox(width: 3),
                         Text(
                           field.formattedDistance,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: color,
@@ -713,7 +718,11 @@ class _MapPageState extends State<MapPage> {
                     color: Colors.white.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.close, color: AppColors.muted2, size: 14),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.muted2,
+                    size: 14,
+                  ),
                 ),
               ),
             ],
@@ -724,7 +733,7 @@ class _MapPageState extends State<MapPage> {
             const SizedBox(height: 10),
             Text(
               field.address!,
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -744,7 +753,10 @@ class _MapPageState extends State<MapPage> {
                 Expanded(
                   child: Text(
                     field.openingHours!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -789,7 +801,7 @@ class _MapPageState extends State<MapPage> {
                         const SizedBox(width: 5),
                         Text(
                           'Itinéraire',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             color: AppColors.bg,
@@ -865,7 +877,7 @@ class _MapPageState extends State<MapPage> {
           const SizedBox(height: 14),
           Text(
             'Recherche des terrains...',
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
           ),
         ],
       ),
@@ -896,7 +908,7 @@ class _MapPageState extends State<MapPage> {
             Text(
               provider.error!,
               textAlign: TextAlign.center,
-              style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 13, color: AppColors.muted2),
             ),
             const SizedBox(height: 20),
             GestureDetector(
@@ -914,7 +926,7 @@ class _MapPageState extends State<MapPage> {
                 ),
                 child: Text(
                   'Réessayer',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.bg,
@@ -925,14 +937,16 @@ class _MapPageState extends State<MapPage> {
             if (!provider.hasLocationPermission) ...[
               const SizedBox(height: 14),
               GestureDetector(
-                onTap:
-                    () => launchUrl(
-                      Uri.parse('app-settings:'),
-                      mode: LaunchMode.externalApplication,
-                    ),
+                onTap: () => launchUrl(
+                  Uri.parse('app-settings:'),
+                  mode: LaunchMode.externalApplication,
+                ),
                 child: Text(
                   'Ouvrir les paramètres',
-                  style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.amber),
+                  style: AppTypography.body(
+                    fontSize: 12,
+                    color: AppColors.amber,
+                  ),
                 ),
               ),
             ],
@@ -984,7 +998,7 @@ class _MapPageState extends State<MapPage> {
                       children: [
                         Text(
                           'Filtres',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -997,7 +1011,7 @@ class _MapPageState extends State<MapPage> {
                           },
                           child: Text(
                             'Réinitialiser',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 12,
                               color: AppColors.amber,
                             ),
@@ -1008,7 +1022,7 @@ class _MapPageState extends State<MapPage> {
                     const SizedBox(height: 20),
                     Text(
                       'Rayon : ${(provider.searchRadiusMeters / 1000).toStringAsFixed(0)} km',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
@@ -1058,7 +1072,7 @@ class _MapPageState extends State<MapPage> {
                         child: Text(
                           'Appliquer',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.06,
@@ -1098,12 +1112,15 @@ class _LoadingChip extends StatelessWidget {
           const SizedBox(
             width: 14,
             height: 14,
-            child: CircularProgressIndicator(color: AppColors.amber, strokeWidth: 2),
+            child: CircularProgressIndicator(
+              color: AppColors.amber,
+              strokeWidth: 2,
+            ),
           ),
           const SizedBox(width: 8),
           Text(
             'Recherche...',
-            style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+            style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
           ),
         ],
       ),
@@ -1159,7 +1176,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
             children: [
               Text(
                 'Notifications',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
@@ -1197,7 +1214,10 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
                 'Aucune notification en attente',
-                style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
               ),
             )
           else
@@ -1213,7 +1233,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'INVITATIONS D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -1221,19 +1241,20 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                         ),
                       ),
                     ),
-                    ...invitations.map((inv) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _buildInvitationItem(context, inv, teams),
-                    )),
+                    ...invitations.map(
+                      (inv) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: _buildInvitationItem(context, inv, teams),
+                      ),
+                    ),
                   ],
                   if (challenges.isNotEmpty) ...[
-                    if (invitations.isNotEmpty)
-                      const SizedBox(height: 4),
+                    if (invitations.isNotEmpty) const SizedBox(height: 4),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'DÉFIS DE MATCH',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -1241,10 +1262,14 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                         ),
                       ),
                     ),
-                    ...challenges.asMap().entries.map((e) => Padding(
-                      padding: EdgeInsets.only(bottom: e.key < challenges.length - 1 ? 10 : 0),
-                      child: _buildItem(context, e.value, teams),
-                    )),
+                    ...challenges.asMap().entries.map(
+                      (e) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: e.key < challenges.length - 1 ? 10 : 0,
+                        ),
+                        child: _buildItem(context, e.value, teams),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -1259,7 +1284,9 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
     TeamInvitation invitation,
     TeamsProvider teams,
   ) {
-    final isLoading = _loadingIds.contains(-invitation.id); // negative ID for invitations
+    final isLoading = _loadingIds.contains(
+      -invitation.id,
+    ); // negative ID for invitations
 
     final positionLabels = {
       'goalkeeper': 'Gardien',
@@ -1293,7 +1320,10 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                 child: invitation.teamLogoUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(9),
-                        child: Image.network(invitation.teamLogoUrl!, fit: BoxFit.cover),
+                        child: Image.network(
+                          invitation.teamLogoUrl!,
+                          fit: BoxFit.cover,
+                        ),
                       )
                     : Center(
                         child: Text(
@@ -1313,7 +1343,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                   children: [
                     Text(
                       invitation.teamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -1323,7 +1353,10 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                     ),
                     Text(
                       'Invitation · ${invitation.invitingUsername}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -1358,7 +1391,8 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                             invitationId: invitation.id,
                             accept: false,
                           );
-                          if (mounted) setState(() => _loadingIds.remove(-invitation.id));
+                          if (mounted)
+                            setState(() => _loadingIds.remove(-invitation.id));
                         },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1370,7 +1404,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -1415,7 +1449,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -1457,10 +1491,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                 decoration: BoxDecoration(
                   color: AppColors.amberDim,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0x33FF7F2A),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0x33FF7F2A), width: 1),
                 ),
                 child: challenge.challengerTeamLogoUrl != null
                     ? ClipRRect(
@@ -1488,7 +1519,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                   children: [
                     Text(
                       challenge.challengerTeamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -1498,7 +1529,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                     ),
                     Text(
                       'Défi reçu',
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
                       ),
@@ -1509,7 +1540,10 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 10,
+                    color: AppColors.muted2,
+                  ),
                 ),
             ],
           ),
@@ -1523,7 +1557,10 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
               ),
               child: Text(
                 challenge.message!,
-                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 12,
+                  color: AppColors.muted2,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1533,12 +1570,19 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                const Icon(
+                  Icons.location_on,
+                  size: 12,
+                  color: AppColors.muted2,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1565,7 +1609,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                   ),
                   child: Text(
                     'REFUSER',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w600,
                       fontSize: 10,
                       letterSpacing: 0.6,
@@ -1614,7 +1658,7 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                         )
                       : Text(
                           'ACCEPTER',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 10,
                             letterSpacing: 0.6,

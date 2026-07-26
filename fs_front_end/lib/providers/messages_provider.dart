@@ -74,7 +74,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère un nouveau message reçu
   void _handleNewMessage(MessageModel message) {
-
     // Si on est dans la conversation avec cet utilisateur, ajouter le message
     if (_activeUserId == message.senderId && _activeConversation != null) {
       _activeConversation = ConversationOut(
@@ -103,7 +102,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère la confirmation d'envoi de message
   void _handleMessageSent(MessageModel message) {
-
     // Ajouter le message à la conversation active
     if (_activeConversation != null) {
       // Vérifier si le message n'est pas déjà dans la liste (éviter les doublons)
@@ -183,7 +181,6 @@ class MessagesProvider with ChangeNotifier {
 
   /// Gère la notification que des messages ont été lus
   void _handleMessagesRead(int readerId, List<int> messageIds) {
-
     // Mettre à jour le statut des messages dans la conversation active
     if (_activeConversation != null) {
       final updatedMessages = _activeConversation!.messages.map((m) {

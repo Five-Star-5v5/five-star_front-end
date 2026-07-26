@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:intl/intl.dart';
 
 import 'package:provider/provider.dart';
@@ -12,6 +12,8 @@ import '../theme_config/colors_config.dart';
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
 import '../widgets/city_autocomplete_field.dart';
+import '../widgets/coach_mark.dart';
+import '../services/onboarding_prefs.dart';
 import '../providers/teams_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/auth_provider.dart';
@@ -24,7 +26,6 @@ import 'find_opponents_page.dart';
 import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
-
 
 Widget _buildAvailChip(IconData icon, String label) {
   return Container(
@@ -73,6 +74,29 @@ class _HomePageState extends State<HomePage>
   late AnimationController _loadingAnimationController;
   Timer? _matchPollingTimer;
 
+  // ── Tuto guidé (première visite de l'onglet Équipe) ──────────────────────
+  final _tourTeamCardsKey = GlobalKey();
+  final _tourSearchToggleKey = GlobalKey();
+  final _tourPitchKey = GlobalKey();
+  final _tourSubsKey = GlobalKey();
+  final _tourMatchesKey = GlobalKey();
+  bool _tourStarted = false;
+
+  /// Garde-fou de réentrance : le timer peut refirer pendant que la lecture
+  /// asynchrone de la préférence est encore en cours.
+  bool _tourChecking = false;
+  Timer? _tourRetryTimer;
+
+  /// Référence conservée tant que l'élément est vivant, pour pouvoir retirer
+  /// le listener dans dispose() sans passer par le context.
+  TeamsProvider? _teamsProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _teamsProvider = context.read<TeamsProvider>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +115,15 @@ class _HomePageState extends State<HomePage>
       provider.addListener(_onTeamChanged);
       _loadSearchPreferences();
       // _loadPublicMatches(); // SECTION MATCHS OUVERTS
+
+      // Le tuto ne peut démarrer qu'une fois les cibles réellement rendues.
+      // On sonde à intervalle court plutôt que d'attendre une notification du
+      // provider, qui peut n'arriver que plusieurs secondes plus tard.
+      _maybeStartTeamTour();
+      _tourRetryTimer = Timer.periodic(
+        const Duration(milliseconds: 250),
+        (_) => _maybeStartTeamTour(),
+      );
     });
 
     _matchPollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -109,10 +142,12 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _matchPollingTimer?.cancel();
+    _tourRetryTimer?.cancel();
     _loadingAnimationController.dispose();
-    try {
-      context.read<TeamsProvider>().removeListener(_onTeamChanged);
-    } catch (_) {}
+    // Référence capturée : `context.read` lève dans dispose(), et le try/catch
+    // qui masquait l'erreur laissait le listener attaché — une fuite à chaque
+    // changement d'onglet, puisque HomePage est reconstruite à chaque fois.
+    _teamsProvider?.removeListener(_onTeamChanged);
     super.dispose();
   }
 
@@ -122,6 +157,71 @@ class _HomePageState extends State<HomePage>
     final currentTeam = provider.currentDisplayedTeam;
     if (currentTeam != null && currentTeam.id != _lastLoadedTeamId) {
       _loadSearchPreferences();
+    }
+    _maybeStartTeamTour();
+  }
+
+  /// Lance le tuto guidé à la première visite de l'onglet Équipe.
+  ///
+  /// Appelé à chaque mise à jour du provider : tant que les cibles ne sont pas
+  /// rendues (équipe encore en chargement), on repart sans rien marquer, et
+  /// une prochaine mise à jour retentera.
+  Future<void> _maybeStartTeamTour() async {
+    if (_tourStarted || _tourChecking) return;
+    if (_tourTeamCardsKey.currentContext == null) return;
+
+    _tourChecking = true;
+    try {
+      if (await OnboardingPrefs.hasSeenTeamTour()) {
+        _tourStarted = true; // inutile de relire la préférence ensuite
+        _tourRetryTimer?.cancel();
+        return;
+      }
+      if (!mounted) return;
+      _tourStarted = true;
+      _tourRetryTimer?.cancel();
+
+      await showCoachMarks(context, [
+        CoachMarkStep(
+          key: _tourTeamCardsKey,
+          title: 'Tes équipes',
+          body:
+              'Fais défiler pour passer d\'une équipe à l\'autre. '
+              'La dernière carte te permet d\'en rejoindre une nouvelle.',
+        ),
+        CoachMarkStep(
+          key: _tourSearchToggleKey,
+          title: 'Disponible pour un match',
+          body:
+              'Active ce bouton pour que ton équipe soit visible '
+              'par celles qui cherchent un adversaire.',
+        ),
+        CoachMarkStep(
+          key: _tourPitchKey,
+          title: 'Ta composition',
+          body:
+              'Place tes joueurs sur le terrain. Touche un emplacement '
+              'libre pour y installer un membre de l\'équipe.',
+        ),
+        CoachMarkStep(
+          key: _tourSubsKey,
+          title: 'Les remplaçants',
+          body:
+              'Les membres qui ne sont pas encore sur le terrain '
+              'attendent ici.',
+        ),
+        CoachMarkStep(
+          key: _tourMatchesKey,
+          title: 'Tes matchs à venir',
+          body:
+              'Tes prochaines rencontres s\'affichent ici. '
+              'Utilise « Trouver » pour défier une autre équipe.',
+        ),
+      ]);
+
+      await OnboardingPrefs.markTeamTourSeen();
+    } finally {
+      _tourChecking = false;
     }
   }
 
@@ -275,7 +375,12 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
               child: SvgPicture.string(
-                buildKobetaLogoSvg(kLogoOrangePaths, '#0B0D11', 28, 'loadingHex'),
+                buildKobetaLogoSvg(
+                  kLogoOrangePaths,
+                  '#0B0D11',
+                  28,
+                  'loadingHex',
+                ),
                 width: 50,
                 height: 50,
               ),
@@ -284,7 +389,7 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 28),
           Text(
             'Kobeta',
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 24,
               fontWeight: FontWeight.w800,
               color: AppColors.white,
@@ -294,7 +399,7 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 12),
           Text(
             'Préparation en cours...',
-            style: GoogleFonts.dmSans(
+            style: AppTypography.body(
               fontSize: 13,
               color: AppColors.muted2,
               fontStyle: FontStyle.italic,
@@ -350,12 +455,16 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 20),
             Row(
               children: [
-                const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
+                const Icon(
+                  Icons.info_outline,
+                  color: AppColors.amber,
+                  size: 18,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     title,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: AppColors.white,
@@ -370,7 +479,7 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
                   line,
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 13,
                     color: AppColors.muted2,
                     height: 1.55,
@@ -389,7 +498,9 @@ class _HomePageState extends State<HomePage>
     return Container(
       margin: const EdgeInsets.only(top: 16, bottom: 8),
       decoration: BoxDecoration(
-        color: _isLookingForOpponent ? AppColors.amber.withValues(alpha: 0.08) : AppColors.card,
+        color: _isLookingForOpponent
+            ? AppColors.amber.withValues(alpha: 0.08)
+            : AppColors.card,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isLookingForOpponent
@@ -416,14 +527,18 @@ class _HomePageState extends State<HomePage>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _isLookingForOpponent ? AppColors.amberDim : AppColors.border,
+                    color: _isLookingForOpponent
+                        ? AppColors.amberDim
+                        : AppColors.border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     _isLookingForOpponent
                         ? Icons.visibility
                         : Icons.visibility_off,
-                    color: _isLookingForOpponent ? AppColors.amber : AppColors.muted2,
+                    color: _isLookingForOpponent
+                        ? AppColors.amber
+                        : AppColors.muted2,
                     size: 20,
                   ),
                 ),
@@ -434,11 +549,13 @@ class _HomePageState extends State<HomePage>
                     children: [
                       Text(
                         'Disponible pour un match',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                           letterSpacing: 0.04 * 13,
-                          color: _isLookingForOpponent ? AppColors.amber : AppColors.white,
+                          color: _isLookingForOpponent
+                              ? AppColors.amber
+                              : AppColors.white,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -446,7 +563,7 @@ class _HomePageState extends State<HomePage>
                         _isLookingForOpponent
                             ? 'Votre équipe est visible par les équipes qui cherchent un adversaire'
                             : 'Activez pour apparaître dans les recherches',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -515,7 +632,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'MATCHS À VENIR',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.04 * 13,
@@ -577,7 +694,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Text(
                     'Trouver →',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppColors.amber,
@@ -590,33 +707,65 @@ class _HomePageState extends State<HomePage>
         ),
         const SizedBox(height: 10),
         if (_upcomingMatches.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.border, width: 1),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.sports_soccer_outlined, size: 28, color: AppColors.muted2),
-                const SizedBox(height: 8),
-                Text(
-                  'Aucun match à venir',
-                  style: GoogleFonts.syne(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.muted2,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.border, width: 1),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      'assets/logos/pitchball.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Défiez une équipe pour planifier un match',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.65),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.sports_soccer_outlined,
+                            size: 28,
+                            color: AppColors.muted2,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Aucun match à venir',
+                            style: AppTypography.display(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Défiez une équipe pour planifier un match',
+                            style: AppTypography.body(
+                              fontSize: 11,
+                              color: AppColors.muted2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         else
@@ -644,7 +793,7 @@ class _HomePageState extends State<HomePage>
   //             children: [
   //               Text(
   //                 'MATCHS OUVERTS',
-  //                 style: GoogleFonts.syne(
+  //                 style: AppTypography.display(
   //                   fontSize: 13,
   //                   fontWeight: FontWeight.w700,
   //                   letterSpacing: 0.04 * 13,
@@ -685,7 +834,7 @@ class _HomePageState extends State<HomePage>
   //             ),
   //             child: Text(
   //               'Voir tout →',
-  //               style: GoogleFonts.syne(
+  //               style: AppTypography.display(
   //                 fontSize: 12,
   //                 fontWeight: FontWeight.w600,
   //                 color: AppColors.amber,
@@ -710,7 +859,7 @@ class _HomePageState extends State<HomePage>
   //               const SizedBox(height: 6),
   //               Text(
   //                 'Aucun match ouvert pour le moment',
-  //                 style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+  //                 style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
   //               ),
   //             ],
   //           ),
@@ -755,7 +904,7 @@ class _HomePageState extends State<HomePage>
   //               const Spacer(),
   //               Text(
   //                 'VS',
-  //                 style: GoogleFonts.syne(
+  //                 style: AppTypography.display(
   //                   fontSize: 10,
   //                   fontWeight: FontWeight.w800,
   //                   letterSpacing: 1.5,
@@ -769,7 +918,7 @@ class _HomePageState extends State<HomePage>
   //           const SizedBox(height: 8),
   //           Text(
   //             '${match.challengerTeam.name.split(' ').first} — ${match.challengedTeam.name.split(' ').first}',
-  //             style: GoogleFonts.syne(
+  //             style: AppTypography.display(
   //               fontSize: 11,
   //               fontWeight: FontWeight.w700,
   //               color: AppColors.white,
@@ -785,7 +934,7 @@ class _HomePageState extends State<HomePage>
   //                 const SizedBox(width: 4),
   //                 Text(
   //                   DateFormat('d MMM • HH:mm', 'fr_FR').format(match.proposedDate!),
-  //                   style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+  //                   style: AppTypography.body(fontSize: 10, color: AppColors.muted2),
   //                 ),
   //               ],
   //             ),
@@ -804,7 +953,7 @@ class _HomePageState extends State<HomePage>
   //                 const SizedBox(width: 4),
   //                 Text(
   //                   '$openSlots poste${openSlots > 1 ? 's' : ''} libre${openSlots > 1 ? 's' : ''}',
-  //                   style: GoogleFonts.syne(
+  //                   style: AppTypography.display(
   //                     fontSize: 9,
   //                     fontWeight: FontWeight.w700,
   //                     color: sageColor,
@@ -862,563 +1011,756 @@ class _HomePageState extends State<HomePage>
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(11),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border, width: 1),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: AppColors.amber.withValues(alpha: 0.06),
+            blurRadius: 26,
+            spreadRadius: -6,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // En-tête avec adversaire
-          Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2A2C37), Color(0xFF16181E)],
+              stops: [0.0, 0.8],
+            ),
+            border: Border.all(color: AppColors.border2, width: 1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
             children: [
-              // Icône match
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.amberDim,
-                  borderRadius: BorderRadius.circular(11),
-                  border: Border.all(
-                    color: AppColors.amber.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
-                ),
-                child: opponentLogo != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(opponentLogo, fit: BoxFit.cover),
-                      )
-                    : Center(
-                        child: Text(
-                          opponentName[0].toUpperCase(),
-                          style: const TextStyle(
-                            color: AppColors.amber,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 11, 11, 11),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'VS $opponentName',
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        letterSpacing: 0.03 * 13,
-                        color: AppColors.white,
-                      ),
-                    ),
-                    Text(
-                      isChallenger ? 'Défi envoyé' : 'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
-                    ),
-                  ],
-                ),
-              ),
-              // Bouton chat avec badge de messages non lus
-              _buildMatchChatButton(match, myTeamId, isDarkMode),
-              const SizedBox(width: 8),
-              // Statut
-              _buildMatchStatusBadge(match, hasSubmitted, isDarkMode),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Infos du match
-          if (match.proposedDate != null || match.proposedLocation != null)
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.card2,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  if (match.proposedDate != null)
+                    // ── Barre haute : statut + chat ──
                     Row(
                       children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 14,
-                          color: AppColors.muted2,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _formatMatchDate(match.proposedDate!),
-                          style: const TextStyle(fontSize: 12, color: AppColors.white),
-                        ),
+                        _buildMatchStatusBadge(match, hasSubmitted, isDarkMode),
+                        const Spacer(),
+                        _buildMatchChatButton(match, myTeamId, isDarkMode),
                       ],
                     ),
-                  if (match.proposedDate != null &&
-                      match.proposedLocation != null)
-                    const SizedBox(height: 6),
-                  if (match.proposedLocation != null)
+                    const SizedBox(height: 16),
+                    // ── Affiche du match : équipe vs équipe ──
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: AppColors.muted2,
-                        ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            match.proposedLocation!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.white,
+                          child: _buildMatchTeamSide(
+                            name: isChallenger
+                                ? match.challengerTeamName
+                                : match.challengedTeamName,
+                            logoUrl: isChallenger
+                                ? match.challengerTeamLogoUrl
+                                : match.challengedTeamLogoUrl,
+                            isMine: true,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 4,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 12),
-
-          // Afficher le score de l'adversaire s'il a soumis et que je n'ai pas soumis
-          if (opponentSubmittedScore != null && !hasSubmitted) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'L\'adversaire a soumis le score suivant :',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode
-                                ? Colors.orange[200]
-                                : Colors.orange[800],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Affichage du score avec noms d'équipes
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDarkMode ? Colors.grey[800] : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Équipe challenger
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                match.challengerTeamName,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.04),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: AppColors.border2,
+                                width: 1,
                               ),
-                              const SizedBox(height: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                            ),
+                            child: Text(
+                              'VS',
+                              style: AppTypography.display(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 11,
+                                letterSpacing: 0.08 * 11,
+                                color: AppColors.muted2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildMatchTeamSide(
+                            name: opponentName,
+                            logoUrl: opponentLogo,
+                            isMine: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        isChallenger ? 'Défi envoyé' : 'Défi reçu',
+                        style: AppTypography.body(
+                          fontSize: 10,
+                          letterSpacing: 0.04 * 10,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 1,
+                      width: double.infinity,
+                      color: AppColors.border,
+                    ),
+                    const SizedBox(height: 12),
+                    // Infos du match
+                    if (match.proposedDate != null ||
+                        match.proposedLocation != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (match.proposedDate != null)
+                            _buildMatchInfoChip(
+                              Icons.calendar_today,
+                              _formatMatchDate(match.proposedDate!),
+                            ),
+                          if (match.proposedDate != null &&
+                              match.proposedLocation != null)
+                            const SizedBox(height: 6),
+                          if (match.proposedLocation != null)
+                            _buildMatchInfoChip(
+                              Icons.location_on,
+                              match.proposedLocation!,
+                              maxLines: 2,
+                            ),
+                        ],
+                      ),
+                    const SizedBox(height: 12),
+
+                    // Afficher le score de l'adversaire s'il a soumis et que je n'ai pas soumis
+                    if (opponentSubmittedScore != null && !hasSubmitted) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.orange.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Colors.orange,
+                                  size: 20,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(10),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'L\'adversaire a soumis le score suivant :',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDarkMode
+                                          ? Colors.orange[200]
+                                          : Colors.orange[800],
+                                    ),
+                                  ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            // Affichage du score avec noms d'équipes
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  // Équipe challenger
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          match.challengerTeamName,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${opponentSubmittedScore['challengerScore']}',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDarkMode
+                                                  ? Colors.blue[300]
+                                                  : Colors.blue[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Séparateur
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                    ),
+                                    child: Text(
+                                      '-',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.grey[400]
+                                            : Colors.grey[600],
+                                      ),
+                                    ),
+                                  ),
+                                  // Équipe challengée
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          match.challengedTeamName,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '${opponentSubmittedScore['challengedScore']}',
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDarkMode
+                                                  ? Colors.red[300]
+                                                  : Colors.red[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Boutons Valider / Contester - seulement pour l'owner
+                            if (isOwner) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _contestMatchScore(match),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(9),
+                                        border: Border.all(
+                                          color: const Color(0xFFD4607A),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'CONTESTER',
+                                        style: AppTypography.display(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 10,
+                                          letterSpacing: 0.06 * 10,
+                                          color: const Color(0xFFD4607A),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => _validateMatchScore(match),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A7A4B),
+                                        borderRadius: BorderRadius.circular(9),
+                                      ),
+                                      child: Text(
+                                        'VALIDER',
+                                        style: AppTypography.display(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 10,
+                                          letterSpacing: 0.06 * 10,
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Align(
+                                alignment: Alignment.centerRight,
                                 child: Text(
-                                  '${opponentSubmittedScore['challengerScore']}',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.blue[300]
-                                        : Colors.blue[700],
+                                  'Contester = match nul (0-0)',
+                                  style: AppTypography.body(
+                                    fontSize: 10,
+                                    color: AppColors.muted2,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
                               ),
+                            ] else ...[
+                              // Message pour les membres non-owner
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.orange.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.orange[700],
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'En attente de la validation du score par le capitaine',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isDarkMode
+                                              ? Colors.orange[300]
+                                              : Colors.orange[700],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
-                          ),
+                          ],
                         ),
-                        // Séparateur
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text(
-                            '-',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                      ),
+                    ]
+                    // Si j'ai déjà soumis, attente de validation
+                    else if (hasSubmitted) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.hourglass_empty,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Score soumis ! En attente de validation par l\'adversaire.',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // Owner — score pas encore soumis (match à jouer)
+                    else if (isOwner) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.card2,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                isChallenger
+                                    ? match.challengerTeamName
+                                    : match.challengedTeamName,
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: AppColors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              child: Text(
+                                '? – ?',
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: AppColors.muted2,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                opponentName,
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: AppColors.white,
+                                ),
+                                textAlign: TextAlign.right,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // Membre mais pas owner - afficher un message
+                    else if (!isOwner) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
                               color: isDarkMode
                                   ? Colors.grey[400]
                                   : Colors.grey[600],
+                              size: 20,
                             ),
-                          ),
-                        ),
-                        // Équipe challengée
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text(
-                                match.challengedTeamName,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'En attente que le capitaine enregistre le résultat.',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
                                   color: isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
+                                  fontSize: 13,
                                 ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 6),
-                              Container(
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    // Boutons d'action compacts (droite)
+                    if (isOwner) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (!hasSubmitted &&
+                              opponentSubmittedScore == null) ...[
+                            GestureDetector(
+                              onTap: () =>
+                                  _showSubmitScoreDialog(match, myTeamId),
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
-                                  vertical: 6,
+                                  vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(10),
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.amberSoft,
+                                      AppColors.amberD,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(9),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x47FF7F2A),
+                                      blurRadius: 12,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
                                 child: Text(
-                                  '${opponentSubmittedScore['challengedScore']}',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkMode
-                                        ? Colors.red[300]
-                                        : Colors.red[700],
+                                  'RÉSULTAT',
+                                  style: AppTypography.display(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 10,
+                                    letterSpacing: 0.06 * 10,
+                                    color: AppColors.night,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Boutons Valider / Contester - seulement pour l'owner
-                  if (isOwner) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _contestMatchScore(match),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(9),
-                              border: Border.all(
-                                color: const Color(0xFFD4607A),
-                                width: 1.5,
+                            const SizedBox(width: 8),
+                          ],
+                          GestureDetector(
+                            onTap: () => _cancelMatch(match),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
                               ),
-                            ),
-                            child: Text(
-                              'CONTESTER',
-                              style: GoogleFonts.syne(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10,
-                                letterSpacing: 0.06 * 10,
-                                color: const Color(0xFFD4607A),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(9),
+                                border: Border.all(
+                                  color: AppColors.border2,
+                                  width: 1.5,
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () => _validateMatchScore(match),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2A7A4B),
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                            child: Text(
-                              'VALIDER',
-                              style: GoogleFonts.syne(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10,
-                                letterSpacing: 0.06 * 10,
-                                color: AppColors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'Contester = match nul (0-0)',
-                        style: GoogleFonts.dmSans(
-                          fontSize: 10,
-                          color: AppColors.muted2,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    // Message pour les membres non-owner
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.orange.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.orange[700],
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'En attente de la validation du score par le capitaine',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDarkMode
-                                    ? Colors.orange[300]
-                                    : Colors.orange[700],
+                              child: Text(
+                                'ANNULER',
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                  letterSpacing: 0.06 * 10,
+                                  color: AppColors.muted2,
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ]
-          // Si j'ai déjà soumis, attente de validation
-          else if (hasSubmitted) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.hourglass_empty,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Score soumis ! En attente de validation par l\'adversaire.',
-                      style: TextStyle(color: Colors.green[700], fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]
-          // Owner — score pas encore soumis (match à jouer)
-          else if (isOwner) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.card2,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      isChallenger
-                          ? match.challengerTeamName
-                          : match.challengedTeamName,
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        color: AppColors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Text(
-                      '? – ?',
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        color: AppColors.muted2,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      opponentName,
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        color: AppColors.white,
-                      ),
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]
-          // Membre mais pas owner - afficher un message
-          else if (!isOwner) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'En attente que le capitaine enregistre le résultat.',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          // Boutons d'action compacts (droite)
-          if (isOwner) ...[
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!hasSubmitted && opponentSubmittedScore == null) ...[
-                  GestureDetector(
-                    onTap: () => _showSubmitScoreDialog(match, myTeamId),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.amberSoft, AppColors.amberD],
-                        ),
-                        borderRadius: BorderRadius.circular(9),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x47FF7F2A),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        'RÉSULTAT',
-                        style: GoogleFonts.syne(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10,
-                          letterSpacing: 0.06 * 10,
-                          color: AppColors.night,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                GestureDetector(
-                  onTap: () => _cancelMatch(match),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(color: AppColors.border2, width: 1.5),
-                    ),
-                    child: Text(
-                      'ANNULER',
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 10,
-                        letterSpacing: 0.06 * 10,
-                        color: AppColors.muted2,
-                      ),
+              // Barre d'accent amber (bord gauche)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 3,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.amber, AppColors.amberD],
                     ),
                   ),
                 ),
-              ],
+              ),
+              // Liseré lumineux sur le bord haut (« éclairé du dessus »)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withValues(alpha: 0.16),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Un côté de l'affiche de match : blason + nom d'équipe.
+  /// [isMine] met en avant l'équipe du user (anneau + halo amber).
+  Widget _buildMatchTeamSide({
+    required String name,
+    required String? logoUrl,
+    required bool isMine,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isMine
+                  ? [
+                      AppColors.amber.withValues(alpha: 0.24),
+                      AppColors.amberD.withValues(alpha: 0.06),
+                    ]
+                  : [
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.white.withValues(alpha: 0.02),
+                    ],
             ),
-          ],
+            border: Border.all(
+              color: isMine
+                  ? AppColors.amber.withValues(alpha: 0.45)
+                  : AppColors.border2,
+              width: 1.5,
+            ),
+            boxShadow: isMine
+                ? [
+                    BoxShadow(
+                      color: AppColors.amber.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                      spreadRadius: -2,
+                    ),
+                  ]
+                : null,
+          ),
+          child: logoUrl != null
+              ? ClipOval(child: Image.network(logoUrl, fit: BoxFit.cover))
+              : Center(
+                  child: Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : '?',
+                    style: AppTypography.display(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 19,
+                      color: isMine ? AppColors.amber : AppColors.white,
+                    ),
+                  ),
+                ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          name.toUpperCase(),
+          style: AppTypography.display(
+            fontWeight: FontWeight.w700,
+            fontSize: 10,
+            letterSpacing: 0.06 * 10,
+            color: isMine ? AppColors.white : AppColors.muted2,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  /// Petite pill (date, lieu) — style premium pour la card de match.
+  Widget _buildMatchInfoChip(IconData icon, String label, {int maxLines = 1}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.amber.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: AppColors.amber.withValues(alpha: 0.16),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.amber),
+          const SizedBox(width: 7),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.body(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: AppColors.white,
+              ),
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
@@ -1627,7 +1969,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'Enregistrer le résultat',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: AppColors.white,
@@ -1636,7 +1978,10 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Entrez le score du match contre $opponentName',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
@@ -1647,7 +1992,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             'Votre équipe',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1665,20 +2010,28 @@ class _HomePageState extends State<HomePage>
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: AppColors.muted2),
+                              hintStyle: const TextStyle(
+                                color: AppColors.muted2,
+                              ),
                               filled: true,
                               fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.amber),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
                           ),
@@ -1701,7 +2054,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             opponentName,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1721,20 +2074,28 @@ class _HomePageState extends State<HomePage>
                             ),
                             decoration: InputDecoration(
                               hintText: '0',
-                              hintStyle: const TextStyle(color: AppColors.muted2),
+                              hintStyle: const TextStyle(
+                                color: AppColors.muted2,
+                              ),
                               filled: true,
                               fillColor: AppColors.card2,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.amber),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
                           ),
@@ -1752,12 +2113,16 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: AppColors.amber, size: 18),
+                      const Icon(
+                        Icons.info_outline,
+                        color: AppColors.amber,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'L\'adversaire devra confirmer ce score pour qu\'il soit validé.',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.amberSoft,
                             fontSize: 12,
                           ),
@@ -1782,7 +2147,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -1814,7 +2179,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Valider',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                               fontSize: 13,
@@ -1887,7 +2252,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Valider le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -1896,7 +2261,10 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -1915,7 +2283,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -1939,7 +2307,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Valider',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -1992,7 +2360,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Contester le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -2002,7 +2370,10 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\n'
                 'Êtes-vous sûr de vouloir contester ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2021,7 +2392,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -2043,7 +2414,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Contester',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -2095,7 +2466,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Annuler le match',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -2105,7 +2476,10 @@ class _HomePageState extends State<HomePage>
               Text(
                 'Êtes-vous sûr de vouloir annuler le match contre ${match.getOpponentName(_getMyTeamIdFromMatch(match))} ?\n\n'
                 'Cette action ne peut pas être annulée.',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -2124,7 +2498,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Non',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -2146,7 +2520,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Oui, annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -2212,7 +2586,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   'Quitter l\'équipe',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: AppColors.white,
@@ -2222,7 +2596,10 @@ class _HomePageState extends State<HomePage>
                 Text(
                   'Êtes-vous sûr de vouloir quitter "${team.name}" ?\n\n'
                   'Vous ne recevrez plus les messages de cette équipe et ne pourrez plus participer aux matchs.',
-                  style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -2241,7 +2618,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -2313,7 +2690,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Quitter',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                               fontSize: 13,
@@ -2426,7 +2803,10 @@ class _HomePageState extends State<HomePage>
                         decoration: BoxDecoration(
                           color: AppColors.amber,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.night, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.night,
+                            width: 1.5,
+                          ),
                         ),
                         child: Center(
                           child: Text(
@@ -2510,26 +2890,35 @@ class _HomePageState extends State<HomePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           // ── Team cards (scrollable) ─────────────────────
-                          _buildTeamHeader(
-                            context: context,
-                            teamsProvider: teamsProvider,
-                            titleColor: titleColor,
-                            isDarkMode: isDarkMode,
+                          KeyedSubtree(
+                            key: _tourTeamCardsKey,
+                            child: _buildTeamHeader(
+                              context: context,
+                              teamsProvider: teamsProvider,
+                              titleColor: titleColor,
+                              isDarkMode: isDarkMode,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           // Widget pour activer le mode recherche d'adversaire
                           if (teamsProvider.isCurrentTeamMine &&
                               teamsProvider.currentDisplayedTeam != null)
-                            _buildSearchModeToggle(isDarkMode),
+                            KeyedSubtree(
+                              key: _tourSearchToggleKey,
+                              child: _buildSearchModeToggle(isDarkMode),
+                            ),
                           const SizedBox(height: 12),
                           if (allTeams.isEmpty)
                             _buildEmptyTeamPlaceholder(isDarkMode)
                           else
-                            _buildTeamPitch(
-                              context,
-                              team: teamsProvider.currentDisplayedTeam!,
-                              isMyTeam: teamsProvider.isCurrentTeamMine,
-                              isDarkMode: isDarkMode,
+                            KeyedSubtree(
+                              key: _tourPitchKey,
+                              child: _buildTeamPitch(
+                                context,
+                                team: teamsProvider.currentDisplayedTeam!,
+                                isMyTeam: teamsProvider.isCurrentTeamMine,
+                                isDarkMode: isDarkMode,
+                              ),
                             ),
                           const SizedBox(height: 10),
                           if (allTeams.length > 1)
@@ -2540,11 +2929,14 @@ class _HomePageState extends State<HomePage>
                             ),
                           const SizedBox(height: 20),
                           if (teamsProvider.isCurrentTeamMine)
-                            _buildSubstitutesSection(
-                              context,
-                              teamsProvider: teamsProvider,
-                              titleColor: titleColor,
-                              isDarkMode: isDarkMode,
+                            KeyedSubtree(
+                              key: _tourSubsKey,
+                              child: _buildSubstitutesSection(
+                                context,
+                                teamsProvider: teamsProvider,
+                                titleColor: titleColor,
+                                isDarkMode: isDarkMode,
+                              ),
                             )
                           else if (teamsProvider.currentDisplayedTeam != null)
                             _buildOtherTeamSubstitutes(
@@ -2571,7 +2963,9 @@ class _HomePageState extends State<HomePage>
                                   color: AppColors.amberDim,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: AppColors.amber.withValues(alpha: 0.30),
+                                    color: AppColors.amber.withValues(
+                                      alpha: 0.30,
+                                    ),
                                   ),
                                 ),
                                 child: Row(
@@ -2623,11 +3017,14 @@ class _HomePageState extends State<HomePage>
                             ),
                           // Section des matchs à venir (visible pour tous les membres)
                           if (teamsProvider.isPartOfCurrentTeam)
-                            _buildUpcomingMatchesSection(
-                              teamsProvider.currentDisplayedTeam!.id,
-                              isDarkMode,
-                              titleColor,
-                              teamsProvider.isCurrentTeamMine,
+                            KeyedSubtree(
+                              key: _tourMatchesKey,
+                              child: _buildUpcomingMatchesSection(
+                                teamsProvider.currentDisplayedTeam!.id,
+                                isDarkMode,
+                                titleColor,
+                                teamsProvider.isCurrentTeamMine,
+                              ),
                             ),
                           // Section matchs publics ouverts aux candidatures — désactivée
                           // _buildOpenMatchesSection(), // SECTION MATCHS OUVERTS
@@ -2701,7 +3098,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(height: 8),
                       Text(
                         'PAS D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: AppColors.muted2,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -2762,7 +3159,7 @@ class _HomePageState extends State<HomePage>
                                   const SizedBox(height: 6),
                                   Text(
                                     'REJOINDRE',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.amber,
@@ -2772,7 +3169,7 @@ class _HomePageState extends State<HomePage>
                                   const SizedBox(height: 2),
                                   Text(
                                     'une équipe',
-                                    style: GoogleFonts.dmSans(
+                                    style: AppTypography.body(
                                       fontSize: 9,
                                       color: AppColors.muted2,
                                     ),
@@ -2794,7 +3191,9 @@ class _HomePageState extends State<HomePage>
                                   child: Icon(
                                     Icons.info_outline,
                                     size: 13,
-                                    color: AppColors.amber.withValues(alpha: 0.65),
+                                    color: AppColors.amber.withValues(
+                                      alpha: 0.65,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2863,16 +3262,20 @@ class _HomePageState extends State<HomePage>
                                     borderRadius: BorderRadius.circular(100),
                                     border: Border.all(
                                       color: isOwner
-                                          ? AppColors.amber.withValues(alpha: 0.25)
+                                          ? AppColors.amber.withValues(
+                                              alpha: 0.25,
+                                            )
                                           : AppColors.border2,
                                     ),
                                   ),
                                   child: Text(
                                     isOwner ? 'MON ÉQUIPE' : 'MEMBRE',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 8,
                                       fontWeight: FontWeight.w700,
-                                      color: isOwner ? AppColors.amber : AppColors.muted2,
+                                      color: isOwner
+                                          ? AppColors.amber
+                                          : AppColors.muted2,
                                       letterSpacing: 0.06 * 8,
                                     ),
                                   ),
@@ -2881,7 +3284,7 @@ class _HomePageState extends State<HomePage>
                                 // Team name
                                 Text(
                                   team.name.toUpperCase(),
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.white,
@@ -2894,7 +3297,7 @@ class _HomePageState extends State<HomePage>
                                 // Meta
                                 Text(
                                   '${team.members.length} membre${team.members.length > 1 ? 's' : ''}',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontSize: 10,
                                     color: AppColors.muted2,
                                   ),
@@ -3005,63 +3408,70 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  /// Pastilles d'avatars qui se chevauchent.
+  ///
+  /// Volontairement en Stack positionné plutôt qu'une Row + Transform :
+  /// `Transform.translate` ne décale qu'à la peinture, la Row mesurerait donc
+  /// la largeur sans chevauchement (20px par pastille) et réclamerait plus de
+  /// place qu'elle n'en occupe — ce qui faisait déborder la carte dès le
+  /// 4ᵉ membre. Ici la largeur annoncée est exactement celle peinte.
   Widget _buildStackedAvatars(TeamDetail team) {
+    const double size = 20;
+    const double step = 15; // 20 de large, 5 de chevauchement
+
     final starters = team.starters.take(3).toList();
     final extra = team.members.length > 3 ? team.members.length - 3 : 0;
-    return Row(
-      children: [
-        ...starters.asMap().entries.map((entry) {
-          final i = entry.key;
-          final m = entry.value;
-          return Transform.translate(
-            offset: Offset(i * -5.0, 0),
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.amber,
-                border: Border.all(color: AppColors.card, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  m.user.username.isNotEmpty
-                      ? m.user.username[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(
-                    fontSize: 7,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.night,
-                  ),
+    final count = starters.length + (extra > 0 ? 1 : 0);
+    if (count == 0) return const SizedBox.shrink();
+
+    Widget bubble(Color background, String label, TextStyle style) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: background,
+          border: Border.all(color: AppColors.card, width: 2),
+        ),
+        child: Center(child: Text(label, style: style)),
+      );
+    }
+
+    return SizedBox(
+      width: (count - 1) * step + size,
+      height: size,
+      child: Stack(
+        children: [
+          for (var i = 0; i < starters.length; i++)
+            Positioned(
+              left: i * step,
+              child: bubble(
+                AppColors.amber,
+                starters[i].user.username.isNotEmpty
+                    ? starters[i].user.username[0].toUpperCase()
+                    : '?',
+                const TextStyle(
+                  fontSize: 7,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.night,
                 ),
               ),
             ),
-          );
-        }),
-        if (extra > 0)
-          Transform.translate(
-            offset: Offset(starters.length * -5.0, 0),
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.card2,
-                border: Border.all(color: AppColors.card, width: 2),
-              ),
-              child: Center(
-                child: Text(
-                  '+$extra',
-                  style: const TextStyle(
-                    fontSize: 6,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.muted2,
-                  ),
+          if (extra > 0)
+            Positioned(
+              left: starters.length * step,
+              child: bubble(
+                AppColors.card2,
+                '+$extra',
+                const TextStyle(
+                  fontSize: 6,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.muted2,
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -3698,7 +4108,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   member.user.username,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: AppColors.white,
@@ -3717,7 +4127,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     child: Text(
                       'Vous',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 12,
                         color: AppColors.amber,
                         fontWeight: FontWeight.w600,
@@ -3729,7 +4139,7 @@ class _HomePageState extends State<HomePage>
             ),
             Text(
               member.position.displayName,
-              style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+              style: AppTypography.body(color: AppColors.muted2, fontSize: 13),
             ),
             const SizedBox(height: 20),
             Divider(color: AppColors.border2),
@@ -3772,7 +4182,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(width: 12),
                       Text(
                         'Voir le profil',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -3801,11 +4211,15 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.swap_horiz, color: AppColors.amber, size: 20),
+                    const Icon(
+                      Icons.swap_horiz,
+                      color: AppColors.amber,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Text(
                       'Changer de position',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                         fontSize: 14,
@@ -3836,7 +4250,7 @@ class _HomePageState extends State<HomePage>
                           children: [
                             Text(
                               'Retirer ce joueur ?',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                                 color: AppColors.white,
@@ -3845,7 +4259,7 @@ class _HomePageState extends State<HomePage>
                             const SizedBox(height: 12),
                             Text(
                               'Voulez-vous retirer ${member.user.username} de l\'équipe ?',
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontSize: 13,
                                 color: AppColors.muted2,
                               ),
@@ -3863,12 +4277,14 @@ class _HomePageState extends State<HomePage>
                                       decoration: BoxDecoration(
                                         color: AppColors.card2,
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: AppColors.border2),
+                                        border: Border.all(
+                                          color: AppColors.border2,
+                                        ),
                                       ),
                                       alignment: Alignment.center,
                                       child: Text(
                                         'Annuler',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.muted2,
                                           fontSize: 13,
@@ -3890,7 +4306,7 @@ class _HomePageState extends State<HomePage>
                                       alignment: Alignment.center,
                                       child: Text(
                                         'Retirer',
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
                                           fontSize: 13,
@@ -3920,15 +4336,21 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.roseDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.rose.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.remove_circle, color: AppColors.rose, size: 20),
+                      const Icon(
+                        Icons.remove_circle,
+                        color: AppColors.rose,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Retirer de l\'équipe',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
                           fontSize: 14,
@@ -3943,7 +4365,7 @@ class _HomePageState extends State<HomePage>
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'En tant que propriétaire, vous ne pouvez pas quitter l\'équipe.',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 12,
                     color: AppColors.muted2,
                     fontStyle: FontStyle.italic,
@@ -4005,7 +4427,7 @@ class _HomePageState extends State<HomePage>
                               children: [
                                 Text(
                                   'Invitations envoyées',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.white,
@@ -4013,7 +4435,7 @@ class _HomePageState extends State<HomePage>
                                 ),
                                 Text(
                                   'Poste : ${position.displayName}',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontSize: 12,
                                     color: AppColors.muted2,
                                   ),
@@ -4036,7 +4458,7 @@ class _HomePageState extends State<HomePage>
                             ),
                             child: Text(
                               '${pending.length} en attente',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.amber,
@@ -4055,7 +4477,7 @@ class _HomePageState extends State<HomePage>
                     padding: const EdgeInsets.all(24),
                     child: Text(
                       'Aucune invitation en attente',
-                      style: GoogleFonts.dmSans(color: AppColors.muted2),
+                      style: AppTypography.body(color: AppColors.muted2),
                     ),
                   )
                 else
@@ -4079,13 +4501,15 @@ class _HomePageState extends State<HomePage>
                                     inv.invitedUsername.isNotEmpty
                                         ? inv.invitedUsername[0].toUpperCase()
                                         : '?',
-                                    style: const TextStyle(color: AppColors.amber),
+                                    style: const TextStyle(
+                                      color: AppColors.amber,
+                                    ),
                                   )
                                 : null,
                           ),
                           title: Text(
                             inv.invitedUsername,
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.white,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
@@ -4093,7 +4517,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           subtitle: Text(
                             'Envoyée le ${_formatInvitationDate(inv.createdAt)}',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.muted2,
                               fontSize: 12,
                             ),
@@ -4146,7 +4570,7 @@ class _HomePageState extends State<HomePage>
                               ),
                               child: Text(
                                 'Annuler',
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   color: AppColors.rose,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
@@ -4179,7 +4603,7 @@ class _HomePageState extends State<HomePage>
                       alignment: Alignment.center,
                       child: Text(
                         'Inviter une autre personne',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           color: Colors.black,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -4256,7 +4680,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 12),
                     Text(
                       'Ajouter un ${position.displayName}',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -4275,7 +4699,9 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.amber.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
@@ -4292,16 +4718,22 @@ class _HomePageState extends State<HomePage>
                     ),
                     title: Text(
                       'Me placer ici',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       '@${currentUser.username}',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
-                    trailing: const Icon(Icons.person_add, color: AppColors.amber),
+                    trailing: const Icon(
+                      Icons.person_add,
+                      color: AppColors.amber,
+                    ),
                     onTap: () async {
                       Navigator.pop(ctx);
                       await teamsProvider.addMemberToMyTeam(
@@ -4331,7 +4763,9 @@ class _HomePageState extends State<HomePage>
                   decoration: BoxDecoration(
                     color: AppColors.amberDim,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.amber.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: AppColors.amber.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: ListTile(
                     leading: const CircleAvatar(
@@ -4340,14 +4774,17 @@ class _HomePageState extends State<HomePage>
                     ),
                     title: Text(
                       'Ouvrir le poste',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Les joueurs de l\'app pourront postuler pour rejoindre l\'équipe',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4405,18 +4842,24 @@ class _HomePageState extends State<HomePage>
                   child: ListTile(
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFF1A1D26),
-                      child: Icon(Icons.storefront_outlined, color: AppColors.muted2),
+                      child: Icon(
+                        Icons.storefront_outlined,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     title: Text(
                       'Recruter sur le store',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w600,
                         color: AppColors.white,
                       ),
                     ),
                     subtitle: Text(
                       'Parcourir les joueurs disponibles et les inviter',
-                      style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        color: AppColors.muted2,
+                      ),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -4463,7 +4906,7 @@ class _HomePageState extends State<HomePage>
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'ou choisir un ami',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           color: AppColors.muted2,
                           fontSize: 12,
                         ),
@@ -4478,7 +4921,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     'Tous vos amis sont déjà dans l\'équipe !',
-                    style: GoogleFonts.dmSans(color: AppColors.muted2),
+                    style: AppTypography.body(color: AppColors.muted2),
                   ),
                 )
               else
@@ -4497,13 +4940,15 @@ class _HomePageState extends State<HomePage>
                           child: friend.user.avatarUrl == null
                               ? Text(
                                   friend.user.username[0].toUpperCase(),
-                                  style: const TextStyle(color: AppColors.amber),
+                                  style: const TextStyle(
+                                    color: AppColors.amber,
+                                  ),
                                 )
                               : null,
                         ),
                         title: Text(
                           friend.user.username,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -4511,7 +4956,7 @@ class _HomePageState extends State<HomePage>
                         subtitle: Text(
                           friend.user.preferredPosition ??
                               'Position non définie',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.muted2,
                             fontSize: 12,
                           ),
@@ -4519,7 +4964,9 @@ class _HomePageState extends State<HomePage>
                         trailing: friend.user.rating != null
                             ? Text(
                                 '⭐ ${friend.user.rating!.toStringAsFixed(1)}',
-                                style: GoogleFonts.dmSans(color: AppColors.muted2),
+                                style: AppTypography.body(
+                                  color: AppColors.muted2,
+                                ),
                               )
                             : null,
                         onTap: () async {
@@ -4577,7 +5024,7 @@ class _HomePageState extends State<HomePage>
                     Expanded(
                       child: Text(
                         'Ouvrir le poste de ${position.displayName}',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                           color: AppColors.white,
@@ -4589,7 +5036,10 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 8),
                 Text(
                   'Les joueurs de l\'application pourront voir ce poste et postuler pour rejoindre votre équipe.',
-                  style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 12),
+                  style: AppTypography.body(
+                    color: AppColors.muted2,
+                    fontSize: 12,
+                  ),
                 ),
 
                 // ── PORTÉE ──
@@ -4598,7 +5048,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       'NOMBRE DE POSTES',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         color: AppColors.muted2,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
@@ -4609,7 +5059,7 @@ class _HomePageState extends State<HomePage>
                     Tooltip(
                       message:
                           'Un poste uniquement : Tu choisis manuellement le profil recherché (gardien, défenseur, milieu, attaquant ou remplaçant) et une seule annonce est diffusée pour ce poste précis.\n\nTous les postes disponibles : La fonctionnalité détecte automatiquement les postes vacants dans ton équipe et diffuse une annonce pour chacun d\'eux. Par exemple, s\'il te manque un défenseur et un attaquant, deux annonces seront automatiquement créées et diffusées. Dans ce cas, le choix du profil n\'est pas disponible car les annonces sont générées directement depuis la composition de ton équipe.',
-                      textStyle: GoogleFonts.dmSans(
+                      textStyle: AppTypography.body(
                         color: AppColors.white,
                         fontSize: 12,
                       ),
@@ -4641,27 +5091,35 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: !openAll ? AppColors.amberDim : AppColors.card2,
+                            color: !openAll
+                                ? AppColors.amberDim
+                                : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: !openAll ? AppColors.amber : AppColors.border2,
+                              color: !openAll
+                                  ? AppColors.amber
+                                  : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.person_pin,
-                                color: !openAll ? AppColors.amber : AppColors.muted2,
+                                color: !openAll
+                                    ? AppColors.amber
+                                    : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Un poste uniquement',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: !openAll ? AppColors.amber : AppColors.muted2,
+                                  color: !openAll
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4679,27 +5137,35 @@ class _HomePageState extends State<HomePage>
                             horizontal: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: openAll ? AppColors.amberDim : AppColors.card2,
+                            color: openAll
+                                ? AppColors.amberDim
+                                : AppColors.card2,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: openAll ? AppColors.amber : AppColors.border2,
+                              color: openAll
+                                  ? AppColors.amber
+                                  : AppColors.border2,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 Icons.groups,
-                                color: openAll ? AppColors.amber : AppColors.muted2,
+                                color: openAll
+                                    ? AppColors.amber
+                                    : AppColors.muted2,
                                 size: 18,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Tous les postes disponibles',
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: openAll ? AppColors.amber : AppColors.muted2,
+                                  color: openAll
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                               ),
                             ],
@@ -4721,7 +5187,7 @@ class _HomePageState extends State<HomePage>
                       children: [
                         Text(
                           'PROFIL RECHERCHÉ',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.muted2,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -4786,7 +5252,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 20),
                 Text(
                   'DESCRIPTION (OPTIONNEL)',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -4800,7 +5266,10 @@ class _HomePageState extends State<HomePage>
                   style: const TextStyle(color: AppColors.white, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Ex: Bon niveau requis, ambiance sympa...',
-                    hintStyle: const TextStyle(color: AppColors.muted2, fontSize: 12),
+                    hintStyle: const TextStyle(
+                      color: AppColors.muted2,
+                      fontSize: 12,
+                    ),
                     filled: true,
                     fillColor: AppColors.card2,
                     contentPadding: const EdgeInsets.all(12),
@@ -4823,7 +5292,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 20),
                 Text(
                   'MATCH PRÉVU',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.muted2,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -4849,13 +5318,15 @@ class _HomePageState extends State<HomePage>
                             Icon(
                               Icons.calendar_today,
                               size: 15,
-                              color: hasMatch ? AppColors.amber : AppColors.muted2,
+                              color: hasMatch
+                                  ? AppColors.amber
+                                  : AppColors.muted2,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 'Avez-vous un match prévu ?',
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   color: AppColors.white,
                                   fontSize: 13,
                                 ),
@@ -4928,7 +5399,7 @@ class _HomePageState extends State<HomePage>
                                   matchDate != null
                                       ? '${matchDate!.day.toString().padLeft(2, '0')}/${matchDate!.month.toString().padLeft(2, '0')}/${matchDate!.year}'
                                       : 'Choisir la date du match',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: matchDate != null
                                         ? AppColors.amber
                                         : AppColors.muted2,
@@ -4985,14 +5456,16 @@ class _HomePageState extends State<HomePage>
                                 Icon(
                                   Icons.access_time,
                                   size: 15,
-                                  color: matchTime != null ? AppColors.amber : AppColors.muted2,
+                                  color: matchTime != null
+                                      ? AppColors.amber
+                                      : AppColors.muted2,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
                                   matchTime != null
                                       ? '${matchTime!.hour.toString().padLeft(2, '0')}h${matchTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Choisir l\'heure du match',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: matchTime != null
                                         ? AppColors.amber
                                         : AppColors.muted2,
@@ -5077,7 +5550,7 @@ class _HomePageState extends State<HomePage>
                           alignment: Alignment.center,
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               color: AppColors.muted2,
                               fontSize: 13,
@@ -5160,7 +5633,10 @@ class _HomePageState extends State<HomePage>
                               decoration: BoxDecoration(
                                 gradient: canSubmit
                                     ? const LinearGradient(
-                                        colors: [AppColors.amber, AppColors.amberD],
+                                        colors: [
+                                          AppColors.amber,
+                                          AppColors.amberD,
+                                        ],
                                       )
                                     : null,
                                 color: canSubmit ? null : AppColors.card2,
@@ -5175,13 +5651,15 @@ class _HomePageState extends State<HomePage>
                                 children: [
                                   Icon(
                                     Icons.person_search,
-                                    color: canSubmit ? Colors.white : AppColors.muted2,
+                                    color: canSubmit
+                                        ? Colors.white
+                                        : AppColors.muted2,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Ouvrir',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontWeight: FontWeight.w600,
                                       color: canSubmit
                                           ? Colors.white
@@ -5221,11 +5699,13 @@ class _HomePageState extends State<HomePage>
           decoration: BoxDecoration(
             color: selected ? AppColors.amberDim : AppColors.card2,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: selected ? AppColors.amber : AppColors.border2),
+            border: Border.all(
+              color: selected ? AppColors.amber : AppColors.border2,
+            ),
           ),
           child: Text(
             label,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: selected ? AppColors.amber : AppColors.muted2,
@@ -5273,7 +5753,7 @@ class _HomePageState extends State<HomePage>
             if (openSubSlots.isNotEmpty) ...[
               Text(
                 'POSTES EN RECHERCHE',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.muted2,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -5316,7 +5796,7 @@ class _HomePageState extends State<HomePage>
                           Expanded(
                             child: Text(
                               'Remplaçant · ${slot.applicationsCount} candidature(s)',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 color: AppColors.white,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
@@ -5361,11 +5841,15 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.person_add, color: AppColors.amber, size: 20),
+                      const Icon(
+                        Icons.person_add,
+                        color: AppColors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Ajouter un remplaçant',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -5415,12 +5899,16 @@ class _HomePageState extends State<HomePage>
             const CircleAvatar(
               radius: 30,
               backgroundColor: AppColors.amberDim,
-              child: Icon(Icons.person_search, color: AppColors.amber, size: 30),
+              child: Icon(
+                Icons.person_search,
+                color: AppColors.amber,
+                size: 30,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               'Poste ${position.displayName} — candidatures ouvertes',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
@@ -5430,7 +5918,7 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 8),
               Text(
                 openSlot.description!,
-                style: GoogleFonts.dmSans(color: AppColors.muted2),
+                style: AppTypography.body(color: AppColors.muted2),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -5443,7 +5931,7 @@ class _HomePageState extends State<HomePage>
               ),
               child: Text(
                 '${openSlot.applicationsCount} candidature(s)',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   color: AppColors.amber,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
@@ -5469,11 +5957,15 @@ class _HomePageState extends State<HomePage>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.people, color: AppColors.amber, size: 20),
+                      const Icon(
+                        Icons.people,
+                        color: AppColors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Voir les candidatures',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
                           fontSize: 14,
@@ -5519,7 +6011,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           Text(
                             'Clôturer les candidatures ?',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                               color: AppColors.white,
@@ -5528,7 +6020,7 @@ class _HomePageState extends State<HomePage>
                           const SizedBox(height: 12),
                           Text(
                             'Les candidatures en attente seront annulées.',
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               fontSize: 13,
                               color: AppColors.muted2,
                             ),
@@ -5545,12 +6037,14 @@ class _HomePageState extends State<HomePage>
                                     decoration: BoxDecoration(
                                       color: AppColors.card2,
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: AppColors.border2),
+                                      border: Border.all(
+                                        color: AppColors.border2,
+                                      ),
                                     ),
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Annuler',
-                                      style: GoogleFonts.syne(
+                                      style: AppTypography.display(
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.muted2,
                                         fontSize: 13,
@@ -5572,7 +6066,7 @@ class _HomePageState extends State<HomePage>
                                     alignment: Alignment.center,
                                     child: Text(
                                       'Fermer',
-                                      style: GoogleFonts.syne(
+                                      style: AppTypography.display(
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                         fontSize: 13,
@@ -5600,7 +6094,9 @@ class _HomePageState extends State<HomePage>
                 decoration: BoxDecoration(
                   color: AppColors.roseDim,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.rose.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.rose.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -5611,7 +6107,7 @@ class _HomePageState extends State<HomePage>
                       children: [
                         Text(
                           'Clôturer les candidatures',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.rose,
                             fontSize: 14,
@@ -5619,7 +6115,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         Text(
                           'Mettre fin aux candidatures pour ce poste',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.muted2,
                             fontSize: 12,
                           ),
@@ -5703,7 +6199,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(width: 10),
                         Text(
                           'Joueurs disponibles',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -5721,7 +6217,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           child: Text(
                             position.displayName,
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color: AppColors.amber,
@@ -5739,7 +6235,9 @@ class _HomePageState extends State<HomePage>
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                            child: CircularProgressIndicator(color: AppColors.amber),
+                            child: CircularProgressIndicator(
+                              color: AppColors.amber,
+                            ),
                           );
                         }
                         final players = snapshot.data ?? [];
@@ -5756,7 +6254,7 @@ class _HomePageState extends State<HomePage>
                                 const SizedBox(height: 12),
                                 Text(
                                   'Aucun joueur disponible',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     color: AppColors.muted2,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -5764,7 +6262,7 @@ class _HomePageState extends State<HomePage>
                                 const SizedBox(height: 4),
                                 Text(
                                   'Les joueurs peuvent activer leur disponibilité\ndans "Trouve ton équipe"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     color: AppColors.muted2,
                                     fontSize: 12,
                                   ),
@@ -5824,7 +6322,7 @@ class _HomePageState extends State<HomePage>
                                     child: player.avatarUrl == null
                                         ? Text(
                                             player.username[0].toUpperCase(),
-                                            style: GoogleFonts.syne(
+                                            style: AppTypography.display(
                                               color: AppColors.amber,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -5841,7 +6339,7 @@ class _HomePageState extends State<HomePage>
                                           children: [
                                             Text(
                                               player.username,
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 fontWeight: FontWeight.w700,
                                                 color: AppColors.white,
                                                 fontSize: 14,
@@ -5862,7 +6360,7 @@ class _HomePageState extends State<HomePage>
                                                 ),
                                                 child: Text(
                                                   'Poste correspondant',
-                                                  style: GoogleFonts.syne(
+                                                  style: AppTypography.display(
                                                     fontSize: 9,
                                                     color: AppColors.amber,
                                                     fontWeight: FontWeight.w700,
@@ -5876,7 +6374,7 @@ class _HomePageState extends State<HomePage>
                                         Text(
                                           player.preferredPosition ??
                                               'Aucune position',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -5935,7 +6433,7 @@ class _HomePageState extends State<HomePage>
                                       if (player.rating != null)
                                         Text(
                                           '★ ${player.rating!.toStringAsFixed(1)}',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.amber,
                                             fontWeight: FontWeight.w700,
                                             fontSize: 13,
@@ -5960,7 +6458,7 @@ class _HomePageState extends State<HomePage>
                                           ),
                                           child: Text(
                                             'Déjà membre',
-                                            style: GoogleFonts.syne(
+                                            style: AppTypography.display(
                                               color: AppColors.muted2,
                                               fontWeight: FontWeight.w600,
                                               fontSize: 12,
@@ -6010,14 +6508,13 @@ class _HomePageState extends State<HomePage>
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               border: Border.all(
-                                                color: AppColors.rose.withValues(
-                                                  alpha: 0.5,
-                                                ),
+                                                color: AppColors.rose
+                                                    .withValues(alpha: 0.5),
                                               ),
                                             ),
                                             child: Text(
                                               'Annuler',
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 color: AppColors.rose,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
@@ -6074,7 +6571,7 @@ class _HomePageState extends State<HomePage>
                                             ),
                                             child: Text(
                                               'Inviter',
-                                              style: GoogleFonts.syne(
+                                              style: AppTypography.display(
                                                 color: Colors.black,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
@@ -6145,7 +6642,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 12),
                     Text(
                       'Candidatures (${applications.length})',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.white,
@@ -6167,7 +6664,7 @@ class _HomePageState extends State<HomePage>
                       const SizedBox(height: 16),
                       Text(
                         'Aucune candidature pour le moment',
-                        style: GoogleFonts.dmSans(color: AppColors.muted2),
+                        style: AppTypography.body(color: AppColors.muted2),
                       ),
                     ],
                   ),
@@ -6220,7 +6717,7 @@ class _HomePageState extends State<HomePage>
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
                                           color: AppColors.white,
@@ -6229,7 +6726,7 @@ class _HomePageState extends State<HomePage>
                                       if (app.applicant.rating != null)
                                         Text(
                                           '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -6245,13 +6742,15 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.border.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: AppColors.border2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontStyle: FontStyle.italic,
                                     color: AppColors.muted2,
                                     fontSize: 13,
@@ -6288,7 +6787,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.rose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6302,7 +6803,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6341,7 +6842,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.sage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6355,7 +6858,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6426,7 +6929,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(width: 8),
                         Text(
                           'Toutes les candidatures (${applications.length})',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -6451,7 +6954,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(height: 16),
                         Text(
                           'Aucune candidature en attente',
-                          style: GoogleFonts.dmSans(color: AppColors.muted2),
+                          style: AppTypography.body(color: AppColors.muted2),
                         ),
                       ],
                     ),
@@ -6510,7 +7013,7 @@ class _HomePageState extends State<HomePage>
                                     children: [
                                       Text(
                                         app.applicant.username,
-                                        style: GoogleFonts.syne(
+                                        style: AppTypography.display(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
                                           color: AppColors.white,
@@ -6519,7 +7022,7 @@ class _HomePageState extends State<HomePage>
                                       if (openSlot != null)
                                         Text(
                                           'Pour : ${openSlot.position.displayName}',
-                                          style: GoogleFonts.dmSans(
+                                          style: AppTypography.body(
                                             color: AppColors.muted2,
                                             fontSize: 12,
                                           ),
@@ -6539,7 +7042,7 @@ class _HomePageState extends State<HomePage>
                                     ),
                                     child: Text(
                                       '⭐ ${app.applicant.rating!.toStringAsFixed(1)}',
-                                      style: GoogleFonts.dmSans(
+                                      style: AppTypography.body(
                                         color: AppColors.amberSoft,
                                         fontSize: 12,
                                       ),
@@ -6553,13 +7056,15 @@ class _HomePageState extends State<HomePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: AppColors.border.withValues(alpha: 0.5),
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: AppColors.border2),
                                 ),
                                 child: Text(
                                   '"${app.message}"',
-                                  style: GoogleFonts.dmSans(
+                                  style: AppTypography.body(
                                     fontStyle: FontStyle.italic,
                                     color: AppColors.muted2,
                                     fontSize: 13,
@@ -6595,7 +7100,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.roseDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.rose.withValues(alpha: 0.3),
+                                        color: AppColors.rose.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6609,7 +7116,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Refuser',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.rose,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6648,7 +7155,9 @@ class _HomePageState extends State<HomePage>
                                       color: AppColors.sageDim,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
-                                        color: AppColors.sage.withValues(alpha: 0.3),
+                                        color: AppColors.sage.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -6662,7 +7171,7 @@ class _HomePageState extends State<HomePage>
                                         const SizedBox(width: 4),
                                         Text(
                                           'Accepter',
-                                          style: GoogleFonts.syne(
+                                          style: AppTypography.display(
                                             color: AppColors.sage,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12,
@@ -6715,7 +7224,7 @@ class _HomePageState extends State<HomePage>
             ),
             Text(
               'Changer la position de ${member.user.username}',
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.white,
@@ -6731,14 +7240,16 @@ class _HomePageState extends State<HomePage>
                   child: Text(
                     position.shortName,
                     style: TextStyle(
-                      color: member.position == position ? AppColors.amber : AppColors.muted2,
+                      color: member.position == position
+                          ? AppColors.amber
+                          : AppColors.muted2,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 title: Text(
                   position.displayName,
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.white,
                     fontWeight: member.position == position
                         ? FontWeight.w700
@@ -6783,7 +7294,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Nom de l\'équipe',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -6829,7 +7340,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -6871,7 +7382,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Enregistrer',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -6912,7 +7423,7 @@ class _HomePageState extends State<HomePage>
             children: [
               Text(
                 'Sélectionner l\'heure',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
                   color: AppColors.white,
@@ -7014,7 +7525,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'Annuler',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: AppColors.muted2,
                             fontSize: 13,
@@ -7043,7 +7554,7 @@ class _HomePageState extends State<HomePage>
                         alignment: Alignment.center,
                         child: Text(
                           'OK',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                             fontSize: 13,
@@ -7142,7 +7653,7 @@ class _HomePageState extends State<HomePage>
                       Expanded(
                         child: Text(
                           'Préférences de recherche',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -7156,7 +7667,7 @@ class _HomePageState extends State<HomePage>
                   // Jours disponibles
                   Text(
                     'Jours disponibles *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7171,9 +7682,11 @@ class _HomePageState extends State<HomePage>
                       return FilterChip(
                         label: Text(
                           jour,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 12,
-                            color: isSelected ? AppColors.amber : AppColors.muted2,
+                            color: isSelected
+                                ? AppColors.amber
+                                : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7203,7 +7716,7 @@ class _HomePageState extends State<HomePage>
                   // Plage horaire
                   Text(
                     'Plage horaire *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7294,7 +7807,9 @@ class _HomePageState extends State<HomePage>
                                       ? '${endTime!.hour.toString().padLeft(2, '0')}h${endTime!.minute.toString().padLeft(2, '0')}'
                                       : 'Fin',
                                   style: TextStyle(
-                                    color: endTime != null ? AppColors.white : AppColors.muted2,
+                                    color: endTime != null
+                                        ? AppColors.white
+                                        : AppColors.muted2,
                                   ),
                                 ),
                                 const Icon(
@@ -7315,7 +7830,7 @@ class _HomePageState extends State<HomePage>
                   // Niveau de l'équipe
                   Text(
                     'Niveau de l\'équipe *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7330,9 +7845,11 @@ class _HomePageState extends State<HomePage>
                       return ChoiceChip(
                         label: Text(
                           niveau,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 12,
-                            color: isSelected ? AppColors.amber : AppColors.muted2,
+                            color: isSelected
+                                ? AppColors.amber
+                                : AppColors.muted2,
                           ),
                         ),
                         selected: isSelected,
@@ -7358,7 +7875,7 @@ class _HomePageState extends State<HomePage>
                   // Villes
                   Text(
                     'Villes de déplacement *',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       color: AppColors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -7375,7 +7892,7 @@ class _HomePageState extends State<HomePage>
                         return Chip(
                           label: Text(
                             city,
-                            style: GoogleFonts.dmSans(
+                            style: AppTypography.body(
                               color: AppColors.white,
                               fontSize: 12,
                             ),
@@ -7414,15 +7931,21 @@ class _HomePageState extends State<HomePage>
                             fillColor: AppColors.card2,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.border2),
+                              borderSide: const BorderSide(
+                                color: AppColors.border2,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppColors.amber),
+                              borderSide: const BorderSide(
+                                color: AppColors.amber,
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -7466,7 +7989,7 @@ class _HomePageState extends State<HomePage>
                   const SizedBox(height: 16),
                   Text(
                     '* Champs obligatoires',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       color: AppColors.muted2,
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
@@ -7490,7 +8013,7 @@ class _HomePageState extends State<HomePage>
                             alignment: Alignment.center,
                             child: Text(
                               'Annuler',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.muted2,
                                 fontSize: 13,
@@ -7588,7 +8111,7 @@ class _HomePageState extends State<HomePage>
                             alignment: Alignment.center,
                             child: Text(
                               'Valider',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 fontSize: 13,
@@ -7694,10 +8217,7 @@ class _ModernPitchPainter extends CustomPainter {
         ..shader = RadialGradient(
           center: Alignment.center,
           radius: 0.85,
-          colors: [
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.20),
-          ],
+          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.20)],
         ).createShader(Rect.fromLTWH(0, 0, w, h)),
     );
 
@@ -7774,19 +8294,31 @@ class _ModernPitchPainter extends CustomPainter {
     final double cr = h * 0.07;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(m, m), radius: cr),
-      0, math.pi / 2, false, lp,
+      0,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(m, h - m), radius: cr),
-      -math.pi / 2, math.pi / 2, false, lp,
+      -math.pi / 2,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(w - m, m), radius: cr),
-      math.pi / 2, math.pi / 2, false, lp,
+      math.pi / 2,
+      math.pi / 2,
+      false,
+      lp,
     );
     canvas.drawArc(
       Rect.fromCircle(center: Offset(w - m, h - m), radius: cr),
-      math.pi, math.pi / 2, false, lp,
+      math.pi,
+      math.pi / 2,
+      false,
+      lp,
     );
   }
 
@@ -7850,7 +8382,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             children: [
               Text(
                 'Notifications',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.white,
@@ -7885,7 +8417,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               padding: const EdgeInsets.symmetric(vertical: 28),
               child: Text(
                 'Aucune notification en attente',
-                style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 13),
+                style: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
               ),
             )
           else
@@ -7901,7 +8436,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'DEMANDES D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -7931,7 +8466,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'CANDIDATURES MATCH PUBLIC',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -7959,7 +8494,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'INVITATIONS D\'ÉQUIPE',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -7984,7 +8519,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'DÉFIS DE MATCH',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: AppColors.muted2,
@@ -8074,7 +8609,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       invitation.teamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8084,7 +8619,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Invitation · ${invitation.invitingUsername}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -8132,7 +8670,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8179,7 +8717,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8250,7 +8788,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       challenge.challengerTeamName,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8260,7 +8798,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Défi reçu',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -8268,7 +8809,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               if (challenge.proposedDate != null)
                 Text(
                   DateFormat('d MMM', 'fr_FR').format(challenge.proposedDate!),
-                  style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 10,
+                    color: AppColors.muted2,
+                  ),
                 ),
             ],
           ),
@@ -8283,7 +8827,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
               ),
               child: Text(
                 challenge.message!,
-                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 12,
+                  color: AppColors.muted2,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -8294,12 +8841,19 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                const Icon(
+                  Icons.location_on,
+                  size: 12,
+                  color: AppColors.muted2,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     challenge.proposedLocation!,
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -8327,7 +8881,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   ),
                   child: Text(
                     'REFUSER',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w600,
                       fontSize: 10,
                       letterSpacing: 0.6,
@@ -8376,7 +8930,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                         )
                       : Text(
                           'ACCEPTER',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontWeight: FontWeight.w700,
                             fontSize: 10,
                             letterSpacing: 0.6,
@@ -8473,7 +9027,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       app.applicantUsername,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8483,7 +9037,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${app.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8532,7 +9089,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8560,7 +9117,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                                 SnackBar(
                                   content: Text(
                                     result.errorMessage!,
-                                    style: GoogleFonts.dmSans(
+                                    style: AppTypography.body(
                                       color: AppColors.white,
                                       fontSize: 13,
                                     ),
@@ -8595,7 +9152,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8677,7 +9234,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                   children: [
                     Text(
                       request.requesterUsername,
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: AppColors.white,
@@ -8687,7 +9244,10 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     ),
                     Text(
                       'Veut rejoindre · ${request.teamName}',
-                      style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -8740,7 +9300,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                     child: Center(
                       child: Text(
                         'Refuser',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.rose,
@@ -8786,7 +9346,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                             )
                           : Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.amber,
@@ -8973,7 +9533,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     ),
                     child: Text(
                       '${_step + 1}/2',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.amber,
@@ -8987,7 +9547,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       children: [
                         Text(
                           title,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -8995,7 +9555,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         ),
                         Text(
                           subtitle,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 11,
                             color: AppColors.muted2,
                           ),
@@ -9049,7 +9609,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         )
                       : Text(
                           _step == 0 ? 'Équipe adverse →' : 'Terminer',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -9098,7 +9658,10 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
               ),
               child: Text(
                 s,
-                style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 11,
+                  color: AppColors.muted2,
+                ),
               ),
             ),
           );
@@ -9114,7 +9677,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
       children: [
         Text(
           'NOTE (optionnel)',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 9,
             fontWeight: FontWeight.w700,
             color: AppColors.muted2,
@@ -9138,12 +9701,14 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.amber : AppColors.card,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: isSelected ? AppColors.amber : AppColors.border2),
+                    border: Border.all(
+                      color: isSelected ? AppColors.amber : AppColors.border2,
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     '$note',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: isSelected ? Colors.white : AppColors.muted2,
@@ -9166,7 +9731,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
         color: AppColors.card2,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isAbsent ? AppColors.rose.withValues(alpha: 0.4) : AppColors.border2,
+          color: isAbsent
+              ? AppColors.rose.withValues(alpha: 0.4)
+              : AppColors.border2,
         ),
       ),
       child: Column(
@@ -9218,7 +9785,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       children: [
                         Text(
                           member.user.username,
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppColors.white,
@@ -9226,7 +9793,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                         ),
                         Text(
                           member.position.displayName,
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 11,
                             color: AppColors.muted2,
                           ),
@@ -9248,7 +9815,9 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: isAbsent ? AppColors.rose.withValues(alpha: 0.2) : AppColors.border2,
+                    color: isAbsent
+                        ? AppColors.rose.withValues(alpha: 0.2)
+                        : AppColors.border2,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isAbsent ? AppColors.rose : Colors.transparent,
@@ -9267,7 +9836,7 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
                       const SizedBox(width: 4),
                       Text(
                         isAbsent ? 'Absent' : 'Présent',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: isAbsent ? AppColors.rose : AppColors.muted2,
@@ -9284,13 +9853,19 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
           const SizedBox(height: 10),
           TextField(
             controller: _controllers[member.user.id],
-            style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.white),
+            style: AppTypography.body(fontSize: 12, color: AppColors.white),
             maxLines: 2,
             maxLength: 300,
             decoration: InputDecoration(
               hintText: 'Commentaire (optionnel)…',
-              hintStyle: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2),
-              counterStyle: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2),
+              hintStyle: AppTypography.body(
+                fontSize: 12,
+                color: AppColors.muted2,
+              ),
+              counterStyle: AppTypography.body(
+                fontSize: 10,
+                color: AppColors.muted2,
+              ),
               filled: true,
               fillColor: AppColors.card,
               contentPadding: const EdgeInsets.symmetric(

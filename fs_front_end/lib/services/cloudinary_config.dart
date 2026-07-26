@@ -30,13 +30,13 @@ class CloudinaryConfig {
 //
 // 3️⃣ Créer un Upload Preset (unsigned)
 //    Settings → Upload → Upload presets → Add upload preset
-//    - Preset name: "five_star_avatars"
+//    - Preset name: "kobeta_avatars"
 //    - Unsigned: ✅ YES
-//    - Folder: "five_star_avatars/" (optionnel)
+//    - Folder: "kobeta_avatars/" (optionnel)
 //
 // 4️⃣ Remplir les constants ci-dessus
 //    cloudName = "ta_cloud_name"
-//    uploadPreset = "five_star_avatars"
+//    uploadPreset = "kobeta_avatars"
 //
 // 5️⃣ Tester dans Flutter
 //    - Aller à Settings → Edit Profile

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import '../services/teams_service.dart';
 
 import '../theme/app_colors.dart';
@@ -79,11 +79,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
       }
     };
 
-    _teamsService.onMatchChatConnected = () {
-    };
+    _teamsService.onMatchChatConnected = () {};
 
-    _teamsService.onMatchChatDisconnected = () {
-    };
+    _teamsService.onMatchChatDisconnected = () {};
 
     // Se connecter au WebSocket
     _teamsService.connectToMatchChat(widget.challengeId);
@@ -160,7 +158,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.muted2,
+                size: 16,
+              ),
             ),
           ),
         ),
@@ -190,7 +192,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                 children: [
                   Text(
                     widget.opponentTeamName,
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                       color: AppColors.white,
@@ -199,7 +201,10 @@ class _MatchChatPageState extends State<MatchChatPage> {
                   ),
                   Text(
                     'Chat du match',
-                    style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
                   ),
                 ],
               ),
@@ -239,7 +244,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         const SizedBox(height: 16),
                         Text(
                           'Aucun message',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             fontSize: 18,
                             color: AppColors.muted2,
                           ),
@@ -247,7 +252,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Commencez à discuter avec votre adversaire !',
-                          style: GoogleFonts.dmSans(
+                          style: AppTypography.body(
                             color: AppColors.muted2,
                             fontSize: 13,
                           ),
@@ -287,7 +292,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 _formatDate(message.createdAt),
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   fontSize: 11,
                                   color: AppColors.muted2,
                                 ),
@@ -319,7 +324,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                       controller: _messageController,
                       decoration: InputDecoration(
                         hintText: 'Écrire un message...',
-                        hintStyle: GoogleFonts.dmSans(color: AppColors.muted2),
+                        hintStyle: AppTypography.body(color: AppColors.muted2),
                         filled: true,
                         fillColor: AppColors.card2,
                         contentPadding: const EdgeInsets.symmetric(
@@ -328,18 +333,22 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: const BorderSide(color: AppColors.amber),
                         ),
                       ),
-                      style: GoogleFonts.dmSans(color: AppColors.white),
+                      style: AppTypography.body(color: AppColors.white),
                       cursorColor: AppColors.amber,
                       onSubmitted: (_) => _sendMessage(),
                       enabled: !_isSending,
@@ -373,7 +382,11 @@ class _MatchChatPageState extends State<MatchChatPage> {
                                 ),
                               ),
                             )
-                          : const Icon(Icons.send, color: AppColors.night, size: 18),
+                          : const Icon(
+                              Icons.send,
+                              color: AppColors.night,
+                              size: 18,
+                            ),
                     ),
                   ),
                 ],
@@ -419,7 +432,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                           message.senderUsername.isNotEmpty
                               ? message.senderUsername[0].toUpperCase()
                               : '?',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.night,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -444,7 +457,9 @@ class _MatchChatPageState extends State<MatchChatPage> {
                           end: Alignment.bottomRight,
                         )
                       : null,
-                  border: isMyTeam ? null : Border.all(color: AppColors.border2),
+                  border: isMyTeam
+                      ? null
+                      : Border.all(color: AppColors.border2),
                   borderRadius: BorderRadius.circular(20).copyWith(
                     bottomRight: isMyTeam
                         ? const Radius.circular(6)
@@ -465,7 +480,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           '${message.senderUsername} (${message.senderTeamName})',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             color: AppColors.amber,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -475,7 +490,7 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     // Contenu du message
                     Text(
                       message.content,
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         color: isMyTeam ? AppColors.night : AppColors.white,
                         fontSize: 14,
                       ),
@@ -484,7 +499,10 @@ class _MatchChatPageState extends State<MatchChatPage> {
                     // Heure
                     Text(
                       _formatTime(message.createdAt),
-                      style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 10),
+                      style: AppTypography.body(
+                        color: AppColors.muted2,
+                        fontSize: 10,
+                      ),
                     ),
                   ],
                 ),

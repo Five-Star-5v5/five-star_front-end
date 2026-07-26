@@ -20,7 +20,10 @@ void _captureHttpError(String method, Uri url, int statusCode) {
   }
 }
 
-Future<http_client.Response> get(Uri url, {Map<String, String>? headers}) async {
+Future<http_client.Response> get(
+  Uri url, {
+  Map<String, String>? headers,
+}) async {
   final resp = await http_client.get(url, headers: headers).timeout(_kTimeout);
   _handle401(resp, headers);
   _captureHttpError('GET', url, resp.statusCode);

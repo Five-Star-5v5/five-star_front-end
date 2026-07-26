@@ -2,21 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/teams_provider.dart';
 import '../models/user_model.dart';
 import '../services/teams_service.dart';
-import '../auth/login.dart';
 import 'settings_page.dart';
 import 'match_history_page.dart';
 import 'all_comments_page.dart';
 
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
-
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -60,7 +58,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         if (user == null) {
           return const Scaffold(
             backgroundColor: AppColors.bg,
-            body: Center(child: CircularProgressIndicator(color: AppColors.amber)),
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.amber),
+            ),
           );
         }
 
@@ -92,7 +92,10 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
   // ── AppBar ────────────────────────────────────────────────────────────────
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, AuthProvider authProvider) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    AuthProvider authProvider,
+  ) {
     return AppBar(
       backgroundColor: AppColors.card,
       elevation: 0,
@@ -115,10 +118,21 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           const SizedBox(width: 9),
           RichText(
             text: const TextSpan(
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -0.5, height: 1),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+                height: 1,
+              ),
               children: [
-                TextSpan(text: 'Ko', style: TextStyle(color: AppColors.white)),
-                TextSpan(text: 'beta', style: TextStyle(color: AppColors.amber)),
+                TextSpan(
+                  text: 'Ko',
+                  style: TextStyle(color: AppColors.white),
+                ),
+                TextSpan(
+                  text: 'beta',
+                  style: TextStyle(color: AppColors.amber),
+                ),
               ],
             ),
           ),
@@ -138,28 +152,28 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 ),
                 title: Text(
                   'Déconnexion',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     color: AppColors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 content: Text(
                   'Tu veux vraiment te déconnecter ?',
-                  style: GoogleFonts.dmSans(color: AppColors.muted2),
+                  style: AppTypography.body(color: AppColors.muted2),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
                     child: Text(
                       'Annuler',
-                      style: GoogleFonts.dmSans(color: AppColors.muted2),
+                      style: AppTypography.body(color: AppColors.muted2),
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(true),
                     child: Text(
                       'Déconnecter',
-                      style: GoogleFonts.dmSans(
+                      style: AppTypography.body(
                         color: AppColors.rose,
                         fontWeight: FontWeight.w600,
                       ),
@@ -172,10 +186,11 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
             if (!context.mounted) return;
             final navigator = Navigator.of(context);
             await authProvider.logout();
-            navigator.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginPage()),
-              (route) => false,
-            );
+            // Ne pas reconstruire la pile : app.dart remet déjà la racine sur
+            // WelcomePage dès que `isAuthenticated` retombe à false. Détruire
+            // la route racine laissait LoginPage seule au fond de la pile, et
+            // la reconnexion n'avait alors plus rien vers quoi revenir.
+            navigator.popUntil((r) => r.isFirst);
           },
           child: Container(
             width: 32,
@@ -193,7 +208,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         GestureDetector(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => SettingsPage(authProvider: authProvider)),
+            MaterialPageRoute(
+              builder: (_) => SettingsPage(authProvider: authProvider),
+            ),
           ),
           child: Container(
             width: 32,
@@ -204,7 +221,11 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.border2),
             ),
-            child: const Icon(Icons.settings_outlined, color: AppColors.muted2, size: 16),
+            child: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.muted2,
+              size: 16,
+            ),
           ),
         ),
       ],
@@ -218,7 +239,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   // ── Hero ───────────────────────────────────────────────────────────────────
 
   Widget _buildHero(UserModel user, BuildContext context) {
-    final initial = user.username.isNotEmpty ? user.username[0].toUpperCase() : '?';
+    final initial = user.username.isNotEmpty
+        ? user.username[0].toUpperCase()
+        : '?';
 
     return Padding(
       padding: const EdgeInsets.only(top: 20),
@@ -237,16 +260,26 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: AppColors.amber.withValues(alpha: 0.15), blurRadius: 100, spreadRadius: 30),
-                  BoxShadow(color: AppColors.amber.withValues(alpha: 0.07), blurRadius: 220, spreadRadius: 70),
+                  BoxShadow(
+                    color: AppColors.amber.withValues(alpha: 0.15),
+                    blurRadius: 100,
+                    spreadRadius: 30,
+                  ),
+                  BoxShadow(
+                    color: AppColors.amber.withValues(alpha: 0.07),
+                    blurRadius: 220,
+                    spreadRadius: 70,
+                  ),
                 ],
               ),
               child: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                  ? ClipOval(child: Image.network(user.avatarUrl!, fit: BoxFit.cover))
+                  ? ClipOval(
+                      child: Image.network(user.avatarUrl!, fit: BoxFit.cover),
+                    )
                   : Center(
                       child: Text(
                         initial,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 24,
                           color: AppColors.night,
@@ -260,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           Center(
             child: Text(
               user.username.toUpperCase(),
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontWeight: FontWeight.w800,
                 fontSize: 20,
                 letterSpacing: 0.6,
@@ -273,7 +306,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
           Center(
             child: Text(
               '@${user.username.toLowerCase()}${user.preferredPosition != null ? ' · ${user.preferredPosition}' : ''}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
             ),
           ),
           if (user.codeId.isNotEmpty) ...[
@@ -291,7 +324,10 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.card2,
                     borderRadius: BorderRadius.circular(100),
@@ -302,14 +338,18 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
                     children: [
                       Text(
                         '#${user.codeId}',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 10,
                           color: AppColors.muted2,
                           letterSpacing: 0.5,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.copy_outlined, size: 10, color: AppColors.muted2),
+                      const Icon(
+                        Icons.copy_outlined,
+                        size: 10,
+                        color: AppColors.muted2,
+                      ),
                     ],
                   ),
                 ),
@@ -340,7 +380,11 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
               child: Text(
                 user.bio!,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.muted2, fontStyle: FontStyle.italic),
+                style: AppTypography.body(
+                  fontSize: 12,
+                  color: AppColors.muted2,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
           ],
@@ -350,8 +394,16 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
   }
 
   Widget _pill(String label, {bool amber = false, bool sage = false}) {
-    final color = amber ? AppColors.amber : sage ? AppColors.sage : AppColors.muted2;
-    final bg = amber ? AppColors.amberDim : sage ? AppColors.sageDim : const Color(0x0DFFFFFF);
+    final color = amber
+        ? AppColors.amber
+        : sage
+        ? AppColors.sage
+        : AppColors.muted2;
+    final bg = amber
+        ? AppColors.amberDim
+        : sage
+        ? AppColors.sageDim
+        : const Color(0x0DFFFFFF);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -361,7 +413,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -396,7 +448,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -414,57 +466,99 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
         final stats = [
           _StatItem('MATCHS', '${user.matchesPlayed}'),
           _StatItem('VICTOIRES', '${user.matchesWon}'),
-          _StatItem('NOTE /10', user.rating != null ? user.rating!.toStringAsFixed(1) : '--'),
+          _StatItem(
+            'NOTE /10',
+            user.rating != null ? user.rating!.toStringAsFixed(1) : '--',
+          ),
           _StatItem('AMIS', '${friends.friendsCount}'),
         ];
 
-        return Row(
-          children: List.generate(stats.length, (i) {
-            final isFirst = i == 0;
-            final isLast = i == stats.length - 1;
-            return Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 11),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  border: Border(
-                    top: const BorderSide(color: AppColors.border2),
-                    bottom: const BorderSide(color: AppColors.border2),
-                    left: const BorderSide(color: AppColors.border2),
-                    right: isLast ? const BorderSide(color: AppColors.border2) : BorderSide.none,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    topLeft: isFirst ? const Radius.circular(12) : Radius.zero,
-                    bottomLeft: isFirst ? const Radius.circular(12) : Radius.zero,
-                    topRight: isLast ? const Radius.circular(12) : Radius.zero,
-                    bottomRight: isLast ? const Radius.circular(12) : Radius.zero,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      stats[i].value,
-                      style: GoogleFonts.syne(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: AppColors.amber,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      stats[i].label,
-                      style: GoogleFonts.syne(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.8,
-                        color: AppColors.muted2,
-                      ),
-                    ),
-                  ],
-                ),
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.26),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
-            );
-          }),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF2A2C37), Color(0xFF16181E)],
+                  stops: [0.0, 0.8],
+                ),
+                border: Border.all(color: AppColors.border2),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Stack(
+                children: [
+                  Row(
+                    children: List.generate(stats.length, (i) {
+                      return Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            border: i == 0
+                                ? null
+                                : const Border(
+                                    left: BorderSide(color: AppColors.border2),
+                                  ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                stats[i].value,
+                                style: AppTypography.display(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 19,
+                                  color: AppColors.amber,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                stats[i].label,
+                                style: AppTypography.display(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.8,
+                                  color: AppColors.muted2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  // Liseré lumineux sur le bord haut
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 1,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            Colors.white.withValues(alpha: 0.16),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -480,7 +574,12 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       children: [
         _sectionLabel('BADGES'),
         if (badges.isEmpty)
-          _emptyState(Icons.military_tech_outlined, 'Pas encore de badges', 'Joue plus de matchs pour en gagner')
+          _emptyState(
+            Icons.military_tech_outlined,
+            'Pas encore de badges',
+            'Joue plus de matchs pour en gagner',
+            backgroundImage: 'assets/logos/image_badge.png',
+          )
         else
           Wrap(
             spacing: 6,
@@ -493,10 +592,16 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
   List<_Badge> _computeBadges(UserModel user) {
     final list = <_Badge>[];
-    if (user.matchesPlayed >= 20) list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
-    if (user.matchesPlayed >= 10) list.add(_Badge('Régulier ⚡', AppColors.amber, AppColors.amberDim));
-    if (user.matchesWon >= 5)     list.add(_Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
-    if (user.matchesPlayed >= 5)  list.add(_Badge('Actif', AppColors.amber, AppColors.amberDim));
+    if (user.matchesPlayed >= 20)
+      list.add(_Badge('MVP', const Color(0xFFFFD06E), const Color(0x1AFFD06E)));
+    if (user.matchesPlayed >= 10)
+      list.add(_Badge('Régulier ⚡', AppColors.amber, AppColors.amberDim));
+    if (user.matchesWon >= 5)
+      list.add(
+        _Badge('Série 🔥', const Color(0xFFFFD06E), const Color(0x1AFFD06E)),
+      );
+    if (user.matchesPlayed >= 5)
+      list.add(_Badge('Actif', AppColors.amber, AppColors.amberDim));
     return list;
   }
 
@@ -510,7 +615,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
       ),
       child: Text(
         b.label,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
@@ -534,36 +639,142 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver {
 
   Widget _sectionLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: GoogleFonts.syne(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.4,
-          color: AppColors.muted2,
-        ),
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 12,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.amber, AppColors.amberD],
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: AppTypography.display(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.4,
+              color: AppColors.muted2,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _emptyState(IconData icon, String title, String subtitle) {
+  Widget _emptyState(
+    IconData icon,
+    String title,
+    String subtitle, {
+    String? backgroundImage,
+  }) {
+    final hasImage = backgroundImage != null;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border2),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: AppColors.muted2, size: 26),
-          const SizedBox(height: 8),
-          Text(title, style: GoogleFonts.syne(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 3),
-          Text(subtitle, style: GoogleFonts.dmSans(color: AppColors.muted2, fontSize: 11), textAlign: TextAlign.center),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2A2C37), Color(0xFF16181E)],
+              stops: [0.0, 0.8],
+            ),
+            border: Border.all(color: AppColors.border2),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
+            children: [
+              if (hasImage) ...[
+                Positioned.fill(
+                  // L'image a un cadre incrusté (~38px sur 1536) : on zoome
+                  // légèrement pour le pousser hors du champ visible.
+                  child: Transform.scale(
+                    scale: 1.12,
+                    child: Image.asset(backgroundImage, fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(color: Colors.black.withValues(alpha: 0.52)),
+                ),
+              ],
+              SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 28,
+                    horizontal: 16,
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        icon,
+                        color: hasImage ? AppColors.amber : AppColors.muted2,
+                        size: 28,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: AppTypography.display(
+                          color: AppColors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: AppTypography.body(
+                          color: hasImage ? AppColors.white : AppColors.muted2,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Liseré lumineux sur le bord haut
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withValues(alpha: 0.16),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -604,19 +815,27 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
     // Ne recharge que si la liste d'équipes a réellement changé
     if (_listEquals(teamIds, _loadedTeamIds)) return;
     _loadedTeamIds = teamIds;
-    _future = Future.wait(
-      teams.map((t) => TeamsService.instance.getTeamMatches(t.id, status: 'completed')),
-    ).then((lists) {
-      final seen = <int>{};
-      final result = <MatchChallenge>[];
-      for (final list in lists) {
-        for (final m in list) {
-          if (seen.add(m.id)) result.add(m);
-        }
-      }
-      result.sort((a, b) => (b.matchPlayedAt ?? b.createdAt).compareTo(a.matchPlayedAt ?? a.createdAt));
-      return result;
-    });
+    _future =
+        Future.wait(
+          teams.map(
+            (t) =>
+                TeamsService.instance.getTeamMatches(t.id, status: 'completed'),
+          ),
+        ).then((lists) {
+          final seen = <int>{};
+          final result = <MatchChallenge>[];
+          for (final list in lists) {
+            for (final m in list) {
+              if (seen.add(m.id)) result.add(m);
+            }
+          }
+          result.sort(
+            (a, b) => (b.matchPlayedAt ?? b.createdAt).compareTo(
+              a.matchPlayedAt ?? a.createdAt,
+            ),
+          );
+          return result;
+        });
   }
 
   bool _listEquals(List<int> a, List<int> b) {
@@ -651,7 +870,12 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                       Expanded(
                         child: Text(
                           'HISTORIQUE',
-                          style: GoogleFonts.syne(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.muted2, letterSpacing: 1.1),
+                          style: AppTypography.display(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.muted2,
+                            letterSpacing: 1.1,
+                          ),
                         ),
                       ),
                       if (!loading && matches.isNotEmpty)
@@ -661,13 +885,20 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                             Navigator.push(
                               ctx,
                               MaterialPageRoute(
-                                builder: (_) => MatchHistoryPage(matches: matches, myTeamIds: myTeamIds),
+                                builder: (_) => MatchHistoryPage(
+                                  matches: matches,
+                                  myTeamIds: myTeamIds,
+                                ),
                               ),
                             );
                           },
                           child: Text(
                             'Voir tout →',
-                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
+                            style: AppTypography.display(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.amber,
+                            ),
                           ),
                         ),
                     ],
@@ -678,18 +909,38 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator(color: AppColors.amber, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: AppColors.amber,
+                        strokeWidth: 2,
+                      ),
                     ),
                   )
                 else if (matches.isEmpty)
                   Column(
                     children: [
                       const SizedBox(height: 8),
-                      Icon(Icons.sports_soccer_outlined, size: 32, color: AppColors.muted2.withValues(alpha: 0.4)),
+                      Icon(
+                        Icons.sports_soccer_outlined,
+                        size: 32,
+                        color: AppColors.muted2.withValues(alpha: 0.4),
+                      ),
                       const SizedBox(height: 8),
-                      Text('Aucun match joué', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
+                      Text(
+                        'Aucun match joué',
+                        style: AppTypography.display(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.muted2,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text("Ton historique apparaîtra ici", style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.5))),
+                      Text(
+                        "Ton historique apparaîtra ici",
+                        style: AppTypography.body(
+                          fontSize: 11,
+                          color: AppColors.muted2.withValues(alpha: 0.5),
+                        ),
+                      ),
                       const SizedBox(height: 16),
                     ],
                   )
@@ -710,21 +961,31 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
 
   Widget _buildCard(MatchChallenge m, Set<int> myTeamIds) {
     final iChallenger = myTeamIds.contains(m.challengerTeamId);
-    final myTeamName  = iChallenger ? m.challengerTeamName : m.challengedTeamName;
-    final oppName     = iChallenger ? m.challengedTeamName : m.challengerTeamName;
-    final myScore     = iChallenger ? m.challengerScore : m.challengedScore;
-    final oppScore    = iChallenger ? m.challengedScore : m.challengerScore;
+    final myTeamName = iChallenger
+        ? m.challengerTeamName
+        : m.challengedTeamName;
+    final oppName = iChallenger ? m.challengedTeamName : m.challengerTeamName;
+    final myScore = iChallenger ? m.challengerScore : m.challengedScore;
+    final oppScore = iChallenger ? m.challengedScore : m.challengerScore;
 
     String resultLabel = '';
-    Color resultColor  = AppColors.muted2;
+    Color resultColor = AppColors.muted2;
     if (myScore != null && oppScore != null) {
-      if (myScore > oppScore)      { resultLabel = 'Victoire'; resultColor = AppColors.sage; }
-      else if (myScore < oppScore) { resultLabel = 'Défaite';  resultColor = const Color(0xFFD4607A); }
-      else                         { resultLabel = 'Nul';      resultColor = AppColors.amber; }
+      if (myScore > oppScore) {
+        resultLabel = 'Victoire';
+        resultColor = AppColors.sage;
+      } else if (myScore < oppScore) {
+        resultLabel = 'Défaite';
+        resultColor = const Color(0xFFD4607A);
+      } else {
+        resultLabel = 'Nul';
+        resultColor = AppColors.amber;
+      }
     }
 
     final date = m.matchPlayedAt ?? m.proposedDate ?? m.createdAt;
-    final dateStr = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    final dateStr =
+        '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -742,19 +1003,41 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
               children: [
                 Text(
                   '$myTeamName vs $oppName',
-                  style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.white),
+                  style: AppTypography.display(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                    Text(
+                      dateStr,
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
+                    ),
                     if (m.proposedLocation != null) ...[
                       const SizedBox(width: 6),
-                      const Icon(Icons.location_on_outlined, size: 11, color: Color(0x9EF0F2F5)),
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 11,
+                        color: Color(0x9EF0F2F5),
+                      ),
                       Flexible(
-                        child: Text(m.proposedLocation!, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          m.proposedLocation!,
+                          style: AppTypography.body(
+                            fontSize: 11,
+                            color: AppColors.muted2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ],
@@ -769,17 +1052,31 @@ class _MatchHistorySectionState extends State<_MatchHistorySection> {
               if (myScore != null && oppScore != null)
                 Text(
                   '$myScore – $oppScore',
-                  style: GoogleFonts.syne(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.white),
+                  style: AppTypography.display(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.white,
+                  ),
                 ),
               if (resultLabel.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: resultColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(resultLabel, style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: resultColor)),
+                  child: Text(
+                    resultLabel,
+                    style: AppTypography.display(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: resultColor,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -829,7 +1126,12 @@ class _CommentsSectionState extends State<_CommentsSection> {
                       Expanded(
                         child: Text(
                           'COMMENTAIRES REÇUS',
-                          style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.4, color: AppColors.muted2),
+                          style: AppTypography.display(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.4,
+                            color: AppColors.muted2,
+                          ),
                         ),
                       ),
                       if (!loading && comments.isNotEmpty)
@@ -837,37 +1139,76 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           onTap: () => Navigator.push(
                             ctx,
                             MaterialPageRoute(
-                              builder: (_) => AllCommentsPage(username: widget.username, comments: comments),
+                              builder: (_) => AllCommentsPage(
+                                username: widget.username,
+                                comments: comments,
+                              ),
                             ),
                           ),
                           child: Text(
                             'Voir tout →',
-                            style: GoogleFonts.syne(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.amber),
+                            style: AppTypography.display(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.amber,
+                            ),
                           ),
                         ),
                     ],
                   ),
                 ),
                 if (loading)
-                  const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(color: AppColors.amber, strokeWidth: 2)))
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(
+                        color: AppColors.amber,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  )
                 else if (comments.isEmpty)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 24),
-                    decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(14)),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     child: Column(
                       children: [
-                        Icon(Icons.chat_bubble_outline, size: 28, color: AppColors.muted2.withValues(alpha: 0.4)),
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 28,
+                          color: AppColors.muted2.withValues(alpha: 0.4),
+                        ),
                         const SizedBox(height: 8),
-                        Text('Aucun commentaire', style: GoogleFonts.syne(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.muted2)),
+                        Text(
+                          'Aucun commentaire',
+                          style: AppTypography.display(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.muted2,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text('Les avis laissés après vos matchs apparaîtront ici', style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2.withValues(alpha: 0.6)), textAlign: TextAlign.center),
+                        Text(
+                          'Les avis laissés après vos matchs apparaîtront ici',
+                          style: AppTypography.body(
+                            fontSize: 11,
+                            color: AppColors.muted2.withValues(alpha: 0.6),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   )
                 else
                   Column(
-                    children: comments.take(3).map((c) => _buildCommentCard(c)).toList(),
+                    children: comments
+                        .take(3)
+                        .map((c) => _buildCommentCard(c))
+                        .toList(),
                   ),
               ],
             );
@@ -878,14 +1219,19 @@ class _CommentsSectionState extends State<_CommentsSection> {
   }
 
   Widget _buildCommentCard(PlayerCommentData c) {
-    final dateStr = '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${c.createdAt.day.toString().padLeft(2, '0')}/${c.createdAt.month.toString().padLeft(2, '0')}';
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.isAbsent ? const Color(0xFFD4607A).withValues(alpha: 0.3) : const Color(0x21FFFFFF)),
+        border: Border.all(
+          color: c.isAbsent
+              ? const Color(0xFFD4607A).withValues(alpha: 0.3)
+              : const Color(0x21FFFFFF),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -898,10 +1244,19 @@ class _CommentsSectionState extends State<_CommentsSection> {
               color: const Color(0x21FFFFFF),
               shape: BoxShape.circle,
               image: c.authorAvatarUrl != null
-                  ? DecorationImage(image: NetworkImage(c.authorAvatarUrl!), fit: BoxFit.cover)
+                  ? DecorationImage(
+                      image: NetworkImage(c.authorAvatarUrl!),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
-            child: c.authorAvatarUrl == null ? const Icon(Icons.person_outline, size: 16, color: AppColors.muted2) : null,
+            child: c.authorAvatarUrl == null
+                ? const Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: AppColors.muted2,
+                  )
+                : null,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -910,24 +1265,55 @@ class _CommentsSectionState extends State<_CommentsSection> {
               children: [
                 Row(
                   children: [
-                    Text(c.authorUsername ?? 'Joueur', style: GoogleFonts.syne(fontSize: 12, fontWeight: FontWeight.w700, color: const Color(0xFFF0F2F5))),
+                    Text(
+                      c.authorUsername ?? 'Joueur',
+                      style: AppTypography.display(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFF0F2F5),
+                      ),
+                    ),
                     const Spacer(),
                     if (c.isAbsent)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4607A).withValues(alpha: 0.15),
+                          color: const Color(
+                            0xFFD4607A,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text('Absent', style: GoogleFonts.syne(fontSize: 9, fontWeight: FontWeight.w700, color: const Color(0xFFD4607A))),
+                        child: Text(
+                          'Absent',
+                          style: AppTypography.display(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFD4607A),
+                          ),
+                        ),
                       ),
                     const SizedBox(width: 6),
-                    Text(dateStr, style: GoogleFonts.dmSans(fontSize: 10, color: AppColors.muted2)),
+                    Text(
+                      dateStr,
+                      style: AppTypography.body(
+                        fontSize: 10,
+                        color: AppColors.muted2,
+                      ),
+                    ),
                   ],
                 ),
                 if (c.content != null && c.content!.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(c.content!, style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2)),
+                  Text(
+                    c.content!,
+                    style: AppTypography.body(
+                      fontSize: 11,
+                      color: AppColors.muted2,
+                    ),
+                  ),
                 ],
               ],
             ),

@@ -32,9 +32,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   void initState() {
     super.initState();
-    _emailFocus.addListener(() => setState(() => _emailFocused = _emailFocus.hasFocus));
-    _tokenFocus.addListener(() => setState(() => _tokenFocused = _tokenFocus.hasFocus));
-    _newPasswordFocus.addListener(() => setState(() => _newPasswordFocused = _newPasswordFocus.hasFocus));
+    _emailFocus.addListener(
+      () => setState(() => _emailFocused = _emailFocus.hasFocus),
+    );
+    _tokenFocus.addListener(
+      () => setState(() => _tokenFocused = _tokenFocus.hasFocus),
+    );
+    _newPasswordFocus.addListener(
+      () => setState(() => _newPasswordFocused = _newPasswordFocus.hasFocus),
+    );
   }
 
   @override
@@ -164,7 +170,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back_ios_rounded, size: 14, color: AppColors.white),
+              child: const Icon(
+                Icons.arrow_back_ios_rounded,
+                size: 14,
+                color: AppColors.white,
+              ),
             ),
           ),
         ],
@@ -184,10 +194,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         if (_step == 1) ...[
           _buildEmailField(),
           const SizedBox(height: 24),
-          _buildActionButton(
-            label: 'ENVOYER LE CODE',
-            onTap: _requestReset,
-          ),
+          _buildActionButton(label: 'ENVOYER LE CODE', onTap: _requestReset),
         ] else ...[
           _buildStep2Info(),
           const SizedBox(height: 20),
@@ -195,10 +202,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           const SizedBox(height: 16),
           _buildNewPasswordField(),
           const SizedBox(height: 24),
-          _buildActionButton(
-            label: 'RÉINITIALISER',
-            onTap: _confirmReset,
-          ),
+          _buildActionButton(label: 'RÉINITIALISER', onTap: _confirmReset),
         ],
       ],
     );
@@ -215,7 +219,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             color: AppColors.amber.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.lock_reset_rounded, color: AppColors.amber, size: 22),
+          child: const Icon(
+            Icons.lock_reset_rounded,
+            color: AppColors.amber,
+            size: 22,
+          ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -233,7 +241,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           _step == 1
               ? 'Saisis ton adresse email et on t\'envoie un code de réinitialisation.'
               : 'Entre le code reçu par email et choisis un nouveau mot de passe.',
-          style: const TextStyle(fontSize: 13, color: AppColors.muted2, height: 1.5),
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.muted2,
+            height: 1.5,
+          ),
         ),
       ],
     );
@@ -284,7 +296,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             color: _emailFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _emailFocused ? AppColors.focusedBorder : AppColors.border2,
+              color: _emailFocused
+                  ? AppColors.focusedBorder
+                  : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -292,7 +306,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.alternate_email_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.alternate_email_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -306,7 +324,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     hintText: 'ton@email.com',
                     hintStyle: TextStyle(fontSize: 13, color: AppColors.muted),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 13,
+                      horizontal: 10,
+                    ),
                   ),
                 ),
               ),
@@ -337,7 +358,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             color: _tokenFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _tokenFocused ? AppColors.focusedBorder : AppColors.border2,
+              color: _tokenFocused
+                  ? AppColors.focusedBorder
+                  : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -345,19 +368,34 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.tag_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.tag_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
                   controller: _tokenController,
                   focusNode: _tokenFocus,
                   keyboardType: TextInputType.text,
-                  style: const TextStyle(fontSize: 13, color: AppColors.white, letterSpacing: 2),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.white,
+                    letterSpacing: 2,
+                  ),
                   decoration: const InputDecoration(
                     hintText: 'Code reçu par email',
-                    hintStyle: TextStyle(fontSize: 13, color: AppColors.muted, letterSpacing: 0),
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.muted,
+                      letterSpacing: 0,
+                    ),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 13,
+                      horizontal: 10,
+                    ),
                   ),
                 ),
               ),
@@ -388,7 +426,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             color: _newPasswordFocused ? AppColors.focusedBg : AppColors.card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _newPasswordFocused ? AppColors.focusedBorder : AppColors.border2,
+              color: _newPasswordFocused
+                  ? AppColors.focusedBorder
+                  : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -396,7 +436,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -408,12 +452,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     hintText: '8 caractères minimum',
                     hintStyle: TextStyle(fontSize: 13, color: AppColors.muted),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 13, horizontal: 10),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 13,
+                      horizontal: 10,
+                    ),
                   ),
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => _newPasswordVisible = !_newPasswordVisible),
+                onTap: () =>
+                    setState(() => _newPasswordVisible = !_newPasswordVisible),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 13),
                   child: Icon(
@@ -434,7 +482,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // ── Bouton action ────────────────────────────────────────────────────────
 
-  Widget _buildActionButton({required String label, required VoidCallback onTap}) {
+  Widget _buildActionButton({
+    required String label,
+    required VoidCallback onTap,
+  }) {
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(13),
@@ -465,7 +516,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.night),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.night,
+                    ),
                   )
                 : Row(
                     mainAxisSize: MainAxisSize.min,
@@ -480,7 +534,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: AppColors.night,
+                      ),
                     ],
                   ),
           ),
@@ -503,7 +561,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             color: AppColors.sage.withValues(alpha: 0.12),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_rounded, color: AppColors.sage, size: 36),
+          child: const Icon(
+            Icons.check_rounded,
+            color: AppColors.sage,
+            size: 36,
+          ),
         ),
         const SizedBox(height: 24),
         const Text(
@@ -566,7 +628,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                       ),
                       SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: AppColors.night,
+                      ),
                     ],
                   ),
                 ),

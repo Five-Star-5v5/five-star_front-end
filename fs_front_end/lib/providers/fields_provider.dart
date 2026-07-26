@@ -35,10 +35,7 @@ class FieldsProvider extends ChangeNotifier {
     notifyListeners();
 
     // Lancer les deux en parallèle
-    await Future.wait([
-      _loadLocation(),
-      _loadChainVenues(),
-    ]);
+    await Future.wait([_loadLocation(), _loadChainVenues()]);
 
     // Une fois la position connue, recalculer les distances
     if (_currentPosition != null) {
@@ -58,9 +55,7 @@ class FieldsProvider extends ChangeNotifier {
 
   Future<void> _loadChainVenues() async {
     try {
-      _fields = await _service.fetchChainVenues(
-        userPosition: _currentPosition,
-      );
+      _fields = await _service.fetchChainVenues(userPosition: _currentPosition);
     } catch (e) {
       _error = 'Erreur lors de la recherche des terrains';
     }
@@ -92,8 +87,7 @@ class FieldsProvider extends ChangeNotifier {
         isIndoor: field.isIndoor,
         isFiveSide: field.isFiveSide,
       );
-    }).toList()
-      ..sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
+    }).toList()..sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
   }
 
   /// Force un rechargement depuis l'API (ignore le cache).

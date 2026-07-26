@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'signup.dart';
 import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
-import '../main_screen.dart';
 
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
@@ -79,10 +78,11 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (res['ok'] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
+      // Ne pas pousser MainScreen ici : app.dart bascule déjà dessus dès que
+      // `isAuthenticated` passe à true. En empiler une seconde instance, on se
+      // retrouvait avec deux HomePage vivantes — et donc deux tutos superposés.
+      // Il suffit de dépiler jusqu'à la route racine, devenue MainScreen.
+      Navigator.popUntil(context, (r) => r.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -126,19 +126,20 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 48),
                         _buildBrandMini(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 36),
                         _buildUsernameField(),
                         _buildPasswordField(),
                         _buildForgotPassword(),
                         const SizedBox(height: 4),
                         _buildLoginButton(),
                         const SizedBox(height: 16),
-                        _buildDivider(),
-                        const SizedBox(height: 14),
-                        _buildSocialButtons(),
-                        const SizedBox(height: 16),
+                        // TODO: réactiver Google/Apple sign-in
+                        // _buildDivider(),
+                        // const SizedBox(height: 14),
+                        // _buildSocialButtons(),
+                        // const SizedBox(height: 16),
                         _buildAuthLink(),
                       ],
                     ),
@@ -214,8 +215,14 @@ class _LoginPageState extends State<LoginPage> {
                 height: 1,
               ),
               children: [
-                TextSpan(text: 'Ko', style: TextStyle(color: AppColors.white)),
-                TextSpan(text: 'beta', style: TextStyle(color: AppColors.amber)),
+                TextSpan(
+                  text: 'Ko',
+                  style: TextStyle(color: AppColors.white),
+                ),
+                TextSpan(
+                  text: 'beta',
+                  style: TextStyle(color: AppColors.amber),
+                ),
               ],
             ),
           ),
@@ -251,8 +258,8 @@ class _LoginPageState extends State<LoginPage> {
               color: isValid
                   ? AppColors.validBorder
                   : isFocused
-                      ? AppColors.focusedBorder
-                      : AppColors.border2,
+                  ? AppColors.focusedBorder
+                  : AppColors.border2,
               width: 1.5,
             ),
           ),
@@ -260,7 +267,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.person_outline_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -281,7 +292,11 @@ class _LoginPageState extends State<LoginPage> {
               if (isValid)
                 const Padding(
                   padding: EdgeInsets.only(right: 13),
-                  child: Icon(Icons.check_rounded, size: 14, color: AppColors.sage),
+                  child: Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: AppColors.sage,
+                  ),
                 ),
             ],
           ),
@@ -322,7 +337,11 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               const Padding(
                 padding: EdgeInsets.only(left: 13),
-                child: Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.muted),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16,
+                  color: AppColors.muted,
+                ),
               ),
               Expanded(
                 child: TextField(
@@ -342,7 +361,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               GestureDetector(
-                onTap: () => setState(() => _passwordVisible = !_passwordVisible),
+                onTap: () =>
+                    setState(() => _passwordVisible = !_passwordVisible),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 13),
                   child: Icon(
@@ -435,7 +455,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           SizedBox(width: 8),
-                          Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.night),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 16,
+                            color: AppColors.night,
+                          ),
                         ],
                       ),
               ),
@@ -446,50 +470,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // ── Divider ──────────────────────────────────────────────────────────────
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(child: Container(height: 1, color: AppColors.border)),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            'OU CONTINUER AVEC',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: AppColors.muted,
-              letterSpacing: 1,
-            ),
-          ),
-        ),
-        Expanded(child: Container(height: 1, color: AppColors.border)),
-      ],
-    );
-  }
-
-  // ── Social buttons ───────────────────────────────────────────────────────
-  Widget _buildSocialButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _SocialBtn(
-            label: 'Google',
-            icon: Image.asset('assets/logos/google_logo_icon.png', height: 16),
-            onTap: () {},
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _SocialBtn(
-            label: 'Apple',
-            icon: Image.asset('assets/logos/apple_logo_icon.png', height: 16),
-            onTap: () {},
-          ),
-        ),
-      ],
-    );
-  }
+  // TODO: réactiver Google/Apple sign-in
+  // Widget _buildDivider() { ... }
+  // Widget _buildSocialButtons() { ... }
 
   // ── Auth link ─────────────────────────────────────────────────────────────
   Widget _buildAuthLink() {
@@ -520,39 +503,5 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// ── Social button ────────────────────────────────────────────────────────────
-class _SocialBtn extends StatelessWidget {
-  const _SocialBtn({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: icon,
-      label: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppColors.muted2,
-          letterSpacing: 0.05 * 11,
-        ),
-      ),
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.border2, width: 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-        backgroundColor: AppColors.card,
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        foregroundColor: AppColors.muted2,
-      ),
-    );
-  }
-}
+// TODO: réactiver Google/Apple sign-in
+// class _SocialBtn extends StatelessWidget { ... }

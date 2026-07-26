@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import '../services/teams_service.dart';
 import '../providers/teams_provider.dart';
 
@@ -93,13 +93,17 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.border2),
               ),
-              child: const Icon(Icons.arrow_back, color: AppColors.muted2, size: 16),
+              child: const Icon(
+                Icons.arrow_back,
+                color: AppColors.muted2,
+                size: 16,
+              ),
             ),
           ),
         ),
         title: Text(
           'TROUVER DES ADVERSAIRES',
-          style: GoogleFonts.syne(
+          style: AppTypography.display(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
@@ -146,7 +150,9 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.amber))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.amber),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -178,7 +184,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             children: [
               Text(
                 label,
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
@@ -197,7 +203,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   child: Center(
                     child: Text(
                       '$badgeCount',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         color: isSelected ? AppColors.amber : AppColors.night,
@@ -269,11 +275,13 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.amber : AppColors.card2,
                   borderRadius: BorderRadius.circular(8),
-                  border: isSelected ? null : Border.all(color: AppColors.border2),
+                  border: isSelected
+                      ? null
+                      : Border.all(color: AppColors.border2),
                 ),
                 child: Text(
                   level == 'Tous' ? level : _capitalizeFirst(level),
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 11,
                     color: isSelected ? AppColors.night : AppColors.muted2,
@@ -320,7 +328,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             errorBuilder: (_, _, _) => Center(
                               child: Text(
                                 team.teamName[0].toUpperCase(),
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   color: AppColors.amber,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
@@ -332,7 +340,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       : Center(
                           child: Text(
                             team.teamName[0].toUpperCase(),
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
@@ -347,7 +355,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     children: [
                       Text(
                         team.teamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: AppColors.white,
@@ -355,7 +363,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       ),
                       Text(
                         'par @${team.ownerUsername}',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -375,7 +383,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     ),
                     child: Text(
                       _capitalizeFirst(team.skillLevel!),
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: AppColors.amber,
@@ -392,17 +400,27 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(width: 4),
                 Text(
                   '${team.membersCount} membres',
-                  style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                  style: AppTypography.body(
+                    fontSize: 11,
+                    color: AppColors.muted2,
+                  ),
                 ),
                 if (team.preferredDays != null &&
                     team.preferredDays!.isNotEmpty) ...[
                   const SizedBox(width: 12),
-                  const Icon(Icons.calendar_today, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredDays!.join(', '),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -415,12 +433,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.location_on,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       team.preferredLocations!.join(', '),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -433,12 +458,19 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 13, color: AppColors.muted2),
+                  const Icon(
+                    Icons.access_time,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       _formatTimeSlot(team.preferredTimeSlots!.first),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -456,12 +488,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.format_quote, color: AppColors.muted2, size: 16),
+                    const Icon(
+                      Icons.format_quote,
+                      color: AppColors.muted2,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         team.description!,
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 12,
                           color: AppColors.muted2,
                           fontStyle: FontStyle.italic,
@@ -474,30 +510,63 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             ],
 
             const SizedBox(height: 14),
-            GestureDetector(
-              onTap: () => _showChallengeDialog(context, team),
-              child: Container(
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.amber, AppColors.amberD],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Center(
-                  child: Text(
-                    'Défier',
-                    style: GoogleFonts.syne(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      letterSpacing: 0.6,
-                      color: AppColors.night,
+            Builder(
+              builder: (context) {
+                final alreadySent = _sentChallenges.any(
+                  (c) =>
+                      c.challengedTeamId == team.teamId &&
+                      (c.status == ChallengeStatus.pending ||
+                          c.status == ChallengeStatus.accepted),
+                );
+                if (alreadySent) {
+                  return Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.muted2.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Défi envoyé',
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          color: AppColors.muted2,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return GestureDetector(
+                  onTap: () => _showChallengeDialog(context, team),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.amber, AppColors.amberD],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Défier',
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          color: AppColors.night,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -610,7 +679,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             errorBuilder: (_, _, _) => Center(
                               child: Text(
                                 opponentTeamName[0].toUpperCase(),
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   color: AppColors.amber,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -621,7 +690,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       : Center(
                           child: Text(
                             opponentTeamName[0].toUpperCase(),
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               color: AppColors.amber,
                               fontWeight: FontWeight.w700,
                             ),
@@ -635,14 +704,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     children: [
                       Text(
                         isSent ? 'Défi envoyé à' : 'Défi de',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 10,
                           color: AppColors.muted2,
                         ),
                       ),
                       Text(
                         opponentTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                           color: AppColors.white,
@@ -650,7 +719,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       ),
                       Text(
                         '@$opponentUsername',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -681,7 +750,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         'EEEE d MMMM à HH:mm',
                         'fr_FR',
                       ).format(challenge.proposedDate!),
-                      style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                      ),
                     ),
                   ],
                 ),
@@ -689,12 +761,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 12, color: AppColors.muted2),
+                    const Icon(
+                      Icons.location_on,
+                      size: 12,
+                      color: AppColors.muted2,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         challenge.proposedLocation!,
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -715,12 +791,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.message, color: AppColors.muted2, size: 13),
+                    const Icon(
+                      Icons.message,
+                      color: AppColors.muted2,
+                      size: 13,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         challenge.message!,
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 11,
                           color: AppColors.muted2,
                         ),
@@ -747,7 +827,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     Expanded(
                       child: Text(
                         challenge.challengerTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           color: AppColors.white,
                           fontSize: 12,
@@ -759,7 +839,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         '${challenge.challengerScore} - ${challenge.challengedScore}',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: AppColors.amber,
@@ -769,7 +849,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     Expanded(
                       child: Text(
                         challenge.challengedTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w700,
                           color: AppColors.white,
                           fontSize: 12,
@@ -797,7 +877,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     child: Center(
                       child: Text(
                         'Annuler le défi',
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontWeight: FontWeight.w600,
                           fontSize: 11,
                           color: AppColors.muted2,
@@ -822,7 +902,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Center(
                             child: Text(
                               'Refuser',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
                                 color: AppColors.rose,
@@ -847,7 +927,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Center(
                             child: Text(
                               'Accepter',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11,
                                 color: AppColors.night,
@@ -870,7 +950,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             const SizedBox(height: 8),
             Text(
               'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)}',
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppColors.muted2),
+              style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
             ),
           ],
         ),
@@ -916,7 +996,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     Expanded(
                       child: Text(
                         'L\'adversaire a soumis le score suivant :',
-                        style: GoogleFonts.dmSans(
+                        style: AppTypography.body(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppColors.amberSoft,
@@ -942,7 +1022,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           children: [
                             Text(
                               challenge.challengerTeamName,
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.white,
@@ -963,7 +1043,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               ),
                               child: Text(
                                 '${opponentSubmittedScore['challengerScore']}',
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.amber,
@@ -977,7 +1057,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
                           '-',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: AppColors.muted2,
@@ -989,7 +1069,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           children: [
                             Text(
                               challenge.challengedTeamName,
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.white,
@@ -1010,7 +1090,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               ),
                               child: Text(
                                 '${opponentSubmittedScore['challengedScore']}',
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.rose,
@@ -1039,7 +1119,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Center(
                             child: Text(
                               'Contester',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
                                 color: AppColors.rose,
@@ -1063,7 +1143,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Center(
                             child: Text(
                               'Valider',
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
                                 color: AppColors.sage,
@@ -1078,7 +1158,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 const SizedBox(height: 8),
                 Text(
                   'Si vous contestez, le match sera déclaré nul (0-0)',
-                  style: GoogleFonts.dmSans(
+                  style: AppTypography.body(
                     fontSize: 11,
                     color: AppColors.muted2,
                     fontStyle: FontStyle.italic,
@@ -1107,7 +1187,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                 Expanded(
                   child: Text(
                     'Score soumis ! En attente de validation par l\'adversaire.',
-                    style: GoogleFonts.dmSans(fontSize: 12, color: AppColors.sage),
+                    style: AppTypography.body(
+                      fontSize: 12,
+                      color: AppColors.sage,
+                    ),
                   ),
                 ),
               ],
@@ -1123,13 +1206,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             child: Container(
               height: 44,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
+                gradient: const LinearGradient(
+                  colors: [AppColors.amber, AppColors.amberD],
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
                 child: Text(
                   'Enregistrer le score',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                     letterSpacing: 0.6,
@@ -1160,7 +1245,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             children: [
               Text(
                 'Valider le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: AppColors.white,
@@ -1169,7 +1254,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Confirmez-vous que ce score est correct ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1188,7 +1276,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1212,7 +1300,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Valider',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                               color: AppColors.sage,
@@ -1264,7 +1352,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             children: [
               Text(
                 'Contester le score',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: AppColors.white,
@@ -1273,7 +1361,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Si vous contestez ce score, le match sera déclaré nul (0-0).\n\nÊtes-vous sûr de vouloir contester ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -1292,7 +1383,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -1316,7 +1407,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Contester',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                               color: AppColors.rose,
@@ -1404,7 +1495,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
           const SizedBox(height: 6),
           Text(
             resultText,
-            style: GoogleFonts.syne(
+            style: AppTypography.display(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: resultColor,
@@ -1424,7 +1515,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     children: [
                       Text(
                         myTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
@@ -1445,7 +1536,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         child: Text(
                           '${myScore ?? 0}',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color: AppColors.amber,
@@ -1459,7 +1550,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     '-',
-                    style: GoogleFonts.syne(
+                    style: AppTypography.display(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: AppColors.muted2,
@@ -1471,7 +1562,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     children: [
                       Text(
                         opponentTeamName,
-                        style: GoogleFonts.syne(
+                        style: AppTypography.display(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppColors.white,
@@ -1492,7 +1583,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         child: Text(
                           '${opponentScore ?? 0}',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color: AppColors.rose,
@@ -1516,11 +1607,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.warning_amber, size: 14, color: AppColors.amber),
+                  const Icon(
+                    Icons.warning_amber,
+                    size: 14,
+                    color: AppColors.amber,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     'Scores contradictoires → Match nul déclaré',
-                    style: GoogleFonts.dmSans(
+                    style: AppTypography.body(
                       fontSize: 11,
                       color: AppColors.amberSoft,
                     ),
@@ -1572,7 +1667,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
       ),
       child: Text(
         status.displayName,
-        style: GoogleFonts.syne(
+        style: AppTypography.display(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           color: fg,
@@ -1596,7 +1691,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             const SizedBox(height: 16),
             Text(
               message,
-              style: GoogleFonts.syne(
+              style: AppTypography.display(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.muted2,
@@ -1607,7 +1702,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 8),
               Text(
                 subtitle,
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1620,12 +1718,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppColors.amber, AppColors.amberD]),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.amber, AppColors.amberD],
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   'Actualiser',
-                  style: GoogleFonts.syne(
+                  style: AppTypography.display(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                     color: AppColors.night,
@@ -1674,7 +1774,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           child: Center(
                             child: Text(
                               team.teamName[0].toUpperCase(),
-                              style: GoogleFonts.syne(
+                              style: AppTypography.display(
                                 color: AppColors.amber,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
@@ -1686,7 +1786,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         Expanded(
                           child: Text(
                             'Défier ${team.teamName}',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                               color: AppColors.white,
@@ -1753,7 +1853,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                       'fr_FR',
                                     ).format(selectedDate!)
                                   : 'Proposer une date (optionnel)',
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontSize: 13,
                                 color: selectedDate != null
                                     ? AppColors.white
@@ -1769,10 +1869,13 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Lieu
                     CityAutocompleteField(
                       controller: locationController,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Lieu proposé (optionnel)',
-                        hintStyle: GoogleFonts.dmSans(
+                        hintStyle: AppTypography.body(
                           fontSize: 13,
                           color: AppColors.muted2,
                         ),
@@ -1789,11 +1892,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1806,11 +1913,14 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                     // Message
                     TextField(
                       controller: messageController,
-                      style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                      style: AppTypography.body(
+                        fontSize: 13,
+                        color: AppColors.white,
+                      ),
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Message (optionnel)',
-                        hintStyle: GoogleFonts.dmSans(
+                        hintStyle: AppTypography.body(
                           fontSize: 13,
                           color: AppColors.muted2,
                         ),
@@ -1827,11 +1937,15 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: AppColors.border2),
+                          borderSide: const BorderSide(
+                            color: AppColors.border2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1856,7 +1970,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Center(
                                 child: Text(
                                   'Annuler',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                     color: AppColors.muted2,
@@ -1896,7 +2010,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Center(
                                 child: Text(
                                   'Envoyer',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
                                     color: AppColors.night,
@@ -1954,7 +2068,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                   children: [
                     Text(
                       'Enregistrer le score',
-                      style: GoogleFonts.syne(
+                      style: AppTypography.display(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
                         color: AppColors.white,
@@ -1980,7 +2094,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                           Expanded(
                             child: Text(
                               'L\'adversaire devra confirmer ce score',
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontSize: 11,
                                 color: AppColors.amberSoft,
                               ),
@@ -1998,7 +2112,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             children: [
                               Text(
                                 myTeamName,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                   color: AppColors.white,
@@ -2007,7 +2121,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               ),
                               Text(
                                 '(Vous)',
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   fontSize: 10,
                                   color: AppColors.muted2,
                                 ),
@@ -2022,14 +2136,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                         : null,
                                     child: Icon(
                                       Icons.remove_circle,
-                                      color: myScore > 0 ? AppColors.amber : AppColors.muted2,
+                                      color: myScore > 0
+                                          ? AppColors.amber
+                                          : AppColors.muted2,
                                       size: 28,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     '$myScore',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.white,
@@ -2052,7 +2168,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         ),
                         Text(
                           '-',
-                          style: GoogleFonts.syne(
+                          style: AppTypography.display(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             color: AppColors.muted2,
@@ -2063,7 +2179,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                             children: [
                               Text(
                                 opponentTeamName,
-                                style: GoogleFonts.syne(
+                                style: AppTypography.display(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                   color: AppColors.white,
@@ -2072,7 +2188,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               ),
                               Text(
                                 '(Adversaire)',
-                                style: GoogleFonts.dmSans(
+                                style: AppTypography.body(
                                   fontSize: 10,
                                   color: AppColors.muted2,
                                 ),
@@ -2098,7 +2214,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                                   const SizedBox(width: 8),
                                   Text(
                                     '$opponentScore',
-                                    style: GoogleFonts.syne(
+                                    style: AppTypography.display(
                                       fontSize: 28,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.white,
@@ -2138,7 +2254,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Center(
                                 child: Text(
                                   'Annuler',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 12,
                                     color: AppColors.muted2,
@@ -2170,7 +2286,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                               child: Center(
                                 child: Text(
                                   'Valider',
-                                  style: GoogleFonts.syne(
+                                  style: AppTypography.display(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
                                     color: AppColors.night,
@@ -2235,7 +2351,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Attention !',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: AppColors.amber,
@@ -2244,7 +2360,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'L\'équipe "$opponentTeamName" partage ${commonPlayers.length} joueur(s) avec votre équipe :',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.white),
+                style: AppTypography.body(fontSize: 13, color: AppColors.white),
               ),
               const SizedBox(height: 12),
               Container(
@@ -2261,12 +2377,16 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         children: [
-                          const Icon(Icons.person, size: 14, color: AppColors.amber),
+                          const Icon(
+                            Icons.person,
+                            size: 14,
+                            color: AppColors.amber,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               player,
-                              style: GoogleFonts.dmSans(
+                              style: AppTypography.body(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 12,
                                 color: AppColors.white,
@@ -2282,7 +2402,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Voulez-vous tout de même continuer ?',
-                style: GoogleFonts.dmSans(
+                style: AppTypography.body(
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
                   color: AppColors.muted2,
@@ -2304,7 +2424,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -2329,7 +2449,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             actionText,
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                               color: AppColors.night,
@@ -2395,8 +2515,12 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             backgroundColor: AppColors.sage,
           ),
         );
-        _loadData();
-        _tabController.animateTo(1);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _loadData();
+            _tabController.animateTo(1);
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -2427,7 +2551,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
             children: [
               Text(
                 'Annuler le défi',
-                style: GoogleFonts.syne(
+                style: AppTypography.display(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: AppColors.white,
@@ -2436,7 +2560,10 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
               const SizedBox(height: 12),
               Text(
                 'Voulez-vous vraiment annuler ce défi ?',
-                style: GoogleFonts.dmSans(fontSize: 13, color: AppColors.muted2),
+                style: AppTypography.body(
+                  fontSize: 13,
+                  color: AppColors.muted2,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -2455,7 +2582,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Non',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: AppColors.muted2,
@@ -2479,7 +2606,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
                         child: Center(
                           child: Text(
                             'Oui, annuler',
-                            style: GoogleFonts.syne(
+                            style: AppTypography.display(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                               color: AppColors.rose,
