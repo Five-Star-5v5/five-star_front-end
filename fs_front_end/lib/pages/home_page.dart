@@ -9500,125 +9500,142 @@ class _PostMatchCommentSheetState extends State<_PostMatchCommentSheet> {
       minChildSize: 0.6,
       maxChildSize: 0.95,
       expand: false,
-      builder: (_, scroll) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          children: [
-            // Handle
-            Container(
-              margin: const EdgeInsets.only(top: 10, bottom: 4),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border2,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.amber.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${_step + 1}/2',
-                      style: AppTypography.display(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.amber,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppTypography.display(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.white,
-                          ),
-                        ),
-                        Text(
-                          subtitle,
-                          style: AppTypography.body(
-                            fontSize: 11,
-                            color: AppColors.muted2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1, color: AppColors.border2),
-            // Liste joueurs
-            Expanded(
-              child: (!isMyTeamStep && _loadingOpponent)
-                  ? const Center(
-                      child: CircularProgressIndicator(color: AppColors.amber),
-                    )
-                  : ListView.separated(
-                      controller: scroll,
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                      itemCount: members.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) => _buildPlayerCard(members[i]),
-                    ),
-            ),
-            // Bouton suivant / terminer
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                0,
-                16,
-                MediaQuery.of(context).padding.bottom + 12,
-              ),
-              child: GestureDetector(
-                onTap: _loading ? null : _submitStep,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: _loading ? AppColors.border2 : AppColors.amber,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  alignment: Alignment.center,
-                  child: _loading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          _step == 0 ? 'Équipe adverse →' : 'Terminer',
-                          style: AppTypography.display(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+      builder: (_, scroll) => GestureDetector(
+        // Taper hors d'un champ referme le clavier : le TextField est multiligne
+        // (maxLines: 2), donc la touche entrée insère un saut de ligne au lieu
+        // de « OK » — sans ça, impossible de fermer le clavier sur mobile.
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          // Remonte le contenu au-dessus du clavier pour garder le bouton
+          // « Terminer » accessible pendant la saisie.
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 4),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border2,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-          ],
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.amber.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${_step + 1}/2',
+                        style: AppTypography.display(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amber,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: AppTypography.display(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.white,
+                            ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: AppTypography.body(
+                              fontSize: 11,
+                              color: AppColors.muted2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: AppColors.border2),
+              // Liste joueurs
+              Expanded(
+                child: (!isMyTeamStep && _loadingOpponent)
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.amber,
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: scroll,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                        itemCount: members.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
+                        itemBuilder: (_, i) => _buildPlayerCard(members[i]),
+                      ),
+              ),
+              // Bouton suivant / terminer
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  0,
+                  16,
+                  MediaQuery.of(context).padding.bottom + 12,
+                ),
+                child: GestureDetector(
+                  onTap: _loading ? null : _submitStep,
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: _loading ? AppColors.border2 : AppColors.amber,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: _loading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            _step == 0 ? 'Équipe adverse →' : 'Terminer',
+                            style: AppTypography.display(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
