@@ -2850,6 +2850,7 @@ class TeamJoinRequest {
   final int teamId;
   final String teamName;
   final String? teamLogoUrl;
+  final String? ownerUsername;
   final ApplicationStatus status;
   final String? source;
   final DateTime createdAt;
@@ -2859,6 +2860,7 @@ class TeamJoinRequest {
     required this.teamId,
     required this.teamName,
     this.teamLogoUrl,
+    this.ownerUsername,
     required this.status,
     this.source,
     required this.createdAt,
@@ -2870,6 +2872,7 @@ class TeamJoinRequest {
       teamId: json['team_id'] as int,
       teamName: json['team_name'] as String,
       teamLogoUrl: json['team_logo_url'] as String?,
+      ownerUsername: json['owner_username'] as String?,
       status: ApplicationStatus.values.firstWhere(
         (s) => s.name == (json['status'] as String),
         orElse: () => ApplicationStatus.pending,

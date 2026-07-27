@@ -6,7 +6,7 @@ class ApiConfig {
   // ── Back-end local (dev) ────────────────────────────────────────────────
   // Passe à `true` pour taper le back-end qui tourne sur ta machine (docker).
   // ⚠️ REMETS `false` avant tout build de prod / envoi App Store.
-  static const bool useLocalBackend = false;
+  static const bool useLocalBackend = true;
 
   // Hôte du back-end local :
   //  - Simulateur iOS ou web         → 'localhost'

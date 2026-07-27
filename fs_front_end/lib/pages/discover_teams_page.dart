@@ -878,13 +878,32 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    request.teamName,
-                    style: AppTypography.display(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: AppColors.white,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        request.teamName,
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (request.ownerUsername != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '@${request.ownerUsername}',
+                          style: AppTypography.body(
+                            fontSize: 12,
+                            color: AppColors.amber,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 Container(
