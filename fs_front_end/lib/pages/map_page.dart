@@ -14,6 +14,7 @@ import '../services/teams_service.dart';
 import '../main_screen.dart';
 import '../theme/app_colors.dart';
 import '../widgets/kobeta_logo.dart';
+import '../utils/relative_time.dart';
 
 // ── Google Maps dark style ────────────────────────────────────────────────
 const _kMapStyle = '''
@@ -1352,11 +1353,13 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Invitation · ${invitation.invitingUsername}',
+                      'Invitation · ${invitation.invitingUsername} · ${timeAgo(invitation.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -1528,11 +1531,13 @@ class _MapNotificationsSheetState extends State<_MapNotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Défi reçu',
+                      'Défi reçu · ${timeAgo(challenge.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
