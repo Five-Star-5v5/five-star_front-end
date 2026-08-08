@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'api_config.dart';
 import 'auth_service.dart';
+import '../utils/server_date.dart';
 
 /// Callback pour les événements WebSocket du chat d'équipe
 typedef TeamMessageCallback = void Function(TeamChatMessage message);
@@ -1828,7 +1829,7 @@ class TeamMember {
       position: PlayerPosition.fromString(json['position'] as String),
       slotIndex: json['slot_index'] as int,
       isCaptain: json['is_captain'] as bool,
-      joinedAt: DateTime.parse(json['joined_at'] as String),
+      joinedAt: parseServerDate(json['joined_at'] as String),
     );
   }
 }
@@ -1867,7 +1868,7 @@ class TeamPreview {
       membersCount: json['members_count'] as int,
       ownerUsername: json['owner_username'] as String?,
       ownerCodeId: json['owner_code_id'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -1907,8 +1908,8 @@ class TeamDetail {
       members: (json['members'] as List<dynamic>)
           .map((e) => TeamMember.fromJson(e))
           .toList(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
+      updatedAt: parseServerDate(json['updated_at'] as String),
     );
   }
 
@@ -2003,7 +2004,7 @@ class OpenSlot {
       slotIndex: json['slot_index'] as int,
       description: json['description'] as String?,
       isActive: json['is_active'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       applicationsCount: json['applications_count'] as int,
       preferredPosition: json['preferred_position'] != null
           ? PlayerPosition.fromString(json['preferred_position'] as String)
@@ -2043,9 +2044,9 @@ class SlotApplication {
       applicant: TeamUserInfo.fromJson(json['applicant']),
       message: json['message'] as String?,
       status: ApplicationStatus.fromString(json['status'] as String),
-      appliedAt: DateTime.parse(json['applied_at'] as String),
+      appliedAt: parseServerDate(json['applied_at'] as String),
       respondedAt: json['responded_at'] != null
-          ? DateTime.parse(json['responded_at'] as String)
+          ? parseServerDate(json['responded_at'] as String)
           : null,
     );
   }
@@ -2075,9 +2076,9 @@ class SlotApplicationDetail {
       openSlot: OpenSlot.fromJson(json['open_slot']),
       message: json['message'] as String?,
       status: ApplicationStatus.fromString(json['status'] as String),
-      appliedAt: DateTime.parse(json['applied_at'] as String),
+      appliedAt: parseServerDate(json['applied_at'] as String),
       respondedAt: json['responded_at'] != null
-          ? DateTime.parse(json['responded_at'] as String)
+          ? parseServerDate(json['responded_at'] as String)
           : null,
     );
   }
@@ -2107,7 +2108,7 @@ class TeamChatMessage {
       teamId: json['team_id'] as int,
       sender: TeamUserInfo.fromJson(json['sender']),
       content: json['content'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       isSystemMessage: json['is_system_message'] as bool,
     );
   }
@@ -2217,7 +2218,7 @@ class TeamSearchPreference {
       skillLevel: json['skill_level'] as String?,
       description: json['description'] as String?,
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
+          ? parseServerDate(json['updated_at'])
           : null,
     );
   }
@@ -2412,12 +2413,12 @@ class MatchChallenge {
           json['challenged_submitted_challenged_score'] as int?,
       scoreValidated: json['score_validated'] as bool? ?? false,
       scoreConflict: json['score_conflict'] as bool? ?? false,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       respondedAt: json['responded_at'] != null
-          ? DateTime.parse(json['responded_at'])
+          ? parseServerDate(json['responded_at'])
           : null,
       matchPlayedAt: json['match_played_at'] != null
-          ? DateTime.parse(json['match_played_at'])
+          ? parseServerDate(json['match_played_at'])
           : null,
     );
   }
@@ -2459,7 +2460,7 @@ class MatchChatMessage {
       senderUsername: json['sender_username'] as String,
       senderAvatarUrl: json['sender_avatar_url'] as String?,
       content: json['content'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       isRead: json['is_read'] as bool? ?? false,
     );
   }
@@ -2572,7 +2573,7 @@ class TeamInvitation {
       position: json['position'] as String,
       slotIndex: json['slot_index'] as int,
       status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -2612,7 +2613,7 @@ class SentInvitation {
       slotIndex: json['slot_index'] as int,
       status: (json['status'] as String?) ?? 'pending',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? parseServerDate(json['created_at'] as String)
           : DateTime.now(),
     );
   }
@@ -2653,7 +2654,7 @@ class PlayerCommentData {
       content: json['content'] as String?,
       isAbsent: json['is_absent'] as bool? ?? false,
       rating: json['rating'] as int?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       authorUsername: json['author_username'] as String?,
       authorAvatarUrl: json['author_avatar_url'] as String?,
     );
@@ -2794,7 +2795,7 @@ class PublicMatch {
           ? DateTime.parse(json['proposed_date'] as String)
           : null,
       proposedLocation: json['proposed_location'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -2839,7 +2840,7 @@ class MatchApplication {
       applicantUsername: json['applicant_username'] as String,
       applicantAvatarUrl: json['applicant_avatar_url'] as String?,
       status: MatchApplicationStatus.fromString(json['status'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -2878,7 +2879,7 @@ class TeamJoinRequest {
         orElse: () => ApplicationStatus.pending,
       ),
       source: json['source'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -2920,7 +2921,7 @@ class ReceivedJoinRequest {
       requesterAvatarUrl: json['requester_avatar_url'] as String?,
       source: json['source'] as String?,
       status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'api_config.dart';
 import 'auth_service.dart';
+import '../utils/server_date.dart';
 
 /// Callback pour les événements WebSocket
 typedef MessageCallback = void Function(MessageModel message);
@@ -348,9 +349,9 @@ class MessageModel {
       receiverId: json['receiver_id'] as int,
       content: json['content'] as String,
       isRead: json['is_read'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
       readAt: json['read_at'] != null
-          ? DateTime.parse(json['read_at'] as String)
+          ? parseServerDate(json['read_at'] as String)
           : null,
     );
   }
