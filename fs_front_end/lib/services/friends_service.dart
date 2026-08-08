@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'auth_service.dart';
+import '../utils/server_date.dart';
 
 /// Service pour gérer les amis
 class FriendsService {
@@ -210,7 +211,7 @@ class FriendWithInfo {
       friendshipId: json['friendship_id'] as int,
       user: UserBasicInfo.fromJson(json['user']),
       status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
@@ -230,7 +231,7 @@ class PendingRequest {
     return PendingRequest(
       friendshipId: json['friendship_id'] as int,
       fromUser: UserBasicInfo.fromJson(json['from_user']),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: parseServerDate(json['created_at'] as String),
     );
   }
 }
