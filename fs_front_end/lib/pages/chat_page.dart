@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
-import '../theme_config/colors_config.dart';
 import '../providers/messages_provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/messages_service.dart';
+
+import '../theme/app_colors.dart';
 
 class ChatPage extends StatefulWidget {
   final int friendId;
@@ -100,17 +102,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? myLightBackground : MyprimaryDark;
-
-    final Color senderBubbleColor = isDarkMode
-        ? myAccentVibrantBlue.withValues(alpha: 0.85)
-        : myAccentVibrantBlue;
-
-    final Color receiverBubbleColor = isDarkMode
-        ? MyprimaryDark
-        : Colors.grey[200]!;
-
     final currentUserId = context.read<AuthProvider>().currentUser?.id;
 
     return PopScope(
@@ -123,35 +114,70 @@ class _ChatPageState extends State<ChatPage> {
         }
       },
       child: Scaffold(
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
+          backgroundColor: AppColors.card,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          flexibleSpace: IgnorePointer(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0.0, -0.4),
+                  radius: 2.4,
+                  colors: [Color(0x38FF7F2A), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
           title: Row(
             children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: MyprimaryDark,
-                backgroundImage: widget.friendAvatarUrl != null
-                    ? NetworkImage(widget.friendAvatarUrl!)
-                    : null,
-                child: widget.friendAvatarUrl == null
-                    ? Text(
+              // Avatar
+              widget.friendAvatarUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        widget.friendAvatarUrl!,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0x1CFF7F2A),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
                         widget.friendName.isNotEmpty
                             ? widget.friendName[0].toUpperCase()
                             : '?',
-                        style: const TextStyle(
-                          color: myAccentVibrantBlue,
-                          fontWeight: FontWeight.bold,
+                        style: AppTypography.display(
+                          color: AppColors.amber,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
                         ),
-                      )
-                    : null,
-              ),
+                      ),
+                    ),
               const SizedBox(width: 10),
               Text(
                 widget.friendName,
-                style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                style: AppTypography.display(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
-          iconTheme: Theme.of(context).appBarTheme.iconTheme,
+          iconTheme: const IconThemeData(color: AppColors.white),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: AppColors.border2),
+          ),
         ),
         body: Column(
           children: <Widget>[
@@ -161,7 +187,9 @@ class _ChatPageState extends State<ChatPage> {
                 builder: (context, provider, _) {
                   if (provider.messagesState == MessagesLoadingState.loading &&
                       provider.activeConversation == null) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.amber),
+                    );
                   }
 
                   final messages = provider.activeConversation?.messages ?? [];
@@ -171,31 +199,23 @@ class _ChatPageState extends State<ChatPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.chat_bubble_outline,
                             size: 80,
-                            color: isDarkMode
-                                ? Colors.grey[600]
-                                : Colors.grey[400],
+                            color: AppColors.muted2,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Aucun message',
-                            style: TextStyle(
+                            style: AppTypography.body(
                               fontSize: 18,
-                              color: isDarkMode
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
+                              color: AppColors.muted2,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Envoyez le premier message !',
-                            style: TextStyle(
-                              color: isDarkMode
-                                  ? Colors.grey[500]
-                                  : Colors.grey[500],
-                            ),
+                            style: AppTypography.body(color: AppColors.muted2),
                           ),
                         ],
                       ),
@@ -225,19 +245,13 @@ class _ChatPageState extends State<ChatPage> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 _formatDate(message.createdAt),
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 12,
+                                style: AppTypography.body(
+                                  color: AppColors.muted2,
+                                  fontSize: 11,
                                 ),
                               ),
                             ),
-                          _buildMessageBubble(
-                            message,
-                            isSender,
-                            senderBubbleColor,
-                            receiverBubbleColor,
-                            textColor,
-                          ),
+                          _buildMessageBubble(message, isSender),
                         ],
                       );
                     },
@@ -248,7 +262,8 @@ class _ChatPageState extends State<ChatPage> {
 
             // ===== BARRE DE SAISIE =====
             SafeArea(
-              child: Padding(
+              child: Container(
+                color: AppColors.card,
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Consumer<MessagesProvider>(
                   builder: (context, provider, _) {
@@ -259,46 +274,79 @@ class _ChatPageState extends State<ChatPage> {
                             controller: _messageController,
                             decoration: InputDecoration(
                               hintText: 'Écrire un message...',
-                              hintStyle: TextStyle(
-                                color: isDarkMode
-                                    ? Colors.grey[500]
-                                    : Colors.grey[700],
+                              hintStyle: AppTypography.body(
+                                color: AppColors.muted2,
                               ),
                               filled: true,
-                              fillColor: isDarkMode
-                                  ? MyprimaryDark.withValues(alpha: 0.7)
-                                  : Colors.grey[100],
+                              fillColor: AppColors.card2,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 12,
                               ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
-                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border2,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.amber,
+                                ),
                               ),
                             ),
-                            style: TextStyle(color: textColor),
+                            style: AppTypography.body(color: AppColors.white),
                             onSubmitted: (_) => _sendMessage(),
                             enabled: !provider.isSending,
                           ),
                         ),
                         const SizedBox(width: 10),
-                        FloatingActionButton(
-                          onPressed: provider.isSending ? null : _sendMessage,
-                          backgroundColor: provider.isSending
-                              ? Colors.grey
-                              : myAccentVibrantBlue,
-                          elevation: 0,
+                        GestureDetector(
+                          onTap: provider.isSending ? null : _sendMessage,
                           child: provider.isSending
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
+                              ? Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.card2,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.night,
+                                      strokeWidth: 2,
+                                    ),
                                   ),
                                 )
-                              : const Icon(Icons.send, color: MyprimaryDark),
+                              : Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.amberSoft,
+                                        AppColors.amberD,
+                                      ],
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.send,
+                                    color: AppColors.night,
+                                    size: 18,
+                                  ),
+                                ),
                         ),
                       ],
                     );
@@ -312,13 +360,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _buildMessageBubble(
-    MessageModel message,
-    bool isSender,
-    Color senderBubbleColor,
-    Color receiverBubbleColor,
-    Color textColor,
-  ) {
+  Widget _buildMessageBubble(MessageModel message, bool isSender) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -326,7 +368,13 @@ class _ChatPageState extends State<ChatPage> {
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: isSender ? senderBubbleColor : receiverBubbleColor,
+          gradient: isSender
+              ? const LinearGradient(
+                  colors: [AppColors.amberSoft, AppColors.amberD],
+                )
+              : null,
+          color: isSender ? null : AppColors.card2,
+          border: isSender ? null : Border.all(color: AppColors.border2),
           borderRadius: BorderRadius.circular(20).copyWith(
             bottomLeft: isSender
                 ? const Radius.circular(20)
@@ -341,8 +389,8 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Text(
               message.content,
-              style: TextStyle(
-                color: isSender ? MyprimaryDark : textColor,
+              style: AppTypography.body(
+                color: isSender ? AppColors.night : AppColors.white,
                 fontSize: 14,
               ),
             ),
@@ -352,10 +400,10 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 Text(
                   _formatTime(message.createdAt),
-                  style: TextStyle(
-                    color: (isSender ? MyprimaryDark : textColor).withValues(
-                      alpha: 0.6,
-                    ),
+                  style: AppTypography.body(
+                    color: isSender
+                        ? AppColors.night.withValues(alpha: 0.6)
+                        : AppColors.muted2,
                     fontSize: 10,
                   ),
                 ),
@@ -366,7 +414,7 @@ class _ChatPageState extends State<ChatPage> {
                     size: 14,
                     color: message.isRead
                         ? Colors.blue
-                        : MyprimaryDark.withValues(alpha: 0.6),
+                        : AppColors.night.withValues(alpha: 0.6),
                   ),
                 ],
               ],

@@ -12,6 +12,7 @@ class TeamsProvider with ChangeNotifier {
   // État
   TeamsLoadingState _state = TeamsLoadingState.idle;
   String? _errorMessage;
+  bool _isLoadingInitial = true; // Chargement initial des équipes
 
   // Données
   List<TeamPreview> _teams = [];
@@ -38,8 +39,30 @@ class TeamsProvider with ChangeNotifier {
   // Mes candidatures envoyées
   List<SlotApplicationDetail> _myApplications = [];
 
+  // Toutes les équipes (pour découverte)
+  List<TeamPreview> _allTeamsForDiscover = [];
+
+  // Mes demandes de rejoindre une équipe
+  List<TeamJoinRequest> _myJoinRequests = [];
+
+  // Défis de match reçus en attente
+  List<MatchChallenge> _pendingChallenges = [];
+
+  // Invitations à rejoindre une équipe
+  List<TeamInvitation> _pendingInvitations = [];
+
+  // Candidatures de joueurs pour rejoindre mes équipes sur des matchs publics
+  List<MatchApplication> _receivedMatchApplications = [];
+
+  // Demandes de joueurs pour rejoindre mes équipes (approbation requise)
+  List<ReceivedJoinRequest> _receivedJoinRequests = [];
+
+  // Invitations envoyées par mon équipe (vue propriétaire)
+  List<SentInvitation> _sentInvitations = [];
+
   // Chat d'équipe
-  final Map<int, List<TeamChatMessage>> _teamMessages = {}; // teamId -> messages
+  final Map<int, List<TeamChatMessage>> _teamMessages =
+      {}; // teamId -> messages
   List<TeamChatInfo> _myTeamChats = [];
   bool _isLoadingMessages = false;
   bool _isSendingMessage = false;
@@ -50,9 +73,14 @@ class TeamsProvider with ChangeNotifier {
   Timer? _chatPollingTimer;
   static const Duration _pollingInterval = Duration(seconds: 10);
 
+  // Polling pour les notifications (défis + invitations)
+  Timer? _notificationsPollingTimer;
+  bool _isNotificationsRefreshRunning = false;
+
   // Getters
   TeamsLoadingState get state => _state;
   String? get errorMessage => _errorMessage;
+  bool get isLoadingInitial => _isLoadingInitial;
   List<TeamPreview> get teams => _teams;
   TeamDetail? get myTeam => _myTeam;
   TeamDetail? get selectedTeam => _selectedTeam;
@@ -62,6 +90,33 @@ class TeamsProvider with ChangeNotifier {
   List<SlotApplication> get receivedApplications => _receivedApplications;
   List<OpenSlot> get allOpenSlots => _allOpenSlots;
   List<SlotApplicationDetail> get myApplications => _myApplications;
+  List<TeamPreview> get allTeamsForDiscover => _allTeamsForDiscover;
+  List<TeamJoinRequest> get myJoinRequests => _myJoinRequests;
+  List<MatchChallenge> get pendingChallenges =>
+      List.unmodifiable(_pendingChallenges);
+  int get pendingChallengesCount => _pendingChallenges.length;
+  List<TeamInvitation> get pendingInvitations =>
+      List.unmodifiable(_pendingInvitations);
+  int get pendingInvitationsCount => _pendingInvitations.length;
+  List<MatchApplication> get receivedMatchApplications =>
+      List.unmodifiable(_receivedMatchApplications);
+  int get receivedMatchApplicationsCount => _receivedMatchApplications.length;
+  List<ReceivedJoinRequest> get receivedJoinRequests =>
+      List.unmodifiable(_receivedJoinRequests);
+  int get receivedJoinRequestsCount => _receivedJoinRequests.length;
+  int get totalNotificationsCount =>
+      pendingChallengesCount +
+      pendingInvitationsCount +
+      receivedMatchApplicationsCount +
+      receivedJoinRequestsCount;
+
+  List<SentInvitation> get sentInvitations =>
+      List.unmodifiable(_sentInvitations);
+
+  /// Invitations envoyées en attente pour un slot précis
+  List<SentInvitation> sentInvitationsForSlot(int slotIndex) => _sentInvitations
+      .where((inv) => inv.slotIndex == slotIndex && inv.status == 'pending')
+      .toList();
 
   // Getters chat
   List<TeamChatInfo> get myTeamChats => _myTeamChats;
@@ -83,6 +138,74 @@ class TeamsProvider with ChangeNotifier {
   /// Retourne le nombre total de messages non lus (toutes équipes)
   int get totalUnreadCount =>
       _myTeamChats.fold(0, (sum, chat) => sum + chat.unreadCount);
+
+  /// Démarre le polling périodique des notifications d'équipe (défis + invitations)
+  void startPollingNotifications({
+    Duration interval = const Duration(seconds: 12),
+  }) {
+    _notificationsPollingTimer?.cancel();
+    _silentRefreshNotifications();
+    _notificationsPollingTimer = Timer.periodic(interval, (_) {
+      _silentRefreshNotifications();
+    });
+  }
+
+  /// Arrête le polling périodique des notifications
+  void stopPollingNotifications() {
+    _notificationsPollingTimer?.cancel();
+    _notificationsPollingTimer = null;
+  }
+
+  /// Rafraîchit silencieusement les notifications sans changer l'état de chargement
+  Future<void> _silentRefreshNotifications() async {
+    if (_isNotificationsRefreshRunning) return;
+    _isNotificationsRefreshRunning = true;
+    try {
+      await Future.wait([
+        loadPendingChallenges(),
+        loadPendingInvitations(),
+        loadSentInvitations(),
+        _silentRefreshTeamMembers(),
+        _loadReceivedMatchApplications(),
+        _loadReceivedJoinRequests(),
+      ]);
+    } catch (_) {
+    } finally {
+      _isNotificationsRefreshRunning = false;
+    }
+  }
+
+  /// Rafraîchit silencieusement les membres de l'équipe (terrain) sans changer l'état de chargement
+  Future<void> _silentRefreshTeamMembers() async {
+    try {
+      final results = await Future.wait([
+        _teamsService.getMyTeam(),
+        _teamsService.getTeamsMemberOf(),
+      ]);
+      final newMyTeam = results[0] as TeamDetail?;
+      final newTeamsMemberOf = results[1] as List<TeamDetail>;
+
+      bool changed = false;
+
+      if (newMyTeam?.members.length != _myTeam?.members.length) {
+        changed = true;
+      } else if (newTeamsMemberOf.any((updated) {
+        final current = _teamsMemberOf.firstWhere(
+          (t) => t.id == updated.id,
+          orElse: () => updated,
+        );
+        return updated.members.length != current.members.length;
+      })) {
+        changed = true;
+      }
+
+      if (changed) {
+        _myTeam = newMyTeam;
+        _teamsMemberOf = newTeamsMemberOf;
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
 
   /// Retourne le nombre total de candidatures en attente
   int get pendingApplicationsCount {
@@ -190,19 +313,38 @@ class TeamsProvider with ChangeNotifier {
 
   /// Charge "Mon Équipe" (équipe par défaut) ET les équipes où je suis membre
   Future<void> loadMyTeam() async {
+    // « Initial » veut dire « rien à afficher pour l'instant », pas « une
+    // requête est en cours ». Sans cette condition, revenir sur l'onglet
+    // Équipe rechargeait avec des données déjà en mémoire et faisait clignoter
+    // l'écran : contenu → loader Kobeta → contenu.
+    if (_myTeam == null && _teamsMemberOf.isEmpty) {
+      _isLoadingInitial = true;
+    }
     _state = TeamsLoadingState.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // Charger en parallèle mon équipe et les équipes où je suis membre
+      // Charger en parallèle mon équipe, les équipes où je suis membre, les défis et invitations
       final results = await Future.wait([
         _teamsService.getMyTeam(),
         _teamsService.getTeamsMemberOf(),
+        _teamsService.getReceivedChallenges(),
+        _teamsService.getPendingInvitations(),
       ]);
 
       _myTeam = results[0] as TeamDetail?;
       _teamsMemberOf = results[1] as List<TeamDetail>;
+      final allChallenges = results[2] as List<MatchChallenge>;
+      _pendingChallenges = allChallenges
+          .where((c) => c.status == ChallengeStatus.pending)
+          .toList();
+      _pendingInvitations = results[3] as List<TeamInvitation>;
+
+      // Charger les invitations envoyées si j'ai une équipe
+      if (_myTeam != null) {
+        _sentInvitations = await _teamsService.getSentInvitations(_myTeam!.id);
+      }
 
       // Charger les postes ouverts et candidatures si j'ai une équipe
       if (_myTeam != null) {
@@ -229,6 +371,7 @@ class TeamsProvider with ChangeNotifier {
       _errorMessage = 'Erreur: $e';
     }
 
+    _isLoadingInitial = false;
     notifyListeners();
   }
 
@@ -239,6 +382,136 @@ class TeamsProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Error silently handled
+    }
+  }
+
+  /// Recharge les défis de match reçus en attente
+  Future<void> loadPendingChallenges() async {
+    try {
+      final all = await _teamsService.getReceivedChallenges();
+      _pendingChallenges = all
+          .where((c) => c.status == ChallengeStatus.pending)
+          .toList();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Recharge les candidatures de matchs publics reçues (vue capitaine)
+  Future<void> _loadReceivedMatchApplications() async {
+    try {
+      _receivedMatchApplications = await _teamsService
+          .getReceivedMatchApplications();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> _loadReceivedJoinRequests() async {
+    try {
+      _receivedJoinRequests = await _teamsService.getReceivedJoinRequests();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Le capitaine répond à une demande de rejoindre
+  Future<bool> respondToJoinRequest(
+    int requestId, {
+    required bool accept,
+  }) async {
+    try {
+      final success = await _teamsService.respondToJoinRequest(
+        requestId,
+        accept: accept,
+      );
+      if (success) {
+        _receivedJoinRequests.removeWhere((r) => r.id == requestId);
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Accepte une candidature de match public et retire-la de la liste locale
+  Future<({bool success, String? errorMessage})> acceptReceivedMatchApplication(
+    int applicationId,
+  ) async {
+    final result = await _teamsService.acceptMatchApplication(applicationId);
+    if (result.success) {
+      _receivedMatchApplications.removeWhere((a) => a.id == applicationId);
+      notifyListeners();
+    }
+    return result;
+  }
+
+  /// Refuse une candidature de match public et retire-la de la liste locale
+  Future<bool> rejectReceivedMatchApplication(int applicationId) async {
+    final ok = await _teamsService.rejectMatchApplication(applicationId);
+    if (ok) {
+      _receivedMatchApplications.removeWhere((a) => a.id == applicationId);
+      notifyListeners();
+    }
+    return ok;
+  }
+
+  /// Recharge les invitations d'équipe en attente
+  Future<void> loadPendingInvitations() async {
+    try {
+      _pendingInvitations = await _teamsService.getPendingInvitations();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Répondre à une invitation (accepter ou refuser)
+  Future<bool> respondToInvitation({
+    required int invitationId,
+    required bool accept,
+  }) async {
+    try {
+      final success = await _teamsService.respondToInvitation(
+        invitationId: invitationId,
+        accept: accept,
+      );
+      if (success) {
+        _pendingInvitations.removeWhere((inv) => inv.id == invitationId);
+        if (accept) {
+          await loadMyTeam();
+        }
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Charge les invitations envoyées par mon équipe
+  Future<void> loadSentInvitations() async {
+    if (_myTeam == null) return;
+    try {
+      _sentInvitations = await _teamsService.getSentInvitations(_myTeam!.id);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Ajoute une invitation envoyée à l'état local (après envoi réussi)
+  void addSentInvitation(SentInvitation inv) {
+    _sentInvitations.removeWhere((e) => e.id == inv.id);
+    _sentInvitations.add(inv);
+    notifyListeners();
+  }
+
+  /// Annule une invitation envoyée (propriétaire uniquement)
+  Future<bool> cancelInvitation(int invitationId) async {
+    try {
+      final success = await _teamsService.cancelInvitation(invitationId);
+      if (success) {
+        _sentInvitations.removeWhere((inv) => inv.id == invitationId);
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -320,6 +593,26 @@ class TeamsProvider with ChangeNotifier {
     return false;
   }
 
+  /// Ajoute un membre à une équipe quelconque (par teamId)
+  Future<bool> addMember({
+    required int teamId,
+    required int userId,
+    required PlayerPosition position,
+    required int slotIndex,
+  }) async {
+    final member = await _teamsService.addMember(
+      teamId,
+      userId: userId,
+      position: position,
+      slotIndex: slotIndex,
+    );
+    if (member != null) {
+      await loadMyTeam();
+      return true;
+    }
+    return false;
+  }
+
   /// Retire un membre de "Mon Équipe"
   Future<bool> removeMemberFromMyTeam(int userId) async {
     if (_myTeam == null) return false;
@@ -353,19 +646,51 @@ class TeamsProvider with ChangeNotifier {
   Future<bool> updateMemberPosition({
     required int userId,
     required PlayerPosition position,
-    required int slotIndex,
   }) async {
     if (_myTeam == null) return false;
+
+    // Indices occupés par les autres membres (pas le membre qu'on déplace)
+    final othersOccupied = _myTeam!.members
+        .where((m) => m.user.id != userId)
+        .map((m) => m.slotIndex)
+        .toSet();
+
+    int effectiveSlotIndex;
+    if (position == PlayerPosition.substitute) {
+      effectiveSlotIndex = 5;
+      for (final idx in [5, 6, 7]) {
+        if (!othersOccupied.contains(idx)) {
+          effectiveSlotIndex = idx;
+          break;
+        }
+      }
+    } else if (position == PlayerPosition.defender) {
+      effectiveSlotIndex = 1;
+      for (final idx in [1, 4]) {
+        if (!othersOccupied.contains(idx)) {
+          effectiveSlotIndex = idx;
+          break;
+        }
+      }
+    } else {
+      // goalkeeper=0, midfielder=2, forward=3
+      effectiveSlotIndex = position.index;
+    }
 
     final member = await _teamsService.updateMemberPosition(
       _myTeam!.id,
       userId,
       position: position,
-      slotIndex: slotIndex,
+      slotIndex: effectiveSlotIndex,
     );
 
     if (member != null) {
-      await loadMyTeam(); // Recharger pour avoir la liste à jour
+      // Fermer le slot ouvert à la destination s'il y en avait un
+      final openSlot = getOpenSlotForIndex(effectiveSlotIndex);
+      if (openSlot != null) {
+        await closeOpenSlot(openSlot.id);
+      }
+      await loadMyTeam();
       return true;
     }
 
@@ -425,6 +750,8 @@ class TeamsProvider with ChangeNotifier {
     _updatePendingApplicationsCount();
     _allOpenSlots = [];
     _myApplications = [];
+    _allTeamsForDiscover = [];
+    _myJoinRequests = [];
     notifyListeners();
   }
 
@@ -441,13 +768,10 @@ class TeamsProvider with ChangeNotifier {
 
   /// Retourne le poste ouvert pour un slot donné
   OpenSlot? getOpenSlotForIndex(int slotIndex) {
-    try {
-      return _myOpenSlots.firstWhere(
-        (slot) => slot.slotIndex == slotIndex && slot.isActive,
-      );
-    } catch (_) {
-      return null;
+    for (final slot in _myOpenSlots) {
+      if (slot.slotIndex == slotIndex && slot.isActive) return slot;
     }
+    return null;
   }
 
   /// Charge les postes ouverts de mon équipe
@@ -467,23 +791,99 @@ class TeamsProvider with ChangeNotifier {
     required PlayerPosition position,
     required int slotIndex,
     String? description,
+    bool openAllSlots = false,
+    PlayerPosition? preferredPosition,
+    DateTime? matchDate,
+    String? matchLocation,
   }) async {
     if (_myTeam == null) return false;
 
     try {
-      final slot = await _teamsService.createOpenSlot(
-        _myTeam!.id,
-        position: position,
-        slotIndex: slotIndex,
-        description: description,
-      );
+      if (openAllSlots) {
+        final occupiedIndices = _myTeam!.members
+            .map((m) => m.slotIndex)
+            .toSet();
+        final alreadyOpenIndices = _myOpenSlots
+            .where((s) => s.isActive)
+            .map((s) => s.slotIndex)
+            .toSet();
+        final emptySlots = List.generate(5, (i) => i)
+            .where(
+              (i) =>
+                  !occupiedIndices.contains(i) &&
+                  !alreadyOpenIndices.contains(i),
+            )
+            .toList();
 
-      if (slot != null) {
-        _myOpenSlots.add(slot);
+        bool anySuccess = false;
+        for (final emptyIdx in emptySlots) {
+          final slotPosition = PlayerPosition.values[emptyIdx];
+          final slot = await _teamsService.createOpenSlot(
+            _myTeam!.id,
+            position: slotPosition,
+            slotIndex: emptyIdx,
+            description: description,
+            preferredPosition: preferredPosition,
+            matchDate: matchDate,
+            matchLocation: matchLocation,
+          );
+          if (slot != null) {
+            _myOpenSlots.add(slot);
+            anySuccess = true;
+          }
+        }
         notifyListeners();
-        return true;
+        return anySuccess;
+      } else {
+        final occupiedIndices = _myTeam!.members
+            .map((m) => m.slotIndex)
+            .toSet();
+        final alreadyOpenIndices = _myOpenSlots
+            .where((s) => s.isActive)
+            .map((s) => s.slotIndex)
+            .toSet();
+
+        int effectiveSlotIndex = slotIndex;
+        if (position == PlayerPosition.defender) {
+          // Les deux slots défenseurs sont 1 et 4 — choisir le premier disponible
+          const defenderSlots = [1, 4];
+          for (final idx in [
+            slotIndex,
+            ...defenderSlots.where((i) => i != slotIndex),
+          ]) {
+            if (!occupiedIndices.contains(idx) &&
+                !alreadyOpenIndices.contains(idx)) {
+              effectiveSlotIndex = idx;
+              break;
+            }
+          }
+        } else if (position == PlayerPosition.substitute) {
+          // Les slots remplaçants sont 5, 6, 7 — prendre le premier libre
+          for (final idx in [5, 6, 7]) {
+            if (!occupiedIndices.contains(idx) &&
+                !alreadyOpenIndices.contains(idx)) {
+              effectiveSlotIndex = idx;
+              break;
+            }
+          }
+        }
+
+        final slot = await _teamsService.createOpenSlot(
+          _myTeam!.id,
+          position: position,
+          slotIndex: effectiveSlotIndex,
+          description: description,
+          preferredPosition: preferredPosition,
+          matchDate: matchDate,
+          matchLocation: matchLocation,
+        );
+        if (slot != null) {
+          _myOpenSlots.add(slot);
+          notifyListeners();
+          return true;
+        }
+        return false;
       }
-      return false;
     } catch (e) {
       return false;
     }
@@ -525,17 +925,10 @@ class TeamsProvider with ChangeNotifier {
       _receivedApplications = await _teamsService.getTeamApplications(
         _myTeam!.id,
       );
-      debugPrint(
-        'loadReceivedApplications: ${_receivedApplications.length} candidatures chargées',
-      );
-      for (var app in _receivedApplications) {
-        debugPrint('  - Candidature ${app.id}: statut ${app.status}');
-      }
+      for (var app in _receivedApplications) {}
       _updatePendingApplicationsCount();
       notifyListeners();
-    } catch (e) {
-      debugPrint('Erreur loadReceivedApplications: $e');
-    }
+    } catch (e) {}
   }
 
   /// Charge mes candidatures envoyées
@@ -639,7 +1032,83 @@ class TeamsProvider with ChangeNotifier {
       }
       return false;
     } catch (e) {
-      debugPrint('Erreur cancelApplication: $e');
+      return false;
+    }
+  }
+
+  // ============================================================
+  // Rejoindre directement un poste ouvert
+  // ============================================================
+
+  /// Rejoindre directement un poste ouvert (sans validation)
+  Future<({bool success, bool alreadyTaken, String? error})> joinSlotDirectly(
+    int slotId,
+  ) async {
+    try {
+      final result = await _teamsService.joinOpenSlotDirectly(slotId);
+      if (result.success) {
+        await Future.wait([loadMyTeam(), loadAllOpenSlots()]);
+      } else if (result.alreadyTaken) {
+        await loadAllOpenSlots();
+      }
+      return result;
+    } catch (e) {
+      return (success: false, alreadyTaken: false, error: null);
+    }
+  }
+
+  // ============================================================
+  // Demandes de rejoindre une équipe
+  // ============================================================
+
+  /// Charge toutes les équipes pour la découverte
+  Future<void> loadAllTeamsForDiscover() async {
+    try {
+      _allTeamsForDiscover = await _teamsService.getAllTeamsForDiscover();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Charge les demandes de rejoindre envoyées
+  Future<void> loadMyJoinRequests() async {
+    try {
+      _myJoinRequests = await _teamsService.getMyJoinRequests();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  /// Envoie une demande pour rejoindre une équipe
+  Future<({bool success, String? error})> sendJoinRequest(
+    int teamId, {
+    String? source,
+  }) async {
+    try {
+      final result = await _teamsService.sendJoinRequest(
+        teamId,
+        source: source,
+      );
+      final request = result.request;
+      if (request != null) {
+        _myJoinRequests.add(request);
+        notifyListeners();
+        return (success: true, error: null);
+      }
+      return (success: false, error: result.error);
+    } catch (_) {
+      return (success: false, error: null);
+    }
+  }
+
+  /// Annule une demande de rejoindre
+  Future<bool> cancelJoinRequest(int requestId) async {
+    try {
+      final success = await _teamsService.cancelJoinRequest(requestId);
+      if (success) {
+        _myJoinRequests.removeWhere((r) => r.id == requestId);
+        notifyListeners();
+      }
+      return success;
+    } catch (_) {
       return false;
     }
   }
@@ -657,13 +1126,11 @@ class TeamsProvider with ChangeNotifier {
       _isTeamChatConnected = true;
       _activeTeamChatId = teamId;
       notifyListeners();
-      debugPrint('✅ Team chat WebSocket connected to team $teamId');
     };
     _teamsService.onTeamChatDisconnected = () {
       _isTeamChatConnected = false;
       _activeTeamChatId = null;
       notifyListeners();
-      debugPrint('❌ Team chat WebSocket disconnected');
     };
 
     // Se connecter
@@ -680,8 +1147,6 @@ class TeamsProvider with ChangeNotifier {
 
   /// Gère un nouveau message reçu via WebSocket
   void _handleNewTeamMessage(TeamChatMessage message) {
-    debugPrint('📩 New team message received in team ${message.teamId}');
-
     // Ajouter le message à la fin de la liste (ordre chronologique: plus ancien -> plus récent)
     // L'API renvoie les messages en ordre chronologique, donc on doit garder cet ordre
     if (_teamMessages.containsKey(message.teamId)) {
@@ -793,9 +1258,7 @@ class TeamsProvider with ChangeNotifier {
 
       _myTeamChats = chats;
       notifyListeners();
-    } catch (e) {
-      debugPrint('Erreur loadMyTeamChats: $e');
-    }
+    } catch (e) {}
   }
 
   /// Charger les messages d'une équipe spécifique
@@ -826,7 +1289,6 @@ class TeamsProvider with ChangeNotifier {
       _isLoadingMessages = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Erreur loadTeamMessages: $e');
       _isLoadingMessages = false;
       notifyListeners();
     }
@@ -859,7 +1321,6 @@ class TeamsProvider with ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
-      debugPrint('Erreur sendMessage: $e');
       _isSendingMessage = false;
       notifyListeners();
       return false;
@@ -893,9 +1354,7 @@ class TeamsProvider with ChangeNotifier {
           notifyListeners();
         }
       }
-    } catch (e) {
-      debugPrint('Erreur markMessagesAsRead: $e');
-    }
+    } catch (e) {}
   }
 
   // =====================
@@ -920,21 +1379,17 @@ class TeamsProvider with ChangeNotifier {
         loadMyTeamChats();
       }
     });
-
-    debugPrint(
-      '🔄 Chat polling started (every ${_pollingInterval.inSeconds}s)',
-    );
   }
 
   /// Arrête le polling
   void stopChatPolling() {
     _chatPollingTimer?.cancel();
     _chatPollingTimer = null;
-    debugPrint('⏹️ Chat polling stopped');
   }
 
   @override
   void dispose() {
+    stopPollingNotifications();
     stopChatPolling();
     _teamsService.disconnectFromTeamChat();
     super.dispose();

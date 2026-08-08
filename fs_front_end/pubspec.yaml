@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.1.1+2
 
 environment:
   sdk: ^3.10.1
@@ -42,10 +42,15 @@ dependencies:
   web_socket_channel: ^3.0.0
   
   # Carte et géolocalisation
-  flutter_map: ^7.0.2
-  latlong2: ^0.9.1
+  google_maps_flutter: ^2.9.0
   geolocator: ^13.0.2
   url_launcher: ^6.3.1
+  flutter_svg: ^2.0.16
+  google_fonts: ^6.2.1
+  intl: ^0.19.0
+  image_picker: ^1.0.4
+  image_cropper: ^12.2.1
+  sentry_flutter: ^8.14.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +81,13 @@ flutter:
     - assets/logos/google_logo_icon.png
     - assets/logos/soccer_silhouette_transparent.png
     - assets/logos/soccer_silhouette_white.png
+    - assets/logos/minipitch.png
+    - assets/logos/pitch.png
+    - assets/logos/pitchball.png
+    - assets/logos/image_badge.png
+    - assets/logos/trouve_ton_terrain.png
+    - assets/logos/monte_ton_equipe.png
+    - assets/logos/defie_autre_equipes.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

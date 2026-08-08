@@ -1,42 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
-import '../theme_config/colors_config.dart';
 import '../providers/teams_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/teams_service.dart';
 
-Widget _buildGlassContainer({
-  required Widget child,
-  required Gradient gradient,
-  double borderRadius = 20,
-  double blur = 10,
-  List<BoxShadow>? boxShadow,
-}) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(borderRadius),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow:
-              boxShadow ??
-              [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-        ),
-        child: child,
-      ),
-    ),
-  );
+import '../theme/app_colors.dart';
+import '../widgets/city_autocomplete_field.dart';
+
+// ─── Top-level helpers ────────────────────────────────────────────────────────
+
+String _formatDate(DateTime date) {
+  final now = DateTime.now();
+  final diff = now.difference(date);
+  if (diff.inDays > 0) {
+    return 'il y a ${diff.inDays} jour${diff.inDays > 1 ? 's' : ''}';
+  } else if (diff.inHours > 0) {
+    return 'il y a ${diff.inHours} heure${diff.inHours > 1 ? 's' : ''}';
+  } else if (diff.inMinutes > 0) {
+    return 'il y a ${diff.inMinutes} minute${diff.inMinutes > 1 ? 's' : ''}';
+  } else {
+    return 'à l\'instant';
+  }
 }
 
-/// Page pour découvrir les équipes en recherche de joueurs
+// ─── Widget ───────────────────────────────────────────────────────────────────
+
 class DiscoverTeamsPage extends StatefulWidget {
   const DiscoverTeamsPage({super.key});
 
@@ -49,10 +40,18 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   late TabController _tabController;
   PlayerPosition? _selectedPositionFilter;
 
+  // Recherche dans l'onglet ÉQUIPES
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _searchDebounce;
+
+  // Tracks optimistic join-request state: teamId → true while sending
+  final Set<int> _pendingJoinTeams = {};
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
@@ -61,72 +60,418 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
+
+  // ── Business logic ──────────────────────────────────────────────────────────
 
   Future<void> _loadData() async {
     final teamsProvider = context.read<TeamsProvider>();
     await Future.wait([
+      teamsProvider.loadAllTeamsForDiscover(),
       teamsProvider.loadAllOpenSlots(position: _selectedPositionFilter),
-      teamsProvider.loadMyApplications(),
+      teamsProvider.loadMyJoinRequests(),
     ]);
   }
 
+  void _applyFilter(PlayerPosition? position) {
+    setState(() {
+      _selectedPositionFilter = position;
+    });
+    context.read<TeamsProvider>().loadAllOpenSlots(position: position);
+  }
+
+  // ── Build ───────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text('Trouve ton équipe'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Équipes en recherche'),
-            Tab(text: 'Mes candidatures'),
-          ],
-          indicatorColor: myAccentVibrantBlue,
-          labelColor: myAccentVibrantBlue,
+        backgroundColor: AppColors.card,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.card2,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.border2),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.muted2,
+                size: 16,
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          'Trouve ton équipe',
+          style: AppTypography.display(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: AppColors.white,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: IgnorePointer(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.0, -0.4),
+                radius: 2.4,
+                colors: [Color(0x38FF7F2A), Colors.transparent],
+              ),
+            ),
+          ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _buildOpenSlotsTab(isDarkMode),
-          _buildMyApplicationsTab(isDarkMode),
+          _buildAvailabilityBanner(context),
+          _buildCustomTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildAllTeamsTab(),
+                _buildOpenSlotsTab(),
+                _buildMyJoinRequestsTab(),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildOpenSlotsTab(bool isDarkMode) {
+  // ── Availability banner ─────────────────────────────────────────────────────
+
+  Widget _buildAvailabilityBanner(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        final isAvailable = auth.currentUser?.isAvailable ?? false;
+        return GestureDetector(
+          onTap: () {
+            if (!isAvailable) {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => _AvailabilitySheet(auth: auth),
+              );
+            } else {
+              auth.setAvailability(false);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: isAvailable ? const Color(0x1AFF7F2A) : AppColors.card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isAvailable
+                    ? AppColors.amber.withValues(alpha: 0.40)
+                    : AppColors.border2,
+                width: isAvailable ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isAvailable
+                        ? AppColors.amberDim
+                        : const Color(0x0FFFFFFF),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    isAvailable
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    size: 18,
+                    color: isAvailable ? AppColors.amber : AppColors.muted2,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isAvailable
+                                ? 'PROFIL VISIBLE'
+                                : 'ÊTRE TROUVÉ PAR LES ÉQUIPES',
+                            style: AppTypography.display(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              color: isAvailable
+                                  ? AppColors.amber
+                                  : AppColors.muted2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isAvailable
+                                ? 'Les équipes peuvent t\'inviter'
+                                : 'Active pour recevoir des invitations',
+                            style: AppTypography.body(
+                              fontSize: 11,
+                              color: isAvailable
+                                  ? AppColors.white
+                                  : AppColors.muted2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => _showInfoModal(
+                            'Rendez-vous visible auprès des équipes',
+                            [
+                              'Activez ce mode pour apparaître auprès des équipes incomplètes à la recherche d\'un joueur.',
+                              '--> Les équipes peuvent consulter votre profil et vous envoyer une demande pour rejoindre leur match.',
+                              '--> Vous pouvez accepter ou refuser chaque demande librement.',
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.info_outline,
+                            size: 14,
+                            color: isAvailable
+                                ? AppColors.amber.withValues(alpha: 0.65)
+                                : AppColors.muted2.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  width: 42,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isAvailable
+                        ? AppColors.amber
+                        : const Color(0xFF2A2D38),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 220),
+                    alignment: isAvailable
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.all(3),
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Custom tab bar ──────────────────────────────────────────────────────────
+
+  Widget _buildCustomTabBar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: [
+          _buildTabPill(0, 'ÉQUIPES'),
+          const SizedBox(width: 8),
+          _buildTabPill(1, 'POSTES OUVERTS'),
+          const SizedBox(width: 8),
+          _buildTabPill(2, 'CANDIDATURES'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabPill(int index, String label) {
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, _) {
+        final isSelected = _tabController.index == index;
+        return GestureDetector(
+          onTap: () => _tabController.animateTo(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.amber : AppColors.card2,
+              borderRadius: BorderRadius.circular(8),
+              border: isSelected ? null : Border.all(color: AppColors.border2),
+            ),
+            child: Text(
+              label,
+              style: AppTypography.display(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+                color: isSelected ? const Color(0xFF0B0D11) : AppColors.muted2,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ── Tab: ÉQUIPES (toutes les équipes) ───────────────────────────────────────
+
+  Widget _buildAllTeamsTab() {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, _) {
+        final myTeamIds = teamsProvider.allTeams.map((t) => t.id).toSet();
+        final allTeams = teamsProvider.allTeamsForDiscover;
+
+        final q = _searchQuery.toLowerCase().trim();
+        final teams = q.isEmpty
+            ? allTeams
+            : allTeams.where((t) {
+                final nameMatch = t.name.toLowerCase().contains(q);
+                final ownerMatch =
+                    t.ownerUsername?.toLowerCase().contains(q) ?? false;
+                final codeMatch =
+                    t.ownerCodeId?.toLowerCase().contains(q) ?? false;
+                return nameMatch || ownerMatch || codeMatch;
+              }).toList();
+
         return Column(
           children: [
-            // Filtre par position
-            _buildPositionFilter(isDarkMode),
-            // Liste des postes
+            // Barre de recherche
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Container(
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0x21FFFFFF)),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (v) {
+                    _searchDebounce?.cancel();
+                    _searchDebounce = Timer(
+                      const Duration(milliseconds: 300),
+                      () {
+                        setState(() => _searchQuery = v);
+                      },
+                    );
+                  },
+                  style: AppTypography.body(
+                    color: AppColors.white,
+                    fontSize: 13,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher une équipe ou un capitaine...',
+                    hintStyle: AppTypography.body(
+                      color: AppColors.muted2,
+                      fontSize: 13,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.muted2,
+                      size: 18,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              color: AppColors.muted2,
+                              size: 16,
+                            ),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ),
+            // Liste des équipes
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => teamsProvider.loadAllOpenSlots(
-                  position: _selectedPositionFilter,
-                ),
-                child: teamsProvider.allOpenSlots.isEmpty
+                color: AppColors.amber,
+                onRefresh: () async {
+                  await Future.wait([
+                    teamsProvider.loadAllTeamsForDiscover(),
+                    teamsProvider.loadMyJoinRequests(),
+                  ]);
+                },
+                child: allTeams.isEmpty
                     ? _buildEmptyState(
-                        icon: Icons.sports_soccer,
-                        message: 'Aucune équipe en recherche pour le moment',
-                        isDarkMode: isDarkMode,
-                        onRefresh: () => teamsProvider.loadAllOpenSlots(
-                          position: _selectedPositionFilter,
+                        icon: Icons.groups_outlined,
+                        message: 'Aucune équipe disponible pour le moment',
+                        onRefresh: () =>
+                            teamsProvider.loadAllTeamsForDiscover(),
+                      )
+                    : teams.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Text(
+                            'Aucune équipe pour "$_searchQuery"',
+                            style: AppTypography.body(
+                              color: AppColors.muted2,
+                              fontSize: 13,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: teamsProvider.allOpenSlots.length,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        itemCount: teams.length,
                         itemBuilder: (context, index) {
-                          final slot = teamsProvider.allOpenSlots[index];
-                          return _buildOpenSlotCard(slot, isDarkMode);
+                          final team = teams[index];
+                          final isMember = myTeamIds.contains(team.id);
+                          final pendingRequest = teamsProvider.myJoinRequests
+                              .where(
+                                (r) =>
+                                    r.teamId == team.id &&
+                                    r.status == ApplicationStatus.pending,
+                              )
+                              .firstOrNull;
+                          return _buildTeamDiscoverCard(
+                            team,
+                            teamsProvider,
+                            isMember: isMember,
+                            pendingRequest: pendingRequest,
+                          );
                         },
                       ),
               ),
@@ -137,7 +482,514 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     );
   }
 
-  Widget _buildPositionFilter(bool isDarkMode) {
+  Widget _buildTeamDiscoverCard(
+    TeamPreview team,
+    TeamsProvider teamsProvider, {
+    bool isMember = false,
+    TeamJoinRequest? pendingRequest,
+  }) {
+    final isSending = _pendingJoinTeams.contains(team.id);
+    final hasPendingRequest = pendingRequest != null;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border2),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Logo
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: AppColors.amberDim,
+                borderRadius: BorderRadius.circular(10),
+                image: team.logoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(team.logoUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: team.logoUrl == null
+                  ? Center(
+                      child: Text(
+                        team.name[0].toUpperCase(),
+                        style: AppTypography.display(
+                          color: AppColors.amber,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            // Infos
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    team.name,
+                    style: AppTypography.display(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.people_outline,
+                        size: 12,
+                        color: AppColors.muted2,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${team.membersCount} joueur${team.membersCount > 1 ? 's' : ''}',
+                        style: AppTypography.body(
+                          fontSize: 11,
+                          color: AppColors.muted2,
+                        ),
+                      ),
+                      if (team.ownerUsername != null) ...[
+                        const SizedBox(width: 8),
+                        const Text(
+                          '·',
+                          style: TextStyle(
+                            color: AppColors.muted2,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '@${team.ownerUsername}',
+                            style: AppTypography.body(
+                              fontSize: 11,
+                              color: AppColors.amber,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (team.description != null &&
+                      team.description!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      team.description!,
+                      style: AppTypography.body(
+                        fontSize: 11,
+                        color: AppColors.muted2,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Bouton
+            if (isMember)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.sageDim,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.sage.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check, size: 12, color: AppColors.sage),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Membre',
+                      style: AppTypography.display(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.sage,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (hasPendingRequest)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.amberDim,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.amber.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  'Envoyée',
+                  style: AppTypography.display(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.amber,
+                  ),
+                ),
+              )
+            else
+              GestureDetector(
+                onTap: isSending
+                    ? null
+                    : () => _sendJoinRequest(team, teamsProvider),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: isSending
+                        ? null
+                        : const LinearGradient(
+                            colors: [AppColors.amberSoft, AppColors.amberD],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                    color: isSending ? AppColors.card2 : null,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: isSending
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.amber,
+                          ),
+                        )
+                      : Text(
+                          // Adhésion soumise à validation du capitaine, à ne
+                          // pas confondre avec le bouton « Rejoindre » des
+                          // postes ouverts, qui lui est immédiat.
+                          'Postuler',
+                          style: AppTypography.display(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0B0D11),
+                          ),
+                        ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendJoinRequest(
+    TeamPreview team,
+    TeamsProvider teamsProvider,
+  ) async {
+    setState(() => _pendingJoinTeams.add(team.id));
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await teamsProvider.sendJoinRequest(
+      team.id,
+      source: 'discover',
+    );
+    if (!mounted) return;
+    setState(() => _pendingJoinTeams.remove(team.id));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.success
+              ? 'Demande envoyée à ${team.name} !'
+              // Le message de l'API précise le motif (déjà membre, candidature
+              // en attente…) ; le texte générique ne sert que de repli réseau.
+              : result.error ?? 'Erreur lors de l\'envoi de la demande',
+        ),
+        backgroundColor: result.success ? AppColors.sage : AppColors.rose,
+      ),
+    );
+  }
+
+  // ── Tab: POSTES OUVERTS ─────────────────────────────────────────────────────
+
+  Widget _buildOpenSlotsTab() {
+    return Consumer<TeamsProvider>(
+      builder: (context, teamsProvider, _) {
+        // L'API exclut les équipes qu'on possède, mais pas celles dont on est
+        // simplement membre : sans ce filtre, on propose de rejoindre une
+        // équipe qu'on a déjà rejointe, et le serveur refuse forcément.
+        final myTeamIds = teamsProvider.allTeams.map((t) => t.id).toSet();
+        final slots = teamsProvider.allOpenSlots
+            .where((s) => !myTeamIds.contains(s.teamId))
+            .toList();
+
+        return Column(
+          children: [
+            _buildPositionFilter(),
+            Expanded(
+              child: RefreshIndicator(
+                color: AppColors.amber,
+                onRefresh: () => teamsProvider.loadAllOpenSlots(
+                  position: _selectedPositionFilter,
+                ),
+                child: slots.isEmpty
+                    ? _buildEmptyState(
+                        icon: Icons.sports_soccer,
+                        message: 'Aucun poste ouvert disponible pour le moment',
+                        onRefresh: () => teamsProvider.loadAllOpenSlots(
+                          position: _selectedPositionFilter,
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: slots.length,
+                        itemBuilder: (context, index) {
+                          return _buildOpenSlotCard(
+                            slots[index],
+                            teamsProvider,
+                          );
+                        },
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ── Tab: CANDIDATURES (demandes de rejoindre) ───────────────────────────────
+
+  Widget _buildMyJoinRequestsTab() {
+    return Consumer<TeamsProvider>(
+      builder: (context, teamsProvider, _) {
+        final requests = teamsProvider.myJoinRequests;
+        return RefreshIndicator(
+          color: AppColors.amber,
+          onRefresh: () => teamsProvider.loadMyJoinRequests(),
+          child: requests.isEmpty
+              ? _buildEmptyState(
+                  icon: Icons.inbox_outlined,
+                  message: 'Vous n\'avez pas encore envoyé de demande',
+                  onRefresh: () => teamsProvider.loadMyJoinRequests(),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: requests.length,
+                  itemBuilder: (context, index) {
+                    final request = requests[index];
+                    return _buildJoinRequestCard(request, teamsProvider);
+                  },
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _buildJoinRequestCard(
+    TeamJoinRequest request,
+    TeamsProvider teamsProvider,
+  ) {
+    Color statusColor;
+    Color statusDimColor;
+    String statusText;
+    IconData statusIcon;
+
+    switch (request.status) {
+      case ApplicationStatus.pending:
+        statusColor = AppColors.amber;
+        statusDimColor = AppColors.amberDim;
+        statusText = 'En attente';
+        statusIcon = Icons.hourglass_empty;
+        break;
+      case ApplicationStatus.accepted:
+        statusColor = AppColors.sage;
+        statusDimColor = AppColors.sageDim;
+        statusText = 'Acceptée';
+        statusIcon = Icons.check_circle;
+        break;
+      case ApplicationStatus.rejected:
+        statusColor = AppColors.rose;
+        statusDimColor = AppColors.roseDim;
+        statusText = 'Refusée';
+        statusIcon = Icons.cancel;
+        break;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border2),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.amberDim,
+                    borderRadius: BorderRadius.circular(10),
+                    image: request.teamLogoUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(request.teamLogoUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: request.teamLogoUrl == null
+                      ? Center(
+                          child: Text(
+                            request.teamName[0].toUpperCase(),
+                            style: AppTypography.display(
+                              color: AppColors.amber,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        request.teamName,
+                        style: AppTypography.display(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (request.ownerUsername != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '@${request.ownerUsername}',
+                          style: AppTypography.body(
+                            fontSize: 12,
+                            color: AppColors.amber,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusDimColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, size: 12, color: statusColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        statusText,
+                        style: AppTypography.display(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Envoyée ${_formatDate(request.createdAt)}',
+              style: AppTypography.body(color: AppColors.muted2, fontSize: 11),
+            ),
+            if (request.status == ApplicationStatus.pending) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: () => _showCancelJoinRequestConfirmation(
+                      request,
+                      teamsProvider,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.rose),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.cancel_outlined,
+                            size: 14,
+                            color: AppColors.rose,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Annuler',
+                            style: AppTypography.display(
+                              color: AppColors.rose,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Position filter ─────────────────────────────────────────────────────────
+
+  Widget _buildPositionFilter() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.all(12),
@@ -147,7 +999,6 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
             label: 'Tous',
             isSelected: _selectedPositionFilter == null,
             onTap: () => _applyFilter(null),
-            isDarkMode: isDarkMode,
           ),
           const SizedBox(width: 8),
           ...PlayerPosition.values
@@ -159,7 +1010,6 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
                     label: position.displayName,
                     isSelected: _selectedPositionFilter == position,
                     onTap: () => _applyFilter(position),
-                    isDarkMode: isDarkMode,
                   ),
                 ),
               ),
@@ -172,183 +1022,549 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
-    required bool isDarkMode,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? myAccentVibrantBlue
-              : (isDarkMode ? MyprimaryDark : Colors.grey[200]),
+          color: isSelected ? AppColors.amber : AppColors.card2,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? myAccentVibrantBlue : Colors.transparent,
-          ),
+          border: isSelected ? null : Border.all(color: AppColors.border2),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected
-                ? Colors.white
-                : (isDarkMode ? Colors.white70 : Colors.black87),
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          style: AppTypography.display(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? const Color(0xFF0B0D11) : AppColors.muted2,
           ),
         ),
       ),
     );
   }
 
-  void _applyFilter(PlayerPosition? position) {
-    setState(() {
-      _selectedPositionFilter = position;
-    });
-    context.read<TeamsProvider>().loadAllOpenSlots(position: position);
-  }
+  // ── Open slot card ──────────────────────────────────────────────────────────
 
-  Widget _buildOpenSlotCard(OpenSlot slot, bool isDarkMode) {
+  Widget _buildOpenSlotCard(OpenSlot slot, TeamsProvider teamsProvider) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: _buildGlassContainer(
-        gradient: LinearGradient(
-          colors: isDarkMode
-              ? [
-                  myAccentVibrantBlue.withOpacity(0.18),
-                  Colors.black.withOpacity(0.10),
-                ]
-              : [
-                  myAccentVibrantBlue.withOpacity(0.13),
-                  Colors.white.withOpacity(0.10),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border2),
         ),
-        borderRadius: 16,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Logo équipe ou placeholder
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                    backgroundImage: slot.teamLogoUrl != null
-                        ? NetworkImage(slot.teamLogoUrl!)
-                        : null,
-                    child: slot.teamLogoUrl == null
-                        ? Text(
-                            slot.teamName[0].toUpperCase(),
-                            style: const TextStyle(
-                              color: myAccentVibrantBlue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: AppColors.amberDim,
+                    borderRadius: BorderRadius.circular(10),
+                    image: slot.teamLogoUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(slot.teamLogoUrl!),
+                            fit: BoxFit.cover,
                           )
                         : null,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          slot.teamName,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? myLightBackground
-                                : MyprimaryDark,
+                  child: slot.teamLogoUrl == null
+                      ? Center(
+                          child: Text(
+                            slot.teamName[0].toUpperCase(),
+                            style: AppTypography.display(
+                              color: AppColors.amber,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'par @${slot.ownerUsername}',
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getPositionColor(slot.position).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      slot.position.displayName,
-                      style: TextStyle(
-                        color: _getPositionColor(slot.position),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (slot.description != null && slot.description!.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDarkMode
-                        ? Colors.grey[800]!.withOpacity(0.5)
-                        : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.format_quote,
-                        color: Colors.grey[500],
-                        size: 20,
+                      Text(
+                        slot.teamName,
+                        style: AppTypography.display(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.white,
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          slot.description!,
-                          style: TextStyle(
-                            color: isDarkMode
-                                ? Colors.grey[300]
-                                : Colors.grey[700],
-                            fontStyle: FontStyle.italic,
-                          ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'par @${slot.ownerUsername}',
+                        style: AppTypography.body(
+                          fontSize: 11,
+                          color: AppColors.muted2,
                         ),
                       ),
                     ],
                   ),
                 ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.amberDim,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    slot.position.displayName,
+                    style: AppTypography.display(
+                      color: AppColors.amber,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
               ],
-              const SizedBox(height: 16),
+            ),
+            if (slot.description != null && slot.description!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.card2,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.format_quote,
+                      color: AppColors.muted2,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        slot.description!,
+                        style: AppTypography.body(
+                          color: AppColors.muted2,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: slot.matchDate != null
+                    ? AppColors.sageDim
+                    : AppColors.card2,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: slot.matchDate != null
+                      ? AppColors.sage.withValues(alpha: 0.3)
+                      : AppColors.border2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    slot.matchDate != null
+                        ? Icons.event_available
+                        : Icons.event_busy,
+                    size: 14,
+                    color: slot.matchDate != null
+                        ? AppColors.sage
+                        : AppColors.muted2,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    slot.matchDate != null
+                        ? 'Match prévu le ${slot.matchDate!.day.toString().padLeft(2, '0')}/${slot.matchDate!.month.toString().padLeft(2, '0')}/${slot.matchDate!.year} à ${slot.matchDate!.hour.toString().padLeft(2, '0')}h${slot.matchDate!.minute.toString().padLeft(2, '0')}'
+                        : 'Pas de match prévu',
+                    style: AppTypography.body(
+                      color: slot.matchDate != null
+                          ? AppColors.sage
+                          : AppColors.muted2,
+                      fontSize: 12,
+                      fontWeight: slot.matchDate != null
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (slot.matchDate != null && slot.matchLocation != null) ...[
+              const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 13,
+                    color: AppColors.sage,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      slot.matchLocation!,
+                      style: AppTypography.body(
+                        color: AppColors.sage,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (slot.preferredPosition != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.manage_accounts,
+                    size: 13,
+                    color: AppColors.muted2,
+                  ),
                   const SizedBox(width: 4),
                   Text(
-                    _formatDate(slot.createdAt),
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    'Profil recherché : ${slot.preferredPosition!.displayName}',
+                    style: AppTypography.body(
+                      color: AppColors.muted2,
+                      fontSize: 11,
+                    ),
                   ),
-                  const Spacer(),
-                  ElevatedButton.icon(
-                    onPressed: () => _showApplyDialog(context, slot),
-                    icon: const Icon(Icons.send, size: 18),
-                    label: const Text('Postuler'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: myAccentVibrantBlue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                ],
+              ),
+            ],
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  size: 13,
+                  color: AppColors.muted2,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _formatDate(slot.createdAt),
+                  style: AppTypography.body(
+                    color: AppColors.muted2,
+                    fontSize: 11,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => _joinSlot(slot, teamsProvider),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.amberSoft, AppColors.amberD],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.login,
+                          size: 12,
+                          color: Color(0xFF0B0D11),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Rejoindre',
+                          style: AppTypography.display(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                            letterSpacing: 0.6,
+                            color: const Color(0xFF0B0D11),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _joinSlot(OpenSlot slot, TeamsProvider teamsProvider) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await teamsProvider.joinSlotDirectly(slot.id);
+    if (!mounted) return;
+
+    if (result.success) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Tu as rejoint l\'équipe !'),
+          backgroundColor: AppColors.sage,
+        ),
+      );
+      Navigator.of(context).pop();
+      return;
+    }
+
+    // L'API explicite le refus : place déjà prise, déjà membre de l'équipe,
+    // sa propre équipe, poste supprimé. Le texte générique ne reste que pour
+    // les pannes réseau, où l'on n'a aucun message à afficher.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          result.error ?? 'Une erreur est survenue, réessaie plus tard.',
+        ),
+        backgroundColor: AppColors.rose,
+      ),
+    );
+  }
+
+  // ── Empty state ─────────────────────────────────────────────────────────────
+
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String message,
+    required VoidCallback onRefresh,
+  }) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 64, color: AppColors.muted2),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: AppTypography.body(color: AppColors.muted2, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: onRefresh,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.amberSoft, AppColors.amberD],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.refresh, size: 16, color: Color(0xFF0B0D11)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Rafraîchir',
+                    style: AppTypography.display(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: const Color(0xFF0B0D11),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Info modal ───────────────────────────────────────────────────────────────
+
+  void _showInfoModal(String title, List<String> lines) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border(
+            top: BorderSide(color: AppColors.border2, width: 1),
+            left: BorderSide(color: AppColors.border2, width: 1),
+            right: BorderSide(color: AppColors.border2, width: 1),
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border2,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(
+                  Icons.info_outline,
+                  color: AppColors.amber,
+                  size: 18,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: AppTypography.display(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            ...lines.map(
+              (line) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  line,
+                  style: AppTypography.body(
+                    fontSize: 13,
+                    color: AppColors.muted2,
+                    height: 1.55,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Dialogs ─────────────────────────────────────────────────────────────────
+
+  void _showCancelJoinRequestConfirmation(
+    TeamJoinRequest request,
+    TeamsProvider teamsProvider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.border2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Annuler la demande',
+                style: AppTypography.display(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: AppColors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Annuler la demande pour rejoindre "${request.teamName}" ?',
+                style: AppTypography.body(
+                  color: AppColors.muted2,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(dialogCtx).pop(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.card2,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Non',
+                            style: AppTypography.display(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppColors.muted2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        Navigator.of(dialogCtx).pop();
+                        final messenger = ScaffoldMessenger.of(context);
+                        final success = await teamsProvider.cancelJoinRequest(
+                          request.id,
+                        );
+                        if (!mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success
+                                  ? 'Demande annulée'
+                                  : 'Erreur lors de l\'annulation',
+                            ),
+                            backgroundColor: success
+                                ? AppColors.sage
+                                : AppColors.rose,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.roseDim,
+                          border: Border.all(color: AppColors.rose),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Oui, annuler',
+                            style: AppTypography.display(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppColors.rose,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -362,382 +1578,385 @@ class _DiscoverTeamsPageState extends State<DiscoverTeamsPage>
   }
 }
 
-Color _getPositionColor(PlayerPosition position) {
-  switch (position) {
-    case PlayerPosition.goalkeeper:
-      return Colors.orange;
-    case PlayerPosition.defender:
-      return Colors.blue;
-    case PlayerPosition.midfielder:
-      return Colors.green;
-    case PlayerPosition.forward:
-      return Colors.red;
-    case PlayerPosition.substitute:
-      return Colors.grey;
-  }
+// ─── Availability Setup Sheet ────────────────────────────────────────────────
+
+class _AvailabilitySheet extends StatefulWidget {
+  final AuthProvider auth;
+  const _AvailabilitySheet({required this.auth});
+
+  @override
+  State<_AvailabilitySheet> createState() => _AvailabilitySheetState();
 }
 
-String _formatDate(DateTime date) {
-  final now = DateTime.now();
-  final diff = now.difference(date);
-
-  if (diff.inDays > 0) {
-    return 'il y a ${diff.inDays} jour${diff.inDays > 1 ? 's' : ''}';
-  } else if (diff.inHours > 0) {
-    return 'il y a ${diff.inHours} heure${diff.inHours > 1 ? 's' : ''}';
-  } else if (diff.inMinutes > 0) {
-    return 'il y a ${diff.inMinutes} minute${diff.inMinutes > 1 ? 's' : ''}';
-  } else {
-    return 'à l\'instant';
-  }
-}
-
-void _showApplyDialog(BuildContext context, OpenSlot slot) {
-  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-  final messageController = TextEditingController();
-
-  showDialog(
-    context: context,
-    builder: (dialogCtx) => AlertDialog(
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
-      title: Text(
-        'Postuler chez ${slot.teamName}',
-        style: TextStyle(color: isDarkMode ? myLightBackground : MyprimaryDark),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.sports_soccer,
-                color: _getPositionColor(slot.position),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Poste : ${slot.position.displayName}',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: messageController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: 'Message (optionnel)',
-              hintText: 'Présentez-vous en quelques mots...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogCtx),
-          child: Text(
-            'Annuler',
-            style: TextStyle(
-              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            ),
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: () async {
-            Navigator.pop(dialogCtx);
-            final success = await context.read<TeamsProvider>().applyToSlot(
-              slot.id,
-              message: messageController.text.trim().isNotEmpty
-                  ? messageController.text.trim()
-                  : null,
-            );
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    success
-                        ? 'Candidature envoyée !'
-                        : 'Vous avez déjà postulé ou une erreur est survenue',
-                  ),
-                  backgroundColor: success ? Colors.green : Colors.red,
-                ),
-              );
-            }
-          },
-          icon: const Icon(Icons.send, color: Colors.white),
-          label: const Text('Envoyer'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: myAccentVibrantBlue,
-            foregroundColor: Colors.white,
-          ),
-        ),
-      ],
-    ),
+class _AvailabilitySheetState extends State<_AvailabilitySheet> {
+  late final List<DateTime> _dates = List.generate(
+    7,
+    (i) => DateTime.now().add(Duration(days: i)),
   );
-}
 
-Widget _buildMyApplicationsTab(bool isDarkMode) {
-  return Consumer<TeamsProvider>(
-    builder: (context, teamsProvider, _) {
-      final applications = teamsProvider.myApplications;
+  final Set<int> _selectedDays = {};
+  final List<TextEditingController> _cityControllers = [
+    TextEditingController(),
+  ];
+  int _radiusKm = 10;
+  bool _loading = false;
 
-      return RefreshIndicator(
-        onRefresh: () => teamsProvider.loadMyApplications(),
-        child: applications.isEmpty
-            ? _buildEmptyState(
-                icon: Icons.inbox_outlined,
-                message: 'Vous n\'avez pas encore postulé',
-                isDarkMode: isDarkMode,
-                onRefresh: () => teamsProvider.loadMyApplications(),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: applications.length,
-                itemBuilder: (context, index) {
-                  final app = applications[index];
-                  return _buildApplicationCard(context, app, isDarkMode);
-                },
-              ),
-      );
-    },
-  );
-}
+  bool get _allSelected => _selectedDays.length == 7;
 
-Widget _buildApplicationCard(
-  BuildContext context,
-  SlotApplicationDetail app,
-  bool isDarkMode,
-) {
-  final slot = app.openSlot;
-
-  Color statusColor;
-  String statusText;
-  IconData statusIcon;
-
-  switch (app.status) {
-    case ApplicationStatus.pending:
-      statusColor = Colors.orange;
-      statusText = 'En attente';
-      statusIcon = Icons.hourglass_empty;
-      break;
-    case ApplicationStatus.accepted:
-      statusColor = Colors.green;
-      statusText = 'Acceptée';
-      statusIcon = Icons.check_circle;
-      break;
-    case ApplicationStatus.rejected:
-      statusColor = Colors.red;
-      statusText = 'Refusée';
-      statusIcon = Icons.cancel;
-      break;
+  @override
+  void dispose() {
+    for (final c in _cityControllers) {
+      c.dispose();
+    }
+    super.dispose();
   }
 
-  return Card(
-    margin: const EdgeInsets.only(bottom: 12),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    color: isDarkMode ? MyprimaryDark : Colors.white,
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: myAccentVibrantBlue.withOpacity(0.2),
-                child: Text(
-                  slot.teamName[0].toUpperCase(),
-                  style: const TextStyle(
-                    color: myAccentVibrantBlue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      slot.teamName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? myLightBackground : MyprimaryDark,
-                      ),
-                    ),
-                    Text(
-                      'Poste : ${slot.position.displayName}',
-                      style: TextStyle(
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+  void _toggleAll() {
+    setState(() {
+      if (_allSelected) {
+        _selectedDays.clear();
+      } else {
+        _selectedDays.addAll({0, 1, 2, 3, 4, 5, 6});
+      }
+    });
+  }
+
+  String _fmt(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+  Future<void> _submit() async {
+    setState(() => _loading = true);
+    final sortedIndices = _selectedDays.toList()..sort();
+    final days = sortedIndices.map((i) => _fmt(_dates[i])).toList();
+    final cities = _cityControllers
+        .map((c) => c.text.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    final expiry = DateTime.now().add(const Duration(days: 7));
+    final endDate =
+        '${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
+    await widget.auth.setAvailability(
+      true,
+      days: days.isEmpty ? null : days,
+      endDate: endDate,
+      cities: cities.isEmpty ? null : cities,
+      radiusKm: _radiusKm,
+    );
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        16,
+        20,
+        MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.border2,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 14, color: statusColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      statusText,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (app.message != null && app.message!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Votre message : "${app.message}"',
-              style: TextStyle(
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                fontStyle: FontStyle.italic,
-                fontSize: 12,
               ),
             ),
-          ],
-          const SizedBox(height: 8),
-          Text(
-            'Envoyée ${_formatDate(app.appliedAt)}',
-            style: TextStyle(color: Colors.grey[500], fontSize: 11),
-          ),
-          // Bouton d'annulation pour les candidatures en attente
-          if (app.status == ApplicationStatus.pending) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            Text(
+              'DISPONIBILITÉ',
+              style: AppTypography.display(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Renseigne tes créneaux pour être contacté par les bonnes équipes',
+              style: AppTypography.body(fontSize: 12, color: AppColors.muted2),
+            ),
+            const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton.icon(
-                  onPressed: () =>
-                      _showCancelConfirmation(context, app, isDarkMode),
-                  icon: const Icon(Icons.cancel_outlined, size: 16),
-                  label: const Text('Annuler'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.red,
+                Expanded(
+                  child: Text(
+                    'Jours disponibles',
+                    style: AppTypography.display(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.white,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _toggleAll,
+                  child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _allSelected
+                          ? AppColors.amberDim
+                          : const Color(0x0EFFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _allSelected
+                            ? AppColors.amber.withValues(alpha: 0.4)
+                            : AppColors.border2,
+                      ),
+                    ),
+                    child: Text(
+                      'Tous',
+                      style: AppTypography.display(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: _allSelected
+                            ? AppColors.amber
+                            : AppColors.muted2,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-          ],
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildEmptyState({
-  required IconData icon,
-  required String message,
-  required bool isDarkMode,
-  required VoidCallback onRefresh,
-}) {
-  return Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 64, color: Colors.grey[400]),
-        const SizedBox(height: 16),
-        Text(
-          message,
-          style: TextStyle(
-            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            fontSize: 16,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton.icon(
-          onPressed: onRefresh,
-          icon: const Icon(Icons.refresh),
-          label: const Text('Rafraîchir'),
-        ),
-      ],
-    ),
-  );
-}
-
-void _showCancelConfirmation(
-  BuildContext context,
-  SlotApplicationDetail app,
-  bool isDarkMode,
-) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: isDarkMode ? MyprimaryDark : Colors.white,
-      title: Text(
-        'Annuler la candidature',
-        style: TextStyle(color: isDarkMode ? myLightBackground : MyprimaryDark),
-      ),
-      content: Text(
-        'Êtes-vous sûr de vouloir annuler votre candidature pour l\'équipe "${app.openSlot.teamName}" ?',
-        style: TextStyle(
-          color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'Non',
-            style: TextStyle(
-              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(7, (i) {
+                final sel = _selectedDays.contains(i);
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    if (sel) {
+                      _selectedDays.remove(i);
+                    } else {
+                      _selectedDays.add(i);
+                    }
+                  }),
+                  child: Container(
+                    width: 40,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: sel ? AppColors.amberDim : const Color(0x08FFFFFF),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: sel
+                            ? AppColors.amber.withValues(alpha: 0.4)
+                            : AppColors.border2,
+                      ),
+                    ),
+                    child: Text(
+                      _fmt(_dates[i]),
+                      textAlign: TextAlign.center,
+                      style: AppTypography.display(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: sel ? AppColors.amber : AppColors.muted2,
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ),
-          ),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.of(context).pop();
-
-            final teamsProvider = Provider.of<TeamsProvider>(
-              context,
-              listen: false,
-            );
-            final success = await teamsProvider.cancelApplication(app.id);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  success
-                      ? 'Candidature annulée avec succès'
-                      : 'Erreur lors de l\'annulation',
-                ),
-                backgroundColor: success ? Colors.green : Colors.red,
+            const SizedBox(height: 20),
+            Text(
+              'Zone géographique',
+              style: AppTypography.display(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white,
               ),
-            );
-          },
-          child: const Text(
-            'Oui, annuler',
-            style: TextStyle(color: Colors.red),
-          ),
+            ),
+            const SizedBox(height: 10),
+            ..._cityControllers.asMap().entries.map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CityAutocompleteField(
+                        key: ValueKey('city_${e.key}'),
+                        controller: e.value,
+                        style: AppTypography.body(
+                          fontSize: 13,
+                          color: AppColors.white,
+                        ),
+                        cursorColor: AppColors.amber,
+                        decoration: InputDecoration(
+                          hintText: 'Ville (ex: Paris)',
+                          hintStyle: AppTypography.body(
+                            fontSize: 13,
+                            color: AppColors.muted2,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0x08FFFFFF),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 11,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: AppColors.border2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                              color: AppColors.border2,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: AppColors.amber.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (e.key > 0) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () =>
+                            setState(() => _cityControllers.removeAt(e.key)),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: AppColors.roseDim,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.remove,
+                            size: 18,
+                            color: AppColors.rose,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (e.key == _cityControllers.length - 1 &&
+                        _cityControllers.length < 3) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => setState(
+                          () => _cityControllers.add(TextEditingController()),
+                        ),
+                        child: Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: AppColors.amberDim,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.amber.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            size: 18,
+                            color: AppColors.amber,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Rayon',
+              style: AppTypography.display(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [5, 10, 20, 50].map((km) {
+                final sel = _radiusKm == km;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _radiusKm = km),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
+                      decoration: BoxDecoration(
+                        color: sel
+                            ? AppColors.amberDim
+                            : const Color(0x08FFFFFF),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: sel
+                              ? AppColors.amber.withValues(alpha: 0.4)
+                              : AppColors.border2,
+                        ),
+                      ),
+                      child: Text(
+                        '$km km',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.display(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: sel ? AppColors.amber : AppColors.muted2,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: _loading ? null : _submit,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.amber,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: _loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'ACTIVER MA DISPO',
+                            style: AppTypography.display(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }

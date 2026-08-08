@@ -10,6 +10,9 @@ class AuthService {
   AuthService._privateConstructor();
   static final AuthService instance = AuthService._privateConstructor();
 
+  // Déclenché par app_http.dart quand une réponse 401 est reçue sur une requête authentifiée
+  static void Function()? onUnauthorized;
+
   // Utilise la configuration centralisée de l'API
   final String baseUrl = ApiConfig.authUrl;
 
@@ -228,6 +231,32 @@ class AuthService {
     }
   }
 
+  /// Met à jour le statut de disponibilité du joueur
+  Future<bool> setAvailability(
+    bool isAvailable, {
+    List<String>? days,
+    String? endDate,
+    List<String>? cities,
+    int? radiusKm,
+  }) async {
+    final authHeader = await getAuthHeader();
+    if (authHeader == null) return false;
+    final body = <String, dynamic>{'is_available': isAvailable};
+    if (days != null) body['availability_days'] = jsonEncode(days);
+    if (endDate != null) body['availability_end_date'] = endDate;
+    if (cities != null) body['availability_cities'] = jsonEncode(cities);
+    if (radiusKm != null) body['availability_radius_km'] = radiusKm;
+    final resp = await http.patch(
+      Uri.parse('$baseUrl/me'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authHeader,
+      },
+      body: jsonEncode(body),
+    );
+    return resp.statusCode == 200;
+  }
+
   /// Retourne l'en-tête Authorization si possible (essaie de rafraîchir si nécessaire)
   Future<String?> getAuthHeader() async {
     var access = await getAccessToken();
@@ -261,6 +290,59 @@ class AuthService {
     return null;
   }
 
+  /// Demande un code de réinitialisation par email
+  Future<Map<String, dynamic>> requestPasswordReset({
+    required String email,
+  }) async {
+    final url = Uri.parse('$baseUrl/password-reset/');
+    try {
+      final resp = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (resp.statusCode == 200 ||
+          resp.statusCode == 201 ||
+          resp.statusCode == 204) {
+        return {'ok': true};
+      }
+      try {
+        final errorData = jsonDecode(resp.body);
+        return {'ok': false, 'message': errorData['detail'] ?? resp.body};
+      } catch (_) {
+        return {'ok': false, 'message': resp.body};
+      }
+    } catch (e) {
+      return {'ok': false, 'message': 'Erreur réseau : $e'};
+    }
+  }
+
+  /// Confirme la réinitialisation avec le code reçu par email
+  Future<Map<String, dynamic>> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+  }) async {
+    final url = Uri.parse('$baseUrl/password-reset/confirm/');
+    try {
+      final resp = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'password': newPassword}),
+      );
+      if (resp.statusCode == 200 || resp.statusCode == 204) {
+        return {'ok': true};
+      }
+      try {
+        final errorData = jsonDecode(resp.body);
+        return {'ok': false, 'message': errorData['detail'] ?? resp.body};
+      } catch (_) {
+        return {'ok': false, 'message': resp.body};
+      }
+    } catch (e) {
+      return {'ok': false, 'message': 'Erreur réseau : $e'};
+    }
+  }
+
   /// Supprime le compte de l'utilisateur connecté
   Future<bool> deleteAccount() async {
     final authHeader = await getAuthHeader();
@@ -288,10 +370,8 @@ class AuthService {
         return true;
       }
 
-      debugPrint('Erreur deleteAccount: ${resp.statusCode} - ${resp.body}');
       return false;
     } catch (e) {
-      debugPrint('Exception deleteAccount: $e');
       return false;
     }
   }

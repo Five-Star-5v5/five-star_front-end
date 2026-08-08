@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:five_star_5v5/theme/app_typography.dart';
 import 'package:provider/provider.dart';
 
 import 'theme_config/colors_config.dart';
@@ -7,6 +8,9 @@ import 'pages/home_page.dart';
 import 'pages/friends_list_page.dart';
 import 'pages/profile_page.dart';
 import 'providers/messages_provider.dart';
+import 'providers/friends_provider.dart';
+import 'providers/teams_provider.dart';
+import 'services/tab_navigation.dart';
 
 class FootApp extends StatefulWidget {
   const FootApp({super.key});
@@ -15,6 +19,7 @@ class FootApp extends StatefulWidget {
   State<FootApp> createState() => _FootAppState();
 
   // Pour récupérer l'état depuis n'importe quel widget (toggle du thème)
+  // ignore: library_private_types_in_public_api
   static _FootAppState of(BuildContext context) =>
       context.findAncestorStateOfType<_FootAppState>()!;
 }
@@ -39,7 +44,7 @@ class _FootAppState extends State<FootApp> {
     ),
     scaffoldBackgroundColor: myLightBackground,
     appBarTheme: const AppBarTheme(
-      color: myLightBackground,
+      backgroundColor: myLightBackground,
       elevation: 0,
       iconTheme: IconThemeData(color: MyprimaryDark),
       titleTextStyle: TextStyle(
@@ -73,7 +78,7 @@ class _FootAppState extends State<FootApp> {
     ),
     scaffoldBackgroundColor: myDarkBackground,
     appBarTheme: const AppBarTheme(
-      color: myDarkBackground,
+      backgroundColor: myDarkBackground,
       elevation: 0,
       iconTheme: IconThemeData(color: myAccentVibrantBlue),
       titleTextStyle: TextStyle(
@@ -118,20 +123,83 @@ class MainScreen extends StatefulWidget {
 
   @override
   State<MainScreen> createState() => _MainScreenState();
+
+  // ignore: library_private_types_in_public_api
+  static _MainScreenState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MainScreenState>()!;
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _selectedIndex = 1;
+
+  /// Références capturées tant que l'élément est vivant : `context.read` est
+  /// interdit dans dispose(), l'arbre n'y est plus consultable.
+  FriendsProvider? _friendsProvider;
+  TeamsProvider? _teamsProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _friendsProvider = context.read<FriendsProvider>();
+    _teamsProvider = context.read<TeamsProvider>();
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    requestedTab.addListener(_onTabRequested);
     // Initialiser le WebSocket et charger les conversations
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final messagesProvider = context.read<MessagesProvider>();
       messagesProvider.initWebSocket();
       messagesProvider.loadConversations();
+      context.read<FriendsProvider>().loadFriends();
+      context.read<FriendsProvider>().startPolling();
+      context.read<TeamsProvider>().loadPendingChallenges();
+      context.read<TeamsProvider>().loadPendingInvitations();
+      context.read<TeamsProvider>().startPollingNotifications();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!mounted) return;
+
+    final friendsProvider = context.read<FriendsProvider>();
+    final teamsProvider = context.read<TeamsProvider>();
+    if (state == AppLifecycleState.resumed) {
+      friendsProvider.startPolling();
+      friendsProvider.loadFriends();
+      context.read<MessagesProvider>().loadConversations();
+      teamsProvider.startPollingNotifications();
+      teamsProvider.loadPendingChallenges();
+      teamsProvider.loadPendingInvitations();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      friendsProvider.stopPolling();
+      teamsProvider.stopPollingNotifications();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    requestedTab.removeListener(_onTabRequested);
+    _friendsProvider?.stopPolling();
+    _teamsProvider?.stopPollingNotifications();
+    super.dispose();
+  }
+
+  /// Honore une demande de changement d'onglet venue d'une route extérieure.
+  void _onTabRequested() {
+    final index = requestedTab.value;
+    if (index == null || !mounted) return;
+    setState(() => _selectedIndex = index);
+    // On consomme la demande pour qu'elle ne soit pas rejouée. Le listener se
+    // redéclenche, mais ressort aussitôt puisque la valeur est nulle.
+    requestedTab.value = null;
   }
 
   static const List<Widget> _widgetOptions = <Widget>[
@@ -147,31 +215,40 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void goToTab(int index) => _onItemTapped(index);
+
   Widget _buildCustomBottomNavBar() {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final unreadMessages = context.watch<MessagesProvider>().unreadCount;
+    final pendingRequests = context.watch<FriendsProvider>().totalPendingCount;
+    final teamNotifications = context
+        .watch<TeamsProvider>()
+        .totalNotificationsCount;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: isDarkMode
-            ? MyprimaryDark.withOpacity(0.9)
-            : MyprimaryDark.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30.0),
-        boxShadow: [
-          BoxShadow(
-            color: (isDarkMode ? Colors.black : MyprimaryDark).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: Color(0xFF16181E),
+        border: Border(top: BorderSide(color: Color(0x12FFFFFF), width: 1)),
       ),
-      height: 60,
+      padding: EdgeInsets.fromLTRB(8, 9, 8, 9 + bottomPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, Icons.map_outlined, Icons.map, 'Terrains'),
-          _buildNavItem(1, Icons.people_outline, Icons.people, 'Équipe'),
-          _buildNavItem(2, Icons.group_outlined, Icons.group, 'Amis'),
+          _buildNavItem(
+            1,
+            Icons.people_outline,
+            Icons.people,
+            'Équipe',
+            badge: teamNotifications,
+          ),
+          _buildNavItem(
+            2,
+            Icons.group_outlined,
+            Icons.group,
+            'Amis',
+            badge: unreadMessages + pendingRequests,
+          ),
           _buildNavItem(3, Icons.person_outline, Icons.person, 'Profil'),
         ],
       ),
@@ -182,34 +259,74 @@ class _MainScreenState extends State<MainScreen> {
     int index,
     IconData outlineIcon,
     IconData filledIcon,
-    String label,
-  ) {
+    String label, {
+    int badge = 0,
+  }) {
     final bool isSelected = _selectedIndex == index;
-    final Color unselectedColor =
-        Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey[600]!
-        : Colors.grey[400]!;
+    const Color amber = Color(0xFFFF7F2A);
+    const Color muted = Color(0x62F0F2F5);
 
     return GestureDetector(
       onTap: () => _onItemTapped(index),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isSelected ? filledIcon : outlineIcon,
-            color: isSelected ? myAccentVibrantBlue : unselectedColor,
-            size: 24,
-          ),
-          if (isSelected)
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 64,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  isSelected ? filledIcon : outlineIcon,
+                  color: isSelected ? amber : muted,
+                  size: 22,
+                ),
+                if (badge > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: badge > 9
+                          ? const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            )
+                          : const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4607A),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
+                      child: Text(
+                        badge > 99 ? '99+' : '$badge',
+                        style: const TextStyle(
+                          color: Color(0xFFF0F2F5),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w700,
+                          height: 1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 3),
             Text(
               label,
-              style: const TextStyle(
-                color: myAccentVibrantBlue,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+              style: AppTypography.display(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.06 * 9,
+                color: isSelected ? amber : muted,
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -217,8 +334,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }

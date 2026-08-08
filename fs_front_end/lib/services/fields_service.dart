@@ -2,520 +2,48 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Service pour trouver les terrains de foot à proximité
-/// Utilise Foursquare Places API + base de données locale
 class FieldsService {
   FieldsService._privateConstructor();
   static final FieldsService instance = FieldsService._privateConstructor();
 
-  // Clé API Foursquare
-  static const String _foursquareApiKey =
-      'WZAVZL2O0DRGZNOQWQRTGAF2DZLUBDEUMFPNAAPLLUHF3QEB';
+  // Clé injectée via : flutter run --dart-define=PLACES_API_KEY=ta_cle
+  static const String _apiKey = String.fromEnvironment(
+    'PLACES_API_KEY',
+    defaultValue: '',
+  );
+  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
-  // Catégories Foursquare pour les terrains de foot
-  // https://docs.foursquare.com/data-products/docs/categories
-  static const List<String> _soccerCategories = [
-    '18000', // Sports and Recreation
-    '18021', // Soccer Field
-    '18008', // Athletic Field
-    '18039', // Sports Club
-    '18020', // Recreation Center
+  // Cache 7 jours
+  static const Duration _cacheTtl = Duration(days: 7);
+  static const String _cacheKey = 'chain_venues_v2';
+  static const String _cacheTsKey = 'chain_venues_ts_v2';
+
+  // Chaînes à récupérer sur toute la France
+  static const List<String> _chainQueries = [
+    'Urban Soccer France',
+    'Le Five France',
+    'Z5 football France',
   ];
 
-  /// Base de données locale des centres de foot à 5 connus
-  /// (pour compléter Foursquare si nécessaire)
-  static final List<Map<String, dynamic>> _knownCenters = [
-    // Urban Soccer - Île-de-France
-    {
-      'id': 'local_us_evry',
-      'name': 'Urban Soccer Évry',
-      'lat': 48.6289,
-      'lon': 2.4301,
-      'address': 'ZAC du Bois Briard, Évry-Courcouronnes',
-      'phone': '+33 1 60 79 20 20',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_aubervilliers',
-      'name': 'Urban Soccer Aubervilliers',
-      'lat': 48.9075,
-      'lon': 2.3743,
-      'address': 'Rue des Gardinoux, Aubervilliers',
-      'phone': '+33 1 84 03 00 20',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_puteaux',
-      'name': 'Urban Soccer Puteaux (La Défense)',
-      'lat': 48.8760,
-      'lon': 2.2435,
-      'address': '1 Allée des Sports, Puteaux',
-      'phone': '+33 1 79 36 38 50',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_creteil',
-      'name': 'Urban Soccer Créteil',
-      'lat': 48.7775,
-      'lon': 2.4628,
-      'address': 'Créteil',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_torcy',
-      'name': 'Urban Soccer Torcy',
-      'lat': 48.8501,
-      'lon': 2.6563,
-      'address': 'Torcy',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_orsay',
-      'name': 'Urban Soccer Orsay',
-      'lat': 48.7084,
-      'lon': 2.1782,
-      'address': 'Rue Louis de Broglie, Campus Paris-Saclay, Orsay 91400',
-      'phone': '+33 1 69 35 61 00',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_asnieres',
-      'name': 'Urban Soccer Asnières',
-      'lat': 48.9128,
-      'lon': 2.2853,
-      'address': '40 Rue du Ménil, Asnières-sur-Seine 92600',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_rungis',
-      'name': 'Urban Soccer Rungis',
-      'lat': 48.7486,
-      'lon': 2.3611,
-      'address': 'Rungis 94150',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_ivry',
-      'name': 'Urban Soccer Ivry',
-      'lat': 48.8150,
-      'lon': 2.3920,
-      'address': 'Ivry-sur-Seine 94200',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_velizy',
-      'name': 'Urban Soccer Vélizy',
-      'lat': 48.7810,
-      'lon': 2.1910,
-      'address': 'Vélizy-Villacoublay 78140',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    // Urban Soccer - Autres régions
-    {
-      'id': 'local_us_lyon',
-      'name': 'Urban Soccer Lyon Saint-Priest',
-      'lat': 45.7117,
-      'lon': 4.9047,
-      'address': 'Boulevard de Parilly, Saint-Priest',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_lille',
-      'name': 'Urban Soccer Lille',
-      'lat': 50.6167,
-      'lon': 3.0995,
-      'address': 'Rue Paul Langevin, Lezennes',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_nantes',
-      'name': 'Urban Soccer Nantes',
-      'lat': 47.1903,
-      'lon': -1.4848,
-      'address': 'Rue Marie Curie, Saint-Sébastien-sur-Loire',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_strasbourg',
-      'name': 'Urban Soccer Strasbourg',
-      'lat': 48.5935,
-      'lon': 7.7316,
-      'address': '48 Chemin Haut, Cronenbourg',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_montpellier',
-      'name': 'Urban Soccer Montpellier',
-      'lat': 43.6287,
-      'lon': 3.9093,
-      'address': 'Castelnau-le-Lez',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_clermont',
-      'name': 'Urban Soccer Clermont-Ferrand',
-      'lat': 45.7554,
-      'lon': 3.1368,
-      'address': '46 Rue des Varennes, Aubière',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_angers',
-      'name': 'Urban Soccer Angers',
-      'lat': 47.4724,
-      'lon': -0.6047,
-      'address': 'Avenue du Général Patton, Beaucouzé',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_lemans',
-      'name': 'Urban Soccer Le Mans',
-      'lat': 47.9627,
-      'lon': 0.2188,
-      'address': 'Voie de la Liberté, Le Tertre Rouge',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_us_dijon',
-      'name': 'Urban Soccer Dijon',
-      'lat': 47.3403,
-      'lon': 5.0730,
-      'address': '28 Rue de Cracovie, Cap Nord',
-      'website': 'https://www.urbansoccer.fr',
-      'type': 'fiveSide',
-    },
-    // B14
-    {
-      'id': 'local_b14_bondoufle',
-      'name': 'B14 Bondoufle',
-      'lat': 48.6225,
-      'lon': 2.3806,
-      'address': 'Bondoufle',
-      'phone': '+33 1 81 85 05 60',
-      'website': 'https://www.b-14.fr',
-      'type': 'fiveSide',
-    },
-    // Le Five - Île-de-France
-    {
-      'id': 'local_five_paris18',
-      'name': 'Le Five Paris 18',
-      'lat': 48.8978,
-      'lon': 2.3698,
-      'address': '217 Rue d\'Aubervilliers, 75018 Paris',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_paris17',
-      'name': 'Le Five Paris 17',
-      'lat': 48.9004,
-      'lon': 2.3221,
-      'address': '26 Rue Hélène et François Missoffe, 75017 Paris',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_paris13',
-      'name': 'Le Five Paris 13',
-      'lat': 48.8180,
-      'lon': 2.3655,
-      'address': '9 Avenue de la Porte de Choisy, 75013 Paris',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_bobigny',
-      'name': 'Le Five FC Bobigny',
-      'lat': 48.9014,
-      'lon': 2.4316,
-      'address': 'Rue Arago, Bobigny',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_herblay',
-      'name': 'Le Five Herblay / Carrières-sous-Poissy',
-      'lat': 48.9470,
-      'lon': 2.0228,
-      'address': 'Rue Léonard de Vinci, Carrières-sous-Poissy',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_sarcelles',
-      'name': 'Le Five Sarcelles',
-      'lat': 48.9978,
-      'lon': 2.3901,
-      'address': '32 Rue de l\'Escouvrier, Sarcelles',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_villette',
-      'name': 'Le Five Villette / Aubervilliers',
-      'lat': 48.9067,
-      'lon': 2.3856,
-      'address': '25 Rue Sadi Carnot, Aubervilliers',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_creteil',
-      'name': 'Le Five Créteil',
-      'lat': 48.7639,
-      'lon': 2.4705,
-      'address': '1 Rue Édouard Le Corbusier, Europarc, Créteil',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    // Le Five - Autres régions
-    {
-      'id': 'local_five_lyon',
-      'name': 'Le Five Lyon Gerland',
-      'lat': 45.7275,
-      'lon': 4.8320,
-      'address': 'Lyon',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_bordeaux',
-      'name': 'Le Five Bordeaux',
-      'lat': 44.8799,
-      'lon': -0.5594,
-      'address': '9-13 Rue Dumont d\'Urville, Bordeaux Lac',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_strasbourg',
-      'name': 'Le Five Strasbourg',
-      'lat': 48.5900,
-      'lon': 7.6805,
-      'address': 'Rue Émile Mathis, Eckbolsheim',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_nancy',
-      'name': 'Le Five Nancy',
-      'lat': 48.6453,
-      'lon': 6.1890,
-      'address': 'Avenue des Érables, Heillecourt',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_metz',
-      'name': 'Le Five Metz',
-      'lat': 49.0862,
-      'lon': 6.1182,
-      'address': 'ZAC de la Rotonde, Moulins-lès-Metz',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_reims',
-      'name': 'Le Five Reims',
-      'lat': 49.2691,
-      'lon': 4.0380,
-      'address': '11 Rue du Commerce, Zone du Port Sec, Reims',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_rouen',
-      'name': 'Le Five Rouen',
-      'lat': 49.4275,
-      'lon': 1.1044,
-      'address': '181 Quai du Cours la Reine, Rouen',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_roubaix',
-      'name': 'Le Five Roubaix / Lille',
-      'lat': 50.6919,
-      'lon': 3.1632,
-      'address': 'Rue de l\'Épeule, Roubaix',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_limoges',
-      'name': 'Le Five Limoges',
-      'lat': 45.8708,
-      'lon': 1.2626,
-      'address': '16 Rue de Buxerolles, Limoges',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_orleans',
-      'name': 'Le Five Orléans',
-      'lat': 47.9414,
-      'lon': 1.9360,
-      'address': '113 Rue de Curembourg, Fleury-les-Aubrais',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_tours',
-      'name': 'Le Five Tours',
-      'lat': 47.3540,
-      'lon': 0.6753,
-      'address': 'Rue de Tailhar, Joué-lès-Tours',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_lunel',
-      'name': 'Le Five Lunel / Montpellier',
-      'lat': 43.6896,
-      'lon': 4.1578,
-      'address': 'Chemin du Pont de Lunel',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_mulhouse',
-      'name': 'Le Five Mulhouse',
-      'lat': 47.7958,
-      'lon': 7.3048,
-      'address': 'Cité Fernand Anna, Wittenheim',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_saint_louis',
-      'name': 'Le Five Saint-Louis (Bâle)',
-      'lat': 47.6021,
-      'lon': 7.5447,
-      'address': '160 Rue de Mulhouse, Saint-Louis',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_vitre',
-      'name': 'Le Five Vitré',
-      'lat': 48.1228,
-      'lon': -1.2125,
-      'address': 'Promenade Saint-Yves, Vitré',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_ville_la_grand',
-      'name': 'Le Five Ville-la-Grand (Genève)',
-      'lat': 46.2064,
-      'lon': 6.2805,
-      'address': '16 Rue de Deux Montagnes, Ville-la-Grand',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_five_reunion',
-      'name': 'Le Five Saint-Pierre (La Réunion)',
-      'lat': -21.3431,
-      'lon': 55.4747,
-      'address': '8 Rue François de Mahy, Saint-Pierre',
-      'website': 'https://www.lefive.fr',
-      'type': 'fiveSide',
-    },
-    // CR5
-    {
-      'id': 'local_cr5_villepinte',
-      'name': 'CR5 Villepinte',
-      'lat': 48.9567,
-      'lon': 2.5456,
-      'address': 'Villepinte',
-      'website': 'https://www.cr5.fr',
-      'type': 'fiveSide',
-    },
-    {
-      'id': 'local_cr5_ormoy',
-      'name': 'CR5 Ormoy',
-      'lat': 48.5752,
-      'lon': 2.4494,
-      'address': 'Ormoy, 91540 Essonne',
-      'website': 'https://www.cr5.fr',
-      'type': 'fiveSide',
-    },
-    // Soccer Park
-    {
-      'id': 'local_sp_lieusaint',
-      'name': 'Soccer Park Lieusaint',
-      'lat': 48.6284,
-      'lon': 2.5483,
-      'address': 'Lieusaint',
-      'website': 'https://www.soccerpark.fr',
-      'type': 'fiveSide',
-    },
-    // Foot Indoor
-    {
-      'id': 'local_fi_marseille',
-      'name': 'Foot Indoor Marseille',
-      'lat': 43.3126,
-      'lon': 5.3691,
-      'address': 'Marseille',
-      'type': 'fiveSide',
-    },
-  ];
+  // ── Localisation ───────────────────────────────────────────────────────────
 
-  /// Vérifie et demande les permissions de localisation
   Future<bool> checkLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return false;
 
-    // Vérifier si le service de localisation est activé
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      debugPrint('Location services are disabled.');
-      return false;
-    }
-
-    permission = await Geolocator.checkPermission();
+    var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        debugPrint('Location permissions are denied');
-        return false;
-      }
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      debugPrint('Location permissions are permanently denied');
-      return false;
-    }
-
-    return true;
+    return permission != LocationPermission.denied &&
+        permission != LocationPermission.deniedForever;
   }
 
-  /// Obtient la position actuelle de l'utilisateur
   Future<Position?> getCurrentPosition() async {
     try {
-      final hasPermission = await checkLocationPermission();
-      if (!hasPermission) return null;
-
+      if (!await checkLocationPermission()) return null;
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -523,331 +51,526 @@ class FieldsService {
         ),
       );
     } catch (e) {
-      debugPrint('Error getting current position: $e');
       return null;
     }
   }
 
-  /// Recherche les terrains de foot à proximité
-  /// Utilise Foursquare API en priorité, puis fallback sur la base locale
-  /// [lat] et [lon] sont les coordonnées du centre de recherche
-  /// [radiusMeters] est le rayon de recherche en mètres (défaut: 5000m = 5km)
-  Future<List<SoccerField>> searchNearbyFields({
-    required double lat,
-    required double lon,
-    int radiusMeters = 5000,
-  }) async {
-    final fields = <SoccerField>[];
+  // ── Chaînes (Urban Soccer, Le Five, Z5) ───────────────────────────────────
 
-    // 1. Essayer Foursquare API si la clé est configurée
-    if (_foursquareApiKey != 'YOUR_FOURSQUARE_API_KEY') {
-      final foursquareFields = await _searchFoursquare(lat, lon, radiusMeters);
-      fields.addAll(foursquareFields);
-      debugPrint('✅ Found ${foursquareFields.length} fields from Foursquare');
-    } else {
-      debugPrint(
-        '⚠️ Foursquare API key not configured, using local database only',
-      );
+  /// Retourne tous les centres en France.
+  /// Utilise le cache 7 jours, puis Google Places, puis la base locale.
+  Future<List<SoccerField>> fetchChainVenues({Position? userPosition}) async {
+    final cached = await _loadCache(userPosition);
+    if (cached != null) {
+      return cached;
     }
 
-    // 2. Ajouter les centres de la base locale
-    final localFields = _getLocalFieldsInRadius(lat, lon, radiusMeters, fields);
-    fields.addAll(localFields);
-    debugPrint('📍 Added ${localFields.length} fields from local database');
+    if (_apiKey.isNotEmpty) {
+      final venues = await _fetchFromPlaces(userPosition);
+      if (venues.isNotEmpty) {
+        await _saveCache(venues);
+        return venues;
+      }
+    } else {}
 
-    // 3. Trier par distance
-    fields.sort((a, b) => a.distanceMeters.compareTo(b.distanceMeters));
-    debugPrint('✅ Total: ${fields.length} soccer fields found');
-
-    return fields;
+    return _localFallback(userPosition);
   }
 
-  /// Recherche via Foursquare Places API
-  Future<List<SoccerField>> _searchFoursquare(
-    double lat,
-    double lon,
-    int radiusMeters,
+  Future<List<SoccerField>> _fetchFromPlaces(Position? userPosition) async {
+    final all = <SoccerField>[];
+    final seenIds = <String>{};
+
+    for (final query in _chainQueries) {
+      final venues = await _textSearch(query, seenIds, userPosition);
+      all.addAll(venues);
+    }
+
+    return all;
+  }
+
+  Future<List<SoccerField>> _textSearch(
+    String query,
+    Set<String> seenIds,
+    Position? userPosition,
   ) async {
-    final fields = <SoccerField>[];
+    final venues = <SoccerField>[];
+    String? pageToken;
+    int page = 0;
 
-    try {
-      // Recherche par catégorie (Sports)
-      final categoryUrl = Uri.parse(
-        'https://api.foursquare.com/v3/places/search'
-        '?ll=$lat,$lon'
-        '&radius=$radiusMeters'
-        '&categories=${_soccerCategories.join(",")}'
-        '&limit=50'
-        '&fields=fsq_id,name,geocodes,location,categories,tel,website,hours',
-      );
-
-      // Recherche par mot-clé (foot, soccer, five)
-      final queryUrl = Uri.parse(
-        'https://api.foursquare.com/v3/places/search'
-        '?ll=$lat,$lon'
-        '&radius=$radiusMeters'
-        '&query=foot soccer five futsal'
-        '&limit=50'
-        '&fields=fsq_id,name,geocodes,location,categories,tel,website,hours',
-      );
-
-      final headers = {
-        'Authorization': _foursquareApiKey,
-        'Accept': 'application/json',
+    do {
+      final params = <String, String>{
+        'query': query,
+        'region': 'fr',
+        'language': 'fr',
+        'key': _apiKey,
+        if (pageToken != null) 'pagetoken': pageToken,
       };
 
-      // Exécuter les deux requêtes en parallèle
-      final responses = await Future.wait([
-        http
-            .get(categoryUrl, headers: headers)
-            .timeout(const Duration(seconds: 10)),
-        http
-            .get(queryUrl, headers: headers)
-            .timeout(const Duration(seconds: 10)),
-      ]);
+      final uri = Uri.parse(
+        '$_baseUrl/textsearch/json',
+      ).replace(queryParameters: params);
 
-      final seenIds = <String>{};
+      try {
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 15));
 
-      for (final response in responses) {
         if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final results = data['results'] as List<dynamic>? ?? [];
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final results = (data['results'] as List? ?? [])
+              .cast<Map<String, dynamic>>();
 
           for (final place in results) {
-            final fsqId = place['fsq_id'] as String;
-            if (seenIds.contains(fsqId)) continue;
-            seenIds.add(fsqId);
+            final id = place['place_id'] as String? ?? '';
+            if (seenIds.contains(id)) continue;
+            seenIds.add(id);
 
-            final name = place['name'] as String? ?? '';
+            final venue = _parsePlaceResult(place, userPosition, query);
+            if (venue != null) venues.add(venue);
+          }
 
-            // Filtrer pour garder uniquement les terrains de foot
-            if (!_isSoccerRelated(name, place)) continue;
-
-            final geocodes = place['geocodes']?['main'];
-            if (geocodes == null) continue;
-
-            final fieldLat = geocodes['latitude']?.toDouble();
-            final fieldLon = geocodes['longitude']?.toDouble();
-            if (fieldLat == null || fieldLon == null) continue;
-
-            final location = place['location'] as Map<String, dynamic>?;
-            final distance = Geolocator.distanceBetween(
-              lat,
-              lon,
-              fieldLat,
-              fieldLon,
-            );
-
-            fields.add(
-              SoccerField(
-                id: 'fsq_$fsqId',
-                name: name,
-                address: _buildFoursquareAddress(location),
-                latitude: fieldLat,
-                longitude: fieldLon,
-                distanceMeters: distance,
-                type: _determineFoursquareFieldType(name, place),
-                phone: place['tel'] as String?,
-                website: place['website'] as String?,
-                openingHours: _parseFoursquareHours(place['hours']),
-                operator: null,
-                surface: null,
-                isIndoor: _isIndoorFromName(name),
-                isFiveSide: _isFiveSideFromName(name),
-              ),
-            );
+          pageToken = data['next_page_token'] as String?;
+          // Google exige 2s entre pages
+          if (pageToken != null) {
+            await Future.delayed(const Duration(seconds: 2));
           }
         } else {
-          debugPrint('❌ Foursquare API error: ${response.statusCode}');
+          break;
         }
+      } catch (e) {
+        break;
       }
-    } catch (e) {
-      debugPrint('❌ Foursquare search error: $e');
-    }
 
-    return fields;
+      page++;
+    } while (pageToken != null && page < 3);
+
+    return venues;
   }
 
-  /// Vérifie si le lieu est lié au football
-  bool _isSoccerRelated(String name, Map<String, dynamic> place) {
-    final nameLower = name.toLowerCase();
-
-    // Mots-clés positifs
-    final soccerKeywords = [
-      'soccer',
-      'foot',
-      'futsal',
-      'five',
-      'terrain',
-      'urban soccer',
-      'le five',
-      'b14',
-      'cr5',
-      'soccer park',
-      'goal arena',
-      'city foot',
-      'foot indoor',
-    ];
-
-    for (final keyword in soccerKeywords) {
-      if (nameLower.contains(keyword)) return true;
-    }
-
-    // Vérifier les catégories
-    final categories = place['categories'] as List<dynamic>? ?? [];
-    for (final cat in categories) {
-      final catName = (cat['name'] as String? ?? '').toLowerCase();
-      if (catName.contains('soccer') ||
-          catName.contains('football') ||
-          catName.contains('athletic')) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /// Construit l'adresse depuis les données Foursquare
-  String? _buildFoursquareAddress(Map<String, dynamic>? location) {
-    if (location == null) return null;
-
-    final parts = <String>[];
-    if (location['address'] != null) parts.add(location['address'] as String);
-    if (location['postcode'] != null) parts.add(location['postcode'] as String);
-    if (location['locality'] != null) parts.add(location['locality'] as String);
-
-    return parts.isNotEmpty ? parts.join(', ') : null;
-  }
-
-  /// Détermine le type de terrain depuis Foursquare
-  FieldType _determineFoursquareFieldType(
-    String name,
+  SoccerField? _parsePlaceResult(
     Map<String, dynamic> place,
+    Position? userPosition,
+    String query,
   ) {
-    final nameLower = name.toLowerCase();
-
-    if (nameLower.contains('urban soccer') ||
-        nameLower.contains('le five') ||
-        nameLower.contains('b14') ||
-        nameLower.contains('cr5') ||
-        nameLower.contains('soccer park') ||
-        nameLower.contains('five') ||
-        nameLower.contains('futsal')) {
-      return FieldType.fiveSide;
-    }
-
-    if (nameLower.contains('stade')) return FieldType.stadium;
-    if (nameLower.contains('centre') || nameLower.contains('complexe')) {
-      return FieldType.sportsCentre;
-    }
-
-    return FieldType.pitch;
-  }
-
-  /// Parse les heures d'ouverture Foursquare
-  String? _parseFoursquareHours(dynamic hours) {
-    if (hours == null) return null;
     try {
-      final display = hours['display'] as String?;
-      return display;
+      final name = place['name'] as String? ?? '';
+      final geo = place['geometry']?['location'] as Map<String, dynamic>?;
+      if (geo == null) return null;
+
+      final lat = (geo['lat'] as num).toDouble();
+      final lng = (geo['lng'] as num).toDouble();
+
+      final distance = userPosition != null
+          ? Geolocator.distanceBetween(
+              userPosition.latitude,
+              userPosition.longitude,
+              lat,
+              lng,
+            )
+          : 0.0;
+
+      final nameLower = name.toLowerCase();
+      final queryLower = query.toLowerCase();
+
+      String? operator_;
+      if (queryLower.contains('urban') || nameLower.contains('urban soccer')) {
+        operator_ = 'Urban Soccer';
+      } else if (queryLower.contains('five') ||
+          nameLower.contains('le five') ||
+          nameLower.contains('lefive')) {
+        operator_ = 'Le Five';
+      } else if (queryLower.contains('z5') || nameLower.contains('z5')) {
+        operator_ = 'Z5';
+      }
+
+      return SoccerField(
+        id: 'gmaps_${place['place_id']}',
+        name: name,
+        address: place['formatted_address'] as String?,
+        latitude: lat,
+        longitude: lng,
+        distanceMeters: distance,
+        type: FieldType.fiveSide,
+        phone: null,
+        website: null,
+        openingHours: _parseOpeningHours(place['opening_hours']),
+        operator: operator_,
+        surface: 'synthetic',
+        isIndoor: true,
+        isFiveSide: true,
+      );
     } catch (e) {
       return null;
     }
   }
 
-  /// Vérifie si c'est un terrain indoor depuis le nom
-  bool _isIndoorFromName(String name) {
-    final nameLower = name.toLowerCase();
-    return nameLower.contains('indoor') ||
-        nameLower.contains('couvert') ||
-        nameLower.contains('urban soccer') ||
-        nameLower.contains('le five') ||
-        nameLower.contains('b14');
-  }
-
-  /// Vérifie si c'est un foot à 5 depuis le nom
-  bool _isFiveSideFromName(String name) {
-    final nameLower = name.toLowerCase();
-    return nameLower.contains('five') ||
-        nameLower.contains('5') ||
-        nameLower.contains('futsal') ||
-        nameLower.contains('urban soccer') ||
-        nameLower.contains('le five') ||
-        nameLower.contains('b14') ||
-        nameLower.contains('cr5') ||
-        nameLower.contains('soccer park');
-  }
-
-  /// Récupère les centres de la base locale dans le rayon de recherche
-  List<SoccerField> _getLocalFieldsInRadius(
-    double lat,
-    double lon,
-    int radiusMeters,
-    List<SoccerField> existingFields,
-  ) {
-    final localFields = <SoccerField>[];
-    final existingNames = existingFields
-        .map((f) => f.name.toLowerCase())
-        .toSet();
-
-    for (final center in _knownCenters) {
-      final centerLat = center['lat'] as double;
-      final centerLon = center['lon'] as double;
-
-      final distance = Geolocator.distanceBetween(
-        lat,
-        lon,
-        centerLat,
-        centerLon,
-      );
-
-      // Vérifier si dans le rayon
-      if (distance <= radiusMeters) {
-        // Éviter les doublons (si déjà trouvé par l'API)
-        final centerName = (center['name'] as String).toLowerCase();
-        if (existingNames.any(
-          (name) => name.contains(centerName) || centerName.contains(name),
-        )) {
-          debugPrint('⏭️ Skipping duplicate: ${center['name']}');
-          continue;
-        }
-
-        debugPrint(
-          '📍 Adding from local DB: ${center['name']} (${(distance / 1000).toStringAsFixed(1)}km)',
-        );
-
-        localFields.add(
-          SoccerField(
-            id: center['id'] as String,
-            name: center['name'] as String,
-            address: center['address'] as String?,
-            latitude: centerLat,
-            longitude: centerLon,
-            distanceMeters: distance,
-            type: FieldType.fiveSide,
-            phone: center['phone'] as String?,
-            website: center['website'] as String?,
-            openingHours: null,
-            operator: null,
-            surface: 'synthetic',
-            isIndoor: true,
-            isFiveSide: true,
-          ),
-        );
-      }
+  String? _parseOpeningHours(dynamic hours) {
+    if (hours == null) return null;
+    try {
+      final weekday = hours['weekday_text'] as List?;
+      return weekday?.first as String?;
+    } catch (_) {
+      return null;
     }
-
-    return localFields;
   }
+
+  // ── Cache ──────────────────────────────────────────────────────────────────
+
+  Future<List<SoccerField>?> _loadCache(Position? userPosition) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final ts = prefs.getInt(_cacheTsKey);
+      if (ts == null) return null;
+
+      final age = DateTime.now().difference(
+        DateTime.fromMillisecondsSinceEpoch(ts),
+      );
+      if (age > _cacheTtl) return null;
+
+      final json = prefs.getString(_cacheKey);
+      if (json == null) return null;
+
+      final list = (jsonDecode(json) as List).cast<Map<String, dynamic>>();
+      return list.map((m) => SoccerField.fromJson(m, userPosition)).toList();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _saveCache(List<SoccerField> venues) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _cacheKey,
+        jsonEncode(venues.map((v) => v.toJson()).toList()),
+      );
+      await prefs.setInt(_cacheTsKey, DateTime.now().millisecondsSinceEpoch);
+    } catch (e) {}
+  }
+
+  /// Force le rechargement depuis l'API (ignore le cache)
+  Future<void> clearCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_cacheKey);
+    await prefs.remove(_cacheTsKey);
+  }
+
+  // ── Fallback local ─────────────────────────────────────────────────────────
+
+  List<SoccerField> _localFallback(Position? userPosition) {
+    return _knownCenters.map((c) {
+      final lat = c['lat'] as double;
+      final lon = c['lon'] as double;
+      final distance = userPosition != null
+          ? Geolocator.distanceBetween(
+              userPosition.latitude,
+              userPosition.longitude,
+              lat,
+              lon,
+            )
+          : 0.0;
+
+      return SoccerField(
+        id: c['id'] as String,
+        name: c['name'] as String,
+        address: c['address'] as String?,
+        latitude: lat,
+        longitude: lon,
+        distanceMeters: distance,
+        type: FieldType.fiveSide,
+        phone: c['phone'] as String?,
+        website: c['website'] as String?,
+        openingHours: null,
+        operator: c['operator'] as String?,
+        surface: 'synthetic',
+        isIndoor: true,
+        isFiveSide: true,
+      );
+    }).toList();
+  }
+
+  // ── Base locale de secours ─────────────────────────────────────────────────
+
+  static final List<Map<String, dynamic>> _knownCenters = [
+    // ── Urban Soccer ──────────────────────────────────────────────────────────
+    {
+      'id': 'us_evry',
+      'name': 'Urban Soccer Évry',
+      'lat': 48.6289,
+      'lon': 2.4301,
+      'address': 'ZAC du Bois Briard, Évry',
+      'phone': '+33 1 60 79 20 20',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_aubervilliers',
+      'name': 'Urban Soccer Aubervilliers',
+      'lat': 48.9075,
+      'lon': 2.3743,
+      'address': 'Rue des Gardinoux, Aubervilliers',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_puteaux',
+      'name': 'Urban Soccer Puteaux',
+      'lat': 48.8760,
+      'lon': 2.2435,
+      'address': '1 Allée des Sports, Puteaux',
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_creteil',
+      'name': 'Urban Soccer Créteil',
+      'lat': 48.7775,
+      'lon': 2.4628,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_torcy',
+      'name': 'Urban Soccer Torcy',
+      'lat': 48.8501,
+      'lon': 2.6563,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_orsay',
+      'name': 'Urban Soccer Orsay',
+      'lat': 48.7084,
+      'lon': 2.1782,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_asnieres',
+      'name': 'Urban Soccer Asnières',
+      'lat': 48.9128,
+      'lon': 2.2853,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_lyon',
+      'name': 'Urban Soccer Lyon',
+      'lat': 45.7117,
+      'lon': 4.9047,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_lille',
+      'name': 'Urban Soccer Lille',
+      'lat': 50.6167,
+      'lon': 3.0995,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_nantes',
+      'name': 'Urban Soccer Nantes',
+      'lat': 47.1903,
+      'lon': -1.4848,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_strasbourg',
+      'name': 'Urban Soccer Strasbourg',
+      'lat': 48.5935,
+      'lon': 7.7316,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    {
+      'id': 'us_montpellier',
+      'name': 'Urban Soccer Montpellier',
+      'lat': 43.6287,
+      'lon': 3.9093,
+      'website': 'https://www.urbansoccer.fr',
+      'operator': 'Urban Soccer',
+    },
+    // ── Le Five ───────────────────────────────────────────────────────────────
+    {
+      'id': 'five_paris18',
+      'name': 'Le Five Paris 18',
+      'lat': 48.8978,
+      'lon': 2.3698,
+      'address': "217 Rue d'Aubervilliers, Paris 18",
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_paris17',
+      'name': 'Le Five Paris 17',
+      'lat': 48.9004,
+      'lon': 2.3221,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_paris13',
+      'name': 'Le Five Paris 13',
+      'lat': 48.8180,
+      'lon': 2.3655,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_bobigny',
+      'name': 'Le Five Bobigny',
+      'lat': 48.9014,
+      'lon': 2.4316,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_sarcelles',
+      'name': 'Le Five Sarcelles',
+      'lat': 48.9978,
+      'lon': 2.3901,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_creteil',
+      'name': 'Le Five Créteil',
+      'lat': 48.7639,
+      'lon': 2.4705,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_lyon',
+      'name': 'Le Five Lyon',
+      'lat': 45.7275,
+      'lon': 4.8320,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_bordeaux',
+      'name': 'Le Five Bordeaux',
+      'lat': 44.8799,
+      'lon': -0.5594,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_strasbourg',
+      'name': 'Le Five Strasbourg',
+      'lat': 48.5900,
+      'lon': 7.6805,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_roubaix',
+      'name': 'Le Five Roubaix',
+      'lat': 50.6919,
+      'lon': 3.1632,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    {
+      'id': 'five_reims',
+      'name': 'Le Five Reims',
+      'lat': 49.2691,
+      'lon': 4.0380,
+      'website': 'https://www.lefive.fr',
+      'operator': 'Le Five',
+    },
+    // ── Z5 ────────────────────────────────────────────────────────────────────
+    {
+      'id': 'z5_paris15',
+      'name': 'Z5 Paris 15',
+      'lat': 48.8417,
+      'lon': 2.2944,
+      'address': 'Paris 15e',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_paris19',
+      'name': 'Z5 Paris 19',
+      'lat': 48.8872,
+      'lon': 2.3831,
+      'address': 'Paris 19e',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_vincennes',
+      'name': 'Z5 Vincennes',
+      'lat': 48.8472,
+      'lon': 2.4399,
+      'address': 'Vincennes',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_lyon',
+      'name': 'Z5 Lyon',
+      'lat': 45.7640,
+      'lon': 4.8357,
+      'address': 'Lyon',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_marseille',
+      'name': 'Z5 Marseille',
+      'lat': 43.2965,
+      'lon': 5.3698,
+      'address': 'Marseille',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_bordeaux',
+      'name': 'Z5 Bordeaux',
+      'lat': 44.8378,
+      'lon': -0.5792,
+      'address': 'Bordeaux',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_toulouse',
+      'name': 'Z5 Toulouse',
+      'lat': 43.6047,
+      'lon': 1.4442,
+      'address': 'Toulouse',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_lille',
+      'name': 'Z5 Lille',
+      'lat': 50.6292,
+      'lon': 3.0573,
+      'address': 'Lille',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+    {
+      'id': 'z5_nantes',
+      'name': 'Z5 Nantes',
+      'lat': 47.2184,
+      'lon': -1.5536,
+      'address': 'Nantes',
+      'website': 'https://www.z5.fr',
+      'operator': 'Z5',
+    },
+  ];
 }
 
-/// Type de terrain
-enum FieldType {
-  pitch, // Terrain simple
-  fiveSide, // Terrain de foot à 5
-  sportsCentre, // Centre sportif
-  stadium, // Stade
-}
+// ── Type de terrain ────────────────────────────────────────────────────────────
+
+enum FieldType { pitch, fiveSide, sportsCentre, stadium }
 
 extension FieldTypeExtension on FieldType {
   String get displayName {
@@ -862,22 +585,10 @@ extension FieldTypeExtension on FieldType {
         return 'Stade';
     }
   }
-
-  String get icon {
-    switch (this) {
-      case FieldType.pitch:
-        return '⚽';
-      case FieldType.fiveSide:
-        return '🥅';
-      case FieldType.sportsCentre:
-        return '🏟️';
-      case FieldType.stadium:
-        return '🏟️';
-    }
-  }
 }
 
-/// Modèle représentant un terrain de foot
+// ── Modèle SoccerField ────────────────────────────────────────────────────────
+
 class SoccerField {
   final String id;
   final String name;
@@ -911,7 +622,6 @@ class SoccerField {
     this.isFiveSide = false,
   });
 
-  /// Distance formatée (ex: "1.2 km" ou "850 m")
   String get formattedDistance {
     if (distanceMeters >= 1000) {
       return '${(distanceMeters / 1000).toStringAsFixed(1)} km';
@@ -919,22 +629,53 @@ class SoccerField {
     return '${distanceMeters.round()} m';
   }
 
-  /// Surface formatée
-  String? get formattedSurface {
-    if (surface == null) return null;
-    switch (surface) {
-      case 'grass':
-        return 'Pelouse naturelle';
-      case 'artificial_turf':
-        return 'Pelouse synthétique';
-      case 'concrete':
-        return 'Béton';
-      case 'asphalt':
-        return 'Asphalte';
-      case 'tartan':
-        return 'Tartan';
-      default:
-        return surface;
-    }
+  // Sérialisation pour le cache SharedPreferences
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'address': address,
+    'latitude': latitude,
+    'longitude': longitude,
+    'type': type.index,
+    'phone': phone,
+    'website': website,
+    'openingHours': openingHours,
+    'operator': operator,
+    'surface': surface,
+    'isIndoor': isIndoor,
+    'isFiveSide': isFiveSide,
+  };
+
+  factory SoccerField.fromJson(
+    Map<String, dynamic> json,
+    Position? userPosition,
+  ) {
+    final lat = (json['latitude'] as num).toDouble();
+    final lng = (json['longitude'] as num).toDouble();
+    final distance = userPosition != null
+        ? Geolocator.distanceBetween(
+            userPosition.latitude,
+            userPosition.longitude,
+            lat,
+            lng,
+          )
+        : 0.0;
+
+    return SoccerField(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      address: json['address'] as String?,
+      latitude: lat,
+      longitude: lng,
+      distanceMeters: distance,
+      type: FieldType.values[json['type'] as int],
+      phone: json['phone'] as String?,
+      website: json['website'] as String?,
+      openingHours: json['openingHours'] as String?,
+      operator: json['operator'] as String?,
+      surface: json['surface'] as String?,
+      isIndoor: json['isIndoor'] as bool? ?? false,
+      isFiveSide: json['isFiveSide'] as bool? ?? false,
+    );
   }
 }
