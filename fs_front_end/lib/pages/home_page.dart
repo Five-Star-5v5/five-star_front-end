@@ -26,6 +26,7 @@ import 'find_opponents_page.dart';
 import 'user_profile_page.dart';
 import '../main_screen.dart';
 import '../services/friends_service.dart' show UserBasicInfo;
+import '../utils/relative_time.dart';
 
 Widget _buildAvailChip(IconData icon, String label) {
   return Container(
@@ -1109,7 +1110,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 10),
                     Center(
                       child: Text(
-                        isChallenger ? 'Défi envoyé' : 'Défi reçu',
+                        '${isChallenger ? 'Défi envoyé' : 'Défi reçu'} · ${timeAgo(match.createdAt)}',
                         style: AppTypography.body(
                           fontSize: 10,
                           letterSpacing: 0.04 * 10,
@@ -8618,11 +8619,13 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Invitation · ${invitation.invitingUsername}',
+                      'Invitation · ${invitation.invitingUsername} · ${timeAgo(invitation.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -8797,11 +8800,13 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Défi reçu',
+                      'Défi reçu · ${timeAgo(challenge.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -9036,7 +9041,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Veut rejoindre · ${app.teamName}',
+                      'Veut rejoindre · ${app.teamName} · ${timeAgo(app.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,
@@ -9243,7 +9248,7 @@ class _NotificationsSheetState extends State<_NotificationsSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Veut rejoindre · ${request.teamName}',
+                      'Veut rejoindre · ${request.teamName} · ${timeAgo(request.createdAt)}',
                       style: AppTypography.body(
                         fontSize: 10,
                         color: AppColors.muted2,

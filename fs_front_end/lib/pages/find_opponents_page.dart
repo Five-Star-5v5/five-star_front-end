@@ -7,6 +7,7 @@ import '../providers/teams_provider.dart';
 
 import '../theme/app_colors.dart';
 import '../widgets/city_autocomplete_field.dart';
+import '../utils/relative_time.dart';
 
 /// Page pour trouver des adversaires et gérer les défis
 class FindOpponentsPage extends StatefulWidget {
@@ -949,7 +950,7 @@ class _FindOpponentsPageState extends State<FindOpponentsPage>
 
             const SizedBox(height: 8),
             Text(
-              'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)}',
+              'Défi du ${DateFormat('d MMM yyyy', 'fr_FR').format(challenge.createdAt)} · ${timeAgo(challenge.createdAt)}',
               style: AppTypography.body(fontSize: 11, color: AppColors.muted2),
             ),
           ],
